@@ -1,0 +1,5 @@
+Prepare data for online search:
+
+1. GrammarDB/ - grammar database
+2. Korpus-texts/ - texts
+3. Run KorpusLoading.java
