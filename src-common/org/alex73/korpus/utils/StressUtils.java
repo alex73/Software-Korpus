@@ -22,25 +22,68 @@
 
 package org.alex73.korpus.utils;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.alex73.korpus.base.BelarusianTags;
 
 /**
- * Some utilities methds for stress processing.
+ * Some utilities methods for stress processing.
+ * 
+ * Stress syll index started from 0.
  */
 public class StressUtils {
 
     public static char STRESS_CHAR = '´';
     static Pattern RE_STRESS = Pattern.compile("(.)´");
+    static private final Map<String, String> UNSTRESSED_CACHE = new HashMap<>();
 
     public static String unstress(String stressedWord) {
-        String unstressedWord = stressedWord.replace("" + STRESS_CHAR, "");
-        return unstressedWord;
+        synchronized (UNSTRESSED_CACHE) {
+            String un = UNSTRESSED_CACHE.get(stressedWord);
+            if (un == null) {
+                un = stressedWord.replace("" + STRESS_CHAR, "");
+                UNSTRESSED_CACHE.put(stressedWord, un.equals(stressedWord) ? stressedWord : un);
+            }
+            return un;
+        }
+    }
+
+    /**
+     * Find stress syll by ё, о
+     */
+    public static int getUsuallyStressedSyll(String word) {
+        int r = 0;
+        for (int i = 0; i < word.length(); i++) {
+            char c = word.charAt(i);
+            if (BelarusianTags.USUALLY_STRESSED.indexOf(c) >= 0) {
+                return r;
+            }
+            if (BelarusianTags.HALOSNYJA.indexOf(c) >= 0) {
+                r++;
+            }
+        }
+        return -1;
+    }
+
+    public static int getStressFromStart(String word) {
+        int r = 0;
+        for (int i = 0; i < word.length() - 1; i++) {
+            char c = word.charAt(i);
+            char c1 = word.charAt(i + 1);
+            if (c1 == STRESS_CHAR) {
+                return r;
+            }
+            boolean halosnaja = BelarusianTags.HALOSNYJA.indexOf(c) >= 0;
+            if (halosnaja) {
+                r++;
+            }
+        }
+        return -1;
     }
 
     public static int getStressFromEnd(String word) {
-        // колькасьць галосных
         int r = 0;
         for (int i = word.length() - 1; i >= 0; i--) {
             char c = word.charAt(i);
@@ -53,6 +96,24 @@ public class StressUtils {
             }
         }
         return -1;
+    }
+
+    public static String setStressFromStart(String word, int pos) {
+        if (pos < 0) {
+            return word;
+        }
+        for (int i = 0; i < word.length(); i++) {
+            char c = word.charAt(i);
+            boolean halosnaja = BelarusianTags.HALOSNYJA.indexOf(c) >= 0;
+            if (halosnaja) {
+                if (pos == 0) {
+                    return word.substring(0, i + 1) + STRESS_CHAR + word.substring(i + 1);
+                } else {
+                    pos--;
+                }
+            }
+        }
+        return word;
     }
 
     public static String setStressFromEnd(String word, int pos) {
@@ -98,13 +159,14 @@ public class StressUtils {
         }
         return r;
     }
+
     public static char syllHal(String word, int pos) {
         int r = 0;
         for (int i = 0; i < word.length(); i++) {
             char c = word.charAt(i);
             boolean halosnaja = BelarusianTags.HALOSNYJA.indexOf(c) >= 0;
             if (halosnaja) {
-                if (pos==r) {
+                if (pos == r) {
                     return c;
                 }
                 r++;

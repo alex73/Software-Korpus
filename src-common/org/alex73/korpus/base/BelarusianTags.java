@@ -28,6 +28,7 @@ import java.util.List;
 public class BelarusianTags {
     public static final String NO_GROUP_ITEM = "не ўжываецца";
     public static final String HALOSNYJA = "ёуеыаоэяіюЁУЕЫАОЭЯІЮ";
+    public static final String USUALLY_STRESSED = "ёоЁО";
 
     private static BelarusianTags INSTANCE = new BelarusianTags();
 

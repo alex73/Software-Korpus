@@ -287,7 +287,7 @@ public class GrammarDB {
                 if (!isTagLooksLikeMask(p.getTag(), tagMask)) {
                     continue;
                 }
-                int eq = compareEnds(find, p.getLemma());
+                int eq = compareEnds(find, StressUtils.unstress(p.getLemma()));
                 if (eq > rating) {
                     rating = eq;
                     ratedParadigm = p;
@@ -295,7 +295,7 @@ public class GrammarDB {
                 }
                 if (checkForms) {
                     for (Paradigm.Form f : p.getForm()) {
-                        eq = compareEnds(find, f.getValue());
+                        eq = compareEnds(find, StressUtils.unstress(f.getValue()));
                         if (eq > rating) {
                             rating = eq;
                             ratedParadigm = p;
@@ -310,13 +310,13 @@ public class GrammarDB {
                 if (!isTagLooksLikeMask(p.getTag(), tagMask)) {
                     continue;
                 }
-                if (find.equals(p.getLemma())) {
+                if (find.equals(StressUtils.unstress(p.getLemma()))) {
                     ratedParadigm = p;
                     ratedForm = p.getLemma();
                 }
                 if (checkForms) {
                     for (Paradigm.Form f : p.getForm()) {
-                        if (find.equals(f.getValue())) {
+                        if (find.equals(StressUtils.unstress(f.getValue()))) {
                             ratedParadigm = p;
                             ratedForm = f.getValue();
                         }
@@ -362,6 +362,17 @@ public class GrammarDB {
         return paradigmsByForm.get(StressUtils.unstress(word.toLowerCase(BEL)));
     }
 
+    /**
+     * Construct new paradigm based on specified paradigm.
+     * 
+     * Stress syll based on rules:
+     * 
+     * 1. usually stressed chars
+     * 
+     * 2. otherwise, the same syll from word start if 'word' has stress
+     * 
+     * 3. otherwise, the same syll from word end if paradigm has stress
+     */
     Paradigm constructParadigm(String word, Paradigm p, String ratedForm) {
         String unstressedWord = StressUtils.unstress(word);
         String unstressedRatedForm = StressUtils.unstress(ratedForm);
@@ -369,20 +380,38 @@ public class GrammarDB {
         int ratedSkip = unstressedRatedForm.length() - eq;
         Paradigm result = new Paradigm();
         result.setTag(p.getTag());
+        
+        int stressInSource = StressUtils.getStressFromStart(word);
+        
         String lemma = constructWord(unstressedWord, eq, StressUtils.unstress(p.getLemma()), ratedSkip);
-        lemma = StressUtils.setStressFromEnd(lemma, StressUtils.getStressFromEnd(p.getLemma()));
+        int st = StressUtils.getUsuallyStressedSyll(lemma);
+        if (st < 0) {
+            st = stressInSource;
+        }
+        if (st >= 0) {
+            lemma = StressUtils.setStressFromStart(lemma, st);
+        } else {
+            st = StressUtils.getStressFromEnd(p.getLemma());
+            lemma = StressUtils.setStressFromEnd(lemma, st);
+        }
+        
         result.setLemma(lemma);
+
         for (Paradigm.Form f : p.getForm()) {
             Paradigm.Form rf = new Paradigm.Form();
             rf.setTag(f.getTag());
             String fword = constructWord(unstressedWord, eq, StressUtils.unstress(f.getValue()), ratedSkip);
             if (!fword.isEmpty()) {
-                String sv = fword.replaceAll("([ёоЁО])", "$1" + StressUtils.STRESS_CHAR); // націскі
-                if (!sv.equals(fword)) {
-                    fword = sv;
-                } else {
-                    fword = StressUtils.setStressFromEnd(fword, StressUtils.getStressFromEnd(f.getValue()));
+                st = StressUtils.getUsuallyStressedSyll(fword);
+                if (st < 0) {
+                    st = stressInSource;
                 }
+                if (st >= 0) {
+                    fword = StressUtils.setStressFromStart(fword, st);
+                } else {
+                    st = StressUtils.getStressFromEnd(f.getValue());
+                    fword = StressUtils.setStressFromEnd(fword, st);
+                }                
             }
             rf.setValue(fword);
             result.getForm().add(rf);
