@@ -23,6 +23,7 @@
 package org.alex73.korpus.editor.parser;
 
 import java.io.File;
+import java.io.InputStream;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
@@ -59,10 +60,10 @@ public class TEIParser {
         }
     }
 
-    public static KorpusDocument parseXML(File f) throws Exception {
+    public static KorpusDocument parseXML(InputStream in) throws Exception {
         Unmarshaller unm = CONTEXT.createUnmarshaller();
 
-        TEI data = (TEI) unm.unmarshal(f);
+        TEI data = (TEI) unm.unmarshal(in);
 
         KorpusDocument doc = new KorpusDocument();
         boolean poetryMode = false;

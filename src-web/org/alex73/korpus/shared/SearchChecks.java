@@ -123,7 +123,7 @@ public class SearchChecks {
                 }
             } else {
                 // concrete form
-                if (!wordParam.word.equals(wordResult.value)) {
+                if (!wordParam.word.equalsIgnoreCase(wordResult.value)) {
                     return false;
                 }
             }

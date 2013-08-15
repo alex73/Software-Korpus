@@ -23,8 +23,7 @@
 package org.alex73.korpus.editor.parser;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.text.ParseException;
@@ -56,13 +55,14 @@ public class TextParser {
         }
     }
 
-    public static KorpusDocument parseText(File inFile, boolean headerOnly) throws Exception {
-        BufferedReader rd = new BOMBufferedReader(new InputStreamReader(new FileInputStream(inFile), "UTF-8"));
+    public static KorpusDocument parseText(InputStream in, boolean headerOnly) throws Exception {
+        BufferedReader rd = new BOMBufferedReader(new InputStreamReader(in, "UTF-8"));
 
         Map<String, String> headers = extractHeaders(rd);
 
         KorpusDocument doc = new KorpusDocument();
-        doc.textInfo.authors = headers.get("Authors").split(",");
+        String a = headers.get("Authors");
+        doc.textInfo.authors = a != null ? a.split(",") : new String[0];
         doc.textInfo.title = headers.get("Title");
         doc.textInfo.styleGenre = headers.get("StyleGenre");
         doc.textInfo.writtenYear = parseDate(headers.get("YearWritten"));

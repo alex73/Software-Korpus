@@ -22,17 +22,24 @@
 
 package org.alex73.korpus.compiler;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
@@ -91,6 +98,7 @@ public class KorpusLoading {
 
         List<File> files = new ArrayList<>();
         findFiles(new File("Korpus-texts/"), files);
+        Collections.sort(files);
         int c = 0;
         for (File f : files) {
             System.out.println("loadFileToCorpus " + f + ": " + (++c) + "/" + files.size());
@@ -157,20 +165,64 @@ public class KorpusLoading {
                 files.add(f);
             } else if (f.getName().endsWith(".text")) {
                 files.add(f);
+            } else if (f.getName().endsWith(".zip")) {
+                files.add(f);
             }
         }
     }
 
     protected static void loadFileToCorpus(File f) throws Exception {
+        if (f.getName().endsWith(".xml")) {
+
+            KorpusDocument doc;
+            InputStream in = new BufferedInputStream(new FileInputStream(f));
+            try {
+                doc = TEIParser.parseXML(in);
+            } finally {
+                in.close();
+            }
+            loadTextToCorpus(doc);
+        } else if (f.getName().endsWith(".text")) {
+            KorpusDocument doc;
+            InputStream in = new BufferedInputStream(new FileInputStream(f));
+            try {
+                doc = TextParser.parseText(in, false);
+            } finally {
+                in.close();
+            }
+            loadTextToCorpus(doc);
+        } else if (f.getName().endsWith(".zip")) {
+            ZipFile zip = new ZipFile(f);
+            for (Enumeration<? extends ZipEntry> it = zip.entries(); it.hasMoreElements();) {
+                ZipEntry en = it.nextElement();
+                if (en.isDirectory()) {
+                    continue;
+                }
+                KorpusDocument doc;
+                InputStream in = new BufferedInputStream(zip.getInputStream(en));
+                try {
+                    if (en.getName().endsWith(".text")) {
+                        doc = TextParser.parseText(in, false);
+                    } else if (en.getName().endsWith(".xml")) {
+                        doc = TEIParser.parseXML(in);
+                    } else {
+                        throw new RuntimeException("Unknown entry '" + en.getName() + "' in " + f);
+                    }
+                } finally {
+                    in.close();
+                }
+                loadTextToCorpus(doc);
+            }
+            zip.close();
+        } else {
+            throw new RuntimeException("Unknown file: " + f);
+        }
+    }
+
+    protected static void loadTextToCorpus(KorpusDocument doc) throws Exception {
         statTexts++;
         textId++;
 
-        KorpusDocument doc;
-        if (f.getName().endsWith(".xml")) {
-            doc = TEIParser.parseXML(f);
-        } else {
-            doc = TextParser.parseText(f, false);
-        }
         if (doc.textInfo.styleGenre!=null) {
             stylegenres.add(doc.textInfo.styleGenre);
         }
