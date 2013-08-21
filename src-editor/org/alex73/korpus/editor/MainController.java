@@ -25,7 +25,10 @@ package org.alex73.korpus.editor;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
@@ -207,9 +210,19 @@ public class MainController {
 
             KorpusDocument kDoc;
             if (f.getName().endsWith(".xml")) {
-                kDoc = TEIParser.parseXML(f);
+                InputStream in = new BufferedInputStream(new FileInputStream(f));
+                try {
+                    kDoc = TEIParser.parseXML(in);
+                } finally {
+                    in.close();
+                }
             } else {
-                kDoc = TextParser.parseText(f, false);
+                InputStream in = new BufferedInputStream(new FileInputStream(f));
+                try {
+                    kDoc = TextParser.parseText(in, false);
+                } finally {
+                    in.close();
+                }
             }
 
             UI.doc = new KorpusDocument3(kDoc);

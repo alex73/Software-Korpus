@@ -51,6 +51,7 @@ import javax.xml.validation.Validator;
 
 import org.alex73.korpus.editor.parser.BOMBufferedReader;
 import org.alex73.korpus.utils.StressUtils;
+import org.alex73.korpus.utils.WordNormalizer;
 
 import alex73.corpus.paradigm.Paradigm;
 import alex73.corpus.paradigm.Paradigm.Form;
@@ -206,7 +207,7 @@ public class GrammarDB {
         // optimize(p);
         allParadigms.add(p);
         for (Form f : p.getForm()) {
-            String v = StressUtils.unstress(f.getValue().toLowerCase(BEL));
+            String v = WordNormalizer.normalize(f.getValue());
             Paradigm[] byForm = paradigmsByForm.get(v);
             if (byForm == null) {
                 byForm = new Paradigm[1];
@@ -282,12 +283,12 @@ public class GrammarDB {
         looksLike = looksLike.trim();
         if (looksLike.isEmpty()) {
             int rating = 1;
-            String find = StressUtils.unstress(word);
+            String find = WordNormalizer.normalize(word);
             for (Paradigm p : allParadigms) {
                 if (!isTagLooksLikeMask(p.getTag(), tagMask)) {
                     continue;
                 }
-                int eq = compareEnds(find, StressUtils.unstress(p.getLemma()));
+                int eq = compareEnds(find, WordNormalizer.normalize(p.getLemma()));
                 if (eq > rating) {
                     rating = eq;
                     ratedParadigm = p;
@@ -295,7 +296,7 @@ public class GrammarDB {
                 }
                 if (checkForms) {
                     for (Paradigm.Form f : p.getForm()) {
-                        eq = compareEnds(find, StressUtils.unstress(f.getValue()));
+                        eq = compareEnds(find, WordNormalizer.normalize(f.getValue()));
                         if (eq > rating) {
                             rating = eq;
                             ratedParadigm = p;
@@ -305,18 +306,18 @@ public class GrammarDB {
                 }
             }
         } else {
-            String find = StressUtils.unstress(looksLike);
+            String find = WordNormalizer.normalize(looksLike);
             for (Paradigm p : allParadigms) {
                 if (!isTagLooksLikeMask(p.getTag(), tagMask)) {
                     continue;
                 }
-                if (find.equals(StressUtils.unstress(p.getLemma()))) {
+                if (find.equals(WordNormalizer.normalize(p.getLemma()))) {
                     ratedParadigm = p;
                     ratedForm = p.getLemma();
                 }
                 if (checkForms) {
                     for (Paradigm.Form f : p.getForm()) {
-                        if (find.equals(StressUtils.unstress(f.getValue()))) {
+                        if (find.equals(WordNormalizer.normalize(f.getValue()))) {
                             ratedParadigm = p;
                             ratedForm = f.getValue();
                         }
@@ -359,7 +360,7 @@ public class GrammarDB {
      * Find paradigms by word (unstressed, lower case).
      */
     public synchronized Paradigm[] getParadigmsByForm(String word) {
-        return paradigmsByForm.get(StressUtils.unstress(word.toLowerCase(BEL)));
+        return paradigmsByForm.get(WordNormalizer.normalize(word));
     }
 
     /**
@@ -374,8 +375,8 @@ public class GrammarDB {
      * 3. otherwise, the same syll from word end if paradigm has stress
      */
     Paradigm constructParadigm(String word, Paradigm p, String ratedForm) {
-        String unstressedWord = StressUtils.unstress(word);
-        String unstressedRatedForm = StressUtils.unstress(ratedForm);
+        String unstressedWord = WordNormalizer.normalize(word);
+        String unstressedRatedForm = WordNormalizer.normalize(ratedForm);
         int eq = compareEnds(unstressedWord, unstressedRatedForm);
         int ratedSkip = unstressedRatedForm.length() - eq;
         Paradigm result = new Paradigm();
@@ -383,7 +384,7 @@ public class GrammarDB {
         
         int stressInSource = StressUtils.getStressFromStart(word);
         
-        String lemma = constructWord(unstressedWord, eq, StressUtils.unstress(p.getLemma()), ratedSkip);
+        String lemma = constructWord(unstressedWord, eq, WordNormalizer.normalize(p.getLemma()), ratedSkip);
         int st = StressUtils.getUsuallyStressedSyll(lemma);
         if (st < 0) {
             st = stressInSource;
@@ -400,7 +401,7 @@ public class GrammarDB {
         for (Paradigm.Form f : p.getForm()) {
             Paradigm.Form rf = new Paradigm.Form();
             rf.setTag(f.getTag());
-            String fword = constructWord(unstressedWord, eq, StressUtils.unstress(f.getValue()), ratedSkip);
+            String fword = constructWord(unstressedWord, eq, WordNormalizer.normalize(f.getValue()), ratedSkip);
             if (!fword.isEmpty()) {
                 st = StressUtils.getUsuallyStressedSyll(fword);
                 if (st < 0) {

@@ -175,13 +175,13 @@ public abstract class BaseControlsWrapper {
         });
     }
 
-    RegExp RE_WORD = RegExp.compile("^[йцукенгшўзх'фывапролджэячсмітьбюё]+$");
+    RegExp RE_WORD = RegExp.compile("^[йцукенгшўзх'фывапролджэячсмітьбюёЙЦУКЕНГШЎЗХФЫВАПРОЛДЖЭЯЧСМІТЬБЮЁ]+$");
 
     protected boolean isValidWord(TextBox txt) {
         if (txt.getValue().trim().isEmpty()) {
             return true;
         }
-        return RE_WORD.exec(txt.getValue().toLowerCase()) != null;
+        return RE_WORD.exec(txt.getValue()) != null;
     }
 
     protected void templateToWord(Element el, int wordIndex) {

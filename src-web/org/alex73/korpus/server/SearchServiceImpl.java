@@ -42,6 +42,7 @@ import org.alex73.korpus.shared.ResultSentence;
 import org.alex73.korpus.shared.SearchChecks;
 import org.alex73.korpus.shared.SearchParams;
 import org.alex73.korpus.utils.StressUtils;
+import org.alex73.korpus.utils.WordNormalizer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -158,7 +159,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
             query.add(q, BooleanClause.Occur.MUST);
         }
         for (SearchParams.Word w : params.words) {
-            w.word = StressUtils.unstress(w.word.trim().toLowerCase(GrammarDBLite.BEL));
+            w.word = WordNormalizer.normalize(w.word);
             if (w.word.length() > 0) {
                 Query wq;
                 if (w.allForms) {
@@ -232,7 +233,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         Set<String> result = new HashSet<>();
         for (LiteParadigm p : GrammarDBLite.getInstance().getAllParadigms()) {
             for (LiteForm f : p.forms) {
-                if (word.equals(StressUtils.unstress(f.value))) {
+                if (word.equals(WordNormalizer.normalize(f.value))) {
                     result.add(p.lemma);
                     break;
                 }

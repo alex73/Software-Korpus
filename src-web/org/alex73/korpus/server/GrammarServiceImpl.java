@@ -35,7 +35,7 @@ import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.DBTagsGroups;
 import org.alex73.korpus.client.GrammarService;
 import org.alex73.korpus.shared.LemmaInfo;
-import org.alex73.korpus.utils.StressUtils;
+import org.alex73.korpus.utils.WordNormalizer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -90,7 +90,7 @@ public class GrammarServiceImpl extends RemoteServiceServlet implements GrammarS
 
             begpar: for (LiteParadigm p : GrammarDBLite.getInstance().getAllParadigms()) {
                 if (reLemma != null) {
-                    if (!reLemma.matcher(StressUtils.unstress(p.lemma)).matches()) {
+                    if (!reLemma.matcher(WordNormalizer.normalize(p.lemma)).matches()) {
                         continue;
                     }
                 }
@@ -109,7 +109,7 @@ public class GrammarServiceImpl extends RemoteServiceServlet implements GrammarS
                         }
                     }
                     if (reWord != null) {
-                        if (!reWord.matcher(StressUtils.unstress(f.value)).matches()) {
+                        if (!reWord.matcher(WordNormalizer.normalize(f.value)).matches()) {
                             continue;
                         }
                     }

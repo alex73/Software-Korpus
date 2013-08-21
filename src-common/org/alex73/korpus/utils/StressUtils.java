@@ -22,8 +22,6 @@
 
 package org.alex73.korpus.utils;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.alex73.korpus.base.BelarusianTags;
@@ -37,17 +35,9 @@ public class StressUtils {
 
     public static char STRESS_CHAR = '´';
     static Pattern RE_STRESS = Pattern.compile("(.)´");
-    static private final Map<String, String> UNSTRESSED_CACHE = new HashMap<>();
 
     public static String unstress(String stressedWord) {
-        synchronized (UNSTRESSED_CACHE) {
-            String un = UNSTRESSED_CACHE.get(stressedWord);
-            if (un == null) {
-                un = stressedWord.replace("" + STRESS_CHAR, "");
-                UNSTRESSED_CACHE.put(stressedWord, un.equals(stressedWord) ? stressedWord : un);
-            }
-            return un;
-        }
+        return stressedWord.replace("" + STRESS_CHAR, "");
     }
 
     /**

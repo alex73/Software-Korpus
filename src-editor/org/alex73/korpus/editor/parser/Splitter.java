@@ -40,6 +40,7 @@ import org.alex73.korpus.editor.core.structure.TagShortItem;
 import org.alex73.korpus.editor.core.structure.WordItem;
 import org.alex73.korpus.editor.core.structure.ZnakItem;
 import org.alex73.korpus.utils.StressUtils;
+import org.alex73.korpus.utils.WordNormalizer;
 
 import alex73.corpus.paradigm.Paradigm;
 import alex73.corpus.paradigm.W;
@@ -267,9 +268,9 @@ public class Splitter {
             }
             if (!foundForm) {
                 // the same find, but without stress and lowercase
-                String uw = StressUtils.unstress(word).toLowerCase(BEL);
+                String uw = WordNormalizer.normalize(word);
                 for (Paradigm.Form f : p.getForm()) {
-                    if (uw.equals(StressUtils.unstress(f.getValue()).toLowerCase(BEL))) {
+                    if (uw.equals(WordNormalizer.normalize(f.getValue()))) {
                         cats.add(p.getTag() + f.getTag());
                     }
                 }

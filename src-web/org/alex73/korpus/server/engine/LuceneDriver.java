@@ -30,7 +30,7 @@ import org.alex73.korpus.base.DBTagsGroups;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.server.GrammarDBLite;
 import org.alex73.korpus.server.Settings;
-import org.alex73.korpus.utils.StressUtils;
+import org.alex73.korpus.utils.WordNormalizer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -187,8 +187,7 @@ public class LuceneDriver {
             }
             W w = (W) o;
             if (w.getValue() != null) {
-                String wc = w.getValue().toLowerCase(GrammarDBLite.BEL);
-                wc = StressUtils.unstress(wc);
+                String wc = WordNormalizer.normalize(w.getValue());
                 values.append(wc).append(' ');
             }
             if (StringUtils.isNotEmpty(w.getCat())) {
