@@ -210,7 +210,7 @@ public class LuceneDriver {
         fieldSentenceDBGrammarTags.setStringValue(dbGrammarTags.toString());
         fieldSentenceLemmas.setStringValue(lemmas.toString());
         fieldSentenceXML.setBytesValue(xml);
-        fieldSentenceTextStyleGenre.setStringValue(nvl(info.styleGenre));
+        fieldSentenceTextStyleGenre.setTokenStream(new StringArrayTokenStream(new String[] {nvl(info.styleGenre)}));
         fieldSentenceTextWrittenYear.setIntValue(nvl(info.writtenYear));
         fieldSentenceTextPublishedYear.setIntValue(nvl(info.publishedYear));
         fieldSentenceTextAuthor.setTokenStream(new StringArrayTokenStream(info.authors));
