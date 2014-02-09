@@ -73,6 +73,14 @@ public class StressUtils {
         return -1;
     }
 
+    public static boolean isAssignable(String destination, String withStress) {
+        if (destination.equals(unstress(destination))) {
+            return destination.equals(unstress(withStress));
+        } else {
+            return destination.equals(withStress);
+        }
+    }
+
     public static int getStressFromEnd(String word) {
         int r = 0;
         for (int i = word.length() - 1; i >= 0; i--) {
