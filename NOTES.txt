@@ -1,5 +1,7 @@
 Prepare data for online search:
 
-1. GrammarDB/ - grammar database
-2. Korpus-texts/ - texts
-3. Run KorpusLoading.java
+1. GrammarDB/ - link to grammar database
+2. Korpus-texts/ - link to texts
+3. ant all - build/ROOT.war -> opt/tomcat/webappsBNKorpus/ROOT.war
+4. ant cache - Korpus-cache/ -> opt/tomcat/Korpus-cache/
+

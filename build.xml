@@ -129,4 +129,24 @@
 	</target>
 
 	<target name="all" depends="clean,war,compiler,editor"/>
+
+	<target name="cache">
+		<mkdir dir="build/compiler" />
+		<javac srcdir="src-compiler:src-common" includes="**" encoding="utf-8" destdir="build/compiler" nowarn="true" debug="true" debuglevel="lines,vars,source">
+			<classpath>
+				<path refid="project.class.path" />
+				<fileset dir="lib-editor" includes="**/*.jar" />
+			</classpath>
+		</javac>
+		<delete dir="Korpus-cache" failonerror="false" />
+		<java failonerror="true" fork="true" classname="org.alex73.korpus.compiler.KorpusLoading">
+			<classpath>
+				<pathelement location="build/compiler"/>
+				<path refid="project.class.path"/>
+				<fileset dir="lib-editor" includes="**/*.jar" />
+			</classpath>
+			<jvmarg value="-Xmx4096M"/>
+		</java>
+	</target>
+
 </project>
