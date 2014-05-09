@@ -257,20 +257,24 @@ public class KorpusLoading {
                 for (int p = 0; p < content.length;) {
                     p += sevenZFile.read(content, p, content.length - p);
                 }
-                KorpusDocument doc;
-                InputStream in = new ByteArrayInputStream(content);
                 try {
-                    if (en.getName().endsWith(".text")) {
-                        doc = TextParser.parseText(in, false);
-                    } else if (en.getName().endsWith(".xml")) {
-                        doc = TEIParser.parseXML(in);
-                    } else {
-                        throw new RuntimeException("Unknown entry '" + en.getName() + "' in " + f);
+                    KorpusDocument doc;
+                    InputStream in = new ByteArrayInputStream(content);
+                    try {
+                        if (en.getName().endsWith(".text")) {
+                            doc = TextParser.parseText(in, false);
+                        } else if (en.getName().endsWith(".xml")) {
+                            doc = TEIParser.parseXML(in);
+                        } else {
+                            throw new RuntimeException("Unknown entry '" + en.getName() + "' in " + f);
+                        }
+                    } finally {
+                        in.close();
                     }
-                } finally {
-                    in.close();
+                    loadTextToCorpus(doc);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
-                loadTextToCorpus(doc);
             }
             sevenZFile.close();
         } else {

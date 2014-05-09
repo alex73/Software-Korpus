@@ -72,6 +72,8 @@ public class GrammarDB {
     List<Paradigm> docLevelParadigms = new ArrayList<>();
     Map<String, Paradigm[]> paradigmsByForm = new HashMap<>();
     String znaki = "";
+    String letters = "ёйцукенгшўзх'фывапролджэячсмітьбющиЁЙЦУКЕНГШЎЗХ'ФЫВАПРОЛДЖЭЯЧСМІТЬБЮЩИqwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
+
     Map<String, Theme> themes = new TreeMap<>();
 
     static {
@@ -208,6 +210,9 @@ public class GrammarDB {
         allParadigms.add(p);
         for (Form f : p.getForm()) {
             String v = WordNormalizer.normalize(f.getValue());
+            if (v.isEmpty()) {
+                continue;
+            }
             Paradigm[] byForm = paradigmsByForm.get(v);
             if (byForm == null) {
                 byForm = new Paradigm[1];
@@ -354,6 +359,10 @@ public class GrammarDB {
 
     public String getZnaki() {
         return znaki;
+    }
+    
+    public String getLetters() {
+        return letters;
     }
 
     /**

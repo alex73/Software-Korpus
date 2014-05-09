@@ -74,7 +74,6 @@ public class TextParser {
         String s;
         while ((s = rd.readLine()) != null) {
             Splitter sp = new Splitter(s);
-            sp.presplitSentences();
             doc.add(sp.splitParagraph());
         }
 

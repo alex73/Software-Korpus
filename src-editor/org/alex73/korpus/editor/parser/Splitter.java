@@ -39,7 +39,6 @@ import org.alex73.korpus.editor.core.structure.TagLongItem;
 import org.alex73.korpus.editor.core.structure.TagShortItem;
 import org.alex73.korpus.editor.core.structure.WordItem;
 import org.alex73.korpus.editor.core.structure.ZnakItem;
-import org.alex73.korpus.utils.StressUtils;
 import org.alex73.korpus.utils.WordNormalizer;
 
 import alex73.corpus.paradigm.Paradigm;
@@ -56,6 +55,7 @@ public class Splitter {
     public static final char CH_SENT_SEPARATOR = '�';
 
     protected static final Pattern RE_SPLIT_W = Pattern.compile("\\s+");
+    protected static final Pattern RE_AMP = Pattern.compile("&(#([0-9]+)|([a-z]+));");
 
     enum SPLIT_MODE {
         WORD, SPACE, TAG_SHORT, TAG_LONG
@@ -68,20 +68,117 @@ public class Splitter {
     SPLIT_MODE mode;
 
     public Splitter(String line) {
-	this.line = line.replace("&nbsp;", " ").replace("&oacute;", "ó").replace("&quot;", "\"").replace("&lt;", "<")
-	        .replace("&gt;", ">").replace("&laquo;", "«").replace("&raquo;", "»").replace("&bdquo;", "„")
-	        .replace("&ldquo;", "“").replace("&rdquo;", "”").replace("&ndash;", "–").replace("&mdash;", "—");
-	if (this.line.contains("&")) {
-	    System.err.println("HTML chars: " + this.line);
-	}
+        this.line = presplit(line);
     }
 
-    public void presplitSentences() {
-        line = replace3dots(line);
-        line = line.replaceAll("([\\.\\?\\!" + CH_3DOTS + "])", "$1" + CH_SENT_SEPARATOR);
-        if (line.endsWith("" + CH_SENT_SEPARATOR)) {
-            line = line.substring(0, line.length() - 1);
+    private static StringBuilder str = new StringBuilder();
+    private static StringBuilder temp = new StringBuilder();
+
+    private static synchronized String presplit(String line) {
+        str.setLength(0);
+        for (int i = 0; i < line.length(); i++) {
+            char ch = line.charAt(i);
+
+            char prev, next;
+            try {
+                prev = line.charAt(i - 1);
+            } catch (StringIndexOutOfBoundsException ex) {
+                prev = 0;
+            }
+            try {
+                next = line.charAt(i + 1);
+            } catch (StringIndexOutOfBoundsException ex) {
+                next = 0;
+            }
+            try {// 3 dots
+                if (ch == '.' && next == '.' && line.charAt(i + 2) == '.' && line.charAt(i + 3) != '.') {
+                    ch = CH_3DOTS;
+                    i += 2;
+                }
+            } catch (StringIndexOutOfBoundsException ex) {
+            }
+            if (ch == '&') {
+                temp.setLength(0);
+                if (next == '#') {
+                    i += 2;
+                } else {
+                    i++;
+                }
+                for (; i < line.length(); i++) {
+                    char ct = line.charAt(i);
+                    if (ct == ';') {
+                        break;
+                    }
+                    temp.append(ct);
+                }
+                if (next == '#') { // char number
+                    ch = (char) Integer.parseInt(temp.toString());
+                } else { // char name
+                    switch (temp.toString()) {
+                    case "nbsp":
+                        ch = ' ';
+                        break;
+                    case "oacute":
+                        ch = 'ó';
+                        break;
+                    case "quot":
+                        ch = '"';
+                        break;
+                    case "lt":
+                        ch = '<';
+                        break;
+                    case "gt":
+                        ch = '>';
+                        break;
+                    case "laquo":
+                        ch = '«';
+                        break;
+                    case "raquo":
+                        ch = '»';
+                        break;
+                    case "bdquo":
+                        ch = '„';
+                        break;
+                    case "ldquo":
+                        ch = '“';
+                        break;
+                    case "rdquo":
+                        ch = '”';
+                        break;
+                    case "ndash":
+                        ch = '–';
+                        break;
+                    case "mdash":
+                        ch = '—';
+                        break;
+                    default:
+                        System.err.println("Error in amp: " + line);
+                        ch = ' ';
+                    }
+                }
+            }
+            switch (ch) {
+            case '\u00A0':
+            case '\t':
+                ch = ' ';
+                break;
+            case '’':
+            case '`':
+            case '´':
+            case '‘':
+                ch = '\'';
+                break;
+            }
+            str.append(ch);
+            if (ch == '.' || ch == '?' || ch == '!' || ch == CH_3DOTS) {
+                str.append(CH_SENT_SEPARATOR);
+            }
         }
+        if (str.length() > 0 && str.charAt(str.length() - 1) == CH_SENT_SEPARATOR) {
+            str.setLength(str.length() - 1);
+        }
+
+        return str.toString();
     }
 
     void flush() {
@@ -125,14 +222,15 @@ public class Splitter {
                     flush();
                     partStart = currentPos;
                     mode = SPLIT_MODE.TAG_SHORT;
-                } else if (GrammarDB.getInstance().getZnaki().indexOf(ch) >= 0) {
+                } else if (GrammarDB.getInstance().getLetters().indexOf(ch) >= 0) {
+                } else {
                     flush();
-                    result.add(new ZnakItem(getWordInfo(line.substring(currentPos, currentPos + 1))));
+                    if (ch == ' ') {
+                        result.add(new SpaceItem(" "));
+                    } else {
+                        result.add(new ZnakItem(getWordInfo(line.substring(currentPos, currentPos + 1))));
+                    }
                     partStart = currentPos + 1;
-                    mode = SPLIT_MODE.SPACE;
-                } else if (Character.isWhitespace(ch)) {
-                    flush();
-                    partStart = currentPos;
                     mode = SPLIT_MODE.SPACE;
                 }
                 break;
@@ -141,15 +239,19 @@ public class Splitter {
                     flush();
                     partStart = currentPos;
                     mode = SPLIT_MODE.TAG_SHORT;
-                } else if (GrammarDB.getInstance().getZnaki().indexOf(ch) >= 0) {
-                    flush();
-                    result.add(new ZnakItem(getWordInfo(line.substring(currentPos, currentPos + 1))));
-                    partStart = currentPos + 1;
-                    mode = SPLIT_MODE.SPACE;
-                } else if (!Character.isWhitespace(ch)) {
+                } else if (GrammarDB.getInstance().getLetters().indexOf(ch) >= 0) {
                     flush();
                     partStart = currentPos;
                     mode = SPLIT_MODE.WORD;
+                } else {
+                    flush();
+                    if (ch == ' ') {
+                        result.add(new SpaceItem(" "));
+                    } else {
+                        result.add(new ZnakItem(getWordInfo(line.substring(currentPos, currentPos + 1))));
+                    }
+                    partStart = currentPos + 1;
+                    mode = SPLIT_MODE.SPACE;
                 }
                 break;
             case TAG_SHORT:
@@ -174,6 +276,7 @@ public class Splitter {
         }
         flush();
 
+        result.normalize();
         return result;
     }
 
@@ -192,7 +295,7 @@ public class Splitter {
     protected static W getWordInfo(String w) {
         String word = fixWord(w);
         W result = new W();
-        result.setValue(w);
+        result.setValue(w); // value must be original text
         Paradigm[] paradigms = GrammarDB.getInstance().getParadigmsByForm(word);
         if (paradigms != null) {
             fillWordInfo(result, word, paradigms);
@@ -244,7 +347,7 @@ public class Splitter {
         fillWordInfo(w, word, pt.toArray(new Paradigm[pt.size()]));
     }
 
-    static String fixWord(String word) {
+    public static String fixWord(String word) {
         // Ў
         if (word.startsWith("ў")) {
             word = "у" + word.substring(1);
@@ -291,26 +394,6 @@ public class Splitter {
         return r.toString();
     }
 
-    protected static String replace3dots(String line) {
-        int pos = -1;
-        while (true) {
-            pos = line.indexOf("...", pos + 1);
-            if (pos < 0) {
-                break;
-            }
-            if (pos > 0 && line.charAt(pos - 1) == '.') {
-                // больш за 3 кропкі
-                continue;
-            }
-            if (pos + 4 < line.length() && line.charAt(pos + 4) == '.') {
-                // больш за 3 кропкі
-                continue;
-            }
-            line = line.substring(0, pos) + CH_3DOTS + line.substring(pos + 3);
-        }
-        return line;
-    }
-
     protected static String middle(String v) {
         if (v == null) {
             return null;
@@ -353,7 +436,8 @@ public class Splitter {
                 }
             }
         }
-        while (line.size() >= 2 && (line.get(0) instanceof TagLongItem) && !(line.get(1) instanceof SpaceItem)) {
+        while (line.size() >= 2 && (line.get(0) instanceof TagLongItem)
+                && !(line.get(1) instanceof SpaceItem)) {
             // merge big tags
             String newTagText = line.get(0).getText() + line.get(1).getText();
             line.set(0, new TagLongItem(newTagText));
@@ -366,9 +450,11 @@ public class Splitter {
             BaseItem nextItem = line.get(i + 1);
             BaseItem newItem = null;
             if (currentItem instanceof SpaceItem && nextItem instanceof SpaceItem) {
-                newItem = new SpaceItem(((SpaceItem) currentItem).getText() + ((SpaceItem) nextItem).getText());
+                newItem = new SpaceItem(((SpaceItem) currentItem).getText()
+                        + ((SpaceItem) nextItem).getText());
             } else if (currentItem instanceof WordItem && nextItem instanceof WordItem) {
-                newItem = new WordItem(((WordItem) currentItem).w.getValue() + ((WordItem) nextItem).w.getValue());
+                newItem = new WordItem(((WordItem) currentItem).w.getValue()
+                        + ((WordItem) nextItem).w.getValue());
             }
             if (newItem != null) {
                 line.remove(i);
@@ -376,6 +462,29 @@ public class Splitter {
                 line.add(i, newItem);
                 i--;
                 modified = true;
+            }
+        }
+        for (int i = 0; i < line.size() - 1; i++) {
+            // split words and apostrophes
+            BaseItem currentItem = line.get(i);
+            if (currentItem instanceof WordItem) {
+                BaseItem newItem = null;
+                WordItem w = (WordItem) currentItem;
+                if (w.getText().startsWith("'")) {
+                    newItem = new ZnakItem(getWordInfo("'"));
+                    w = (WordItem) w.splitRight(1);
+                    line.set(i, w);
+                    line.add(i, newItem);
+                    modified = true;
+                }
+                if (w.getText().endsWith("'")) {
+                    newItem = new ZnakItem(getWordInfo("'"));
+                    w = (WordItem) w.splitLeft(w.getText().length() - 1);
+                    line.set(i, w);
+                    line.add(i + 1, newItem);
+                    i--;
+                    modified = true;
+                }
             }
         }
         for (int i = 0; i < line.size(); i++) {
