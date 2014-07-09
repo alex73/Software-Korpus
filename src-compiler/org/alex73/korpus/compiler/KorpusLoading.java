@@ -48,8 +48,8 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.alex73.korpus.editor.core.GrammarDB;
 import org.alex73.korpus.editor.core.structure.KorpusDocument;
-import org.alex73.korpus.editor.parser.TEIParser;
-import org.alex73.korpus.editor.parser.TextParser;
+import org.alex73.korpus.parser.TEIParser;
+import org.alex73.korpus.parser.TextParser;
 import org.alex73.korpus.server.engine.LuceneDriver;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;

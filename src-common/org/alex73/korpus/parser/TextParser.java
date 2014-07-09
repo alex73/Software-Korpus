@@ -20,7 +20,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
 
-package org.alex73.korpus.editor.parser;
+package org.alex73.korpus.parser;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -38,6 +38,7 @@ import javax.xml.bind.JAXBContext;
 
 import org.alex73.korpus.editor.core.structure.KorpusDocument;
 import org.alex73.korpus.editor.core.structure.Line;
+import org.alex73.korpus.editor.parser.Splitter;
 
 import alex73.corpus.paradigm.TEI;
 import alex73.corpus.paradigm.TeiHeader;

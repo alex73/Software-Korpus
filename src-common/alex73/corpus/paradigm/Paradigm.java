@@ -22,6 +22,7 @@ import javax.xml.bind.annotation.XmlValue;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
+ *         &lt;element name="Note" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="Form" maxOccurs="unbounded" minOccurs="0">
  *           &lt;complexType>
  *             &lt;simpleContent>
@@ -30,7 +31,6 @@ import javax.xml.bind.annotation.XmlValue;
  *                 &lt;attribute name="Type" type="{}Type" />
  *                 &lt;attribute name="Slouniki" type="{http://www.w3.org/2001/XMLSchema}string" />
  *                 &lt;attribute name="pravapis" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                 &lt;attribute name="Checked" type="{http://www.w3.org/2001/XMLSchema}string" />
  *                 &lt;attribute name="options" type="{}FormOptions" />
  *                 &lt;attribute name="Govern" type="{http://www.w3.org/2001/XMLSchema}string" />
  *                 &lt;attribute name="todo" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -46,7 +46,6 @@ import javax.xml.bind.annotation.XmlValue;
  *       &lt;attribute name="Theme" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="Govern" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="Type" type="{}Type" />
- *       &lt;attribute name="Checked" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="Marked" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="options" type="{}ParadigmOptions" />
  *       &lt;attribute name="todo" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -61,11 +60,14 @@ import javax.xml.bind.annotation.XmlValue;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
+    "note",
     "form"
 })
 @XmlRootElement(name = "Paradigm")
 public class Paradigm {
 
+    @XmlElement(name = "Note")
+    protected String note;
     @XmlElement(name = "Form")
     protected List<Paradigm.Form> form;
     @XmlAttribute(name = "pdgId", required = true)
@@ -80,8 +82,6 @@ public class Paradigm {
     protected String govern;
     @XmlAttribute(name = "Type")
     protected Type type;
-    @XmlAttribute(name = "Checked")
-    protected String checked;
     @XmlAttribute(name = "Marked")
     protected String marked;
     @XmlAttribute(name = "options")
@@ -92,6 +92,30 @@ public class Paradigm {
     protected String comment;
     @XmlAttribute(name = "meaning")
     protected String meaning;
+
+    /**
+     * Gets the value of the note property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getNote() {
+        return note;
+    }
+
+    /**
+     * Sets the value of the note property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setNote(String value) {
+        this.note = value;
+    }
 
     /**
      * Gets the value of the form property.
@@ -259,30 +283,6 @@ public class Paradigm {
     }
 
     /**
-     * Gets the value of the checked property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getChecked() {
-        return checked;
-    }
-
-    /**
-     * Sets the value of the checked property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setChecked(String value) {
-        this.checked = value;
-    }
-
-    /**
      * Gets the value of the marked property.
      * 
      * @return
@@ -416,7 +416,6 @@ public class Paradigm {
      *       &lt;attribute name="Type" type="{}Type" />
      *       &lt;attribute name="Slouniki" type="{http://www.w3.org/2001/XMLSchema}string" />
      *       &lt;attribute name="pravapis" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="Checked" type="{http://www.w3.org/2001/XMLSchema}string" />
      *       &lt;attribute name="options" type="{}FormOptions" />
      *       &lt;attribute name="Govern" type="{http://www.w3.org/2001/XMLSchema}string" />
      *       &lt;attribute name="todo" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -444,8 +443,6 @@ public class Paradigm {
         protected String slouniki;
         @XmlAttribute(name = "pravapis")
         protected String pravapis;
-        @XmlAttribute(name = "Checked")
-        protected String checked;
         @XmlAttribute(name = "options")
         protected FormOptions options;
         @XmlAttribute(name = "Govern")
@@ -573,30 +570,6 @@ public class Paradigm {
          */
         public void setPravapis(String value) {
             this.pravapis = value;
-        }
-
-        /**
-         * Gets the value of the checked property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getChecked() {
-            return checked;
-        }
-
-        /**
-         * Sets the value of the checked property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setChecked(String value) {
-            this.checked = value;
         }
 
         /**

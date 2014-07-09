@@ -54,54 +54,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link W }
-     * 
-     */
-    public W createW() {
-        return new W();
-    }
-
-    /**
-     * Create an instance of {@link Text }
-     * 
-     */
-    public Text createText() {
-        return new Text();
-    }
-
-    /**
-     * Create an instance of {@link TeiHeader }
-     * 
-     */
-    public TeiHeader createTeiHeader() {
-        return new TeiHeader();
-    }
-
-    /**
-     * Create an instance of {@link S }
-     * 
-     */
-    public S createS() {
-        return new S();
-    }
-
-    /**
-     * Create an instance of {@link Tag }
-     * 
-     */
-    public Tag createTag() {
-        return new Tag();
-    }
-
-    /**
-     * Create an instance of {@link TEI }
-     * 
-     */
-    public TEI createTEI() {
-        return new TEI();
-    }
-
-    /**
      * Create an instance of {@link Clusters }
      * 
      */
@@ -115,6 +67,14 @@ public class ObjectFactory {
      */
     public Cluster.Form createClusterForm() {
         return new Cluster.Form();
+    }
+
+    /**
+     * Create an instance of {@link Tag }
+     * 
+     */
+    public Tag createTag() {
+        return new Tag();
     }
 
     /**
@@ -134,11 +94,51 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link Text }
+     * 
+     */
+    public Text createText() {
+        return new Text();
+    }
+
+    /**
+     * Create an instance of {@link TeiHeader }
+     * 
+     */
+    public TeiHeader createTeiHeader() {
+        return new TeiHeader();
+    }
+
+    /**
+     * Create an instance of {@link W }
+     * 
+     */
+    public W createW() {
+        return new W();
+    }
+
+    /**
      * Create an instance of {@link P }
      * 
      */
     public P createP() {
         return new P();
+    }
+
+    /**
+     * Create an instance of {@link S }
+     * 
+     */
+    public S createS() {
+        return new S();
+    }
+
+    /**
+     * Create an instance of {@link TEI }
+     * 
+     */
+    public TEI createTEI() {
+        return new TEI();
     }
 
     /**

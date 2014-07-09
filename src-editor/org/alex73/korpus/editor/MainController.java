@@ -47,8 +47,8 @@ import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyLineElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyWordElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocumentViewFactory;
 import org.alex73.korpus.editor.core.structure.KorpusDocument;
-import org.alex73.korpus.editor.parser.TEIParser;
-import org.alex73.korpus.editor.parser.TextParser;
+import org.alex73.korpus.parser.TEIParser;
+import org.alex73.korpus.parser.TextParser;
 
 import alex73.corpus.paradigm.TEI;
 import alex73.corpus.paradigm.W;

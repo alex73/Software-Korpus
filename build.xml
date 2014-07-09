@@ -94,7 +94,18 @@
 	</target>
 
 	<target name="compiler" depends="javac">
-		<jar jarfile="build/Korpus-cache.jar" basedir="war/WEB-INF/classes">
+		<mkdir dir="build/classes-compiler" />
+		<javac srcdir="src-compiler:src-common" includes="**" encoding="utf-8" destdir="build/classes-compiler" nowarn="true" debug="true" debuglevel="lines,vars,source">
+			<classpath refid="project.class.path" />
+			<classpath>
+				<fileset dir="lib-editor" includes="**/*.jar" />
+			</classpath>
+		</javac>
+		<copy todir="build/classes-compiler">
+			<fileset dir="src-compiler" />
+			<fileset dir="src-common" />
+		</copy>
+		<jar jarfile="build/Korpus-cache.jar" basedir="build/classes-compiler">
 			<manifest>
 				<attribute name="Main-Class" value="org.alex73.korpus.server.engine.KorpusLoading" />
 			</manifest>

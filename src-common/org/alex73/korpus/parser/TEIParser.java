@@ -20,7 +20,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
 
-package org.alex73.korpus.editor.parser;
+package org.alex73.korpus.parser;
 
 import java.io.File;
 import java.io.InputStream;
