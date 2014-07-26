@@ -158,7 +158,8 @@ public class CheckGrammarDB {
     }
     
     static Set<String> KNOWN_SLOUNIKI = new HashSet<>(Arrays.asList("sbm2012", "prym2009", "dzsl2007", "nazounik2008"));
-    static Set<String> KNOWN_PRAVAPIS = new HashSet<>(Arrays.asList("A1957", "A2008"));
+    static Set<String> KNOWN_PRAVAPIS = new HashSet<>(Arrays.asList("А1933", "А1957", "А2008", "Т1929",
+            "К2005", "Н"));
 
     static void checkSlounikPravapis(Paradigm p) {
         for (Form f : p.getForm()) {
