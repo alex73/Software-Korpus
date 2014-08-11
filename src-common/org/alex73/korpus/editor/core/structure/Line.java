@@ -25,7 +25,7 @@ package org.alex73.korpus.editor.core.structure;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.alex73.korpus.editor.parser.Splitter;
+import org.alex73.korpus.parser.Splitter;
 
 /**
  * Сховішча для радку дакумэнту корпуса.

@@ -5,10 +5,10 @@
 	<property name="gwt.args" value="" />
 
 	<!-- Configure path to GWT SDK -->
-	<condition property="gwt.sdk" value="C:/opt/gwt-2.5.1">
+	<condition property="gwt.sdk" value="C:/opt/gwt-2.6.1">
 		<os family="windows"/>
 	</condition>
-	<condition property="gwt.sdk" value="/opt/gwt-2.5.1">
+	<condition property="gwt.sdk" value="/opt/gwt-2.6.1">
 		<os family="unix"/>
 	</condition>
 
@@ -44,8 +44,8 @@
 				<pathelement location="src-web"/>
 				<pathelement location="src-common"/>
 				<path refid="project.class.path"/>
-				<pathelement location="/opt/gwt-2.5.0.rc1/validation-api-1.0.0.GA.jar" />
-				<pathelement location="/opt/gwt-2.5.0.rc1/validation-api-1.0.0.GA-sources.jar" />
+				<pathelement location="/opt/gwt-2.6.1/validation-api-1.0.0.GA.jar" />
+				<pathelement location="/opt/gwt-2.6.1/validation-api-1.0.0.GA-sources.jar" />
 			</classpath>
 			<!-- add jvmarg -Xss16M or similar if you see a StackOverflowError -->
 			<jvmarg value="-Xmx256M"/>
@@ -63,8 +63,8 @@
 				<pathelement location="src-web"/>
 				<pathelement location="src-common"/>
 				<path refid="project.class.path"/>
-				<pathelement location="/opt/gwt-2.5.0.rc1/validation-api-1.0.0.GA.jar" />
-				<pathelement location="/opt/gwt-2.5.0.rc1/validation-api-1.0.0.GA-sources.jar" />
+				<pathelement location="/opt/gwt-2.6.1/validation-api-1.0.0.GA.jar" />
+				<pathelement location="/opt/gwt-2.6.1/validation-api-1.0.0.GA-sources.jar" />
 			</classpath>
 			<jvmarg value="-Xmx256M"/>
 			<arg value="-startupUrl"/>

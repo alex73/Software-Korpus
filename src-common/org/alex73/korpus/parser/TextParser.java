@@ -38,7 +38,7 @@ import javax.xml.bind.JAXBContext;
 
 import org.alex73.korpus.editor.core.structure.KorpusDocument;
 import org.alex73.korpus.editor.core.structure.Line;
-import org.alex73.korpus.editor.parser.Splitter;
+import org.apache.commons.lang.StringUtils;
 
 import alex73.corpus.paradigm.TEI;
 import alex73.corpus.paradigm.TeiHeader;
@@ -68,6 +68,13 @@ public class TextParser {
         doc.textInfo.styleGenre = headers.get("StyleGenre");
         doc.textInfo.writtenYear = parseDate(headers.get("YearWritten"));
         doc.textInfo.publishedYear = parseDate(headers.get("YearPublished"));
+
+        if (doc.textInfo.authors.length == 0) {
+            throw new Exception("Нявызначаны аўтар");
+        }
+        if (StringUtils.isBlank(doc.textInfo.title)) {
+            throw new Exception("Нявызначаная назва");
+        }
         if (headerOnly) {
             return doc;
         }

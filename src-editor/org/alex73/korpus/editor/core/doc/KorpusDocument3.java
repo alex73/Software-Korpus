@@ -47,7 +47,7 @@ import org.alex73.korpus.editor.core.structure.TagLongItem;
 import org.alex73.korpus.editor.core.structure.TagShortItem;
 import org.alex73.korpus.editor.core.structure.WordItem;
 import org.alex73.korpus.editor.core.structure.ZnakItem;
-import org.alex73.korpus.editor.parser.Splitter;
+import org.alex73.korpus.parser.Splitter;
 
 import alex73.corpus.paradigm.W;
 

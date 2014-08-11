@@ -22,7 +22,7 @@
 
 package org.alex73.korpus.editor.core.structure;
 
-import org.alex73.korpus.editor.parser.Splitter;
+import org.alex73.korpus.parser.Splitter;
 
 public class SentenceSeparatorItem extends BaseItem {
     @Override

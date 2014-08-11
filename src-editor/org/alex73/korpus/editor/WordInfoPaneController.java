@@ -31,8 +31,8 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 import org.alex73.korpus.base.BelarusianTags;
-import org.alex73.korpus.editor.parser.Splitter;
 import org.alex73.korpus.editor.ui.WordInfoPane;
+import org.alex73.korpus.parser.Splitter;
 
 import alex73.corpus.paradigm.W;
 

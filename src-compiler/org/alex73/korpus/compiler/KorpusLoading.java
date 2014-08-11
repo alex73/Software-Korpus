@@ -102,31 +102,28 @@ public class KorpusLoading {
             }
         });
 
-        File[] parts = new File("Korpus-texts/").listFiles();
-        if (parts == null) {
+        Properties stat = new Properties();
+        int allStatTexts = 0, allStatWords = 0;
+		List<File> files = new ArrayList<>(FileUtils.listFiles(new File(
+				"Korpus-texts/"), new String[] { "xml", "text", "7z", "zip" },
+				true));
+        if (files.isEmpty()) {
             System.out.println("Няма тэкстаў ў Korpus-texts/");
             System.exit(1);
         }
-        Properties stat = new Properties();
-        int allStatTexts = 0, allStatWords = 0;
-        for (File f : parts) {
+        Collections.sort(files);
+        int c = 0;
+        for (File f : files) {
+            System.out.println("loadFileToCorpus " + f + ": " + (++c) + "/" + files.size());
             statTexts = 0;
             statWords = 0;
-            if (f.isDirectory()) {
-                List<File> files = new ArrayList<>(FileUtils.listFiles(f, new String[] { "xml", "text" }, true));
-                Collections.sort(files);
-                int c = 0;
-                for (File t : files) {
-                    System.out.println("loadFileToCorpus " + t + ": " + (++c) + "/" + files.size());
-                    loadXmlOrTextFileToCorpus(t);
-                }
-            } else if (f.getName().endsWith(".zip")) {
-                loadArchiveFileToCorpus(f);
-            } else if (f.getName().endsWith(".7z")) {
-                loadArchiveFileToCorpus(f);
-            }
-            stat.setProperty("texts." + f.getName(), "" + statTexts);
-            stat.setProperty("words." + f.getName(), "" + statWords);
+			if (f.getName().endsWith(".xml") || f.getName().endsWith(".text")) {
+				loadXmlOrTextFileToCorpus(f);
+			} else if (f.getName().endsWith(".zip") || f.getName().endsWith(".7z")) {
+				loadArchiveFileToCorpus(f);
+				stat.setProperty("texts." + f.getName(), "" + statTexts);
+				stat.setProperty("words." + f.getName(), "" + statWords);
+			}
             allStatTexts += statTexts;
             allStatWords += statWords;
         }
@@ -145,8 +142,6 @@ public class KorpusLoading {
             authorsstr += ";" + s;
         }
 
-        stat.setProperty("texts", "" + statTexts);
-        stat.setProperty("words", "" + statWords);
         if (!stylegenres.isEmpty()) {
             stat.setProperty("stylegenres", stylegenresstr.substring(1));
         } else {
