@@ -10,15 +10,16 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="lib" path="lib-editor/vldocking_2.1.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib-editor/junit-4.10.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/lucene-analyzers-common-4.2.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/lucene-core-4.2.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/lucene-grouping-4.2.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/lucene-join-4.2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-lang-2.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/log4j-core-2.0-beta6.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/log4j-api-2.0-beta6.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib-editor/commons-compress-1.6-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib-editor/xz-1.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib-editor/commons-io-1.4.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-api-2.0.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-core-2.0.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-web-2.0.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-analyzers-common-4.9.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-core-4.9.0.jar" sourcepath="war/WEB-INF/lib/sources/lucene"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-grouping-4.9.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-join-4.9.0.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
