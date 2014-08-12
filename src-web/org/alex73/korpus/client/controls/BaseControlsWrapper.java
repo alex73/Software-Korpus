@@ -64,7 +64,8 @@ public abstract class BaseControlsWrapper {
 
     public static class TextControl {
         public SuggestBox author;
-        public ListBox stylegenre;
+        public Anchor stylegenre;
+        public final List<String> styleGenres = new ArrayList<>();
         public TextBox yearWrittenFrom, yearWrittenTo, yearPublishedFrom, yearPublishedTo;
     }
 

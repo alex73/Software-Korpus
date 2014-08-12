@@ -41,7 +41,6 @@ import org.alex73.korpus.server.engine.LuceneDriver;
 import org.alex73.korpus.shared.ResultSentence;
 import org.alex73.korpus.shared.SearchChecks;
 import org.alex73.korpus.shared.SearchParams;
-import org.alex73.korpus.utils.StressUtils;
 import org.alex73.korpus.utils.WordNormalizer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -78,6 +77,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         try {
             CONTEXT = JAXBContext.newInstance(TEI.class.getPackage().getName());
         } catch (Exception ex) {
+            LOGGER.error("JAXB initialization", ex);
             throw new ExceptionInInitializerError(ex);
         }
     }
@@ -120,7 +120,6 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         } finally {
             in.close();
         }
-        result.styleGenres =Arrays.asList(props.getProperty("stylegenres").split(";"));
         result.authors =Arrays.asList(props.getProperty("authors").split(";"));
         return result;
     }
@@ -139,8 +138,13 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
             query.add(q, BooleanClause.Occur.MUST);
         }
         // style/genre
-        if (StringUtils.isNotEmpty(params.text.stylegenre)) {
-            Query q = new TermQuery(new Term(lucene.fieldSentenceTextStyleGenre.name(), params.text.stylegenre));
+        if (!params.text.stylegenres.isEmpty()) {
+            BooleanQuery q = new BooleanQuery();
+            for (String sg : params.text.stylegenres) {
+                q.add(new TermQuery(new Term(lucene.fieldSentenceTextStyleGenre.name(), sg)),
+                        BooleanClause.Occur.SHOULD);
+            }
+            q.setMinimumNumberShouldMatch(1);
             query.add(q, BooleanClause.Occur.MUST);
         }
         // written year

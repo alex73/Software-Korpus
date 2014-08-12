@@ -1,7 +1,7 @@
 /**************************************************************************
  Korpus - Corpus Linguistics Software.
 
- Copyright (C) 2013 Aleś Bułojčyk (alex73mail@gmail.com)
+ Copyright (C) 2014 Aleś Bułojčyk (alex73mail@gmail.com)
                Home page: https://sourceforge.net/projects/korpus/
 
  This file is part of Korpus.
@@ -23,30 +23,34 @@
 package org.alex73.korpus.server.engine;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Set;
 
+import org.apache.lucene.analysis.NumericTokenStream.NumericTermAttribute;
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-import org.apache.lucene.analysis.tokenattributes.OffsetAttribute;
 
 /**
- * Token stream which returns each string as separate token.
+ * Token stream which returns each int as separate token.
  */
-public class StringArrayTokenStream extends TokenStream {
-    final String[] data;
+public class IntArrayTokenStream extends TokenStream {
+    final Set<Integer> data;
+    final int precisionStep;
+    final int shift;
+    Iterator<Integer> it;
     int index;
-    final CharTermAttribute token = addAttribute(CharTermAttribute.class);
-//    final OffsetAttribute offset = addAttribute(OffsetAttribute.class);
+    final NumericTermAttribute token = addAttribute(NumericTermAttribute.class);
 
-    public StringArrayTokenStream(String[] data) {
+    public IntArrayTokenStream(Set<Integer> data, int precisionStep, int shift) {
         this.data = data;
+        this.precisionStep = precisionStep;
+        this.shift = shift;
     }
 
     @Override
     public boolean incrementToken() throws IOException {
         clearAttributes();
-        if (index < data.length) {
-            token.setEmpty().append(data[index]);
-  //          offset.setOffset(0, data[index].length());
+        if (it.hasNext()) {
+            token.init(it.next(), 16, precisionStep, shift);
             index++;
             return true;
         } else {
@@ -56,6 +60,6 @@ public class StringArrayTokenStream extends TokenStream {
 
     @Override
     public void reset() throws IOException {
-        index = 0;
+        it = data.iterator();
     }
 }

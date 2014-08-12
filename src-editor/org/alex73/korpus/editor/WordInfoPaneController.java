@@ -125,7 +125,7 @@ public class WordInfoPaneController {
             W w = new W();
             w.setValue(UI.wordInfoPane.txtWord.getText());
             String lemma = ((JRadioButton) e.getSource()).getText();
-            Splitter.fillWordInfo(w, lemma);
+            Splitter.fillWordInfoLemma(w, lemma);
             fillLemmas(w);
 
             setSaveEnabled();

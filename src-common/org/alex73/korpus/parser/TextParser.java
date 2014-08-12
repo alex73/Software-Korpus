@@ -65,7 +65,8 @@ public class TextParser {
         String a = headers.get("Authors");
         doc.textInfo.authors = a != null ? a.split(",") : new String[0];
         doc.textInfo.title = headers.get("Title");
-        doc.textInfo.styleGenre = headers.get("StyleGenre");
+        String sg = headers.get("StyleGenre");
+        doc.textInfo.styleGenres = sg != null ? sg.split(",") : new String[0];
         doc.textInfo.writtenYear = parseDate(headers.get("YearWritten"));
         doc.textInfo.publishedYear = parseDate(headers.get("YearPublished"));
 

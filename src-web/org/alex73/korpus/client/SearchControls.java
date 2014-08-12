@@ -26,15 +26,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.alex73.korpus.client.controls.BaseControlsWrapper;
+import org.alex73.korpus.client.controls.StyleGenrePopup;
 import org.alex73.korpus.shared.SearchParams;
 import org.alex73.korpus.shared.SearchParams.WordsOrder;
+import org.alex73.korpus.shared.StyleGenres;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.PopupPanel.PositionCallback;
 import com.google.gwt.user.client.ui.SimpleRadioButton;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.TextBox;
@@ -51,7 +59,7 @@ public class SearchControls extends BaseControlsWrapper {
 
         final MultiWordSuggestOracle ora = new MultiWordSuggestOracle();
         text.author = SuggestBox.wrap(ora, DOM.getElementById("text.author"));
-        text.stylegenre = ListBox.wrap(DOM.getElementById("text.stylegenre"));
+        text.stylegenre = Anchor.wrap(DOM.getElementById("text.stylegenre"));
         text.yearWrittenFrom =  TextBox.wrap(DOM.getElementById("text.yearWrittenFrom"));
         text.yearWrittenTo =  TextBox.wrap(DOM.getElementById("text.yearWrittenTo"));
         text.yearPublishedFrom = TextBox.wrap(DOM.getElementById("text.yearPublishedFrom"));
@@ -59,6 +67,29 @@ public class SearchControls extends BaseControlsWrapper {
 
         orderPreset = SimpleRadioButton.wrap(DOM.getElementById("orderPreset"));
         orderAny = SimpleRadioButton.wrap(DOM.getElementById("orderAny"));
+
+        text.stylegenre.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+            //final StyleGenrePopup
+                final StyleGenrePopup popup = new StyleGenrePopup(text.styleGenres);
+                popup.addCloseHandler(new CloseHandler<PopupPanel>() {
+                    @Override
+                    public void onClose(CloseEvent<PopupPanel> event) {
+                        text.styleGenres.clear();
+                        text.styleGenres.addAll(popup.getSelected());
+                        text.stylegenre.setText(StyleGenres.getSelectedName(text.styleGenres));
+                    }
+                });
+                popup.showRelativeTo(text.stylegenre);
+                popup.setPopupPositionAndShow(new PositionCallback() {
+                    public void setPosition(int offsetWidth, int offsetHeight) {
+                        popup.setPopupPosition(0, text.stylegenre.getAbsoluteTop()
+                                + text.stylegenre.getOffsetHeight());
+                    }
+                });
+            }
+        });
 
         validator = new ChangeHandler() {
             @Override
@@ -74,17 +105,13 @@ public class SearchControls extends BaseControlsWrapper {
         };
 
         final Map<String, String> ps = parseParameters(parameters);
-        importParameters(ps);
         try {
             searchService.getInitialData(new AsyncCallback<SearchService.InitialData>() {
                 @Override
                 public void onSuccess(SearchService.InitialData result) {
-                    for(String s:result.styleGenres) {
-                    text.stylegenre.addItem(s);
-                    }
                     ora.addAll(result.authors);
-                    inListBox(ps, "stylegenre", text.stylegenre);
-                    inSuggestBox(ps, "author", text.author);
+
+                    importParameters(ps);
                 }
 
                 @Override
@@ -101,8 +128,7 @@ public class SearchControls extends BaseControlsWrapper {
         SearchParams req = new SearchParams();
 
         req.text.author = text.author.getValue();
-        req.text.stylegenre = text.stylegenre.getSelectedIndex() >= 0 ? text.stylegenre.getValue(text.stylegenre
-                .getSelectedIndex()) : null;
+        req.text.stylegenres = text.styleGenres;
         req.text.yearPublishedFrom = txt2int(text.yearPublishedFrom);
         req.text.yearPublishedTo = txt2int(text.yearPublishedTo);
         req.text.yearWrittenFrom = txt2int(text.yearWrittenFrom);
@@ -130,6 +156,7 @@ public class SearchControls extends BaseControlsWrapper {
         // text
         outTextBox(out, "yearPublishedFrom", text.yearPublishedFrom);
         outTextBox(out, "yearPublishedFrom", text.yearPublishedTo);
+        outText(out, "stylegenres", StyleGenres.produceCode(text.styleGenres));
 
         // words
         for (int i = 0; i < words.size(); i++) {
@@ -164,11 +191,13 @@ public class SearchControls extends BaseControlsWrapper {
 
     public void importParameters(Map<String, String> ps) {
         // text
-        inSuggestBox(ps, "author", text.author);        
+        inSuggestBox(ps, "author", text.author);
         inTextBox(ps, "yearPublishedFrom", text.yearPublishedFrom);
         inTextBox(ps, "yearPublishedTo", text.yearPublishedTo);
         inTextBox(ps, "yearWrittenFrom", text.yearWrittenFrom);
         inTextBox(ps, "yearWrittenTo", text.yearWrittenTo);
+        StyleGenres.restoreCode(ps.get("stylegenres"), text.styleGenres);
+        text.stylegenre.setText(StyleGenres.getSelectedName(text.styleGenres));
 
         // words
         for (int i = 0;; i++) {

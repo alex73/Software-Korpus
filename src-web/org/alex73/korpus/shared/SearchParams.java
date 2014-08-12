@@ -41,7 +41,7 @@ public class SearchParams implements Serializable {
 
     public static class Text implements Serializable {
         public String author;
-        public String stylegenre;
+        public List<String> stylegenres;
         public Integer yearWrittenFrom, yearWrittenTo, yearPublishedFrom, yearPublishedTo;
     }
 

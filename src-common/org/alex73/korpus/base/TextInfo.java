@@ -27,6 +27,6 @@ import java.io.Serializable;
 public class TextInfo implements Serializable {
     public String[] authors;
     public String title;
-    public String styleGenre;
+    public String[] styleGenres;
     public Integer writtenYear, publishedYear;
 }

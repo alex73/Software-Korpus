@@ -38,7 +38,7 @@ public interface SearchService extends RemoteService {
     ResultSentence[] getSentences(int[] list) throws Exception;
 
     /**
-     * Get initial values for style/genres.
+     * Get initial values for display.
      */
     InitialData getInitialData() throws Exception;
 
@@ -56,7 +56,6 @@ public interface SearchService extends RemoteService {
     }
     
     public static class InitialData implements Serializable {
-        public List<String> styleGenres;
         public List<String> authors;
     }
 }

@@ -28,12 +28,13 @@ import java.util.Arrays;
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.DBTagsGroups;
 import org.alex73.korpus.base.TextInfo;
-import org.alex73.korpus.server.GrammarDBLite;
 import org.alex73.korpus.server.Settings;
+import org.alex73.korpus.shared.StyleGenres;
 import org.alex73.korpus.utils.WordNormalizer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.lucene.analysis.NumericTokenStream;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -131,8 +132,8 @@ public class LuceneDriver {
         dir = new NIOFSDirectory(rootDir);
 
         if (write) {
-            IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_42, new WhitespaceAnalyzer(
-                    Version.LUCENE_42));
+            IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_4_9, new WhitespaceAnalyzer(
+                    Version.LUCENE_4_9));
             config.setOpenMode(OpenMode.CREATE);
             config.setRAMBufferSizeMB(256);
             indexWriter = new IndexWriter(dir, config);
@@ -192,7 +193,7 @@ public class LuceneDriver {
             }
             if (StringUtils.isNotEmpty(w.getCat())) {
                 for (String t : w.getCat().split("_")) {
-                    if (!BelarusianTags.getInstance().isValid(t, w.getValue())) {
+                    if (!BelarusianTags.getInstance().isValid(t, null)) {
                         //TODO throw new Exception("Няправільны тэг: " + t);
                     } else {
                         dbGrammarTags.append(DBTagsGroups.getDBTagString(t)).append(' ');
@@ -210,7 +211,7 @@ public class LuceneDriver {
         fieldSentenceDBGrammarTags.setStringValue(dbGrammarTags.toString());
         fieldSentenceLemmas.setStringValue(lemmas.toString());
         fieldSentenceXML.setBytesValue(xml);
-        fieldSentenceTextStyleGenre.setTokenStream(new StringArrayTokenStream(new String[] {nvl(info.styleGenre)}));
+        fieldSentenceTextStyleGenre.setTokenStream(new StringArrayTokenStream(info.styleGenres));
         fieldSentenceTextWrittenYear.setIntValue(nvl(info.writtenYear));
         fieldSentenceTextPublishedYear.setIntValue(nvl(info.publishedYear));
         fieldSentenceTextAuthor.setTokenStream(new StringArrayTokenStream(info.authors));

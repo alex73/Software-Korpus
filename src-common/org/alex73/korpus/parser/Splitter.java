@@ -298,7 +298,7 @@ public class Splitter {
         result.setValue(w); // value must be original text
         Paradigm[] paradigms = GrammarDB.getInstance().getParadigmsByForm(word);
         if (paradigms != null) {
-            fillWordInfo(result, word, paradigms);
+            fillWordInfoParadigms(result, word, paradigms);
         }
         return result;
     }
@@ -315,23 +315,23 @@ public class Splitter {
                 String word = w.getValue();
                 Paradigm[] paradigms = GrammarDB.getInstance().getParadigmsByForm(word);
                 if (paradigms != null) {
-                    fillWordInfo(w, word, paradigms);
+                    fillWordInfoParadigms(w, word, paradigms);
                 }
             }
         }
     }
 
-    public static void fillWordInfo(W w, Paradigm paradygm) {
+    public static void fillWordInfoPagadigm(W w, Paradigm paradygm) {
         String word = fixWord(w.getValue());
 
         Paradigm[] paradigms = new Paradigm[1];
         paradigms[0] = paradygm;
         w.setLemma(null);
         w.setCat(null);
-        fillWordInfo(w, word.toLowerCase(BEL), paradigms);
+        fillWordInfoParadigms(w, word.toLowerCase(BEL), paradigms);
     }
 
-    public static void fillWordInfo(W w, String lemma) {
+    public static void fillWordInfoLemma(W w, String lemma) {
         String word = fixWord(w.getValue());
 
         Paradigm[] paradigms = GrammarDB.getInstance().getParadigmsByForm(word);
@@ -344,7 +344,7 @@ public class Splitter {
                 pt.add(p);
             }
         }
-        fillWordInfo(w, word, pt.toArray(new Paradigm[pt.size()]));
+        fillWordInfoParadigms(w, word, pt.toArray(new Paradigm[pt.size()]));
     }
 
     public static String fixWord(String word) {
@@ -357,7 +357,7 @@ public class Splitter {
         return word;
     }
 
-    static void fillWordInfo(W w, String word, Paradigm[] paradigms) {
+    static void fillWordInfoParadigms(W w, String word, Paradigm[] paradigms) {
         Set<String> lemmas = new TreeSet<>();
         Set<String> cats = new TreeSet<>();
         for (Paradigm p : paradigms) {

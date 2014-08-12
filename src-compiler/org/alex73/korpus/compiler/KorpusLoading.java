@@ -80,7 +80,6 @@ public class KorpusLoading {
 
     static int statTexts, statWords;
     static int textId;
-    static Set<String> stylegenres = new TreeSet<>();
     static Set<String> authors = new TreeSet<>();
 
     public static void main(String[] args) throws Exception {
@@ -133,20 +132,11 @@ public class KorpusLoading {
         System.out.println("Optimize...");
         lucene.shutdown();
 
-        String stylegenresstr = "";
-        for (String s : stylegenres) {
-            stylegenresstr += ";" + s;
-        }
         String authorsstr = "";
         for (String s : authors) {
             authorsstr += ";" + s;
         }
 
-        if (!stylegenres.isEmpty()) {
-            stat.setProperty("stylegenres", stylegenresstr.substring(1));
-        } else {
-            stat.setProperty("stylegenres", "");
-        }
         if (!authors.isEmpty()) {
             stat.setProperty("authors", authorsstr.substring(1));
         } else {
@@ -281,9 +271,6 @@ public class KorpusLoading {
         statTexts++;
         textId++;
 
-        if (doc.textInfo.styleGenre != null) {
-            stylegenres.add(doc.textInfo.styleGenre);
-        }
         for (String a : doc.textInfo.authors) {
             authors.add(a);
         }

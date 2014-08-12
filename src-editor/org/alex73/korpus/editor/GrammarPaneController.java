@@ -123,7 +123,7 @@ public class GrammarPaneController {
                     Paradigm p = parseXML();
                     GrammarDB.getInstance().addDocLevelParadigm(p);
                     MainController.saveGrammar();
-                    Splitter.fillWordInfo(currentWord, p);
+                    Splitter.fillWordInfoPagadigm(currentWord, p);
                     UI.editor.repaint();
                     UI.grammarPane.outXML.setText("Захавана");
                 } catch (Exception ex) {
