@@ -38,7 +38,6 @@ import javax.xml.bind.JAXBContext;
 
 import org.alex73.korpus.editor.core.structure.KorpusDocument;
 import org.alex73.korpus.editor.core.structure.Line;
-import org.apache.commons.lang.StringUtils;
 
 import alex73.corpus.paradigm.TEI;
 import alex73.corpus.paradigm.TeiHeader;
@@ -73,7 +72,7 @@ public class TextParser {
         if (doc.textInfo.authors.length == 0) {
             throw new Exception("Нявызначаны аўтар");
         }
-        if (StringUtils.isBlank(doc.textInfo.title)) {
+        if (doc.textInfo.title == null || doc.textInfo.title.trim().isEmpty()) {
             throw new Exception("Нявызначаная назва");
         }
         if (headerOnly) {
