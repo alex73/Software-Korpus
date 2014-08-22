@@ -85,6 +85,7 @@
 	<xs:element name="Paradigm">
 		<xs:complexType>
 			<xs:sequence>
+                <xs:element name="e" minOccurs="0" type="xs:string" />
                 <xs:element name="Note" minOccurs="0" type="xs:string" />
 				<xs:element name="Form" minOccurs="0" maxOccurs="unbounded">
 					<xs:complexType>

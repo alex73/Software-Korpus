@@ -22,6 +22,7 @@ import javax.xml.bind.annotation.XmlValue;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
+ *         &lt;element name="e" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="Note" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="Form" maxOccurs="unbounded" minOccurs="0">
  *           &lt;complexType>
@@ -60,12 +61,14 @@ import javax.xml.bind.annotation.XmlValue;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
+    "e",
     "note",
     "form"
 })
 @XmlRootElement(name = "Paradigm")
 public class Paradigm {
 
+    protected String e;
     @XmlElement(name = "Note")
     protected String note;
     @XmlElement(name = "Form")
@@ -92,6 +95,30 @@ public class Paradigm {
     protected String comment;
     @XmlAttribute(name = "meaning")
     protected String meaning;
+
+    /**
+     * Gets the value of the e property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getE() {
+        return e;
+    }
+
+    /**
+     * Sets the value of the e property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setE(String value) {
+        this.e = value;
+    }
 
     /**
      * Gets the value of the note property.

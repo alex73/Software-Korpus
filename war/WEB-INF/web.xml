@@ -17,11 +17,11 @@
   
   <servlet-mapping>
     <servlet-name>searchServlet</servlet-name>
-    <url-pattern>korpus/search</url-pattern>
+    <url-pattern>/korpus/search</url-pattern>
   </servlet-mapping>
     <servlet-mapping>
     <servlet-name>grammarServlet</servlet-name>
-    <url-pattern>korpus/grammar</url-pattern>
+    <url-pattern>/korpus/grammar</url-pattern>
   </servlet-mapping>
   
   <!-- Default page to serve -->
