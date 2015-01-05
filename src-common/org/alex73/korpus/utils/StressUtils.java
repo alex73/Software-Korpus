@@ -133,16 +133,18 @@ public class StressUtils {
     }
 
     public static void checkStress(String word) throws Exception {
-        int pos = -1;
-        int mainStresses = 0;
-        while ((pos = word.indexOf(STRESS_CHAR, pos + 1)) >= 0) {
-            if (BelarusianTags.HALOSNYJA.indexOf(word.charAt(pos - 1)) < 0) {
-                throw new Exception("Націск не на галосную");
+        for (String w : word.split("\\-")) {
+            int pos = -1;
+            int mainStresses = 0;
+            while ((pos = w.indexOf(STRESS_CHAR, pos + 1)) >= 0) {
+                if (BelarusianTags.HALOSNYJA.indexOf(w.charAt(pos - 1)) < 0) {
+                    throw new Exception("Націск не на галосную");
+                }
+                mainStresses++;
             }
-            mainStresses++;
-        }
-        if (mainStresses > 1) {
-            throw new Exception("Зашмат асноўных націскаў");
+            if (mainStresses > 1) {
+                throw new Exception("Зашмат асноўных націскаў");
+            }
         }
     }
 
