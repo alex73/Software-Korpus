@@ -31,6 +31,9 @@ public class TagLetter {
 
     public List<OneLetterInfo> letters = new ArrayList<OneLetterInfo>();
 
+    /** true if letter must be latest in paradigm */
+    protected boolean isLatestInParadigm;
+
     /**
      * Add child info like:
      * 
@@ -66,6 +69,11 @@ public class TagLetter {
             letters.add(newLetter);
         }
         return c;
+    }
+
+    public TagLetter latestInParadigm() {
+        isLatestInParadigm = true;
+        return this;
     }
 
     public TagLetter next(char c) {

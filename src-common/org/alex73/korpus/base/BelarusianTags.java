@@ -25,6 +25,8 @@ package org.alex73.korpus.base;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.alex73.korpus.base.TagLetter.OneLetterInfo;
+
 public class BelarusianTags {
     public static final String NO_GROUP_ITEM = "не ўжываецца";
     public static final String HALOSNYJA = "ёуеыаоэяіюЁУЕЫАОЭЯІЮ";
@@ -39,7 +41,8 @@ public class BelarusianTags {
     private TagLetter root;
 
     public static void main(String[] a) {
-        INSTANCE.isValid("VTPN1PG", "err");
+        INSTANCE.isValidParadigm("VTPN1", "err p");
+        INSTANCE.isValid("VTPN1PG", "err f");
     }
 
     private BelarusianTags() {
@@ -59,17 +62,70 @@ public class BelarusianTags {
         pabocnaje(root);
         predykatyu(root);
         znaki(root);
+
+        checkParadigmMarks();
+    }
+
+    /**
+     * шукаем ва ўсіх тэгах count(latestInParadigm)==1
+     */
+    private void checkParadigmMarks() {
+        checkParadigmMarks(root, "", 0);
+    }
+
+    private void checkParadigmMarks(TagLetter tl, String code, int pmCount) {
+        if (tl.isLatestInParadigm) {
+            pmCount++;
+        }
+        if (tl.isFinish()) {
+            if (pmCount != 1) {
+                throw new RuntimeException("pmCount=" + pmCount + " for " + code);
+            }
+        } else {
+            for (OneLetterInfo letterInfo : tl.letters) {
+                checkParadigmMarks(letterInfo.nextLetters, code + letterInfo.letter, pmCount);
+            }
+        }
+    }
+
+    /**
+     * Ці правільны тэг у парадыгме ? latestInParadigm==true
+     */
+    public boolean isValidParadigm(String code, String w) {
+        TagLetter after = getTagLetterAfter(code, w);
+        if (after == null) {
+            return false;
+        }
+        if (!after.isLatestInParadigm) {
+            System.out.println(code + " " + w + " - няправільны тэг парадыгмы");
+            return false;
+        }
+        return true;
     }
 
     public boolean isValid(String code, String w) {
+        TagLetter after = getTagLetterAfter(code, w);
+        if (after == null) {
+            return false;
+        }
+        if (!after.isFinish()) {
+            if (w != null) {
+                System.out.println(code + " " + w + " - замалы код");
+            }
+            return false;
+        }
+        return true;
+    }
+
+    private TagLetter getTagLetterAfter(String code, String w) {
         TagLetter tags = root;
         for (char c : code.toCharArray()) {
-            if (c == 'x') { //TODO
-                if (tags.letters.isEmpty()) {
+            if (c == 'x') { // TODO
+                if (tags.isFinish()) {
                     if (w != null) {
                         System.out.println(code + " " + w + " - зашмат літараў у кодзе");
                     }
-                    return false;
+                    return null;
                 }
                 TagLetter first = tags.letters.get(0).nextLetters;
                 for (TagLetter.OneLetterInfo li : tags.letters) {
@@ -77,7 +133,7 @@ public class BelarusianTags {
                         if (w != null) {
                             System.out.println(code + " " + w + " - незразумелы шлях раскадаваньня");
                         }
-                        return false;
+                        return null;
                     }
                 }
                 tags = first;
@@ -87,17 +143,11 @@ public class BelarusianTags {
                     if (w != null) {
                         System.out.println(code + " " + w + " - невядомая літара ў кодзе");
                     }
-                    return false;
+                    return null;
                 }
             }
         }
-        if (!tags.letters.isEmpty()) {
-            if (w != null) {
-                System.out.println(code + " " + w + " - замалы код");
-            }
-            return false;
-        }
-        return true;
+        return tags;
     }
 
     public TagLetter getRoot() {
@@ -140,17 +190,19 @@ public class BelarusianTags {
         t = t.add("Скарот => B:скарот;N:нескарот");
 
         TagLetter z = t.add("Род => M:мужчынскі;F:жаночы;N:ніякі;C:агульны;X:???????");
-        z = z.add("Скланенне => 1:1 скланенне;2:2 скланенне;3:3 скланенне;0:нескланяльны;4:рознаскланяльны;6:змешаны;X:???????");
+        z = z.add(
+                "Скланенне => 1:1 скланенне;2:2 скланенне;3:3 скланенне;0:нескланяльны;4:рознаскланяльны;6:змешаны;X:???????")
+                .latestInParadigm();
         z = z.add("Склон => N:назоўны;G:родны;D:давальны;A:вінавальны;I:творны;L:месны;V:клічны");
         z = z.add("Лік => S:адзіночны;P:множны");
 
         TagLetter p = t.add("Множналікавыя => P:множны лік");
-        p = p.add("Скланенне => 0:нескланяльныя;7:множналікавыя");
+        p = p.add("Скланенне => 0:нескланяльныя;7:множналікавыя").latestInParadigm();
         p = p.add("Склон => N:назоўны;G:родны;D:давальны;A:вінавальны;I:творны;L:месны;V:клічны");
         p = p.add("Лік => S:адзіночны;P:множны");
 
         TagLetter su = t.add("Субстантываванасць => S:субстантываваны;U:субстантываваныя множналікавыя");
-        su = su.add("Скланенне => 5:ад’ектыўнае");
+        su = su.add("Скланенне => 5:ад’ектыўнае").latestInParadigm();
         su = su.add("Род => M:мужчынскі;F:жаночы;N:ніякі;P:адсутнасьць роду ў множным ліку;X:???????");
         su = su.add("Склон => N:назоўны;G:родны;D:давальны;A:вінавальны;I:творны;L:месны;V:клічны");
         su = su.add("Лік => S:адзіночны;P:множны");
@@ -159,9 +211,9 @@ public class BelarusianTags {
     private void licebnik(TagLetter t) {
         t = t.add("Часціна => M:Лічэбнік");
         t = t.add("Словазмяненне => N:як у назоўніка;A:як у прыметніка;X:???????");
-
         t = t.add("Значэнне => C:колькасны;O:парадкавы;K:зборны;F:дробавы");
-        t = t.add("Форма => S:просты;C:складаны");
+        t = t.add("Форма => S:просты;C:складаны").latestInParadigm();
+
         t = t.add("Род => M:мужчынскі;F:жаночы;N:ніякі;X:???????");
         t = t.add("Склон => N:назоўны;G:родны;D:давальны;A:вінавальны;I:творны;L:месны;V:клічны;X:???????");
         t = t.add("Лік => S:адзіночны;P:множны;X:???????");
@@ -171,7 +223,8 @@ public class BelarusianTags {
         t = t.add("Часціна => S:Займеннік");
         t = t.add("Словазмяненне => N:як у назоўніка;A:як у прыметніка;M:як у займенніка");
         t = t.add("Разрад => P:асабовы;R:зваротны;S:прыналежны;D:указальны;E:азначальны;L:пытальна–адносны;N:адмоўны;F:няпэўны");
-        t = t.add("Асоба => 1:першая;2:другая;3:трэцяя;0:безасабовы;X:???????");
+        t = t.add("Асоба => 1:першая;2:другая;3:трэцяя;0:безасабовы;X:???????").latestInParadigm();
+
         t = t.add("Род => M:мужчынскі;F:жаночы;N:ніякі;X:???????");
         t = t.add("Склон => N:назоўны;G:родны;D:давальны;A:вінавальны;I:творны;L:месны;V:клічны;X:???????");
         t = t.add("Лік => S:адзіночны;P:множны;X:???????");
@@ -179,10 +232,10 @@ public class BelarusianTags {
 
     private void prymietnik(TagLetter t) {
         t = t.add("Часціна => A:Прыметнік");
-        t.add("Тып => 0:нескланяльны");
+        t.add("Тып => 0:нескланяльны").latestInParadigm();
         t = t.add("Тып => Q:якасны;R:адносны;P:прыналежны;X:???????");
+        t = t.add("Ступень параўнання => P:станоўчая;C:вышэйшая;S:найвышэйшая").latestInParadigm();
 
-        t = t.add("Ступень параўнання => P:станоўчая;C:вышэйшая;S:найвышэйшая");
         t = t.add("Род => M:мужчынскі;F:жаночы;N:ніякі;P:множны лік;X:???????");
         t = t.add("Склон => N:назоўны;G:родны;D:давальны;A:вінавальны;I:творны;L:месны;V:клічны");
         t = t.add("Лік => S:адзіночны;P:множны");
@@ -193,13 +246,15 @@ public class BelarusianTags {
         t = t.add("Пераходнасць => T:пераходны;I:непераходны;D:пераходны/непераходны;X:???????");
         t = t.add("Трыванне => P:закончанае;M:незакончанае");
         t = t.add("Зваротнасць => R:зваротны;N:незваротны");
-        t = t.add("Спражэнне => 1:першае;2:другое;3:рознаспрагальны");
+        t = t.add("Спражэнне => 1:першае;2:другое;3:рознаспрагальны").latestInParadigm();
+
         TagLetter casR = t.add("Час => R:цяперашні");
         TagLetter casM = t.add("Час => P:мінулы");
         TagLetter casO = t.add("Час => F:будучы;Q:перадмінулы");
         TagLetter zah = t.add("Загадны лад => I:загадны лад");
         t.add("Інфінітыў => 0:Інфінітыў");
-        t.add("Невядома => X:невядома").add("Невядома => X:невядома").add("Невядома => X:невядома").add("Невядома => X:невядома");
+        t.add("Невядома => X:невядома").add("Невядома => X:невядома").add("Невядома => X:невядома")
+                .add("Невядома => X:невядома");
 
         TagLetter casRL = casR.add("Асоба => 1:першая;2:другая;3:трэцяя;0:безасабовы");
         casR.add("Дзеепрыслоўе => G:дзеепрыслоўе");
@@ -221,7 +276,9 @@ public class BelarusianTags {
         t = t.add("Часціна => P:Дзеепрыметнік");
         t = t.add("Стан => A:незалежны;P:залежны");
         t = t.add("Час => R:цяперашні;P:мінулы");
-        t = t.add("Трыванне => P:закончанае;M:незакончанае;D:закончанае/незакончанае;X:???????");
+        t = t.add("Трыванне => P:закончанае;M:незакончанае;D:закончанае/незакончанае;X:???????")
+                .latestInParadigm();
+
         t = t.add("Род => M:мужчынскі;F:жаночы;N:ніякі;P:множны лік;X:???????");
         t = t.add("Склон => N:назоўны;G:родны;D:давальны;A:вінавальны;I:творны;L:месны;V:клічны;H:???????");
         t = t.add("Лік => S:адзіночны;P:множны;X:???????");
@@ -229,7 +286,10 @@ public class BelarusianTags {
 
     private void pryslouje(TagLetter t) {
         t = t.add("Часціна => R:Прыслоўе");
-        t = t.add("Утварэнне => N:ад назоўнікаў;A:прыметнікаў;M:лічэбнікаў;S:займеннікаў;G:дзеепрыслоўяў;V:дзеясловаў;E:часціц;I:прыназоўнікаў;X:???????");
+        t = t.add(
+                "Утварэнне => N:ад назоўнікаў;A:прыметнікаў;M:лічэбнікаў;S:займеннікаў;G:дзеепрыслоўяў;V:дзеясловаў;E:часціц;I:прыназоўнікаў;X:???????")
+                .latestInParadigm();
+
         t = t.add("Ступень параўнання => P:станоўчая;C:вышэйшая;S:найвышэйшая");
     }
 
@@ -237,41 +297,43 @@ public class BelarusianTags {
         t = t.add("Часціна => C:Злучнік");
         TagLetter s = t.add("Тып => S:падпарадкавальны");
         TagLetter k = t.add("Тып => K:злучальны");
-        t.add("Тып => P:паясняльны");
-        s.add("Падпарадкавальны => B:прычынны;C:часавы;D:умоўны;F:мэтавы;G:уступальны;H:параўнальны;K:следства;X:???????");
-        k.add("Злучальны => A:спалучальны;E:супастаўляльны;O:пералічальна-размеркавальны;L:далучальны;U:градацыйны;X:???????");
+        t.add("Тып => P:паясняльны").latestInParadigm();
+        s.add("Падпарадкавальны => B:прычынны;C:часавы;D:умоўны;F:мэтавы;G:уступальны;H:параўнальны;K:следства;X:???????")
+                .latestInParadigm().latestInParadigm();
+        k.add("Злучальны => A:спалучальны;E:супастаўляльны;O:пералічальна-размеркавальны;L:далучальны;U:градацыйны;X:???????")
+                .latestInParadigm().latestInParadigm();
     }
 
     private void prynazounik(TagLetter t) {
-        t.add("Часціна => I:Прыназоўнік");
+        t.add("Часціна => I:Прыназоўнік").latestInParadigm();
     }
 
     private void cascica(TagLetter t) {
-        t.add("Часціна => E:Часціца");
+        t.add("Часціна => E:Часціца").latestInParadigm();
     }
 
     private void vyklicnik(TagLetter t) {
-        t.add("Часціна => Y:Выклічнік");
+        t.add("Часціна => Y:Выклічнік").latestInParadigm();
     }
 
     private void pabocnaje(TagLetter t) {
-        t.add("Часціна => Z:Пабочнае слова");
+        t.add("Часціна => Z:Пабочнае слова").latestInParadigm();
     }
 
     private void predykatyu(TagLetter t) {
-        t.add("Часціна => W:Прэдыкатыў");
+        t.add("Часціна => W:Прэдыкатыў").latestInParadigm();
     }
 
     private void znaki(TagLetter t) {
         t = t.add("Часціна => K:Знак прыпынку");
-        t.add("Знак => K:,;R:.;E:!;T:...;2:двухкроп'е;3:трохкроп'е;A:пытальнік;O:іншае");
+        t.add("Знак => K:,;R:.;E:!;T:...;2:двухкроп'е;3:трохкроп'е;A:пытальнік;O:іншае").latestInParadigm();
         TagLetter q = t.add("Знак => Q:двукоссе");
-        q.add("Двукоссе => L:Левае;R:Правае;O:адчыняе;C:зачыняе;Q:простае");
+        q.add("Двукоссе => L:Левае;R:Правае;O:адчыняе;C:зачыняе;Q:простае").latestInParadigm();
         TagLetter v = t.add("Знак => V:квадратныя дужкі");
-        v.add("Двукоссе => O:адчыняе;C:зачыняе");
-        TagLetter m=t.add("Знак => M:мінус");
-        m.add("Мінус => 1:1;2:2");
-        TagLetter s=t.add("Знак => D:дужкі");
-        s.add("Дужкі => O:Левая;C:Правая");
+        v.add("Двукоссе => O:адчыняе;C:зачыняе").latestInParadigm();
+        TagLetter m = t.add("Знак => M:мінус");
+        m.add("Мінус => 1:1;2:2").latestInParadigm();
+        TagLetter s = t.add("Знак => D:дужкі");
+        s.add("Дужкі => O:Левая;C:Правая").latestInParadigm();
     }
 }
