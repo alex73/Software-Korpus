@@ -277,7 +277,9 @@ public class SearchControls extends BaseControlsWrapper {
             if (!found) {
                 break;
             }
-            addWord();
+            if (i >= words.size()) {
+                addWord();
+            }
             WordControl w = words.get(i);
             inTextBox(ps, prefix + "word", w.word);
             inCheckBox(ps, prefix + "allForms", w.allForms);
