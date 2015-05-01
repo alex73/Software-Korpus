@@ -39,18 +39,15 @@ import javax.xml.bind.Unmarshaller;
 import org.alex73.korpus.client.SearchService;
 import org.alex73.korpus.server.engine.LuceneDriverKorpus;
 import org.alex73.korpus.shared.ResultSentence;
-import org.alex73.korpus.shared.SearchChecks;
 import org.alex73.korpus.shared.SearchParams;
+import org.alex73.korpus.shared.SearchParams.CorpusType;
+import org.alex73.korpus.shared.WordsDetailsChecks;
 import org.alex73.korpus.utils.WordNormalizer;
-import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.ScoreDoc;
@@ -65,13 +62,16 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 /**
  * Service for search by corpus documents.
  */
+@SuppressWarnings("serial")
 public class SearchServiceImpl extends RemoteServiceServlet implements SearchService {
 
     protected static JAXBContext CONTEXT;
 
     static final Logger LOGGER = LogManager.getLogger(SearchServiceImpl.class);
 
-    LuceneDriverKorpus lucene;
+    String dirPrefix = System.getProperty("KORPUS_DIR");
+    ProcessKorpus processKorpus;
+    ProcessOther processOther;
 
     static {
         try {
@@ -85,8 +85,9 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     public SearchServiceImpl() {
         LOGGER.info("startup");
         try {
-            lucene = new LuceneDriverKorpus("Korpus-cache/", false);
             GrammarDBLite.initializeFromDir(new File("GrammarDB"));
+            processKorpus = new ProcessKorpus(dirPrefix);
+            processOther = new ProcessOther(dirPrefix);
         } catch (Throwable ex) {
             LOGGER.error("startup", ex);
             throw new ExceptionInInitializerError(ex);
@@ -97,7 +98,8 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     public void destroy() {
         LOGGER.info("shutdown");
         try {
-            lucene.shutdown();
+            processKorpus.close();
+            processOther.close();
         } catch (Exception ex) {
             LOGGER.error("shutdown", ex);
         }
@@ -111,16 +113,23 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     }
 
     @Override
-    public InitialData getInitialData() throws Exception {  
-        InitialData result=new InitialData();
+    public InitialData getInitialData() throws Exception {
+        LOGGER.info(">> getInitialData");
+        InitialData result = new InitialData();
+
         Properties props = new Properties();
-        InputStream in = new FileInputStream("Korpus-cache/stat.properties");
-        try {
+        try (InputStream in = new FileInputStream(dirPrefix + "/Korpus-cache/stat.properties")) {
             props.load(in);
-        } finally {
-            in.close();
         }
-        result.authors =Arrays.asList(props.getProperty("authors").split(";"));
+        result.authors = Arrays.asList(props.getProperty("authors").split(";"));
+
+        props = new Properties();
+        try (InputStream in = new FileInputStream(dirPrefix + "/Other-cache/stat.properties")) {
+            props.load(in);
+        }
+        result.volumes = Arrays.asList(props.getProperty("volumes").split(";"));
+
+        LOGGER.info("<< getInitialData");
         return result;
     }
 
@@ -132,36 +141,14 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
             throw new RuntimeException(ServerError.REQUIEST_TOO_SIMPLE);
         }
         BooleanQuery query = new BooleanQuery();
-        // author
-        if (StringUtils.isNotEmpty(params.text.author)) {
-            Query q = new TermQuery(new Term(lucene.fieldSentenceTextAuthor.name(), params.text.author));
-            query.add(q, BooleanClause.Occur.MUST);
+        IProcess process;
+        if (params.corpusType == CorpusType.STANDARD) {
+            process = processKorpus;
+        } else {
+            process = processOther;
         }
-        // style/genre
-        if (!params.text.stylegenres.isEmpty()) {
-            BooleanQuery q = new BooleanQuery();
-            for (String sg : params.text.stylegenres) {
-                q.add(new TermQuery(new Term(lucene.fieldSentenceTextStyleGenre.name(), sg)),
-                        BooleanClause.Occur.SHOULD);
-            }
-            q.setMinimumNumberShouldMatch(1);
-            query.add(q, BooleanClause.Occur.MUST);
-        }
-        // written year
-        if (params.text.yearWrittenFrom != null || params.text.yearWrittenTo != null) {
-            int yFrom = params.text.yearWrittenFrom != null ? params.text.yearWrittenFrom : 1;
-            int yTo = params.text.yearWrittenTo != null ? params.text.yearWrittenTo : 9999;
-            Query q = NumericRangeQuery.newIntRange(lucene.fieldSentenceTextWrittenYear.name(), yFrom, yTo, true, true);
-            query.add(q, BooleanClause.Occur.MUST);
-        }
-        // published year
-        if (params.text.yearPublishedFrom != null || params.text.yearPublishedTo != null) {
-            int yFrom = params.text.yearPublishedFrom != null ? params.text.yearPublishedFrom : 1;
-            int yTo = params.text.yearPublishedTo != null ? params.text.yearPublishedTo : 9999;
-            Query q = NumericRangeQuery.newIntRange(lucene.fieldSentenceTextPublishedYear.name(), yFrom, yTo, true,
-                    true);
-            query.add(q, BooleanClause.Occur.MUST);
-        }
+        process.addTextQuery(query, params);
+
         for (SearchParams.Word w : params.words) {
             w.word = WordNormalizer.normalize(w.word);
             if (w.word.length() > 0) {
@@ -173,34 +160,33 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
                     }
                     BooleanQuery qLemmas = new BooleanQuery();
                     for (String lemma : w.lemmas) {
-                        qLemmas.add(new TermQuery(new Term(lucene.fieldSentenceLemmas.name(), lemma)),
-                                BooleanClause.Occur.SHOULD);
+                        qLemmas.add(new TermQuery(process.getLemmaTerm(lemma)), BooleanClause.Occur.SHOULD);
                     }
                     wq = qLemmas;
                 } else {
-                    wq = new TermQuery(new Term(lucene.fieldSentenceValues.name(), w.word));
+                    wq = new TermQuery(process.getValueTerm(w.word));
                 }
 
                 query.add(wq, BooleanClause.Occur.MUST);
             }
             if (w.grammar != null) {
-                Query wq = new RegexpQuery(new Term(lucene.fieldSentenceDBGrammarTags.name(), w.grammar));
+                Query wq = new RegexpQuery(process.getGrammarTerm(w.grammar));
                 query.add(wq, BooleanClause.Occur.MUST);
             }
         }
 
-        try {        
+        try {
             ScoreDoc latestDoc;
             if (latest != null) {
                 latestDoc = new ScoreDoc(latest.doc, latest.score, latest.shardIndex);
             } else {
                 latestDoc = null;
             }
-            ScoreDoc[] found = lucene.search(query, latestDoc, new LuceneDriverKorpus.DocFilter() {
+            ScoreDoc[] found = process.search(query, latestDoc, new LuceneDriverKorpus.DocFilter() {
                 public boolean isDocAllowed(int docID) {
                     try {
-                        ResultSentence doc = getSentence(docID);
-                        return SearchChecks.isFoundDoc(params, doc);
+                        ResultSentence doc = getSentence(params.corpusType, docID);
+                        return WordsDetailsChecks.isAllowed(params.wordsOrder, params.words, doc);
                     } catch (Exception ex) {
                         throw new RuntimeException(ex);
                     }
@@ -228,7 +214,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
             LOGGER.info("<< Result: found: " + result.foundIDs.length + " hasMore:" + result.hasMore);
             return result;
         } catch (Throwable ex) {
-            LOGGER.error("",ex);
+            LOGGER.error("", ex);
             throw new RuntimeException(ex);
         }
     }
@@ -247,11 +233,11 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     }
 
     @Override
-    public ResultSentence[] getSentences(int[] list) {
+    public ResultSentence[] getSentences(SearchParams.CorpusType corpusType, int[] list) {
         try {
             ResultSentence[] result = new ResultSentence[list.length];
             for (int i = 0; i < list.length; i++) {
-                result[i] = getSentence(list[i]);
+                result[i] = getSentence(corpusType, list[i]);
             }
             return result;
         } catch (Exception ex) {
@@ -260,9 +246,17 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         }
     }
 
-    protected ResultSentence getSentence(int sentenceDocId) throws Exception {
-        Document sentenceDoc = lucene.getSentence(sentenceDocId);
-        byte[] xml = sentenceDoc.getField(lucene.fieldSentenceXML.name()).binaryValue().bytes;
+    protected ResultSentence getSentence(SearchParams.CorpusType corpusType, int sentenceDocId)
+            throws Exception {
+        IProcess process;
+        if (corpusType == CorpusType.STANDARD) {
+            process = processKorpus;
+        } else {
+            process = processOther;
+        }
+
+        Document sentenceDoc = process.getSentence(sentenceDocId);
+        byte[] xml = process.getXML(sentenceDoc);
 
         Unmarshaller unm = CONTEXT.createUnmarshaller();
         S sentence = (S) unm.unmarshal(new ByteArrayInputStream(xml));
@@ -285,11 +279,13 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
             result.words[j] = rsw;
         }
 
-        Field fieldTextId = (Field) sentenceDoc.getField(lucene.fieldSentenceTextID.name());
-        int textId = fieldTextId.numericValue().intValue();
+        if (corpusType == CorpusType.STANDARD) {
+            result.doc = processKorpus.getTextInfo(sentenceDoc);
+        } else {
+            result.docOther = processOther.getOtherInfo(sentenceDoc);
+            process = processOther;
+        }
 
-        result.doc = lucene.getTextInfo(textId);
-        
         return result;
     }
 }

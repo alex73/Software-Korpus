@@ -1,7 +1,7 @@
 /**************************************************************************
  Korpus - Corpus Linguistics Software.
 
- Copyright (C) 2013 Aleś Bułojčyk (alex73mail@gmail.com)
+ Copyright (C) 2013-2015 Aleś Bułojčyk (alex73mail@gmail.com)
                Home page: https://sourceforge.net/projects/korpus/
 
  This file is part of Korpus.
@@ -24,6 +24,7 @@ package org.alex73.korpus.shared;
 
 import java.io.Serializable;
 
+import org.alex73.korpus.base.OtherInfo;
 import org.alex73.korpus.base.TextInfo;
 
 /**
@@ -31,6 +32,7 @@ import org.alex73.korpus.base.TextInfo;
  */
 public class ResultSentence implements Serializable {
     public TextInfo doc;
+    public OtherInfo docOther;
     public Word[] words;
 
     public static class Word implements Serializable {

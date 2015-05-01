@@ -35,6 +35,7 @@ public class PrepareCache {
         Locale.setDefault(new Locale("be"));
 
         System.out.println("Load GrammarDB...");
+        
         GrammarDB.initializeFromDir(new File("GrammarDB"), new GrammarDB.LoaderProgress() {
             public void setFilesCount(int count) {
             }
@@ -46,6 +47,7 @@ public class PrepareCache {
             public void afterFileLoading() {
             }
         });
+        
 
         KorpusLoading.processKorpus();
         OtherLoading.processOther();

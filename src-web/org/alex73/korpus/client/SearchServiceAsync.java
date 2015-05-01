@@ -31,7 +31,7 @@ public interface SearchServiceAsync {
     void search(SearchParams params, SearchService.LatestMark latest, AsyncCallback<SearchService.SearchResult> callback)
             throws Exception;
 
-    void getSentences(int[] list, AsyncCallback<ResultSentence[]> callback) throws Exception;
+    void getSentences(SearchParams.CorpusType corpusType, int[] list, AsyncCallback<ResultSentence[]> callback) throws Exception;
 
     void getInitialData(AsyncCallback<SearchService.InitialData> callback) throws Exception;
 }

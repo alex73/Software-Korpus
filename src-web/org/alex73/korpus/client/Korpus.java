@@ -1,7 +1,7 @@
 /**************************************************************************
  Korpus - Corpus Linguistics Software.
 
- Copyright (C) 2013 Aleś Bułojčyk (alex73mail@gmail.com)
+ Copyright (C) 2013-2015 Aleś Bułojčyk (alex73mail@gmail.com)
                Home page: https://sourceforge.net/projects/korpus/
 
  This file is part of Korpus.
@@ -30,7 +30,7 @@ import java.util.Map;
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.client.controls.VisibleElement;
 import org.alex73.korpus.shared.ResultSentence;
-import org.alex73.korpus.shared.SearchChecks;
+import org.alex73.korpus.shared.WordsDetailsChecks;
 import org.alex73.korpus.shared.SearchParams;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -60,6 +60,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class Korpus implements EntryPoint {
 
     private final SearchServiceAsync searchService = GWT.create(SearchService.class);
+    private final boolean korpus;
 
     SearchControls searchControls;
 
@@ -70,6 +71,10 @@ public class Korpus implements EntryPoint {
     List<int[]> pages = new ArrayList<int[]>();
     boolean hasMore;
     SearchService.LatestMark latestMark;
+
+    public Korpus(boolean useKorpus) {
+        this.korpus = useKorpus;
+    }
 
     public void onModuleLoad() {
         Button btnSearch = Button.wrap(DOM.getElementById("btnSearch"));
@@ -159,7 +164,8 @@ public class Korpus implements EntryPoint {
         searchControls.errorMessage.setText("Дэталі...");
         try {
             int[] req = pages.get(pageIndex);
-            searchService.getSentences(req, new AsyncCallback<ResultSentence[]>() {
+            searchService.getSentences(korpus ? SearchParams.CorpusType.STANDARD
+                    : SearchParams.CorpusType.UNPROCESSED, req, new AsyncCallback<ResultSentence[]>() {
                 @Override
                 public void onSuccess(ResultSentence[] result) {
                     showResults(pageIndex, result);
@@ -209,7 +215,7 @@ public class Korpus implements EntryPoint {
 
             int firstFoundWord = -1;
             for (int i = 0; i < s.words.length && firstFoundWord < 0; i++) {
-                if (SearchChecks.isFoundWord(curentParams, s, i)) {
+                if (WordsDetailsChecks.isFoundWord(curentParams.wordsOrder, curentParams.words, s, i)) {
                     firstFoundWord = i;
                     break;
                 }
@@ -225,7 +231,7 @@ public class Korpus implements EntryPoint {
                     text = " " + w.value;
                 }
                 InlineLabel wlabel = new InlineLabel(text);
-                if (SearchChecks.isFoundWord(curentParams, s, i)) {
+                if (WordsDetailsChecks.isFoundWord(curentParams.wordsOrder, curentParams.words, s, i)) {
                     wlabel.setStyleName("wordFound");
                 }
                 wlabel.addMouseDownHandler(handlerShowInfoWord);

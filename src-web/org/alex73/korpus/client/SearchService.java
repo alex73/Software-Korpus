@@ -35,7 +35,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface SearchService extends RemoteService {
     SearchResult search(SearchParams params, LatestMark latest) throws Exception;
 
-    ResultSentence[] getSentences(int[] list) throws Exception;
+    ResultSentence[] getSentences(SearchParams.CorpusType corpusType, int[] list) throws Exception;
 
     /**
      * Get initial values for display.
@@ -57,5 +57,6 @@ public interface SearchService extends RemoteService {
     
     public static class InitialData implements Serializable {
         public List<String> authors;
+        public List<String> volumes;
     }
 }

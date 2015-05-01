@@ -26,7 +26,6 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -34,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Locale;
 import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
@@ -42,16 +40,13 @@ import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.transform.stream.StreamResult;
 
-import org.alex73.korpus.editor.core.GrammarDB;
 import org.alex73.korpus.editor.core.structure.KorpusDocument;
 import org.alex73.korpus.parser.TEIParser;
 import org.alex73.korpus.parser.TextParser;
 import org.alex73.korpus.server.engine.LuceneDriverKorpus;
-import org.alex73.korpus.server.engine.LuceneDriverOther;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.commons.io.FileUtils;
@@ -59,7 +54,6 @@ import org.apache.commons.io.FileUtils;
 import alex73.corpus.paradigm.P;
 import alex73.corpus.paradigm.Part;
 import alex73.corpus.paradigm.S;
-import alex73.corpus.paradigm.TEI;
 import alex73.corpus.paradigm.Text;
 
 /**

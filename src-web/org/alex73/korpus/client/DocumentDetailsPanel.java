@@ -1,7 +1,7 @@
 /**************************************************************************
  Korpus - Corpus Linguistics Software.
 
- Copyright (C) 2013 Aleś Bułojčyk (alex73mail@gmail.com)
+ Copyright (C) 2013-2015 Aleś Bułojčyk (alex73mail@gmail.com)
                Home page: https://sourceforge.net/projects/korpus/
 
  This file is part of Korpus.
@@ -23,7 +23,7 @@
 package org.alex73.korpus.client;
 
 import org.alex73.korpus.shared.ResultSentence;
-import org.alex73.korpus.shared.SearchChecks;
+import org.alex73.korpus.shared.WordsDetailsChecks;
 
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
@@ -31,33 +31,39 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class DocumentDetailsPanel extends VerticalPanel {
     public DocumentDetailsPanel(ResultSentence s, Korpus screen) {
-        String html = "<i><u>";
-        switch (s.doc.authors.length) {
-        case 0:
-            break;
-        case 1:
-            html += "Аўтар: " + s.doc.authors[0] + "<br/>";
-            break;
-        default:
-            html += "Аўтары: ";
-            for (int i = 0; i < s.doc.authors.length; i++) {
-                if (i > 0) {
-                    html += ",";
-                }
-                html += s.doc.authors[i];
-            }
-            html += "<br/>";
-            break;
-        }
-        html += "Назва: " + s.doc.title;
-        if (s.doc.writtenYear != null) {
-            html += "<br/>Год напісаньня: " + s.doc.writtenYear;
-        }
-        if (s.doc.publishedYear != null) {
-            html += "<br/>Год выданьня: " + s.doc.publishedYear;
-        }
+        String html = "";
 
+        html += "<i><u>";
+        if (s.doc != null) {
+            switch (s.doc.authors.length) {
+            case 0:
+                break;
+            case 1:
+                html += "Аўтар: " + s.doc.authors[0] + "<br/>";
+                break;
+            default:
+                html += "Аўтары: ";
+                for (int i = 0; i < s.doc.authors.length; i++) {
+                    if (i > 0) {
+                        html += ",";
+                    }
+                    html += s.doc.authors[i];
+                }
+                html += "<br/>";
+                break;
+            }
+            html += "Назва: " + s.doc.title;
+            if (s.doc.writtenYear != null) {
+                html += "<br/>Год напісаньня: " + s.doc.writtenYear;
+            }
+            if (s.doc.publishedYear != null) {
+                html += "<br/>Год выданьня: " + s.doc.publishedYear;
+            }
+        } else if (s.docOther != null) {
+            html += s.docOther.textURL;
+        }
         html += "</u></i>";
+
         add(new HTMLPanel(html));
         add(createWords(s, screen));
     }
@@ -74,7 +80,8 @@ public class DocumentDetailsPanel extends VerticalPanel {
                 text = " " + w.value;
             }
             InlineLabel wlabel = new InlineLabel(text);
-            if (SearchChecks.isFoundWord(screen.curentParams, s, i)) {
+            if (WordsDetailsChecks.isFoundWord(screen.curentParams.wordsOrder, screen.curentParams.words, s,
+                    i)) {
                 wlabel.setStyleName("wordFound");
             }
             // wlabel.addMouseDownHandler(screen.handlerShowInfoWord);

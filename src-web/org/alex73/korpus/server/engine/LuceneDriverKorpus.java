@@ -22,20 +22,15 @@
 
 package org.alex73.korpus.server.engine;
 
-import java.util.Arrays;
-
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.DBTagsGroups;
 import org.alex73.korpus.base.TextInfo;
-import org.alex73.korpus.server.Settings;
 import org.alex73.korpus.utils.WordNormalizer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.IntField;
 import org.apache.lucene.search.NumericRangeQuery;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 
 import alex73.corpus.paradigm.S;
@@ -137,37 +132,6 @@ public class LuceneDriverKorpus extends LuceneDriverBase {
         indexWriter.addDocument(docSentence);
     }
 
-    public ScoreDoc[] search(Query query, ScoreDoc latest, DocFilter filter) throws Exception {
-        LOGGER.info("   Lucene search: " + query);
-        ScoreDoc[] result = new ScoreDoc[Settings.KORPUS_SEARCH_RESULT_PAGE + 1];
-
-        int found = 0;
-
-        TopDocs rs;
-        if (latest == null) {
-            rs = indexSearcher.search(query, Settings.KORPUS_SEARCH_RESULT_PAGE + 1);
-        } else {
-            rs = indexSearcher.searchAfter(latest, query, Settings.KORPUS_SEARCH_RESULT_PAGE + 1);
-        }
-        LOGGER.info("   Lucene found: total: " + rs.totalHits + ", block: " + rs.scoreDocs.length);
-        while (rs.scoreDocs.length > 0 && found < result.length) {
-            for (int i = 0; i < rs.scoreDocs.length && found < result.length; i++) {
-                if (filter.isDocAllowed(rs.scoreDocs[i].doc)) {
-                    result[found] = rs.scoreDocs[i];
-                    found++;
-                }
-            }
-            if (found < result.length) {
-                rs = indexSearcher.searchAfter(rs.scoreDocs[rs.scoreDocs.length - 1], query,
-                        Settings.KORPUS_SEARCH_RESULT_PAGE + 1);
-                LOGGER.info("   Lucene found: block: " + rs.scoreDocs.length);
-                System.out.println("found block " + rs.scoreDocs.length);
-            }
-        }
-
-        return Arrays.copyOf(result, found);
-    }
-
     public String nvl(String n) {
         return n != null ? n : "";
     }
@@ -204,10 +168,6 @@ public class LuceneDriverKorpus extends LuceneDriverBase {
         v = doc.getField(fieldTextYearPublished.name()).numericValue().intValue();
         result.publishedYear = v > 0 ? v : null;
         return result;
-    }
-
-    public Document getSentence(int docID) throws Exception {
-        return indexSearcher.doc(docID);
     }
 
     public interface DocFilter {

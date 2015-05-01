@@ -30,19 +30,28 @@ import java.util.List;
  * Parameters for search corpus documents.
  */
 public class SearchParams implements Serializable {
+    public enum CorpusType {
+        STANDARD, UNPROCESSED
+    };
 
     public enum WordsOrder {
         PRESET, ANY
     };
 
-    public Text text = new Text();
+    public CorpusType corpusType;
+    public TextStandard textStandard = new TextStandard();
+    public TextUnprocessed textUnprocessed = new TextUnprocessed();
     public List<Word> words = new ArrayList<Word>();
     public WordsOrder wordsOrder = WordsOrder.PRESET;
 
-    public static class Text implements Serializable {
+    public static class TextStandard implements Serializable {
         public String author;
         public List<String> stylegenres;
         public Integer yearWrittenFrom, yearWrittenTo, yearPublishedFrom, yearPublishedTo;
+    }
+
+    public static class TextUnprocessed implements Serializable {
+        public String volume;
     }
 
     public static class Word implements Serializable {

@@ -33,6 +33,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -59,9 +61,10 @@ public class OtherLoading {
     static LuceneDriverOther lucene;
 
     static int statTexts, statWords;
+    static Set<String> volumes = new TreeSet<>();
 
     static void processOther() throws Exception {
-        File dir =new File("Other-cache/"); 
+        File dir = new File("Other-cache/");
         FileUtils.deleteDirectory(dir);
         dir.mkdirs();
         lucene = new LuceneDriverOther("Other-cache/", true);
@@ -82,10 +85,8 @@ public class OtherLoading {
             System.out.println("loadFileToOther " + f + ": " + (++c) + "/" + files.size());
             statTexts = 0;
             statWords = 0;
-            if (f.getName().endsWith(".zip")) {
-                loadZipPagesToOther(f);
-            }
-            allStatTexts += statTexts;
+            loadZipPagesToOther(f);
+            allStatTexts++;
             allStatWords += statWords;
         }
         stat.setProperty("texts", "" + allStatTexts);
@@ -94,6 +95,16 @@ public class OtherLoading {
         System.out.println("Optimize...");
         lucene.shutdown();
 
+        String volumesstr = "";
+        for (String s : volumes) {
+            volumesstr += ";" + s;
+        }
+
+        if (!volumesstr.isEmpty()) {
+            stat.setProperty("volumes", volumesstr.substring(1));
+        } else {
+            stat.setProperty("volumes", "");
+        }
         FileOutputStream o = new FileOutputStream("Other-cache/stat.properties");
         stat.store(o, null);
         o.close();
@@ -119,10 +130,10 @@ public class OtherLoading {
     }
 
     protected static void loadTextToCorpus(String volume, String textUrl, String data) throws Exception {
+        volumes.add(volume);
+
         data = data.trim().replace('\n', ' ').replace('\r', ' ').replaceAll("\\s{2,}", " ");
         Line line = new Splitter(data).splitParagraph();
-
-        statTexts++;
 
         Text text = TEIParser.constructXML(Arrays.asList(line));
 

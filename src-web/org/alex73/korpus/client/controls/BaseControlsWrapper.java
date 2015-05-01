@@ -67,6 +67,7 @@ public abstract class BaseControlsWrapper {
         public Anchor stylegenre;
         public final List<String> styleGenres = new ArrayList<>();
         public TextBox yearWrittenFrom, yearWrittenTo, yearPublishedFrom, yearPublishedTo;
+        public SuggestBox volume;
     }
 
     public static class WordControl {
@@ -247,20 +248,24 @@ public abstract class BaseControlsWrapper {
     }
 
     protected void outTextBox(StringBuilder out, String name, TextBox txt) {
-        if (!txt.getValue().trim().isEmpty()) {
+        if (txt != null && !txt.getValue().trim().isEmpty()) {
             out.append('&').append(name).append('=').append(txt.getValue().trim());
         }
     }
 
     protected void inSuggestBox(Map<String, String> params, String name, SuggestBox txt) {
-        if (params.containsKey(name)) {
-            txt.setValue(params.get(name));
+        if (txt != null) {
+            if (params.containsKey(name)) {
+                txt.setValue(params.get(name));
+            }
         }
     }
 
     protected void inTextBox(Map<String, String> params, String name, TextBox txt) {
-        if (params.containsKey(name)) {
-            txt.setValue(params.get(name));
+        if (txt != null) {
+            if (params.containsKey(name)) {
+                txt.setValue(params.get(name));
+            }
         }
     }
 

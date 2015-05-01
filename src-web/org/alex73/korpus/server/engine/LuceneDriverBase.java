@@ -23,7 +23,10 @@
 package org.alex73.korpus.server.engine;
 
 import java.nio.file.Paths;
+import java.util.Arrays;
 
+import org.alex73.korpus.server.Settings;
+import org.alex73.korpus.server.engine.LuceneDriverKorpus.DocFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
@@ -36,6 +39,9 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
 
@@ -127,4 +133,39 @@ public abstract class LuceneDriverBase {
         dir.close();
     }
 
+
+    public ScoreDoc[] search(Query query, ScoreDoc latest, DocFilter filter) throws Exception {
+        LOGGER.info("   Lucene search: " + query);
+        ScoreDoc[] result = new ScoreDoc[Settings.KORPUS_SEARCH_RESULT_PAGE + 1];
+
+        int found = 0;
+
+        TopDocs rs;
+        if (latest == null) {
+            rs = indexSearcher.search(query, Settings.KORPUS_SEARCH_RESULT_PAGE + 1);
+        } else {
+            rs = indexSearcher.searchAfter(latest, query, Settings.KORPUS_SEARCH_RESULT_PAGE + 1);
+        }
+        LOGGER.info("   Lucene found: total: " + rs.totalHits + ", block: " + rs.scoreDocs.length);
+        while (rs.scoreDocs.length > 0 && found < result.length) {
+            for (int i = 0; i < rs.scoreDocs.length && found < result.length; i++) {
+                if (filter.isDocAllowed(rs.scoreDocs[i].doc)) {
+                    result[found] = rs.scoreDocs[i];
+                    found++;
+                }
+            }
+            if (found < result.length) {
+                rs = indexSearcher.searchAfter(rs.scoreDocs[rs.scoreDocs.length - 1], query,
+                        Settings.KORPUS_SEARCH_RESULT_PAGE + 1);
+                LOGGER.info("   Lucene found: block: " + rs.scoreDocs.length);
+                System.out.println("found block " + rs.scoreDocs.length);
+            }
+        }
+
+        return Arrays.copyOf(result, found);
+    }
+
+    public Document getSentence(int docID) throws Exception {
+        return indexSearcher.doc(docID);
+    }
 }

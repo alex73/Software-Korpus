@@ -24,10 +24,8 @@ package org.alex73.korpus.server.engine;
 
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.DBTagsGroups;
-import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.utils.WordNormalizer;
 import org.apache.commons.lang.StringUtils;
-import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 
 import alex73.corpus.paradigm.S;
@@ -38,10 +36,12 @@ import alex73.corpus.paradigm.W;
  */
 public class LuceneDriverOther extends LuceneDriverBase {
     public Field fieldSentenceTextURL;
+    public Field fieldSentenceTextVolume;
 
     public LuceneDriverOther(String rootDir, boolean write) throws Exception {
         super(rootDir, write);
 
+        docSentence.add(fieldSentenceTextVolume = new Field("textVolume", "", TYPE_NOTSTORED_INDEXED));
         docSentence.add(fieldSentenceTextURL = new Field("textURL", "", TYPE_STORED_NOTINDEXED));
     }
 
