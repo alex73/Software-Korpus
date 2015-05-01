@@ -2,6 +2,6 @@ Prepare data for online search:
 
 1. GrammarDB/ - link to grammar database
 2. Korpus-texts/ - link to texts
-3. ant all - build/ROOT.war -> opt/tomcat/webappsBNKorpus/ROOT.war
-4. ant cache - Korpus-cache/ -> opt/tomcat/Korpus-cache/
-
+3. Other-texts/ - link to unprocessed texts
+4. ant all - build/ROOT.war -> opt/tomcat/webappsBNKorpus/ROOT.war
+5. ant cache - Korpus-cache/ -> opt/tomcat/Korpus-cache/, Other-cache/ -> opt/tomcat/Other-cache/

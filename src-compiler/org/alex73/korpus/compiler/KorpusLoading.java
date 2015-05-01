@@ -1,7 +1,7 @@
 /**************************************************************************
  Korpus - Corpus Linguistics Software.
 
- Copyright (C) 2013 Aleś Bułojčyk (alex73mail@gmail.com)
+ Copyright (C) 2013-2015 Aleś Bułojčyk (alex73mail@gmail.com)
                Home page: https://sourceforge.net/projects/korpus/
 
  This file is part of Korpus.
@@ -50,7 +50,8 @@ import org.alex73.korpus.editor.core.GrammarDB;
 import org.alex73.korpus.editor.core.structure.KorpusDocument;
 import org.alex73.korpus.parser.TEIParser;
 import org.alex73.korpus.parser.TextParser;
-import org.alex73.korpus.server.engine.LuceneDriver;
+import org.alex73.korpus.server.engine.LuceneDriverKorpus;
+import org.alex73.korpus.server.engine.LuceneDriverOther;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.commons.io.FileUtils;
@@ -62,50 +63,30 @@ import alex73.corpus.paradigm.TEI;
 import alex73.corpus.paradigm.Text;
 
 /**
- * Class for loading texts into searchable cache.
+ * Class for loading Corpus texts into searchable cache.
  */
 public class KorpusLoading {
 
-    public static JAXBContext CONTEXT;
-    static {
-        try {
-            CONTEXT = JAXBContext.newInstance(TEI.class.getPackage().getName());
-        } catch (Exception ex) {
-            throw new ExceptionInInitializerError(ex);
-        }
-    }
     static Random RANDOM = new Random();
 
-    static LuceneDriver lucene;
+    static LuceneDriverKorpus lucene;
 
     static int statTexts, statWords;
     static int textId;
     static Set<String> authors = new TreeSet<>();
 
-    public static void main(String[] args) throws Exception {
-        Locale.setDefault(new Locale("be"));
-
-        new File("Korpus-cache/").mkdirs();
-        lucene = new LuceneDriver(new File("Korpus-cache/"), true);
-
-        System.out.println("Load GrammarDB...");
-        GrammarDB.initializeFromDir(new File("GrammarDB"), new GrammarDB.LoaderProgress() {
-            public void setFilesCount(int count) {
-            }
-
-            public void beforeFileLoading(String file) {
-                System.out.println("Load " + file);
-            }
-
-            public void afterFileLoading() {
-            }
-        });
+    static void processKorpus() throws Exception {
+        File dir =new File("Korpus-cache/"); 
+        FileUtils.deleteDirectory(dir);
+        dir.mkdirs();
+        lucene = new LuceneDriverKorpus("Korpus-cache/", true);
 
         Properties stat = new Properties();
         int allStatTexts = 0, allStatWords = 0;
-		List<File> files = new ArrayList<>(FileUtils.listFiles(new File(
-				"Korpus-texts/"), new String[] { "xml", "text", "7z", "zip" },
-				true));
+        statTexts = 0;
+        statWords = 0;
+        List<File> files = new ArrayList<>(FileUtils.listFiles(new File("Korpus-texts/"), new String[] {
+                "xml", "text", "7z", "zip" }, true));
         if (files.isEmpty()) {
             System.out.println("Няма тэкстаў ў Korpus-texts/");
             System.exit(1);
@@ -116,13 +97,13 @@ public class KorpusLoading {
             System.out.println("loadFileToCorpus " + f + ": " + (++c) + "/" + files.size());
             statTexts = 0;
             statWords = 0;
-			if (f.getName().endsWith(".xml") || f.getName().endsWith(".text")) {
-				loadXmlOrTextFileToCorpus(f);
-			} else if (f.getName().endsWith(".zip") || f.getName().endsWith(".7z")) {
-				loadArchiveFileToCorpus(f);
-				stat.setProperty("texts." + f.getName(), "" + statTexts);
-				stat.setProperty("words." + f.getName(), "" + statWords);
-			}
+            if (f.getName().endsWith(".xml") || f.getName().endsWith(".text")) {
+                loadXmlOrTextFileToCorpus(f);
+            } else if (f.getName().endsWith(".zip") || f.getName().endsWith(".7z")) {
+                loadArchiveFileToCorpus(f);
+                stat.setProperty("texts." + f.getName(), "" + statTexts);
+                stat.setProperty("words." + f.getName(), "" + statWords);
+            }
             allStatTexts += statTexts;
             allStatWords += statWords;
         }
@@ -146,38 +127,6 @@ public class KorpusLoading {
         stat.store(o, null);
         o.close();
         System.out.println(statTexts + " files processed");
-    }
-
-    static void loadGrammarDb() throws Exception {
-        GrammarDB.getInstance().addThemesFile(new File("GrammarDB/themes.txt"));
-        File[] xmlFiles = new File("GrammarDB").listFiles(new FileFilter() {
-            public boolean accept(File pathname) {
-                return pathname.isFile() && pathname.getName().endsWith(".xml");
-            }
-        });
-        for (int i = 0; i < xmlFiles.length; i++) {
-            System.out.println("  " + xmlFiles[i]);
-            GrammarDB.getInstance().addXMLFile(xmlFiles[i], false);
-        }
-        GrammarDB.getInstance().stat();
-    }
-
-    static void findFiles(File dir, List<File> files) {
-        File[] fs = dir.listFiles();
-        if (fs == null) {
-            return;
-        }
-        for (File f : fs) {
-            if (f.isDirectory()) {
-                findFiles(f, files);
-            } else if (f.getName().endsWith(".xml")) {
-                files.add(f);
-            } else if (f.getName().endsWith(".text")) {
-                files.add(f);
-            } else if (f.getName().endsWith(".zip")) {
-                files.add(f);
-            }
-        }
     }
 
     protected static void loadXmlOrTextFileToCorpus(File f) throws Exception {
@@ -206,45 +155,16 @@ public class KorpusLoading {
 
     protected static void loadArchiveFileToCorpus(File f) throws Exception {
         if (f.getName().endsWith(".zip")) {
-            ZipFile zip = new ZipFile(f);
-            int c = 0;
-            for (Enumeration<? extends ZipEntry> it = zip.entries(); it.hasMoreElements();) {
-                ZipEntry en = it.nextElement();
-                if (en.isDirectory()) {
-                    continue;
-                }
-                System.out.println("loadFileToCorpus " + f + "/" + en.getName() + ": " + (++c));
-                KorpusDocument doc;
-                InputStream in = new BufferedInputStream(zip.getInputStream(en));
-                try {
-                    if (en.getName().endsWith(".text")) {
-                        doc = TextParser.parseText(in, false);
-                    } else if (en.getName().endsWith(".xml")) {
-                        doc = TEIParser.parseXML(in);
-                    } else {
-                        throw new RuntimeException("Unknown entry '" + en.getName() + "' in " + f);
+            try (ZipFile zip = new ZipFile(f)) {
+                int c = 0;
+                for (Enumeration<? extends ZipEntry> it = zip.entries(); it.hasMoreElements();) {
+                    ZipEntry en = it.nextElement();
+                    if (en.isDirectory()) {
+                        continue;
                     }
-                } finally {
-                    in.close();
-                }
-                loadTextToCorpus(doc);
-            }
-            zip.close();
-        } else if (f.getName().endsWith(".7z")) {
-            SevenZFile sevenZFile = new SevenZFile(f);
-            int c = 0;
-            for (SevenZArchiveEntry en = sevenZFile.getNextEntry(); en != null; en = sevenZFile.getNextEntry()) {
-                if (en.isDirectory()) {
-                    continue;
-                }
-                System.out.println("loadFileToCorpus " + f + "/" + en.getName() + ": " + (++c));
-                byte[] content = new byte[(int) en.getSize()];
-                for (int p = 0; p < content.length;) {
-                    p += sevenZFile.read(content, p, content.length - p);
-                }
-                try {
+                    System.out.println("loadFileToCorpus " + f + "/" + en.getName() + ": " + (++c));
                     KorpusDocument doc;
-                    InputStream in = new ByteArrayInputStream(content);
+                    InputStream in = new BufferedInputStream(zip.getInputStream(en));
                     try {
                         if (en.getName().endsWith(".text")) {
                             doc = TextParser.parseText(in, false);
@@ -255,6 +175,33 @@ public class KorpusLoading {
                         }
                     } finally {
                         in.close();
+                    }
+                    loadTextToCorpus(doc);
+                }
+            }
+        } else if (f.getName().endsWith(".7z")) {
+            SevenZFile sevenZFile = new SevenZFile(f);
+            int c = 0;
+            for (SevenZArchiveEntry en = sevenZFile.getNextEntry(); en != null; en = sevenZFile
+                    .getNextEntry()) {
+                if (en.isDirectory()) {
+                    continue;
+                }
+                System.out.println("loadFileToCorpus " + f + "/" + en.getName() + ": " + (++c));
+                byte[] content = new byte[(int) en.getSize()];
+                for (int p = 0; p < content.length;) {
+                    p += sevenZFile.read(content, p, content.length - p);
+                }
+                try {
+                    KorpusDocument doc;
+                    try (InputStream in = new ByteArrayInputStream(content)) {
+                        if (en.getName().endsWith(".text")) {
+                            doc = TextParser.parseText(in, false);
+                        } else if (en.getName().endsWith(".xml")) {
+                            doc = TEIParser.parseXML(in);
+                        } else {
+                            throw new RuntimeException("Unknown entry '" + en.getName() + "' in " + f);
+                        }
                     }
                     loadTextToCorpus(doc);
                 } catch (Exception ex) {
@@ -276,7 +223,7 @@ public class KorpusLoading {
         }
         Text text = TEIParser.constructXML(doc);
 
-        Marshaller m = CONTEXT.createMarshaller();
+        Marshaller m = TEIParser.CONTEXT.createMarshaller();
         ByteArrayOutputStream ba = new ByteArrayOutputStream();
         StreamResult mOut = new StreamResult(ba);
         int id = 1;

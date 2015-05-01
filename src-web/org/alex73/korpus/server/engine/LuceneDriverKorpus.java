@@ -22,37 +22,21 @@
 
 package org.alex73.korpus.server.engine;
 
-import java.io.File;
 import java.util.Arrays;
 
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.DBTagsGroups;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.server.Settings;
-import org.alex73.korpus.shared.StyleGenres;
 import org.alex73.korpus.utils.WordNormalizer;
 import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.lucene.analysis.NumericTokenStream;
-import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.IntField;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.FieldInfo.IndexOptions;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.IndexWriterConfig.OpenMode;
-import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.NIOFSDirectory;
-import org.apache.lucene.util.Version;
 
 import alex73.corpus.paradigm.S;
 import alex73.corpus.paradigm.W;
@@ -60,20 +44,11 @@ import alex73.corpus.paradigm.W;
 /**
  * Lucene driver for corpus document's database.
  */
-public class LuceneDriver {
-    static final Logger LOGGER = LogManager.getLogger(LuceneDriver.class);
+public class LuceneDriverKorpus extends LuceneDriverBase {
 
-    private Directory dir;
-    private IndexWriter indexWriter;
-    private DirectoryReader directoryReader;
-    private IndexSearcher indexSearcher;
-    private Document docSentence, docText;
+    protected Document docText;
 
     public Field fieldSentenceTextID;
-    public Field fieldSentenceValues;
-    public Field fieldSentenceDBGrammarTags;
-    public Field fieldSentenceLemmas;
-    public Field fieldSentenceXML;
     public Field fieldSentenceTextStyleGenre;
     public Field fieldSentenceTextAuthor;
     public Field fieldSentenceTextWrittenYear;
@@ -85,74 +60,17 @@ public class LuceneDriver {
     public Field fieldTextYearWritten;
     public Field fieldTextYearPublished;
 
-    private StringBuilder values = new StringBuilder();
-    private StringBuilder dbGrammarTags = new StringBuilder();
-    private StringBuilder lemmas = new StringBuilder();
+    public LuceneDriverKorpus(String rootDir, boolean write) throws Exception {
+        super(rootDir, write);
 
-    public static final FieldType TYPE_STORED_NOTINDEXED = new FieldType();
-    static {
-        TYPE_STORED_NOTINDEXED.setIndexed(false);
-        TYPE_STORED_NOTINDEXED.setTokenized(false);
-        TYPE_STORED_NOTINDEXED.setOmitNorms(true);
-        TYPE_STORED_NOTINDEXED.setIndexOptions(IndexOptions.DOCS_ONLY);
-        TYPE_STORED_NOTINDEXED.setStored(true);
-        TYPE_STORED_NOTINDEXED.freeze();
-    }
-    public static final FieldType TYPE_STORED_NOTINDEXED_INT = new FieldType();
-    static {
-        TYPE_STORED_NOTINDEXED_INT.setIndexed(false);
-        TYPE_STORED_NOTINDEXED_INT.setTokenized(false);
-        TYPE_STORED_NOTINDEXED_INT.setOmitNorms(true);
-        TYPE_STORED_NOTINDEXED_INT.setIndexOptions(IndexOptions.DOCS_ONLY);
-        TYPE_STORED_NOTINDEXED_INT.setNumericType(FieldType.NumericType.INT);
-        TYPE_STORED_NOTINDEXED_INT.setStored(true);
-        TYPE_STORED_NOTINDEXED_INT.freeze();
-    }
-    public static final FieldType TYPE_NOTSTORED_INDEXED_INT = new FieldType();
-    static {
-        TYPE_NOTSTORED_INDEXED_INT.setIndexed(true);
-        TYPE_NOTSTORED_INDEXED_INT.setTokenized(false);
-        TYPE_NOTSTORED_INDEXED_INT.setOmitNorms(true);
-        TYPE_NOTSTORED_INDEXED_INT.setIndexOptions(IndexOptions.DOCS_ONLY);
-        TYPE_NOTSTORED_INDEXED_INT.setNumericType(FieldType.NumericType.INT);
-        TYPE_NOTSTORED_INDEXED_INT.setStored(false);
-        TYPE_NOTSTORED_INDEXED_INT.freeze();
-    }
-    public static final FieldType TYPE_NOTSTORED_INDEXED = new FieldType();
-    static {
-        TYPE_NOTSTORED_INDEXED.setIndexed(true);
-        TYPE_NOTSTORED_INDEXED.setTokenized(true);
-        TYPE_NOTSTORED_INDEXED.setOmitNorms(true);
-        TYPE_NOTSTORED_INDEXED.setIndexOptions(IndexOptions.DOCS_ONLY);
-        TYPE_NOTSTORED_INDEXED.setStored(false);
-        TYPE_NOTSTORED_INDEXED.freeze();
-    }
-
-    public LuceneDriver(File rootDir, boolean write) throws Exception {
-        dir = new NIOFSDirectory(rootDir);
-
-        if (write) {
-            IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_4_9, new WhitespaceAnalyzer(
-                    Version.LUCENE_4_9));
-            config.setOpenMode(OpenMode.CREATE);
-            config.setRAMBufferSizeMB(256);
-            indexWriter = new IndexWriter(dir, config);
-        } else {
-            directoryReader = DirectoryReader.open(dir);
-            indexSearcher = new IndexSearcher(directoryReader);
-        }
-
-        docSentence = new Document();
-
-        docSentence.add(fieldSentenceValues = new Field("value", "", TYPE_NOTSTORED_INDEXED));
-        docSentence.add(fieldSentenceDBGrammarTags = new Field("dbGrammarTag", "", TYPE_NOTSTORED_INDEXED));
-        docSentence.add(fieldSentenceLemmas = new Field("lemma", "", TYPE_NOTSTORED_INDEXED));
-        docSentence.add(fieldSentenceXML = new Field("xml", new byte[0], TYPE_STORED_NOTINDEXED));
         docSentence.add(fieldSentenceTextID = new IntField("textId", 0, TYPE_STORED_NOTINDEXED_INT));
-        docSentence.add(fieldSentenceTextStyleGenre = new Field("textStyleGenre", "", TYPE_NOTSTORED_INDEXED));
+        docSentence
+                .add(fieldSentenceTextStyleGenre = new Field("textStyleGenre", "", TYPE_NOTSTORED_INDEXED));
         docSentence.add(fieldSentenceTextAuthor = new Field("textAuthor", "", TYPE_NOTSTORED_INDEXED));
-        docSentence.add(fieldSentenceTextWrittenYear = new IntField("writtenYear", 0, TYPE_NOTSTORED_INDEXED_INT));
-        docSentence.add(fieldSentenceTextPublishedYear = new IntField("publishedYear", 0, TYPE_NOTSTORED_INDEXED_INT));
+        docSentence.add(fieldSentenceTextWrittenYear = new IntField("writtenYear", 0,
+                TYPE_NOTSTORED_INDEXED_INT));
+        docSentence.add(fieldSentenceTextPublishedYear = new IntField("publishedYear", 0,
+                TYPE_NOTSTORED_INDEXED_INT));
 
         docText = new Document();
         docText.add(fieldTextID = new IntField("id", 0, TYPE_NOTSTORED_INDEXED_INT));
@@ -167,10 +85,10 @@ public class LuceneDriver {
      */
     public void addText(int textId, TextInfo info) throws Exception {
         fieldTextID.setIntValue(textId);
-        fieldTextAuthors.setStringValue(merge(info.authors,";"));
+        fieldTextAuthors.setStringValue(merge(info.authors, ";"));
         fieldTextTitle.setStringValue(info.title);
-        fieldTextYearWritten.setIntValue(info.writtenYear!=null?info.writtenYear:0);
-        fieldTextYearPublished.setIntValue(info.publishedYear!=null?info.publishedYear:0);
+        fieldTextYearWritten.setIntValue(info.writtenYear != null ? info.writtenYear : 0);
+        fieldTextYearPublished.setIntValue(info.publishedYear != null ? info.publishedYear : 0);
         indexWriter.addDocument(docText);
     }
 
@@ -194,7 +112,7 @@ public class LuceneDriver {
             if (StringUtils.isNotEmpty(w.getCat())) {
                 for (String t : w.getCat().split("_")) {
                     if (!BelarusianTags.getInstance().isValid(t, null)) {
-                        //TODO throw new Exception("Няправільны тэг: " + t);
+                        // TODO throw new Exception("Няправільны тэг: " + t);
                     } else {
                         dbGrammarTags.append(DBTagsGroups.getDBTagString(t)).append(' ');
                     }
@@ -251,17 +169,17 @@ public class LuceneDriver {
     }
 
     public String nvl(String n) {
-        return n!=null?n:"";
+        return n != null ? n : "";
     }
 
     public int nvl(Integer n) {
-        return n!=null?n:0;
+        return n != null ? n : 0;
     }
-    
-    String merge(String[] strs,String sep) {
-        StringBuilder out=new StringBuilder();
-        for(String s:strs) {
-            if (out.length()>0) {
+
+    String merge(String[] strs, String sep) {
+        StringBuilder out = new StringBuilder();
+        for (String s : strs) {
+            if (out.length() > 0) {
                 out.append(sep);
             }
             out.append(s);
@@ -270,8 +188,8 @@ public class LuceneDriver {
     }
 
     public TextInfo getTextInfo(int textId) throws Exception {
-        NumericRangeQuery<Integer> query = NumericRangeQuery.newIntRange(fieldTextID.name(), 1, textId, textId, true,
-                true);
+        NumericRangeQuery<Integer> query = NumericRangeQuery.newIntRange(fieldTextID.name(), 1, textId,
+                textId, true, true);
         TopDocs rs = indexSearcher.search(query, 1);
         if (rs.totalHits < 1) {
             return null;
@@ -290,17 +208,6 @@ public class LuceneDriver {
 
     public Document getSentence(int docID) throws Exception {
         return indexSearcher.doc(docID);
-    }
-
-    public void shutdown() throws Exception {
-        if (directoryReader != null)
-            directoryReader.close();
-        if (indexWriter != null) {
-            indexWriter.forceMerge(1);
-            indexWriter.commit();
-            indexWriter.close();
-        }
-        dir.close();
     }
 
     public interface DocFilter {

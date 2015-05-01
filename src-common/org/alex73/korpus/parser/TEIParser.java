@@ -24,6 +24,7 @@ package org.alex73.korpus.parser;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
@@ -132,7 +133,7 @@ public class TEIParser {
         return doc;
     }
 
-    public static Text constructXML(KorpusDocument doc) {
+    public static Text constructXML(List<Line> doc) {
         Text text = new Text();
         text.setBody(new Part());
         boolean poetryMode = false;

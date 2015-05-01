@@ -149,8 +149,7 @@
 				<fileset dir="lib-editor" includes="**/*.jar" />
 			</classpath>
 		</javac>
-		<delete dir="Korpus-cache" failonerror="false" />
-		<java failonerror="true" fork="true" classname="org.alex73.korpus.compiler.KorpusLoading">
+		<java failonerror="true" fork="true" classname="org.alex73.korpus.compiler.PrepareCache">
 			<classpath>
 				<pathelement location="build/compiler"/>
 				<path refid="project.class.path"/>

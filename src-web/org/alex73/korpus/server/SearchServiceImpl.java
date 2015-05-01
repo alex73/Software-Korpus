@@ -37,7 +37,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 
 import org.alex73.korpus.client.SearchService;
-import org.alex73.korpus.server.engine.LuceneDriver;
+import org.alex73.korpus.server.engine.LuceneDriverKorpus;
 import org.alex73.korpus.shared.ResultSentence;
 import org.alex73.korpus.shared.SearchChecks;
 import org.alex73.korpus.shared.SearchParams;
@@ -71,7 +71,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
     static final Logger LOGGER = LogManager.getLogger(SearchServiceImpl.class);
 
-    LuceneDriver lucene;
+    LuceneDriverKorpus lucene;
 
     static {
         try {
@@ -85,7 +85,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     public SearchServiceImpl() {
         LOGGER.info("startup");
         try {
-            lucene = new LuceneDriver(new File("Korpus-cache/"), false);
+            lucene = new LuceneDriverKorpus("Korpus-cache/", false);
             GrammarDBLite.initializeFromDir(new File("GrammarDB"));
         } catch (Throwable ex) {
             LOGGER.error("startup", ex);
@@ -196,7 +196,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
             } else {
                 latestDoc = null;
             }
-            ScoreDoc[] found = lucene.search(query, latestDoc, new LuceneDriver.DocFilter() {
+            ScoreDoc[] found = lucene.search(query, latestDoc, new LuceneDriverKorpus.DocFilter() {
                 public boolean isDocAllowed(int docID) {
                     try {
                         ResultSentence doc = getSentence(docID);
