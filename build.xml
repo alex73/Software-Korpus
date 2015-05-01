@@ -109,8 +109,8 @@
 			<manifest>
 				<attribute name="Main-Class" value="org.alex73.korpus.server.engine.KorpusLoading" />
 			</manifest>
-			<zipfileset src="war/WEB-INF/lib/lucene-core-4.9.0.jar"/>
-			<zipfileset src="war/WEB-INF/lib/lucene-analyzers-common-4.9.0.jar"/>
+			<zipfileset src="war/WEB-INF/lib/lucene-core-5.1.0.jar"/>
+			<zipfileset src="war/WEB-INF/lib/lucene-analyzers-common-5.1.0.jar"/>
 			<zipfileset src="war/WEB-INF/lib/commons-lang-2.4.jar"/>
 		</jar>
 	</target>
