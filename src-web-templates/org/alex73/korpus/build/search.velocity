@@ -7,8 +7,26 @@
 
     <link type="text/css" rel="stylesheet" href="Korpus.css">
 
-      <title>Беларускі N-корпус: пошук па корпусе</title>
-      
+#if ( $mode == 'search')
+  #if ( $db == 'korpus' )
+    <title>Беларускі N-корпус: пошук па корпусе</title>
+  #else
+    <title>Беларускі N-корпус: пошук па неапрацаваных тэкстах</title>
+  #end
+#elseif ( $mode == 'conco')
+  #if ( $db == 'korpus' )
+    <title>Беларускі N-корпус: канкарданс корпуса</title>
+  #else
+    <title>Беларускі N-корпус: канкарданс неапрацаваных тэкстаў</title>
+  #end
+#elseif ( $mode == 'cluster')
+  #if ( $db == 'korpus' )
+    <title>Беларускі N-корпус: кластар корпуса</title>
+  #else
+    <title>Беларускі N-корпус: кластар неапрацаваных тэкстаў</title>
+  #end
+#end
+    
     <script type="text/javascript" language="javascript" src="korpus/korpus.nocache.js"></script>
   </head>
 
@@ -23,17 +41,37 @@
 <span class="logo">Беларускі N-корпус</span>
 <div style="clear: both;"></div>
 <div class="tab">
+#if ( $db == 'korpus' )
   <span class="tabPage">Корпус</span>
   <a class="tabPage" href="otherSearch.html">Неапрацаваныя тэксты</a>
+#else
+  <a class="tabPage" href="korpusSearch.html">Корпус</a>
+  <span class="tabPage">Неапрацаваныя тэксты</span>
+#end
 <a class="tabPage" href="grammarDB.html">Граматычная база</a>
 <a class="tabPage" href="download.html">Спампаваць</a>
 <a class="tabPage" href="about.html">Пра праект</a>
 </div>
 
 <div class="tab">
+#if ( $db == 'korpus' )
+  #set ( $prefix = 'korpus' )
+#else
+  #set ( $prefix = 'other' )
+#end
+#if ( $mode == 'search' )
   <span class="tabPage">Пошук</span>
-  <a class="tabPage" href="korpusConcordance.html">Канкарданс</a>
-  <a class="tabPage" href="korpusCluster.html">Кластар</a>
+  <a class="tabPage" href="${prefix}Concordance.html">Канкарданс</a>
+  <a class="tabPage" href="${prefix}Cluster.html">Кластар</a>
+#elseif ( $mode == 'conco' )
+  <a class="tabPage" href="${prefix}Search.html"><span class="tabPage">Пошук</a>
+  <span class="tabPage">Канкарданс</span>
+  <a class="tabPage" href="${prefix}Cluster.html">Кластар</a>
+#elseif ( $mode == 'cluster' )
+  <a class="tabPage" href="${prefix}Search.html"><span class="tabPage">Пошук</a>
+  <a class="tabPage" href="${prefix}Concordance.html">Канкарданс</a>
+  <span class="tabPage">Кластар</span>
+#end
 </div>
 
 <hr/>
@@ -44,12 +82,18 @@
 &nbsp;<span style="color:red" id="errorMessage"> </span>
 </div>
 
+#if ( $db == 'korpus' )
   <fieldset> <legend>Фільтр тэкстаў</legend>
     Аўтар: <input type="text" id="text.author"></input> <br/>
     Стыль/жанр: <a id="text.stylegenre" href="javascript:;" class="gwt-Anchor"></a> <br/>
     Год напісання: ад <input type="text" id="text.yearWrittenFrom"></input> да <input type="text" id="text.yearWrittenTo"></input> <br/>
     Год выдання: ад <input type="text" id="text.yearPublishedFrom"></input> да <input type="text" id="text.yearPublishedTo"></input> <br/>
   </fieldset>
+#else
+  <fieldset> <legend>Фільтр тэкстаў</legend>
+    Частка: <input type="text" id="text.volume"></input> <br/>
+  </fieldset>
+#end
 
 <div id="wordsBlock"></div>
 <button id="btnAddWord" style="float: left;">Дадаць слова</button>
@@ -79,7 +123,11 @@
 <br/>
 <div id="resultTable">
 
+#if ( $db == 'korpus' )
   Корпус утрымлівае пашпартызаваныя тэксты з часткова зьнятай аманіміяй
+#else
+  Неапрацаваныя тэксты могуць утрымліваць памылкі сканаваньня...
+#end
 
 
 </div>
@@ -89,18 +137,6 @@
 <br/><br/>
 <center>Звесткі даступныя на ўмовах ліцэнзіі <a target=_blank" href="http://opendatacommons.org/licenses/odbl/1.0/">ODbL</a>. Рухавік даступны на ўмовах ліцэнзіі <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>.</center>
 
-<script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-40650744-1']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-</script>
+#parse ("ga.velocity")
   </body>
 </html>

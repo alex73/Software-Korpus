@@ -7,7 +7,7 @@
 
     <link type="text/css" rel="stylesheet" href="Korpus.css">
 
-      <title>Беларускі N-корпус: пошук па корпусе</title>
+      <title>Беларускі N-корпус: кластар неапрацаваных тэкстаў</title>
       
     <script type="text/javascript" language="javascript" src="korpus/korpus.nocache.js"></script>
   </head>
@@ -23,17 +23,17 @@
 <span class="logo">Беларускі N-корпус</span>
 <div style="clear: both;"></div>
 <div class="tab">
-  <span class="tabPage">Корпус</span>
-  <a class="tabPage" href="otherSearch.html">Неапрацаваныя тэксты</a>
+  <a class="tabPage" href="korpusSearch.html">Корпус</a>
+  <span class="tabPage">Неапрацаваныя тэксты</span>
 <a class="tabPage" href="grammarDB.html">Граматычная база</a>
 <a class="tabPage" href="download.html">Спампаваць</a>
 <a class="tabPage" href="about.html">Пра праект</a>
 </div>
 
 <div class="tab">
-  <span class="tabPage">Пошук</span>
-  <a class="tabPage" href="korpusConcordance.html">Канкарданс</a>
-  <a class="tabPage" href="korpusCluster.html">Кластар</a>
+  <a class="tabPage" href="otherSearch.html"><span class="tabPage">Пошук</a>
+  <a class="tabPage" href="otherConcordance.html">Канкарданс</a>
+  <span class="tabPage">Кластар</span>
 </div>
 
 <hr/>
@@ -45,10 +45,7 @@
 </div>
 
   <fieldset> <legend>Фільтр тэкстаў</legend>
-    Аўтар: <input type="text" id="text.author"></input> <br/>
-    Стыль/жанр: <a id="text.stylegenre" href="javascript:;" class="gwt-Anchor"></a> <br/>
-    Год напісання: ад <input type="text" id="text.yearWrittenFrom"></input> да <input type="text" id="text.yearWrittenTo"></input> <br/>
-    Год выдання: ад <input type="text" id="text.yearPublishedFrom"></input> да <input type="text" id="text.yearPublishedTo"></input> <br/>
+    Частка: <input type="text" id="text.volume"></input> <br/>
   </fieldset>
 
 <div id="wordsBlock"></div>
@@ -79,7 +76,7 @@
 <br/>
 <div id="resultTable">
 
-  Корпус утрымлівае пашпартызаваныя тэксты з часткова зьнятай аманіміяй
+  Неапрацаваныя тэксты могуць утрымліваць памылкі сканаваньня...
 
 
 </div>

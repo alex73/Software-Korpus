@@ -7,8 +7,8 @@
 
     <link type="text/css" rel="stylesheet" href="Korpus.css">
 
-    <title>Беларускі N-корпус: пошук па неапрацаваных тэкстах</title>
-    
+      <title>Беларускі N-корпус: пошук па неапрацаваных тэкстах</title>
+      
     <script type="text/javascript" language="javascript" src="korpus/korpus.nocache.js"></script>
   </head>
 
@@ -23,12 +23,19 @@
 <span class="logo">Беларускі N-корпус</span>
 <div style="clear: both;"></div>
 <div class="tab">
-<a class="tabPage" href="korpusSearch.html">Корпус</a>
-<span class="tabPage">Неапрацаваныя тэксты</span>
+  <a class="tabPage" href="korpusSearch.html">Корпус</a>
+  <span class="tabPage">Неапрацаваныя тэксты</span>
 <a class="tabPage" href="grammarDB.html">Граматычная база</a>
 <a class="tabPage" href="download.html">Спампаваць</a>
 <a class="tabPage" href="about.html">Пра праект</a>
 </div>
+
+<div class="tab">
+  <span class="tabPage">Пошук</span>
+  <a class="tabPage" href="otherConcordance.html">Канкарданс</a>
+  <a class="tabPage" href="otherCluster.html">Кластар</a>
+</div>
+
 <hr/>
 
 <div id="mainPart" style="display: none;">
@@ -37,9 +44,9 @@
 &nbsp;<span style="color:red" id="errorMessage"> </span>
 </div>
 
-<fieldset> <legend>Фільтр тэкстаў</legend>
-  Частка: <input type="text" id="text.volume"></input> <br/>
-</fieldset>
+  <fieldset> <legend>Фільтр тэкстаў</legend>
+    Частка: <input type="text" id="text.volume"></input> <br/>
+  </fieldset>
 
 <div id="wordsBlock"></div>
 <button id="btnAddWord" style="float: left;">Дадаць слова</button>
@@ -65,7 +72,13 @@
 
 <button id="btnSearch">Пошук</button>
 
+<hr/>
+<br/>
 <div id="resultTable">
+
+  Неапрацаваныя тэксты могуць утрымліваць памылкі сканаваньня...
+
+
 </div>
 
 </div>

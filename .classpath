@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src-web"/>
+	<classpathentry kind="src" path="src-web-templates"/>
 	<classpathentry kind="src" path="src-lat"/>
 	<classpathentry kind="src" path="src-editor"/>
 	<classpathentry kind="src" path="src-compiler"/>
@@ -19,5 +20,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-core-5.1.0.jar" sourcepath="war/WEB-INF/lib/sources/lucene-5.1.0.zip"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-analyzers-common-5.1.0.jar" sourcepath="war/WEB-INF/lib/sources/lucene-5.1.0.zip"/>
+	<classpathentry kind="lib" path="lib-web-templates/velocity-1.7.jar" sourcepath="/home/alex/gits/sources/velocity-1.7.zip"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
