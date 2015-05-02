@@ -1,9 +1,8 @@
 package org.alex73.korpus.client;
 
-import org.alex73.korpus.shared.ResultSentence;
-import org.alex73.korpus.shared.ResultText;
+import org.alex73.korpus.shared.dto.ResultSentence;
+import org.alex73.korpus.shared.dto.WordResult;
 
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -50,7 +49,7 @@ public class ResultsConcordance extends VerticalPanel {
         add(PagesIndexPanel.createPagesIndexPanel(korpus, pageIndex));
     }
 
-    private void showRow(Korpus korpus, ResultSentence text, ResultText.Word[] sentence, int wordsFrom,
+    private void showRow(Korpus korpus, ResultSentence text, WordResult[] sentence, int wordsFrom,
             int wordsTo) {
         int row = grid.insertRow(grid.getRowCount());
 

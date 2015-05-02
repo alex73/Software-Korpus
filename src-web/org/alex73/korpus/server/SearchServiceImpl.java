@@ -39,10 +39,12 @@ import javax.xml.bind.Unmarshaller;
 
 import org.alex73.korpus.client.SearchService;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
-import org.alex73.korpus.shared.ResultSentence;
-import org.alex73.korpus.shared.ResultText;
-import org.alex73.korpus.shared.SearchParams;
-import org.alex73.korpus.shared.SearchParams.CorpusType;
+import org.alex73.korpus.shared.dto.CorpusType;
+import org.alex73.korpus.shared.dto.ResultSentence;
+import org.alex73.korpus.shared.dto.ResultText;
+import org.alex73.korpus.shared.dto.SearchParams;
+import org.alex73.korpus.shared.dto.WordRequest;
+import org.alex73.korpus.shared.dto.WordResult;
 import org.alex73.korpus.utils.WordNormalizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -108,7 +110,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         super.destroy();
     }
 
-    private LuceneFilter getProcess(SearchParams.CorpusType corpusType) {
+    private LuceneFilter getProcess(CorpusType corpusType) {
         if (corpusType == CorpusType.STANDARD) {
             return processKorpus;
         } else {
@@ -164,7 +166,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
                 process.addOtherTextFilter(query, params);
             }
 
-            for (SearchParams.Word w : params.words) {
+            for (WordRequest w : params.words) {
                 w.word = WordNormalizer.normalize(w.word);
                 if (w.word.length() > 0) {
                     Query wq;
@@ -289,7 +291,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         Unmarshaller unm = CONTEXT.createUnmarshaller();
         P paragraph = (P) unm.unmarshal(new GZIPInputStream(new ByteArrayInputStream(xml)));
 
-        List<ResultText.Word[]> sentences = new ArrayList<>();
+        List<WordResult[]> sentences = new ArrayList<>();
 
         for (int i = 0; i < paragraph.getSOrTag().size(); i++) {
             S sentence;
@@ -298,7 +300,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
             } catch (ClassCastException ex) {
                 continue; // not a sentence
             }
-            List<ResultText.Word> words = new ArrayList<>();
+            List<WordResult> words = new ArrayList<>();
             for (int j = 0; j < sentence.getWOrTag().size(); j++) {
                 W w;
                 try {
@@ -306,16 +308,16 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
                 } catch (ClassCastException ex) {
                     continue; // not a word
                 }
-                ResultText.Word rsw = new ResultText.Word();
+                WordResult rsw = new WordResult();
                 rsw.value = w.getValue();
                 rsw.lemma = w.getLemma();
                 rsw.cat = w.getCat();
                 words.add(rsw);
             }
-            sentences.add(words.toArray(new ResultText.Word[0]));
+            sentences.add(words.toArray(new WordResult[0]));
         }
         ResultText text = new ResultText();
-        text.words = sentences.toArray(new ResultText.Word[0][]);
+        text.words = sentences.toArray(new WordResult[0][]);
         return text;
     }
 }

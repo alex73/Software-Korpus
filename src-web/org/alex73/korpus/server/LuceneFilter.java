@@ -26,7 +26,7 @@ import org.alex73.korpus.base.OtherInfo;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
 import org.alex73.korpus.server.engine.LuceneDriverRead.DocFilter;
-import org.alex73.korpus.shared.SearchParams;
+import org.alex73.korpus.shared.dto.SearchParams;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;

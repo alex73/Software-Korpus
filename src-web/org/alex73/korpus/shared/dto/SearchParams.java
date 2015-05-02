@@ -20,7 +20,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
 
-package org.alex73.korpus.shared;
+package org.alex73.korpus.shared.dto;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -30,39 +30,18 @@ import java.util.List;
  * Parameters for search corpus documents.
  */
 public class SearchParams implements Serializable {
-    public enum CorpusType {
-        STANDARD, UNPROCESSED
-    };
-
     public enum WordsOrder {
         PRESET, ANY_IN_SENTENCE, ANY_IN_PARAGRAPH
     };
 
     public CorpusType corpusType;
-    public TextStandard textStandard = new TextStandard();
-    public TextUnprocessed textUnprocessed = new TextUnprocessed();
-    public List<Word> words = new ArrayList<Word>();
+    public TextStandardInfo textStandard = new TextStandardInfo();
+    public TextUnprocessedInfo textUnprocessed = new TextUnprocessedInfo();
+    public List<WordRequest> words = new ArrayList<WordRequest>();
     public WordsOrder wordsOrder = WordsOrder.PRESET;
 
-    public static class TextStandard implements Serializable {
-        public String author;
-        public List<String> stylegenres;
-        public Integer yearWrittenFrom, yearWrittenTo, yearPublishedFrom, yearPublishedTo;
-    }
-
-    public static class TextUnprocessed implements Serializable {
-        public String volume;
-    }
-
-    public static class Word implements Serializable {
-        public String word;
-        public boolean allForms;
-        public String grammar;
-        public List<String> lemmas;
-    }
-
     public boolean isTooSimple() {
-        for (Word w : words) {
+        for (WordRequest w : words) {
             if (w.word != null) {
                 String wt = w.word.trim();
                 if (wt.length() > 1) {

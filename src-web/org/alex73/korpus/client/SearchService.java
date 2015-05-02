@@ -25,8 +25,8 @@ package org.alex73.korpus.client;
 import java.io.Serializable;
 import java.util.List;
 
-import org.alex73.korpus.shared.ResultSentence;
-import org.alex73.korpus.shared.SearchParams;
+import org.alex73.korpus.shared.dto.ResultSentence;
+import org.alex73.korpus.shared.dto.SearchParams;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -36,6 +36,8 @@ public interface SearchService extends RemoteService {
     SearchResult search(SearchParams params, LatestMark latest) throws Exception;
 
     ResultSentence[] getSentences(SearchParams params, int[] list) throws Exception;
+    
+    
 
     /**
      * Get initial values for display.

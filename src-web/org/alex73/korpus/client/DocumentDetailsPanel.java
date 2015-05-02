@@ -22,8 +22,8 @@
 
 package org.alex73.korpus.client;
 
-import org.alex73.korpus.shared.ResultSentence;
-import org.alex73.korpus.shared.ResultText;
+import org.alex73.korpus.shared.dto.ResultSentence;
+import org.alex73.korpus.shared.dto.WordResult;
 
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
@@ -73,7 +73,7 @@ public class DocumentDetailsPanel extends VerticalPanel {
 
         for (int i = 0; i < s.text.words.length; i++) {
             for (int j = 0; j < s.text.words[i].length; j++) {
-                ResultText.Word w = s.text.words[i][j];
+                WordResult w = s.text.words[i][j];
                 String text;
                 if (w.value.equals(",") || w.value.equals(".")) {
                     text = w.value;

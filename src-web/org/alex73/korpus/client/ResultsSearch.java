@@ -1,7 +1,7 @@
 package org.alex73.korpus.client;
 
-import org.alex73.korpus.shared.ResultSentence;
-import org.alex73.korpus.shared.ResultText;
+import org.alex73.korpus.shared.dto.ResultSentence;
+import org.alex73.korpus.shared.dto.WordResult;
 
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -54,7 +54,7 @@ public class ResultsSearch extends VerticalPanel {
                     int begWord = Math.max(firstFoundWord - 6, 0);
                     int endWord = Math.min(s.text.words[i].length - 1, firstFoundWord + 6);
                     for (int j = begWord; j <= endWord; j++) {
-                        ResultText.Word w = s.text.words[i][j];
+                        WordResult w = s.text.words[i][j];
                         InlineLabel wlabel = new InlineLabel(wordToText(w));
                         if (w.requestedWord) {
                             wlabel.setStyleName("wordFound");
@@ -72,7 +72,7 @@ public class ResultsSearch extends VerticalPanel {
         add(PagesIndexPanel.createPagesIndexPanel(korpus, pageIndex));
     }
 
-    public static String wordToText(ResultText.Word w) {
+    public static String wordToText(WordResult w) {
         if (w.value.equals(",") || w.value.equals(".")) {
             return w.value;
         } else {

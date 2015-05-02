@@ -20,7 +20,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
 
-package org.alex73.korpus.shared;
+package org.alex73.korpus.shared.dto;
 
 import java.io.Serializable;
 

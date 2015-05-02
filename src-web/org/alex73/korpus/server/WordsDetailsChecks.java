@@ -26,8 +26,10 @@ import java.util.List;
 
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.DBTagsGroups;
-import org.alex73.korpus.shared.ResultText;
-import org.alex73.korpus.shared.SearchParams;
+import org.alex73.korpus.shared.dto.ResultText;
+import org.alex73.korpus.shared.dto.SearchParams;
+import org.alex73.korpus.shared.dto.WordRequest;
+import org.alex73.korpus.shared.dto.WordResult;
 
 /**
  * Some methods for final checks.
@@ -41,7 +43,7 @@ public class WordsDetailsChecks {
      * Is the document correspond with search criteria ? Check and mark requested words for highlight for
      * user.
      */
-    public static boolean isAllowed(SearchParams.WordsOrder wordsOrder, List<SearchParams.Word> words,
+    public static boolean isAllowed(SearchParams.WordsOrder wordsOrder, List<WordRequest> words,
             ResultText resultText) {
         boolean found = false;
         switch (wordsOrder) {
@@ -60,7 +62,7 @@ public class WordsDetailsChecks {
         case ANY_IN_SENTENCE:
             for (int i = 0; i < resultText.words.length; i++) {
                 int c = 0;
-                for (SearchParams.Word pw : words) {
+                for (WordRequest pw : words) {
                     boolean foundWord = false;
                     for (int j = 0; j < resultText.words[i].length; j++) {
                         if (isWordMatchsParam(pw, resultText.words[i][j])) {
@@ -79,7 +81,7 @@ public class WordsDetailsChecks {
             break;
         case ANY_IN_PARAGRAPH:
             int c = 0;
-            for (SearchParams.Word pw : words) {
+            for (WordRequest pw : words) {
                 boolean foundWord = false;
                 for (int i = 0; i < resultText.words.length; i++) {
                     for (int j = 0; j < resultText.words[i].length; j++) {
@@ -104,8 +106,8 @@ public class WordsDetailsChecks {
      * For the wordsOrder=PRESET: specified words should correspond with specified parameter and all other
      * parameters.
      */
-    private static boolean isWordMatchsParamsAround(List<SearchParams.Word> words, int paramIndex,
-            ResultText.Word[] resultWords, int wordIndex) {
+    private static boolean isWordMatchsParamsAround(List<WordRequest> words, int paramIndex,
+            WordResult[] resultWords, int wordIndex) {
         int startWord = wordIndex - paramIndex;
         if (startWord < 0) {
             return false;
@@ -125,7 +127,7 @@ public class WordsDetailsChecks {
     /**
      * Is the word corresponds with parameter ?
      */
-    private static boolean isWordMatchsParam(SearchParams.Word wordParam, ResultText.Word wordResult) {
+    private static boolean isWordMatchsParam(WordRequest wordParam, WordResult wordResult) {
         if (wordParam.word != null && !wordParam.word.trim().isEmpty()) {
             if (wordParam.allForms) {
                 // lemma

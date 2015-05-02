@@ -27,9 +27,11 @@ import java.util.Map;
 
 import org.alex73.korpus.client.controls.BaseControlsWrapper;
 import org.alex73.korpus.client.controls.StyleGenrePopup;
-import org.alex73.korpus.shared.SearchParams;
-import org.alex73.korpus.shared.SearchParams.WordsOrder;
 import org.alex73.korpus.shared.StyleGenres;
+import org.alex73.korpus.shared.dto.CorpusType;
+import org.alex73.korpus.shared.dto.SearchParams;
+import org.alex73.korpus.shared.dto.SearchParams.WordsOrder;
+import org.alex73.korpus.shared.dto.WordRequest;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -176,7 +178,7 @@ public class SearchControls extends BaseControlsWrapper {
 
         if (text.author != null) {
             // korpus textx
-            req.corpusType = SearchParams.CorpusType.STANDARD;
+            req.corpusType = CorpusType.STANDARD;
             req.textStandard.author = text.author.getValue();
         }
         if (text.styleGenres != null) {
@@ -196,12 +198,12 @@ public class SearchControls extends BaseControlsWrapper {
         }
         if (text.volume != null) {
             // other texts
-            req.corpusType = SearchParams.CorpusType.UNPROCESSED;
+            req.corpusType = CorpusType.UNPROCESSED;
             req.textUnprocessed.volume = text.volume.getValue();
         }
 
         for (WordControl wc : words) {
-            SearchParams.Word w = new SearchParams.Word();
+            WordRequest w = new WordRequest();
             w.word = wc.word.getValue();
             w.allForms = Boolean.TRUE.equals(wc.allForms.getValue());
             w.grammar = wc.wordGrammar;

@@ -29,9 +29,9 @@ import java.util.Map;
 
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.client.controls.VisibleElement;
-import org.alex73.korpus.shared.ResultSentence;
-import org.alex73.korpus.shared.ResultText;
-import org.alex73.korpus.shared.SearchParams;
+import org.alex73.korpus.shared.dto.ResultSentence;
+import org.alex73.korpus.shared.dto.SearchParams;
+import org.alex73.korpus.shared.dto.WordResult;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -108,7 +108,7 @@ public class Korpus implements EntryPoint {
 
     SearchParams curentParams;
     Map<Anchor, ResultSentence> widgetsInfoDoc = new HashMap<Anchor, ResultSentence>();
-    Map<InlineLabel, ResultText.Word> widgetsInfoWord = new HashMap<InlineLabel, ResultText.Word>();
+    Map<InlineLabel, WordResult> widgetsInfoWord = new HashMap<InlineLabel, WordResult>();
 
     ClickHandler handlerShowInfoDoc = new ClickHandler() {
         public void onClick(ClickEvent event) {
@@ -125,7 +125,7 @@ public class Korpus implements EntryPoint {
     MouseDownHandler handlerShowInfoWord = new MouseDownHandler() {
         @Override
         public void onMouseDown(MouseDownEvent event) {
-            ResultText.Word info = widgetsInfoWord.get(event.getSource());
+            WordResult info = widgetsInfoWord.get(event.getSource());
             if (info == null) {
                 return;
             }

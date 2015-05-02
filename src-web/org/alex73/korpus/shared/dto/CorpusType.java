@@ -1,7 +1,7 @@
 /**************************************************************************
  Korpus - Corpus Linguistics Software.
 
- Copyright (C) 2013 Aleś Bułojčyk (alex73mail@gmail.com)
+ Copyright (C) 2015 Aleś Bułojčyk (alex73mail@gmail.com)
                Home page: https://sourceforge.net/projects/korpus/
 
  This file is part of Korpus.
@@ -20,18 +20,11 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
 
-package org.alex73.korpus.client;
+package org.alex73.korpus.shared.dto;
 
-import org.alex73.korpus.shared.dto.ResultSentence;
-import org.alex73.korpus.shared.dto.SearchParams;
-
-import com.google.gwt.user.client.rpc.AsyncCallback;
-
-public interface SearchServiceAsync {
-    void search(SearchParams params, SearchService.LatestMark latest, AsyncCallback<SearchService.SearchResult> callback)
-            throws Exception;
-
-    void getSentences(SearchParams params, int[] list, AsyncCallback<ResultSentence[]> callback) throws Exception;
-
-    void getInitialData(AsyncCallback<SearchService.InitialData> callback) throws Exception;
+/**
+ * Which corpus should be used.
+ */
+public enum CorpusType {
+    STANDARD, UNPROCESSED
 }
