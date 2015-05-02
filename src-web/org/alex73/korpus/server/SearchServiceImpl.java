@@ -38,7 +38,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 
 import org.alex73.korpus.client.SearchService;
-import org.alex73.korpus.server.engine.LuceneDriverKorpus;
+import org.alex73.korpus.server.engine.LuceneDriverRead;
 import org.alex73.korpus.shared.ResultSentence;
 import org.alex73.korpus.shared.ResultText;
 import org.alex73.korpus.shared.SearchParams;
@@ -71,9 +71,9 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
     static final Logger LOGGER = LogManager.getLogger(SearchServiceImpl.class);
 
-    String dirPrefix = System.getProperty("KORPUS_DIR");
-    ProcessKorpus processKorpus;
-    ProcessOther processOther;
+    public static String dirPrefix = System.getProperty("KORPUS_DIR");
+    LuceneFilter processKorpus;
+    LuceneFilter processOther;
 
     static {
         try {
@@ -88,8 +88,8 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         LOGGER.info("startup");
         try {
             GrammarDBLite.initializeFromDir(new File("GrammarDB"));
-            processKorpus = new ProcessKorpus(dirPrefix);
-            processOther = new ProcessOther(dirPrefix);
+            processKorpus = new LuceneFilter(dirPrefix + "/Korpus-cache/");
+            processOther = new LuceneFilter(dirPrefix + "/Other-cache/");
         } catch (Throwable ex) {
             LOGGER.error("startup", ex);
             throw new ExceptionInInitializerError(ex);
@@ -106,6 +106,14 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
             LOGGER.error("shutdown", ex);
         }
         super.destroy();
+    }
+
+    private LuceneFilter getProcess(SearchParams.CorpusType corpusType) {
+        if (corpusType == CorpusType.STANDARD) {
+            return processKorpus;
+        } else {
+            return processOther;
+        }
     }
 
     @Override
@@ -143,13 +151,12 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
             throw new RuntimeException(ServerError.REQUIEST_TOO_SIMPLE);
         }
         BooleanQuery query = new BooleanQuery();
-        IProcess process;
+        LuceneFilter process = getProcess(params.corpusType);
         if (params.corpusType == CorpusType.STANDARD) {
-            process = processKorpus;
+            process.addKorpusTextFilter(query, params);
         } else {
-            process = processOther;
+            process.addOtherTextFilter(query, params);
         }
-        process.addTextQuery(query, params);
 
         for (SearchParams.Word w : params.words) {
             w.word = WordNormalizer.normalize(w.word);
@@ -184,10 +191,10 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
             } else {
                 latestDoc = null;
             }
-            ScoreDoc[] found = process.search(query, latestDoc, new LuceneDriverKorpus.DocFilter() {
+            ScoreDoc[] found = process.search(query, latestDoc, new LuceneDriverRead.DocFilter() {
                 public boolean isDocAllowed(int docID) {
                     try {
-                        Document doc = getLuceneDoc(params, docID);
+                        Document doc = getProcess(params.corpusType).getSentence(docID);
                         ResultText text = restoreText(params, doc);
                         return WordsDetailsChecks.isAllowed(params.wordsOrder, params.words, text);
                     } catch (Exception ex) {
@@ -240,7 +247,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         try {
             ResultSentence[] result = new ResultSentence[list.length];
             for (int i = 0; i < list.length; i++) {
-                Document doc = getLuceneDoc(params, list[i]);
+                Document doc = getProcess(params.corpusType).getSentence(list[i]);
                 result[i] = new ResultSentence();
                 restoreTextInfo(params, doc, result[i]);
                 result[i].text = restoreText(params, doc);
@@ -254,28 +261,17 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         }
     }
 
-    protected Document getLuceneDoc(SearchParams params, int docId) throws Exception {
-        IProcess process;
-        if (params.corpusType == CorpusType.STANDARD) {
-            process = processKorpus;
-        } else {
-            process = processOther;
-        }
-
-        return process.getSentence(docId);
-    }
-
     protected void restoreTextInfo(SearchParams params, Document doc, ResultSentence result) throws Exception {
 
         if (params.corpusType == CorpusType.STANDARD) {
-            result.doc = processKorpus.getTextInfo(doc);
+            result.doc = processKorpus.getKorpusTextInfo(doc);
         } else {
             result.docOther = processOther.getOtherInfo(doc);
         }
     }
 
     protected ResultText restoreText(SearchParams params, Document doc) throws Exception {
-        IProcess process;
+        LuceneFilter process;
         if (params.corpusType == CorpusType.STANDARD) {
             process = processKorpus;
         } else {

@@ -23,30 +23,70 @@
 package org.alex73.korpus.server;
 
 import org.alex73.korpus.base.OtherInfo;
-import org.alex73.korpus.server.engine.LuceneDriverOther;
-import org.alex73.korpus.server.engine.LuceneDriverKorpus.DocFilter;
+import org.alex73.korpus.base.TextInfo;
+import org.alex73.korpus.server.engine.LuceneDriverRead;
+import org.alex73.korpus.server.engine.LuceneDriverRead.DocFilter;
 import org.alex73.korpus.shared.SearchParams;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 
-public class ProcessOther implements IProcess {
-    LuceneDriverOther lucene;
+public class LuceneFilter {
+    LuceneDriverRead lucene;
 
-    public ProcessOther(String dirPrefix) throws Exception {
-        lucene = new LuceneDriverOther(dirPrefix + "/Other-cache/", false);
+    public LuceneFilter(String dir) throws Exception {
+        lucene = new LuceneDriverRead(dir);
     }
 
     public void close() throws Exception {
         lucene.shutdown();
     }
 
-    public void addTextQuery(BooleanQuery query, SearchParams params) {
+    public void addKorpusTextFilter(BooleanQuery query, SearchParams params) {
+        // author
+        if (StringUtils.isNotEmpty(params.textStandard.author)) {
+            Query q = new TermQuery(new Term(lucene.fieldSentenceTextAuthor.name(),
+                    params.textStandard.author));
+            query.add(q, BooleanClause.Occur.MUST);
+        }
+        // style/genre
+        if (!params.textStandard.stylegenres.isEmpty()) {
+            BooleanQuery q = new BooleanQuery();
+            for (String sg : params.textStandard.stylegenres) {
+                q.add(new TermQuery(new Term(lucene.fieldSentenceTextStyleGenre.name(), sg)),
+                        BooleanClause.Occur.SHOULD);
+            }
+            q.setMinimumNumberShouldMatch(1);
+            query.add(q, BooleanClause.Occur.MUST);
+        }
+        // written year
+        if (params.textStandard.yearWrittenFrom != null || params.textStandard.yearWrittenTo != null) {
+            int yFrom = params.textStandard.yearWrittenFrom != null ? params.textStandard.yearWrittenFrom : 1;
+            int yTo = params.textStandard.yearWrittenTo != null ? params.textStandard.yearWrittenTo : 9999;
+            Query q = NumericRangeQuery.newIntRange(lucene.fieldSentenceTextWrittenYear.name(), yFrom, yTo,
+                    true, true);
+            query.add(q, BooleanClause.Occur.MUST);
+        }
+        // published year
+        if (params.textStandard.yearPublishedFrom != null || params.textStandard.yearPublishedTo != null) {
+            int yFrom = params.textStandard.yearPublishedFrom != null ? params.textStandard.yearPublishedFrom
+                    : 1;
+            int yTo = params.textStandard.yearPublishedTo != null ? params.textStandard.yearPublishedTo
+                    : 9999;
+            Query q = NumericRangeQuery.newIntRange(lucene.fieldSentenceTextPublishedYear.name(), yFrom, yTo,
+                    true, true);
+            query.add(q, BooleanClause.Occur.MUST);
+        }
+    }
+
+    public void addOtherTextFilter(BooleanQuery query, SearchParams params) {
         // volume
         if (StringUtils.isNotEmpty(params.textStandard.author)) {
             Query q = new TermQuery(new Term(lucene.fieldSentenceTextVolume.name(),
@@ -75,9 +115,15 @@ public class ProcessOther implements IProcess {
         return lucene.getSentence(docID);
     }
 
-    @Override
     public byte[] getXML(Document doc) {
         return doc.getField(lucene.fieldSentenceXML.name()).binaryValue().bytes;
+    }
+
+    public TextInfo getKorpusTextInfo(Document doc) throws Exception {
+        Field fieldTextId = (Field) doc.getField(lucene.fieldSentenceTextID.name());
+        int textId = fieldTextId.numericValue().intValue();
+
+        return lucene.getTextInfo(textId);
     }
 
     public OtherInfo getOtherInfo(Document doc) throws Exception {

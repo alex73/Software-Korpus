@@ -1,25 +1,3 @@
-/**************************************************************************
- Korpus - Corpus Linguistics Software.
-
- Copyright (C) 2013 Aleś Bułojčyk (alex73mail@gmail.com)
-               Home page: https://sourceforge.net/projects/korpus/
-
- This file is part of Korpus.
-
- Korpus is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
-
- Korpus is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
- **************************************************************************/
-
 package org.alex73.korpus.server.engine;
 
 import org.alex73.korpus.base.BelarusianTags;
@@ -27,37 +5,42 @@ import org.alex73.korpus.base.DBTagsGroups;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.utils.WordNormalizer;
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.IntField;
-import org.apache.lucene.search.NumericRangeQuery;
-import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.IndexWriterConfig.OpenMode;
+import org.apache.lucene.store.Directory;
 
 import alex73.corpus.paradigm.P;
 import alex73.corpus.paradigm.S;
 import alex73.corpus.paradigm.W;
 
-/**
- * Lucene driver for corpus document's database.
- */
-public class LuceneDriverKorpus extends LuceneDriverBase {
+public class LuceneDriverWrite extends LuceneFields {
+    protected final Logger LOGGER = LogManager.getLogger(LuceneDriverWrite.class);
+
+    protected Directory dir;
+
+    protected IndexWriter indexWriter;
 
     protected Document docText;
+    protected Document docSentence;
 
-    public Field fieldSentenceTextID;
-    public Field fieldSentenceTextStyleGenre;
-    public Field fieldSentenceTextAuthor;
-    public Field fieldSentenceTextWrittenYear;
-    public Field fieldSentenceTextPublishedYear;
+    public LuceneDriverWrite(String rootDir) throws Exception {
+        IndexWriterConfig config = new IndexWriterConfig(new WhitespaceAnalyzer());
+        config.setOpenMode(OpenMode.CREATE);
+        config.setRAMBufferSizeMB(256);
+        indexWriter = new IndexWriter(dir, config);
 
-    public Field fieldTextID;
-    public Field fieldTextAuthors;
-    public Field fieldTextTitle;
-    public Field fieldTextYearWritten;
-    public Field fieldTextYearPublished;
-
-    public LuceneDriverKorpus(String rootDir, boolean write) throws Exception {
-        super(rootDir, write);
+        docSentence = new Document();
+        docSentence.add(fieldSentenceValues = new Field("value", "", TYPE_NOTSTORED_INDEXED));
+        docSentence.add(fieldSentenceDBGrammarTags = new Field("dbGrammarTag", "", TYPE_NOTSTORED_INDEXED));
+        docSentence.add(fieldSentenceLemmas = new Field("lemma", "", TYPE_NOTSTORED_INDEXED));
+        docSentence.add(fieldSentenceXML = new Field("xml", new byte[0], TYPE_STORED_NOTINDEXED));
 
         docSentence.add(fieldSentenceTextID = new IntField("textId", 0, TYPE_STORED_NOTINDEXED_INT));
         docSentence
@@ -74,18 +57,17 @@ public class LuceneDriverKorpus extends LuceneDriverBase {
         docText.add(fieldTextTitle = new Field("title", "", TYPE_STORED_NOTINDEXED));
         docText.add(fieldTextYearWritten = new IntField("textYearWritten", 0, TYPE_STORED_NOTINDEXED_INT));
         docText.add(fieldTextYearPublished = new IntField("textYearPublished", 0, TYPE_STORED_NOTINDEXED_INT));
+
+        docSentence.add(fieldSentenceTextVolume = new Field("textVolume", "", TYPE_NOTSTORED_INDEXED));
+        docSentence.add(fieldSentenceTextURL = new Field("textURL", "", TYPE_STORED_NOTINDEXED));
     }
 
-    /**
-     * Add text to database.
-     */
-    public void addText(int textId, TextInfo info) throws Exception {
-        fieldTextID.setIntValue(textId);
-        fieldTextAuthors.setStringValue(merge(info.authors, ";"));
-        fieldTextTitle.setStringValue(info.title);
-        fieldTextYearWritten.setIntValue(info.writtenYear != null ? info.writtenYear : 0);
-        fieldTextYearPublished.setIntValue(info.publishedYear != null ? info.publishedYear : 0);
-        indexWriter.addDocument(docText);
+    public void shutdown() throws Exception {
+
+        indexWriter.forceMerge(1);
+        indexWriter.commit();
+        indexWriter.close();
+        dir.close();
     }
 
     /**
@@ -93,10 +75,12 @@ public class LuceneDriverKorpus extends LuceneDriverBase {
      * 
      * @return words count
      */
-    public int addSentence(P paragraph, byte[] xml, int textId, TextInfo info) throws Exception {
-        values.setLength(0);
-        lemmas.setLength(0);
-        dbGrammarTags.setLength(0);
+    public int addSentence(P paragraph, byte[] xml, int textId, TextInfo info, String volume, String textURL)
+            throws Exception {
+
+        StringBuilder values = new StringBuilder();
+        StringBuilder dbGrammarTags = new StringBuilder();
+        StringBuilder lemmas = new StringBuilder();
 
         int wordsCount = 0;
         for (Object op : paragraph.getSOrTag()) {
@@ -128,6 +112,9 @@ public class LuceneDriverKorpus extends LuceneDriverBase {
         }
 
         // fieldID.setIntValue(id);
+        fieldSentenceTextVolume.setStringValue(volume);
+        fieldSentenceTextURL.setStringValue(textURL);
+
         fieldSentenceTextID.setIntValue(textId);
         fieldSentenceValues.setStringValue(values.toString());
         fieldSentenceDBGrammarTags.setStringValue(dbGrammarTags.toString());
@@ -143,15 +130,19 @@ public class LuceneDriverKorpus extends LuceneDriverBase {
         return wordsCount;
     }
 
-    public String nvl(String n) {
-        return n != null ? n : "";
+    /**
+     * Add text to database.
+     */
+    public void addText(int textId, TextInfo info) throws Exception {
+        fieldTextID.setIntValue(textId);
+        fieldTextAuthors.setStringValue(merge(info.authors, ";"));
+        fieldTextTitle.setStringValue(info.title);
+        fieldTextYearWritten.setIntValue(info.writtenYear != null ? info.writtenYear : 0);
+        fieldTextYearPublished.setIntValue(info.publishedYear != null ? info.publishedYear : 0);
+        indexWriter.addDocument(docText);
     }
 
-    public int nvl(Integer n) {
-        return n != null ? n : 0;
-    }
-
-    String merge(String[] strs, String sep) {
+    private String merge(String[] strs, String sep) {
         StringBuilder out = new StringBuilder();
         for (String s : strs) {
             if (out.length() > 0) {
@@ -162,26 +153,11 @@ public class LuceneDriverKorpus extends LuceneDriverBase {
         return out.toString();
     }
 
-    public TextInfo getTextInfo(int textId) throws Exception {
-        NumericRangeQuery<Integer> query = NumericRangeQuery.newIntRange(fieldTextID.name(), 1, textId,
-                textId, true, true);
-        TopDocs rs = indexSearcher.search(query, 1);
-        if (rs.totalHits < 1) {
-            return null;
-        }
-        int v;
-        Document doc = directoryReader.document(rs.scoreDocs[0].doc);
-        TextInfo result = new TextInfo();
-        result.authors = doc.getField(fieldTextAuthors.name()).stringValue().split(";");
-        result.title = doc.getField(fieldTextTitle.name()).stringValue();
-        v = doc.getField(fieldTextYearWritten.name()).numericValue().intValue();
-        result.writtenYear = v > 0 ? v : null;
-        v = doc.getField(fieldTextYearPublished.name()).numericValue().intValue();
-        result.publishedYear = v > 0 ? v : null;
-        return result;
+    private String nvl(String n) {
+        return n != null ? n : "";
     }
 
-    public interface DocFilter {
-        public boolean isDocAllowed(int docID);
+    private int nvl(Integer n) {
+        return n != null ? n : 0;
     }
 }

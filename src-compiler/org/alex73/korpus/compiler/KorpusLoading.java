@@ -46,7 +46,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.alex73.korpus.editor.core.structure.KorpusDocument;
 import org.alex73.korpus.parser.TEIParser;
 import org.alex73.korpus.parser.TextParser;
-import org.alex73.korpus.server.engine.LuceneDriverKorpus;
+import org.alex73.korpus.server.engine.LuceneDriverWrite;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.commons.io.FileUtils;
@@ -60,7 +60,7 @@ import alex73.corpus.paradigm.Text;
  */
 public class KorpusLoading {
 
-    static LuceneDriverKorpus lucene;
+    static LuceneDriverWrite lucene;
 
     static int statTexts, statWords;
     static int textId;
@@ -70,7 +70,7 @@ public class KorpusLoading {
         File dir = new File("Korpus-cache/");
         FileUtils.deleteDirectory(dir);
         dir.mkdirs();
-        lucene = new LuceneDriverKorpus("Korpus-cache/", true);
+        lucene = new LuceneDriverWrite("Korpus-cache/");
 
         Properties stat = new Properties();
         int allStatTexts = 0, allStatWords = 0;
@@ -230,7 +230,7 @@ public class KorpusLoading {
                 StreamResult mOut = new StreamResult(baz);
                 m.marshal(p, mOut);
             }
-            int c = lucene.addSentence(p, ba.toByteArray(), textId, doc.textInfo);
+            int c = lucene.addSentence(p, ba.toByteArray(), textId, doc.textInfo, null, null);
             statWords += c;
         }
 

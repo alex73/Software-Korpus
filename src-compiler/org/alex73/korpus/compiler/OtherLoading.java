@@ -45,7 +45,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.alex73.korpus.editor.core.structure.Line;
 import org.alex73.korpus.parser.Splitter;
 import org.alex73.korpus.parser.TEIParser;
-import org.alex73.korpus.server.engine.LuceneDriverOther;
+import org.alex73.korpus.server.engine.LuceneDriverWrite;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
@@ -58,7 +58,7 @@ import alex73.corpus.paradigm.Text;
  */
 public class OtherLoading {
 
-    static LuceneDriverOther lucene;
+    static LuceneDriverWrite lucene;
 
     static int statTexts, statWords;
     static Set<String> volumes = new TreeSet<>();
@@ -67,7 +67,7 @@ public class OtherLoading {
         File dir = new File("Other-cache/");
         FileUtils.deleteDirectory(dir);
         dir.mkdirs();
-        lucene = new LuceneDriverOther("Other-cache/", true);
+        lucene = new LuceneDriverWrite("Other-cache/");
 
         Properties stat = new Properties();
         int allStatTexts = 0, allStatWords = 0;
@@ -153,7 +153,7 @@ public class OtherLoading {
                 StreamResult mOut = new StreamResult(baz);
                 m.marshal(p, mOut);
             }
-            int c = lucene.addSentence(p, ba.toByteArray(), volume, textUrl);
+            int c = lucene.addSentence(p, ba.toByteArray(),0,null, volume, textUrl);
             statWords += c;
         }
     }
