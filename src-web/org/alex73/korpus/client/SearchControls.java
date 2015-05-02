@@ -55,7 +55,7 @@ import com.google.gwt.user.client.ui.TextBox;
 public class SearchControls extends BaseControlsWrapper {
     public TextControl text = new TextControl();
 
-    public SimpleRadioButton orderPreset, orderAny;
+    public SimpleRadioButton orderPreset, orderAnySentence, orderAnyParagraph;
 
     private MultiWordSuggestOracle oraAuthors;
     private MultiWordSuggestOracle oraVolumes;
@@ -94,7 +94,8 @@ public class SearchControls extends BaseControlsWrapper {
         }
 
         orderPreset = SimpleRadioButton.wrap(DOM.getElementById("orderPreset"));
-        orderAny = SimpleRadioButton.wrap(DOM.getElementById("orderAny"));
+        orderAnySentence = SimpleRadioButton.wrap(DOM.getElementById("orderAnySentence"));
+        orderAnyParagraph = SimpleRadioButton.wrap(DOM.getElementById("orderAnyParagraph"));
 
         if (text.stylegenre != null) {
             text.stylegenre.addClickHandler(new ClickHandler() {
@@ -136,9 +137,11 @@ public class SearchControls extends BaseControlsWrapper {
 
         final Map<String, String> ps = parseParameters(parameters);
         try {
+            errorMessage.setText("Ініцыялізацыя...");
             searchService.getInitialData(new AsyncCallback<SearchService.InitialData>() {
                 @Override
                 public void onSuccess(SearchService.InitialData result) {
+                    errorMessage.setText("");
                     if (oraAuthors != null) {
                         oraAuthors.addAll(result.authors);
                     }
@@ -197,7 +200,13 @@ public class SearchControls extends BaseControlsWrapper {
             }
         }
 
-        req.wordsOrder = Boolean.TRUE.equals(orderPreset.getValue()) ? WordsOrder.PRESET : WordsOrder.ANY;
+        if (Boolean.TRUE.equals(orderAnyParagraph.getValue())) {
+            req.wordsOrder = WordsOrder.ANY_IN_PARAGRAPH;
+        } else if (Boolean.TRUE.equals(orderAnySentence.getValue())) {
+            req.wordsOrder = WordsOrder.ANY_IN_SENTENCE;
+        } else {
+            req.wordsOrder = WordsOrder.PRESET;
+        }
 
         return req;
     }
@@ -228,7 +237,8 @@ public class SearchControls extends BaseControlsWrapper {
         }
 
         outRadioButton(out, "orderPreset", orderPreset);
-        outRadioButton(out, "orderAny", orderAny);
+        outRadioButton(out, "orderAnySentence", orderAnySentence);
+        outRadioButton(out, "orderAnyParagraph", orderAnyParagraph);
 
         return out.substring(1).toString();
     }
@@ -294,6 +304,7 @@ public class SearchControls extends BaseControlsWrapper {
         }
 
         inRadioButton(ps, "orderPreset", orderPreset);
-        inRadioButton(ps, "orderAny", orderAny);
+        inRadioButton(ps, "orderAnySentence", orderAnySentence);
+        inRadioButton(ps, "orderAnyParagraph", orderAnyParagraph);
     }
 }

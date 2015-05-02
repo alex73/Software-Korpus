@@ -20,76 +20,84 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
 
-package org.alex73.korpus.shared;
+package org.alex73.korpus.server;
 
 import java.util.List;
 
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.DBTagsGroups;
+import org.alex73.korpus.shared.ResultText;
+import org.alex73.korpus.shared.SearchParams;
 
 /**
  * Some methods for final checks.
  * 
- * Lucene can't process some complex criteria of search(like order of words). In this case, these methods used
- * for additional filtering of results from Lucene's search.
+ * Lucene can't process some complex criteria of search(like order of words). This methods used for these
+ * complex check for filtering of results from Lucene's search.
  */
 public class WordsDetailsChecks {
 
     /**
-     * Is the document correspond with search criteria ?
+     * Is the document correspond with search criteria ? Check and mark requested words for highlight for
+     * user.
      */
     public static boolean isAllowed(SearchParams.WordsOrder wordsOrder, List<SearchParams.Word> words,
-            ResultSentence result) {
+            ResultText resultText) {
+        boolean found = false;
         switch (wordsOrder) {
         case PRESET:
-            for (int i = 0; i < result.words.length; i++) {
-                if (isWordMatchsParamsAround(words, 0, result, i)) {
-                    return true;
-                }
-            }
-            return false;
-        case ANY:
-            for (SearchParams.Word pw : words) {
-                boolean found = false;
-                for (ResultSentence.Word rw : result.words) {
-                    if (isWordMatchsParam(pw, rw)) {
+            for (int i = 0; i < resultText.words.length; i++) {
+                for (int j = 0; j < resultText.words[i].length; j++) {
+                    if (isWordMatchsParamsAround(words, 0, resultText.words[i], j)) {
+                        for (int k = 0; k < words.size(); k++) { // mark found words as requested
+                            resultText.words[i][j + k].requestedWord = true;
+                        }
                         found = true;
-                        break;
                     }
                 }
-                if (!found) {
-                    return false;
+            }
+            break;
+        case ANY_IN_SENTENCE:
+            for (int i = 0; i < resultText.words.length; i++) {
+                int c = 0;
+                for (SearchParams.Word pw : words) {
+                    boolean foundWord = false;
+                    for (int j = 0; j < resultText.words[i].length; j++) {
+                        if (isWordMatchsParam(pw, resultText.words[i][j])) {
+                            resultText.words[i][j].requestedWord = true;
+                            foundWord = true;
+                        }
+                    }
+                    if (foundWord) {
+                        c++;
+                    }
+                }
+                if (c == words.size()) { // allowed only if all words exist
+                    found = true;
                 }
             }
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Is the word correspond with search criteria ?
-     */
-    public static boolean isFoundWord(SearchParams.WordsOrder wordsOrder, List<SearchParams.Word> words,
-            ResultSentence result, int wordIndex) {
-        switch (wordsOrder) {
-        case PRESET:
-            for (int i = 0; i < words.size(); i++) {
-                if (isWordMatchsParamsAround(words, i, result, wordIndex)) {
-                    return true;
-                }
-            }
-            return false;
-        case ANY:
-            ResultSentence.Word rw = result.words[wordIndex];
+            break;
+        case ANY_IN_PARAGRAPH:
+            int c = 0;
             for (SearchParams.Word pw : words) {
-                if (isWordMatchsParam(pw, rw)) {
-                    return true;
+                boolean foundWord = false;
+                for (int i = 0; i < resultText.words.length; i++) {
+                    for (int j = 0; j < resultText.words[i].length; j++) {
+                        if (isWordMatchsParam(pw, resultText.words[i][j])) {
+                            resultText.words[i][j].requestedWord = true;
+                            foundWord = true;
+                        }
+                    }
+                }
+                if (foundWord) {
+                    c++;
                 }
             }
-            return false;
+            found = c == words.size(); // allowed only if all words exist
+            break;
         }
-        return false;
+
+        return found;
     }
 
     /**
@@ -97,17 +105,17 @@ public class WordsDetailsChecks {
      * parameters.
      */
     private static boolean isWordMatchsParamsAround(List<SearchParams.Word> words, int paramIndex,
-            ResultSentence result, int wordIndex) {
+            ResultText.Word[] resultWords, int wordIndex) {
         int startWord = wordIndex - paramIndex;
         if (startWord < 0) {
             return false;
         }
         int endWord = words.size() - paramIndex + wordIndex;
-        if (endWord > result.words.length) {
+        if (endWord > resultWords.length) {
             return false;
         }
         for (int i = 0; i < words.size(); i++) {
-            if (!isWordMatchsParam(words.get(i), result.words[startWord + i])) {
+            if (!isWordMatchsParam(words.get(i), resultWords[startWord + i])) {
                 return false;
             }
         }
@@ -117,7 +125,7 @@ public class WordsDetailsChecks {
     /**
      * Is the word corresponds with parameter ?
      */
-    private static boolean isWordMatchsParam(SearchParams.Word wordParam, ResultSentence.Word wordResult) {
+    private static boolean isWordMatchsParam(SearchParams.Word wordParam, ResultText.Word wordResult) {
         if (wordParam.word != null && !wordParam.word.trim().isEmpty()) {
             if (wordParam.allForms) {
                 // lemma

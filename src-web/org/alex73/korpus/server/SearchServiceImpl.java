@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.zip.GZIPInputStream;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -39,9 +40,9 @@ import javax.xml.bind.Unmarshaller;
 import org.alex73.korpus.client.SearchService;
 import org.alex73.korpus.server.engine.LuceneDriverKorpus;
 import org.alex73.korpus.shared.ResultSentence;
+import org.alex73.korpus.shared.ResultText;
 import org.alex73.korpus.shared.SearchParams;
 import org.alex73.korpus.shared.SearchParams.CorpusType;
-import org.alex73.korpus.shared.WordsDetailsChecks;
 import org.alex73.korpus.utils.WordNormalizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -53,6 +54,7 @@ import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 
+import alex73.corpus.paradigm.P;
 import alex73.corpus.paradigm.S;
 import alex73.corpus.paradigm.TEI;
 import alex73.corpus.paradigm.W;
@@ -185,8 +187,9 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
             ScoreDoc[] found = process.search(query, latestDoc, new LuceneDriverKorpus.DocFilter() {
                 public boolean isDocAllowed(int docID) {
                     try {
-                        ResultSentence doc = getSentence(params.corpusType, docID);
-                        return WordsDetailsChecks.isAllowed(params.wordsOrder, params.words, doc);
+                        Document doc = getLuceneDoc(params, docID);
+                        ResultText text = restoreText(params, doc);
+                        return WordsDetailsChecks.isAllowed(params.wordsOrder, params.words, text);
                     } catch (Exception ex) {
                         throw new RuntimeException(ex);
                     }
@@ -233,11 +236,16 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     }
 
     @Override
-    public ResultSentence[] getSentences(SearchParams.CorpusType corpusType, int[] list) {
+    public ResultSentence[] getSentences(SearchParams params, int[] list) {
         try {
             ResultSentence[] result = new ResultSentence[list.length];
             for (int i = 0; i < list.length; i++) {
-                result[i] = getSentence(corpusType, list[i]);
+                Document doc = getLuceneDoc(params, list[i]);
+                result[i] = new ResultSentence();
+                restoreTextInfo(params, doc, result[i]);
+                result[i].text = restoreText(params, doc);
+                // mark result words
+                WordsDetailsChecks.isAllowed(params.wordsOrder, params.words, result[i].text);
             }
             return result;
         } catch (Exception ex) {
@@ -246,46 +254,66 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         }
     }
 
-    protected ResultSentence getSentence(SearchParams.CorpusType corpusType, int sentenceDocId)
-            throws Exception {
+    protected Document getLuceneDoc(SearchParams params, int docId) throws Exception {
         IProcess process;
-        if (corpusType == CorpusType.STANDARD) {
+        if (params.corpusType == CorpusType.STANDARD) {
             process = processKorpus;
         } else {
             process = processOther;
         }
 
-        Document sentenceDoc = process.getSentence(sentenceDocId);
-        byte[] xml = process.getXML(sentenceDoc);
+        return process.getSentence(docId);
+    }
 
-        Unmarshaller unm = CONTEXT.createUnmarshaller();
-        S sentence = (S) unm.unmarshal(new ByteArrayInputStream(xml));
+    protected void restoreTextInfo(SearchParams params, Document doc, ResultSentence result) throws Exception {
 
-        for (int j = 0; j < sentence.getWOrTag().size(); j++) {
-            if (!(sentence.getWOrTag().get(j) instanceof W)) {
-                sentence.getWOrTag().remove(j);
-                j--;
-            }
-        }
-
-        ResultSentence result = new ResultSentence();
-        result.words = new ResultSentence.Word[sentence.getWOrTag().size()];
-        for (int j = 0; j < result.words.length; j++) {
-            W w = (W) sentence.getWOrTag().get(j);
-            ResultSentence.Word rsw = new ResultSentence.Word();
-            rsw.value = w.getValue();
-            rsw.lemma = w.getLemma();
-            rsw.cat = w.getCat();
-            result.words[j] = rsw;
-        }
-
-        if (corpusType == CorpusType.STANDARD) {
-            result.doc = processKorpus.getTextInfo(sentenceDoc);
+        if (params.corpusType == CorpusType.STANDARD) {
+            result.doc = processKorpus.getTextInfo(doc);
         } else {
-            result.docOther = processOther.getOtherInfo(sentenceDoc);
+            result.docOther = processOther.getOtherInfo(doc);
+        }
+    }
+
+    protected ResultText restoreText(SearchParams params, Document doc) throws Exception {
+        IProcess process;
+        if (params.corpusType == CorpusType.STANDARD) {
+            process = processKorpus;
+        } else {
             process = processOther;
         }
 
-        return result;
+        byte[] xml = process.getXML(doc);
+
+        Unmarshaller unm = CONTEXT.createUnmarshaller();
+        P paragraph = (P) unm.unmarshal(new GZIPInputStream(new ByteArrayInputStream(xml)));
+
+        List<ResultText.Word[]> sentences = new ArrayList<>();
+
+        for (int i = 0; i < paragraph.getSOrTag().size(); i++) {
+            S sentence;
+            try {
+                sentence = (S) paragraph.getSOrTag().get(i);
+            } catch (ClassCastException ex) {
+                continue; // not a sentence
+            }
+            List<ResultText.Word> words = new ArrayList<>();
+            for (int j = 0; j < sentence.getWOrTag().size(); j++) {
+                W w;
+                try {
+                    w = (W) sentence.getWOrTag().get(j);
+                } catch (ClassCastException ex) {
+                    continue; // not a word
+                }
+                ResultText.Word rsw = new ResultText.Word();
+                rsw.value = w.getValue();
+                rsw.lemma = w.getLemma();
+                rsw.cat = w.getCat();
+                words.add(rsw);
+            }
+            sentences.add(words.toArray(new ResultText.Word[0]));
+        }
+        ResultText text = new ResultText();
+        text.words = sentences.toArray(new ResultText.Word[0][]);
+        return text;
     }
 }

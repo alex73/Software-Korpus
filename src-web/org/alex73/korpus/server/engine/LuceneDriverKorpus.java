@@ -33,6 +33,7 @@ import org.apache.lucene.document.IntField;
 import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.TopDocs;
 
+import alex73.corpus.paradigm.P;
 import alex73.corpus.paradigm.S;
 import alex73.corpus.paradigm.W;
 
@@ -89,32 +90,40 @@ public class LuceneDriverKorpus extends LuceneDriverBase {
 
     /**
      * Add sentence to database. Sentence linked to previously added text.
+     * 
+     * @return words count
      */
-    public void addSentence(S sentence, byte[] xml, int textId, TextInfo info) throws Exception {
+    public int addSentence(P paragraph, byte[] xml, int textId, TextInfo info) throws Exception {
         values.setLength(0);
         lemmas.setLength(0);
         dbGrammarTags.setLength(0);
 
-        for (Object o : sentence.getWOrTag()) {
-            if (!(o instanceof W)) {
-                continue;
-            }
-            W w = (W) o;
-            if (w.getValue() != null) {
-                String wc = WordNormalizer.normalize(w.getValue());
-                values.append(wc).append(' ');
-            }
-            if (StringUtils.isNotEmpty(w.getCat())) {
-                for (String t : w.getCat().split("_")) {
-                    if (!BelarusianTags.getInstance().isValid(t, null)) {
-                        // TODO throw new Exception("Няправільны тэг: " + t);
-                    } else {
-                        dbGrammarTags.append(DBTagsGroups.getDBTagString(t)).append(' ');
+        int wordsCount = 0;
+        for (Object op : paragraph.getSOrTag()) {
+            if (op instanceof S) {
+                for (Object o : ((S) op).getWOrTag()) {
+                    if (!(o instanceof W)) {
+                        continue;
+                    }
+                    W w = (W) o;
+                    wordsCount++;
+                    if (w.getValue() != null) {
+                        String wc = WordNormalizer.normalize(w.getValue());
+                        values.append(wc).append(' ');
+                    }
+                    if (StringUtils.isNotEmpty(w.getCat())) {
+                        for (String t : w.getCat().split("_")) {
+                            if (!BelarusianTags.getInstance().isValid(t, null)) {
+                                // TODO throw new Exception("Няправільны тэг: " + t);
+                            } else {
+                                dbGrammarTags.append(DBTagsGroups.getDBTagString(t)).append(' ');
+                            }
+                        }
+                    }
+                    if (w.getLemma() != null) {
+                        lemmas.append(w.getLemma().replace('_', ' ')).append(' ');
                     }
                 }
-            }
-            if (w.getLemma() != null) {
-                lemmas.append(w.getLemma().replace('_', ' ')).append(' ');
             }
         }
 
@@ -130,6 +139,8 @@ public class LuceneDriverKorpus extends LuceneDriverBase {
         fieldSentenceTextAuthor.setTokenStream(new StringArrayTokenStream(info.authors));
 
         indexWriter.addDocument(docSentence);
+
+        return wordsCount;
     }
 
     public String nvl(String n) {

@@ -23,7 +23,7 @@
 package org.alex73.korpus.client;
 
 import org.alex73.korpus.shared.ResultSentence;
-import org.alex73.korpus.shared.WordsDetailsChecks;
+import org.alex73.korpus.shared.ResultText;
 
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
@@ -71,22 +71,23 @@ public class DocumentDetailsPanel extends VerticalPanel {
     HTMLPanel createWords(ResultSentence s, Korpus screen) {
         HTMLPanel p = new HTMLPanel("");
 
-        for (int i = 0; i < s.words.length; i++) {
-            ResultSentence.Word w = s.words[i];
-            String text;
-            if (w.value.equals(",") || w.value.equals(".")) {
-                text = w.value;
-            } else {
-                text = " " + w.value;
+        for (int i = 0; i < s.text.words.length; i++) {
+            for (int j = 0; j < s.text.words[i].length; j++) {
+                ResultText.Word w = s.text.words[i][j];
+                String text;
+                if (w.value.equals(",") || w.value.equals(".")) {
+                    text = w.value;
+                } else {
+                    text = " " + w.value;
+                }
+                InlineLabel wlabel = new InlineLabel(text);
+                if (w.requestedWord) {
+                    wlabel.setStyleName("wordFound");
+                }
+                // wlabel.addMouseDownHandler(screen.handlerShowInfoWord);
+                p.add(wlabel);
+                // screen.widgetsInfoWord.put(wlabel, w);
             }
-            InlineLabel wlabel = new InlineLabel(text);
-            if (WordsDetailsChecks.isFoundWord(screen.curentParams.wordsOrder, screen.curentParams.words, s,
-                    i)) {
-                wlabel.setStyleName("wordFound");
-            }
-            // wlabel.addMouseDownHandler(screen.handlerShowInfoWord);
-            p.add(wlabel);
-            // screen.widgetsInfoWord.put(wlabel, w);
         }
         return p;
     }

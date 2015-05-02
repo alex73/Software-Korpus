@@ -1,7 +1,7 @@
 /**************************************************************************
  Korpus - Corpus Linguistics Software.
 
- Copyright (C) 2013-2015 Aleś Bułojčyk (alex73mail@gmail.com)
+ Copyright (C) 2015 Aleś Bułojčyk (alex73mail@gmail.com)
                Home page: https://sourceforge.net/projects/korpus/
 
  This file is part of Korpus.
@@ -20,19 +20,27 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
 
-package org.alex73.korpus.shared;
+package org.alex73.korpus.compiler;
 
-import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
-import org.alex73.korpus.base.OtherInfo;
-import org.alex73.korpus.base.TextInfo;
+import alex73.corpus.paradigm.P;
 
-/**
- * DTO for results of search by corpus documents.
- */
-@SuppressWarnings("serial")
-public class ResultSentence implements Serializable {
-    public TextInfo doc;
-    public OtherInfo docOther;
-    public ResultText text;
+public class Utils {
+
+    static Random RANDOM = new Random();
+
+    /**
+     * Parts of text should be randomized against ability to restore original book.
+     */
+    static List<P> randomizeOrder(List<P> sentences) {
+        List<P> result = new ArrayList<>(sentences.size());
+        while (!sentences.isEmpty()) {
+            int next = RANDOM.nextInt(sentences.size());
+            result.add(sentences.remove(next));
+        }
+        return result;
+    }
 }

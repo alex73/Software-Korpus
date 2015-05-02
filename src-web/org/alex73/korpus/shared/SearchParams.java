@@ -35,7 +35,7 @@ public class SearchParams implements Serializable {
     };
 
     public enum WordsOrder {
-        PRESET, ANY
+        PRESET, ANY_IN_SENTENCE, ANY_IN_PARAGRAPH
     };
 
     public CorpusType corpusType;

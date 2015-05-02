@@ -30,7 +30,7 @@ import java.util.Map;
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.client.controls.VisibleElement;
 import org.alex73.korpus.shared.ResultSentence;
-import org.alex73.korpus.shared.WordsDetailsChecks;
+import org.alex73.korpus.shared.ResultText;
 import org.alex73.korpus.shared.SearchParams;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -88,7 +88,6 @@ public class Korpus implements EntryPoint {
         if (searchControls.words.isEmpty()) {
             addWordhandler.onClick(null);
         }
-        searchControls.validator.onChange(null);
 
         resultTable = new VerticalPanel();
         RootPanel.get("resultTable").add(resultTable);
@@ -104,7 +103,7 @@ public class Korpus implements EntryPoint {
 
     SearchParams curentParams;
     Map<Anchor, ResultSentence> widgetsInfoDoc = new HashMap<Anchor, ResultSentence>();
-    Map<InlineLabel, ResultSentence.Word> widgetsInfoWord = new HashMap<InlineLabel, ResultSentence.Word>();
+    Map<InlineLabel, ResultText.Word> widgetsInfoWord = new HashMap<InlineLabel, ResultText.Word>();
 
     ClickHandler handlerShowInfoDoc = new ClickHandler() {
         public void onClick(ClickEvent event) {
@@ -121,7 +120,7 @@ public class Korpus implements EntryPoint {
     MouseDownHandler handlerShowInfoWord = new MouseDownHandler() {
         @Override
         public void onMouseDown(MouseDownEvent event) {
-            ResultSentence.Word info = widgetsInfoWord.get(event.getSource());
+            ResultText.Word info = widgetsInfoWord.get(event.getSource());
             if (info == null) {
                 return;
             }
@@ -164,8 +163,7 @@ public class Korpus implements EntryPoint {
         searchControls.errorMessage.setText("Дэталі...");
         try {
             int[] req = pages.get(pageIndex);
-            searchService.getSentences(korpus ? SearchParams.CorpusType.STANDARD
-                    : SearchParams.CorpusType.UNPROCESSED, req, new AsyncCallback<ResultSentence[]>() {
+            searchService.getSentences(curentParams, req, new AsyncCallback<ResultSentence[]>() {
                 @Override
                 public void onSuccess(ResultSentence[] result) {
                     showResults(pageIndex, result);
@@ -213,32 +211,41 @@ public class Korpus implements EntryPoint {
 
             p.add(doclabel);
 
-            int firstFoundWord = -1;
-            for (int i = 0; i < s.words.length && firstFoundWord < 0; i++) {
-                if (WordsDetailsChecks.isFoundWord(curentParams.wordsOrder, curentParams.words, s, i)) {
-                    firstFoundWord = i;
-                    break;
+            boolean alreadyFound = false;
+            for (int i = 0; i < s.text.words.length; i++) {
+                int firstFoundWord = -1;
+                for (int j = 0; j < s.text.words[i].length; j++) {
+                    if (s.text.words[i][j].requestedWord) {
+                        firstFoundWord = j;
+                        break;
+                    }
+                }
+                if (firstFoundWord >= 0) {
+                    if (alreadyFound) {
+                        p.add(new InlineLabel(" ... "));
+                    } else {
+                        alreadyFound = true;
+                    }
+                    int begWord = Math.max(firstFoundWord - 6, 0);
+                    int endWord = Math.min(s.text.words[i].length - 1, firstFoundWord + 6);
+                    for (int j = begWord; j <= endWord; j++) {
+                        ResultText.Word w = s.text.words[i][j];
+                        String text;
+                        if (w.value.equals(",") || w.value.equals(".")) {
+                            text = w.value;
+                        } else {
+                            text = " " + w.value;
+                        }
+                        InlineLabel wlabel = new InlineLabel(text);
+                        if (w.requestedWord) {
+                            wlabel.setStyleName("wordFound");
+                        }
+                        wlabel.addMouseDownHandler(handlerShowInfoWord);
+                        p.add(wlabel);
+                        widgetsInfoWord.put(wlabel, w);
+                    }
                 }
             }
-            int begWord = Math.max(firstFoundWord - 6, 0);
-            int endWord = Math.min(s.words.length - 1, firstFoundWord + 6);
-            for (int i = begWord; i <= endWord; i++) {
-                ResultSentence.Word w = s.words[i];
-                String text;
-                if (w.value.equals(",") || w.value.equals(".")) {
-                    text = w.value;
-                } else {
-                    text = " " + w.value;
-                }
-                InlineLabel wlabel = new InlineLabel(text);
-                if (WordsDetailsChecks.isFoundWord(curentParams.wordsOrder, curentParams.words, s, i)) {
-                    wlabel.setStyleName("wordFound");
-                }
-                wlabel.addMouseDownHandler(handlerShowInfoWord);
-                p.add(wlabel);
-                widgetsInfoWord.put(wlabel, w);
-            }
-
             widgetsInfoDoc.put(doclabel, s);
 
             resultTable.add(p);

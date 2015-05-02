@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -50,7 +51,6 @@ import org.apache.commons.io.IOUtils;
 
 import alex73.corpus.paradigm.P;
 import alex73.corpus.paradigm.Part;
-import alex73.corpus.paradigm.S;
 import alex73.corpus.paradigm.Text;
 
 /**
@@ -137,26 +137,24 @@ public class OtherLoading {
 
         Text text = TEIParser.constructXML(Arrays.asList(line));
 
-        Marshaller m = TEIParser.CONTEXT.createMarshaller();
-        ByteArrayOutputStream ba = new ByteArrayOutputStream();
-        StreamResult mOut = new StreamResult(ba);
-        List<S> sentences = new ArrayList<>();
+        List<P> sentences = new ArrayList<>();
         for (Object o : text.getBody().getHeadOrPOrDiv()) {
             if (o instanceof P) {
-                P p = (P) o;
-                for (Object o2 : p.getSOrTag()) {
-                    if (o2 instanceof S) {
-                        sentences.add((S) o2);
-                    }
-                }
+                sentences.add((P) o);
             } else if (o instanceof Part) {
             }
         }
-        for (S s : sentences) {
-            ba.reset();
-            m.marshal(s, mOut);
-            lucene.addSentence(s, ba.toByteArray(), volume, textUrl);
-            statWords += s.getWOrTag().size();
+        sentences = Utils.randomizeOrder(sentences);
+
+        Marshaller m = TEIParser.CONTEXT.createMarshaller();
+        for (P p : sentences) {
+            ByteArrayOutputStream ba = new ByteArrayOutputStream();
+            try (GZIPOutputStream baz = new GZIPOutputStream(ba)) {
+                StreamResult mOut = new StreamResult(baz);
+                m.marshal(p, mOut);
+            }
+            int c = lucene.addSentence(p, ba.toByteArray(), volume, textUrl);
+            statWords += c;
         }
     }
 }

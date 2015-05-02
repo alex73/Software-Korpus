@@ -34,9 +34,9 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
-import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -53,15 +53,12 @@ import org.apache.commons.io.FileUtils;
 
 import alex73.corpus.paradigm.P;
 import alex73.corpus.paradigm.Part;
-import alex73.corpus.paradigm.S;
 import alex73.corpus.paradigm.Text;
 
 /**
  * Class for loading Corpus texts into searchable cache.
  */
 public class KorpusLoading {
-
-    static Random RANDOM = new Random();
 
     static LuceneDriverKorpus lucene;
 
@@ -70,7 +67,7 @@ public class KorpusLoading {
     static Set<String> authors = new TreeSet<>();
 
     static void processKorpus() throws Exception {
-        File dir =new File("Korpus-cache/"); 
+        File dir = new File("Korpus-cache/");
         FileUtils.deleteDirectory(dir);
         dir.mkdirs();
         lucene = new LuceneDriverKorpus("Korpus-cache/", true);
@@ -217,31 +214,24 @@ public class KorpusLoading {
         }
         Text text = TEIParser.constructXML(doc);
 
-        Marshaller m = TEIParser.CONTEXT.createMarshaller();
-        ByteArrayOutputStream ba = new ByteArrayOutputStream();
-        StreamResult mOut = new StreamResult(ba);
-        int id = 1;
-        List<S> sentences = new ArrayList<>();
+        List<P> sentences = new ArrayList<>();
         for (Object o : text.getBody().getHeadOrPOrDiv()) {
             if (o instanceof P) {
-                P p = (P) o;
-                for (Object o2 : p.getSOrTag()) {
-                    if (o2 instanceof S) {
-                        sentences.add((S) o2);
-                    }
-                }
+                sentences.add((P) o);
             } else if (o instanceof Part) {
             }
         }
-        sentences = randomizeOrder(sentences);
-        for (S s : sentences) {
-            ba.reset();
-            m.marshal(s, mOut);
-            String stylegenre = "";
-            String[] authors = new String[0];
-            lucene.addSentence(s, ba.toByteArray(), textId, doc.textInfo);
-            statWords += s.getWOrTag().size();
-            id++;
+        sentences = Utils.randomizeOrder(sentences);
+
+        Marshaller m = TEIParser.CONTEXT.createMarshaller();
+        for (P p : sentences) {
+            ByteArrayOutputStream ba = new ByteArrayOutputStream();
+            try (GZIPOutputStream baz = new GZIPOutputStream(ba)) {
+                StreamResult mOut = new StreamResult(baz);
+                m.marshal(p, mOut);
+            }
+            int c = lucene.addSentence(p, ba.toByteArray(), textId, doc.textInfo);
+            statWords += c;
         }
 
         String title = "";
@@ -254,14 +244,5 @@ public class KorpusLoading {
             title = doc.textInfo.title;
         }
         lucene.addText(textId, doc.textInfo);
-    }
-
-    static List<S> randomizeOrder(List<S> sentences) {
-        List<S> result = new ArrayList<>(sentences.size());
-        while (!sentences.isEmpty()) {
-            int next = RANDOM.nextInt(sentences.size());
-            result.add(sentences.remove(next));
-        }
-        return result;
     }
 }
