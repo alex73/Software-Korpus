@@ -1,7 +1,9 @@
 package org.alex73.korpus.server.engine;
 
+import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
+import org.apache.lucene.document.IntField;
 import org.apache.lucene.index.IndexOptions;
 
 public class LuceneFields {
@@ -60,4 +62,30 @@ public class LuceneFields {
     public Field fieldTextTitle;
     public Field fieldTextYearWritten;
     public Field fieldTextYearPublished;
+
+    public LuceneFields() {
+        // words fields
+        fieldSentenceValues = new Field("value", "", TYPE_NOTSTORED_INDEXED);
+        fieldSentenceDBGrammarTags = new Field("dbGrammarTag", "", TYPE_NOTSTORED_INDEXED);
+        fieldSentenceLemmas = new Field("lemma", "", TYPE_NOTSTORED_INDEXED);
+        fieldSentenceXML = new Field("xml", new byte[0], TYPE_STORED_NOTINDEXED);
+
+        // korpus text fields for filtering
+        fieldSentenceTextID = new IntField("textId", 0, TYPE_STORED_NOTINDEXED_INT);
+        fieldSentenceTextStyleGenre = new Field("textStyleGenre", "", TYPE_NOTSTORED_INDEXED);
+        fieldSentenceTextAuthor = new Field("textAuthor", "", TYPE_NOTSTORED_INDEXED);
+        fieldSentenceTextWrittenYear = new IntField("writtenYear", 0, TYPE_NOTSTORED_INDEXED_INT);
+        fieldSentenceTextPublishedYear = new IntField("publishedYear", 0, TYPE_NOTSTORED_INDEXED_INT);
+
+        // korpus text info fields
+        fieldTextID = new IntField("id", 0, TYPE_NOTSTORED_INDEXED_INT);
+        fieldTextAuthors = new Field("authors", "", TYPE_STORED_NOTINDEXED);
+        fieldTextTitle = new Field("title", "", TYPE_STORED_NOTINDEXED);
+        fieldTextYearWritten = new IntField("textYearWritten", 0, TYPE_STORED_NOTINDEXED_INT);
+        fieldTextYearPublished = new IntField("textYearPublished", 0, TYPE_STORED_NOTINDEXED_INT);
+
+        // other text fields
+        fieldSentenceTextVolume = new Field("textVolume", "", TYPE_NOTSTORED_INDEXED);
+        fieldSentenceTextURL = new Field("textURL", "", TYPE_STORED_NOTINDEXED);
+    }
 }

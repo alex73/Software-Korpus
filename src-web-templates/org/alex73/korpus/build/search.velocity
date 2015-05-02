@@ -96,14 +96,23 @@
 #end
 
 <div id="wordsBlock"></div>
-<button id="btnAddWord" style="float: left;">Дадаць слова</button>
+
+#if ( $mode == 'cluster' )
+  Слоў злева: <input id="txtWordsBefore" type="text" value="1"></input><br/>
+  Слоў справа: <input id="txtWordsAfter" type="text" value="1"></input><br/>
+#else
+  <button id="btnAddWord" style="float: left;">Дадаць слова</button>
+#end
+
 <div style="clear: both"></div>
 
-<div class="block">
-<input type="radio" name="order" id="orderPreset" checked="on">Вызначаны парадак</input>
-<input type="radio" name="order" id="orderAnySentence">Любая адлегласць у межах сказа</input>
-<input type="radio" name="order" id="orderAnyParagraph">Любая адлегласць у межах абзаца</input>
-</div>
+#if ( $mode == 'search' )
+  <div class="block">
+    <input type="radio" name="order" id="orderPreset" checked="on">Вызначаны парадак</input>
+    <input type="radio" name="order" id="orderAnySentence">Любая адлегласць у межах сказа</input>
+    <input type="radio" name="order" id="orderAnyParagraph">Любая адлегласць у межах абзаца</input>
+  </div>
+#end
 
 <div class="word" id="templateWord" style="display:none">
   <fieldset> <legend>Слова</legend>

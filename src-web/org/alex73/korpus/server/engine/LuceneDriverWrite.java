@@ -9,8 +9,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.analysis.core.WhitespaceAnalyzer;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.IntField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
@@ -37,29 +35,26 @@ public class LuceneDriverWrite extends LuceneFields {
         indexWriter = new IndexWriter(dir, config);
 
         docSentence = new Document();
-        docSentence.add(fieldSentenceValues = new Field("value", "", TYPE_NOTSTORED_INDEXED));
-        docSentence.add(fieldSentenceDBGrammarTags = new Field("dbGrammarTag", "", TYPE_NOTSTORED_INDEXED));
-        docSentence.add(fieldSentenceLemmas = new Field("lemma", "", TYPE_NOTSTORED_INDEXED));
-        docSentence.add(fieldSentenceXML = new Field("xml", new byte[0], TYPE_STORED_NOTINDEXED));
+        docSentence.add(fieldSentenceValues);
+        docSentence.add(fieldSentenceDBGrammarTags);
+        docSentence.add(fieldSentenceLemmas);
+        docSentence.add(fieldSentenceXML);
 
-        docSentence.add(fieldSentenceTextID = new IntField("textId", 0, TYPE_STORED_NOTINDEXED_INT));
-        docSentence
-                .add(fieldSentenceTextStyleGenre = new Field("textStyleGenre", "", TYPE_NOTSTORED_INDEXED));
-        docSentence.add(fieldSentenceTextAuthor = new Field("textAuthor", "", TYPE_NOTSTORED_INDEXED));
-        docSentence.add(fieldSentenceTextWrittenYear = new IntField("writtenYear", 0,
-                TYPE_NOTSTORED_INDEXED_INT));
-        docSentence.add(fieldSentenceTextPublishedYear = new IntField("publishedYear", 0,
-                TYPE_NOTSTORED_INDEXED_INT));
+        docSentence.add(fieldSentenceTextID);
+        docSentence.add(fieldSentenceTextStyleGenre);
+        docSentence.add(fieldSentenceTextAuthor);
+        docSentence.add(fieldSentenceTextWrittenYear);
+        docSentence.add(fieldSentenceTextPublishedYear);
+
+        docSentence.add(fieldSentenceTextVolume);
+        docSentence.add(fieldSentenceTextURL);
 
         docText = new Document();
-        docText.add(fieldTextID = new IntField("id", 0, TYPE_NOTSTORED_INDEXED_INT));
-        docText.add(fieldTextAuthors = new Field("authors", "", TYPE_STORED_NOTINDEXED));
-        docText.add(fieldTextTitle = new Field("title", "", TYPE_STORED_NOTINDEXED));
-        docText.add(fieldTextYearWritten = new IntField("textYearWritten", 0, TYPE_STORED_NOTINDEXED_INT));
-        docText.add(fieldTextYearPublished = new IntField("textYearPublished", 0, TYPE_STORED_NOTINDEXED_INT));
-
-        docSentence.add(fieldSentenceTextVolume = new Field("textVolume", "", TYPE_NOTSTORED_INDEXED));
-        docSentence.add(fieldSentenceTextURL = new Field("textURL", "", TYPE_STORED_NOTINDEXED));
+        docText.add(fieldTextID);
+        docText.add(fieldTextAuthors);
+        docText.add(fieldTextTitle);
+        docText.add(fieldTextYearWritten);
+        docText.add(fieldTextYearPublished);
     }
 
     public void shutdown() throws Exception {

@@ -93,9 +93,18 @@ public class SearchControls extends BaseControlsWrapper {
             text.volume = SuggestBox.wrap(oraVolumes, elVolume);
         }
 
-        orderPreset = SimpleRadioButton.wrap(DOM.getElementById("orderPreset"));
-        orderAnySentence = SimpleRadioButton.wrap(DOM.getElementById("orderAnySentence"));
-        orderAnyParagraph = SimpleRadioButton.wrap(DOM.getElementById("orderAnyParagraph"));
+        Element elOrderPreset = DOM.getElementById("orderPreset");
+        if (elOrderPreset != null) {
+            orderPreset = SimpleRadioButton.wrap(elOrderPreset);
+        }
+        Element elOrderAnySentence = DOM.getElementById("orderAnySentence");
+        if (elOrderAnySentence != null) {
+            orderAnySentence = SimpleRadioButton.wrap(elOrderAnySentence);
+        }
+        Element elOrderAnyParagraph = DOM.getElementById("orderAnyParagraph");
+        if (elOrderAnyParagraph != null) {
+            orderAnyParagraph = SimpleRadioButton.wrap(elOrderAnyParagraph);
+        }
 
         if (text.stylegenre != null) {
             text.stylegenre.addClickHandler(new ClickHandler() {
@@ -166,6 +175,7 @@ public class SearchControls extends BaseControlsWrapper {
         SearchParams req = new SearchParams();
 
         if (text.author != null) {
+            // korpus textx
             req.corpusType = SearchParams.CorpusType.STANDARD;
             req.textStandard.author = text.author.getValue();
         }
@@ -185,6 +195,7 @@ public class SearchControls extends BaseControlsWrapper {
             req.textStandard.yearWrittenTo = txt2int(text.yearWrittenTo);
         }
         if (text.volume != null) {
+            // other texts
             req.corpusType = SearchParams.CorpusType.UNPROCESSED;
             req.textUnprocessed.volume = text.volume.getValue();
         }
@@ -200,12 +211,18 @@ public class SearchControls extends BaseControlsWrapper {
             }
         }
 
-        if (Boolean.TRUE.equals(orderAnyParagraph.getValue())) {
-            req.wordsOrder = WordsOrder.ANY_IN_PARAGRAPH;
-        } else if (Boolean.TRUE.equals(orderAnySentence.getValue())) {
-            req.wordsOrder = WordsOrder.ANY_IN_SENTENCE;
-        } else {
+        if (orderPreset == null) {
+            // concordance
             req.wordsOrder = WordsOrder.PRESET;
+        } else {
+            // search
+            if (Boolean.TRUE.equals(orderAnyParagraph.getValue())) {
+                req.wordsOrder = WordsOrder.ANY_IN_PARAGRAPH;
+            } else if (Boolean.TRUE.equals(orderAnySentence.getValue())) {
+                req.wordsOrder = WordsOrder.ANY_IN_SENTENCE;
+            } else {
+                req.wordsOrder = WordsOrder.PRESET;
+            }
         }
 
         return req;

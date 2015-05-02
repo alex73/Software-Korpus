@@ -125,66 +125,72 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     @Override
     public InitialData getInitialData() throws Exception {
         LOGGER.info(">> getInitialData");
-        InitialData result = new InitialData();
+        try {
+            InitialData result = new InitialData();
 
-        Properties props = new Properties();
-        try (InputStream in = new FileInputStream(dirPrefix + "/Korpus-cache/stat.properties")) {
-            props.load(in);
+            Properties props = new Properties();
+            try (InputStream in = new FileInputStream(dirPrefix + "/Korpus-cache/stat.properties")) {
+                props.load(in);
+            }
+            result.authors = Arrays.asList(props.getProperty("authors").split(";"));
+
+            props = new Properties();
+            try (InputStream in = new FileInputStream(dirPrefix + "/Other-cache/stat.properties")) {
+                props.load(in);
+            }
+            result.volumes = Arrays.asList(props.getProperty("volumes").split(";"));
+
+            LOGGER.info("<< getInitialData");
+            return result;
+        } catch (Exception ex) {
+            LOGGER.error("getInitialData", ex);
+            throw ex;
         }
-        result.authors = Arrays.asList(props.getProperty("authors").split(";"));
-
-        props = new Properties();
-        try (InputStream in = new FileInputStream(dirPrefix + "/Other-cache/stat.properties")) {
-            props.load(in);
-        }
-        result.volumes = Arrays.asList(props.getProperty("volumes").split(";"));
-
-        LOGGER.info("<< getInitialData");
-        return result;
     }
 
     @Override
-    public SearchResult search(final SearchParams params, LatestMark latest) {
+    public SearchResult search(final SearchParams params, LatestMark latest) throws Exception {
         LOGGER.info(">> Request from " + getThreadLocalRequest().getRemoteAddr());
-        if (params.isTooSimple()) {
-            LOGGER.info("<< Request too simple");
-            throw new RuntimeException(ServerError.REQUIEST_TOO_SIMPLE);
-        }
-        BooleanQuery query = new BooleanQuery();
-        LuceneFilter process = getProcess(params.corpusType);
-        if (params.corpusType == CorpusType.STANDARD) {
-            process.addKorpusTextFilter(query, params);
-        } else {
-            process.addOtherTextFilter(query, params);
-        }
-
-        for (SearchParams.Word w : params.words) {
-            w.word = WordNormalizer.normalize(w.word);
-            if (w.word.length() > 0) {
-                Query wq;
-                if (w.allForms) {
-                    w.lemmas = findAllLemmas(w.word);
-                    if (w.lemmas.isEmpty()) {
-                        throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
-                    }
-                    BooleanQuery qLemmas = new BooleanQuery();
-                    for (String lemma : w.lemmas) {
-                        qLemmas.add(new TermQuery(process.getLemmaTerm(lemma)), BooleanClause.Occur.SHOULD);
-                    }
-                    wq = qLemmas;
-                } else {
-                    wq = new TermQuery(process.getValueTerm(w.word));
-                }
-
-                query.add(wq, BooleanClause.Occur.MUST);
-            }
-            if (w.grammar != null) {
-                Query wq = new RegexpQuery(process.getGrammarTerm(w.grammar));
-                query.add(wq, BooleanClause.Occur.MUST);
-            }
-        }
-
         try {
+            if (params.isTooSimple()) {
+                LOGGER.info("<< Request too simple");
+                throw new RuntimeException(ServerError.REQUIEST_TOO_SIMPLE);
+            }
+            BooleanQuery query = new BooleanQuery();
+            LuceneFilter process = getProcess(params.corpusType);
+            if (params.corpusType == CorpusType.STANDARD) {
+                process.addKorpusTextFilter(query, params);
+            } else {
+                process.addOtherTextFilter(query, params);
+            }
+
+            for (SearchParams.Word w : params.words) {
+                w.word = WordNormalizer.normalize(w.word);
+                if (w.word.length() > 0) {
+                    Query wq;
+                    if (w.allForms) {
+                        w.lemmas = findAllLemmas(w.word);
+                        if (w.lemmas.isEmpty()) {
+                            throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
+                        }
+                        BooleanQuery qLemmas = new BooleanQuery();
+                        for (String lemma : w.lemmas) {
+                            qLemmas.add(new TermQuery(process.getLemmaTerm(lemma)),
+                                    BooleanClause.Occur.SHOULD);
+                        }
+                        wq = qLemmas;
+                    } else {
+                        wq = new TermQuery(process.getValueTerm(w.word));
+                    }
+
+                    query.add(wq, BooleanClause.Occur.MUST);
+                }
+                if (w.grammar != null) {
+                    Query wq = new RegexpQuery(process.getGrammarTerm(w.grammar));
+                    query.add(wq, BooleanClause.Occur.MUST);
+                }
+            }
+
             ScoreDoc latestDoc;
             if (latest != null) {
                 latestDoc = new ScoreDoc(latest.doc, latest.score, latest.shardIndex);
@@ -224,8 +230,8 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
             LOGGER.info("<< Result: found: " + result.foundIDs.length + " hasMore:" + result.hasMore);
             return result;
         } catch (Throwable ex) {
-            LOGGER.error("", ex);
-            throw new RuntimeException(ex);
+            LOGGER.error("search", ex);
+            throw ex;
         }
     }
 
@@ -243,7 +249,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     }
 
     @Override
-    public ResultSentence[] getSentences(SearchParams params, int[] list) {
+    public ResultSentence[] getSentences(SearchParams params, int[] list) throws Exception {
         try {
             ResultSentence[] result = new ResultSentence[list.length];
             for (int i = 0; i < list.length; i++) {
@@ -256,8 +262,8 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
             }
             return result;
         } catch (Exception ex) {
-            ex.printStackTrace();
-            throw new RuntimeException(ex);
+            LOGGER.error("getSentences", ex);
+            throw ex;
         }
     }
 

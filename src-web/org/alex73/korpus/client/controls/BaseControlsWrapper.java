@@ -270,8 +270,10 @@ public abstract class BaseControlsWrapper {
     }
 
     protected void outRadioButton(StringBuilder out, String name, SimpleRadioButton radio) {
-        if (Boolean.TRUE.equals(radio.getValue())) {
-            out.append('&').append(name);
+        if (radio != null) {
+            if (Boolean.TRUE.equals(radio.getValue())) {
+                out.append('&').append(name);
+            }
         }
     }
 

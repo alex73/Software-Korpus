@@ -45,6 +45,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 /**
  * Service for find by grammar database.
  */
+@SuppressWarnings("serial")
 public class GrammarServiceImpl extends RemoteServiceServlet implements GrammarService {
 
     static final Logger LOGGER = LogManager.getLogger(GrammarServiceImpl.class);

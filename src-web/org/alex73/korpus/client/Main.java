@@ -39,10 +39,8 @@ public class Main implements EntryPoint {
         String url = Window.Location.getHref();
         if (url.contains("grammarDB.html")) {
             new GrammarDB().onModuleLoad();
-        } else if (url.contains("otherSearch.html")) {
-            new Korpus(false).onModuleLoad();
         } else {
-            new Korpus(true).onModuleLoad();
+            new Korpus().onModuleLoad();
         }
     }
 

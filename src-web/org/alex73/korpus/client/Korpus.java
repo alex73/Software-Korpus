@@ -35,6 +35,7 @@ import org.alex73.korpus.shared.SearchParams;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.MouseDownEvent;
@@ -48,11 +49,9 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -60,37 +59,43 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class Korpus implements EntryPoint {
 
     private final SearchServiceAsync searchService = GWT.create(SearchService.class);
-    private final boolean korpus;
 
     SearchControls searchControls;
 
-    VerticalPanel resultTable;
+    ResultsSearch resultsSearch;
+    ResultsConcordance resultsConcordance;
 
     DecoratedPopupPanel docInfoPopup;
 
     List<int[]> pages = new ArrayList<int[]>();
     boolean hasMore;
     SearchService.LatestMark latestMark;
-
-    public Korpus(boolean useKorpus) {
-        this.korpus = useKorpus;
-    }
+    boolean search;
 
     public void onModuleLoad() {
         Button btnSearch = Button.wrap(DOM.getElementById("btnSearch"));
         btnSearch.addClickHandler(searchHandler);
 
-        Button btnAddWord = Button.wrap(DOM.getElementById("btnAddWord"));
-        btnAddWord.addClickHandler(addWordhandler);
+        Element elBtnAddWord = DOM.getElementById("btnAddWord");
+        if (elBtnAddWord != null) {
+            Button btnAddWord = Button.wrap(elBtnAddWord);
+            btnAddWord.addClickHandler(addWordhandler);
+        }
 
         searchControls = new SearchControls(History.getToken(), searchService);
+
+        search = searchControls.orderPreset != null;
 
         if (searchControls.words.isEmpty()) {
             addWordhandler.onClick(null);
         }
-
-        resultTable = new VerticalPanel();
-        RootPanel.get("resultTable").add(resultTable);
+        if (search) {
+            resultsSearch = new ResultsSearch();
+            RootPanel.get("resultTable").add(resultsSearch);
+        } else {
+            resultsConcordance = new ResultsConcordance();
+            RootPanel.get("resultTable").add(resultsConcordance);
+        }
 
         docInfoPopup = new DecoratedPopupPanel(true);
         docInfoPopup.ensureDebugId("cwBasicPopup-simplePopup");
@@ -166,7 +171,12 @@ public class Korpus implements EntryPoint {
             searchService.getSentences(curentParams, req, new AsyncCallback<ResultSentence[]>() {
                 @Override
                 public void onSuccess(ResultSentence[] result) {
-                    showResults(pageIndex, result);
+                    if (search) {
+                        resultsSearch.showResults(Korpus.this, pageIndex, result);
+                    } else {
+                        resultsConcordance.showResults(Korpus.this, pageIndex, result,
+                                curentParams.words.size());
+                    }
                 }
 
                 @Override
@@ -183,105 +193,12 @@ public class Korpus implements EntryPoint {
         searchControls.errorMessage.setText("Нічога не знойдзена");
         widgetsInfoDoc.clear();
         widgetsInfoWord.clear();
-        resultTable.clear();
-    }
-
-    void showResults(int pageIndex, ResultSentence[] sentences) {
-        int c = 0;
-        for (int[] p : pages) {
-            c += p.length;
+        if (resultsSearch != null) {
+            resultsSearch.clear();
         }
-        if (hasMore) {
-            searchControls.errorMessage.setText("Знойдзена больш за " + c);
-        } else {
-            searchControls.errorMessage.setText("Знойдзена: " + c);
+        if (resultsConcordance != null) {
+            resultsConcordance.clear();
         }
-
-        widgetsInfoDoc.clear();
-        widgetsInfoWord.clear();
-        resultTable.clear();
-
-        resultTable.add(createPagesIndexPanel(pageIndex));
-
-        for (ResultSentence s : sentences) {
-            HTMLPanel p = new HTMLPanel("");
-            Anchor doclabel = new Anchor("падрабязней... ");
-            doclabel.addClickHandler(handlerShowInfoDoc);
-            // doclabel.addMouseOutHandler(handlerHideInfoDoc);
-
-            p.add(doclabel);
-
-            boolean alreadyFound = false;
-            for (int i = 0; i < s.text.words.length; i++) {
-                int firstFoundWord = -1;
-                for (int j = 0; j < s.text.words[i].length; j++) {
-                    if (s.text.words[i][j].requestedWord) {
-                        firstFoundWord = j;
-                        break;
-                    }
-                }
-                if (firstFoundWord >= 0) {
-                    if (alreadyFound) {
-                        p.add(new InlineLabel(" ... "));
-                    } else {
-                        alreadyFound = true;
-                    }
-                    int begWord = Math.max(firstFoundWord - 6, 0);
-                    int endWord = Math.min(s.text.words[i].length - 1, firstFoundWord + 6);
-                    for (int j = begWord; j <= endWord; j++) {
-                        ResultText.Word w = s.text.words[i][j];
-                        String text;
-                        if (w.value.equals(",") || w.value.equals(".")) {
-                            text = w.value;
-                        } else {
-                            text = " " + w.value;
-                        }
-                        InlineLabel wlabel = new InlineLabel(text);
-                        if (w.requestedWord) {
-                            wlabel.setStyleName("wordFound");
-                        }
-                        wlabel.addMouseDownHandler(handlerShowInfoWord);
-                        p.add(wlabel);
-                        widgetsInfoWord.put(wlabel, w);
-                    }
-                }
-            }
-            widgetsInfoDoc.put(doclabel, s);
-
-            resultTable.add(p);
-        }
-
-        resultTable.add(createPagesIndexPanel(pageIndex));
-    }
-
-    HTMLPanel createPagesIndexPanel(int currentPageIndex) {
-        HTMLPanel panelPages = new HTMLPanel("<br/><br/>");
-        for (int i = 0; i < pages.size(); i++) {
-            if (i == currentPageIndex) {
-                InlineLabel next = new InlineLabel(Integer.toString(i + 1));
-                next.setStyleName("pageIndex");
-                panelPages.add(next);
-            } else {
-                Anchor next = new Anchor(Integer.toString(i + 1));
-                next.setStyleName("pageIndex");
-                final int pi = i;
-                next.addClickHandler(new ClickHandler() {
-                    public void onClick(ClickEvent event) {
-                        requestPageDetails(pi);
-                    }
-                });
-                panelPages.add(next);
-            }
-        }
-        if (hasMore) {
-            Anchor next = new Anchor("Наступная старонка...");
-            next.setStyleName("pageIndex");
-            next.addClickHandler(nextPageHandler);
-            panelPages.add(next);
-        }
-        panelPages.add(new HTMLPanel("<br/><br/>"));
-
-        return panelPages;
     }
 
     ClickHandler addWordhandler = new ClickHandler() {
