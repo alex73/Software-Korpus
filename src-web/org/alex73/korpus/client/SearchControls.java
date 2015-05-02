@@ -28,9 +28,12 @@ import java.util.Map;
 import org.alex73.korpus.client.controls.BaseControlsWrapper;
 import org.alex73.korpus.client.controls.StyleGenrePopup;
 import org.alex73.korpus.shared.StyleGenres;
+import org.alex73.korpus.shared.dto.ClusterParams;
 import org.alex73.korpus.shared.dto.CorpusType;
 import org.alex73.korpus.shared.dto.SearchParams;
 import org.alex73.korpus.shared.dto.SearchParams.WordsOrder;
+import org.alex73.korpus.shared.dto.StandardTextRequest;
+import org.alex73.korpus.shared.dto.UnprocessedTextRequest;
 import org.alex73.korpus.shared.dto.WordRequest;
 
 import com.google.gwt.dom.client.Document;
@@ -108,6 +111,15 @@ public class SearchControls extends BaseControlsWrapper {
             orderAnyParagraph = SimpleRadioButton.wrap(elOrderAnyParagraph);
         }
 
+        Element elTxtWordsBefore = DOM.getElementById("txtWordsBefore");
+        if (elTxtWordsBefore != null) {
+            text.wordsBefore = TextBox.wrap(elTxtWordsBefore);
+        }
+        Element elTxtWordsAfter = DOM.getElementById("txtWordsAfter");
+        if (elTxtWordsAfter != null) {
+            text.wordsAfter = TextBox.wrap(elTxtWordsAfter);
+        }
+
         if (text.stylegenre != null) {
             text.stylegenre.addClickHandler(new ClickHandler() {
                 @Override
@@ -177,29 +189,14 @@ public class SearchControls extends BaseControlsWrapper {
         SearchParams req = new SearchParams();
 
         if (text.author != null) {
-            // korpus textx
+            // korpus texts
             req.corpusType = CorpusType.STANDARD;
-            req.textStandard.author = text.author.getValue();
-        }
-        if (text.styleGenres != null) {
-            req.textStandard.stylegenres = text.styleGenres;
-        }
-        if (text.yearPublishedFrom != null) {
-            req.textStandard.yearPublishedFrom = txt2int(text.yearPublishedFrom);
-        }
-        if (text.yearPublishedTo != null) {
-            req.textStandard.yearPublishedTo = txt2int(text.yearPublishedTo);
-        }
-        if (text.yearWrittenFrom != null) {
-            req.textStandard.yearWrittenFrom = txt2int(text.yearWrittenFrom);
-        }
-        if (text.yearWrittenTo != null) {
-            req.textStandard.yearWrittenTo = txt2int(text.yearWrittenTo);
+            req.textStandard = createStandardTextFilter();
         }
         if (text.volume != null) {
             // other texts
             req.corpusType = CorpusType.UNPROCESSED;
-            req.textUnprocessed.volume = text.volume.getValue();
+            req.textUnprocessed = createUnprocessedTextFilter();
         }
 
         for (WordControl wc : words) {
@@ -225,6 +222,70 @@ public class SearchControls extends BaseControlsWrapper {
             } else {
                 req.wordsOrder = WordsOrder.PRESET;
             }
+        }
+
+        return req;
+    }
+
+    private StandardTextRequest createStandardTextFilter() {
+        StandardTextRequest req = new StandardTextRequest();
+        if (text.author != null) {
+            // korpus textx
+            req.author = text.author.getValue();
+        }
+        if (text.styleGenres != null) {
+            req.stylegenres = text.styleGenres;
+        }
+        if (text.yearPublishedFrom != null) {
+            req.yearPublishedFrom = txt2int(text.yearPublishedFrom);
+        }
+        if (text.yearPublishedTo != null) {
+            req.yearPublishedTo = txt2int(text.yearPublishedTo);
+        }
+        if (text.yearWrittenFrom != null) {
+            req.yearWrittenFrom = txt2int(text.yearWrittenFrom);
+        }
+        if (text.yearWrittenTo != null) {
+            req.yearWrittenTo = txt2int(text.yearWrittenTo);
+        }
+        return req;
+    }
+
+    private UnprocessedTextRequest createUnprocessedTextFilter() {
+        UnprocessedTextRequest req = new UnprocessedTextRequest();
+        if (text.volume != null) {
+            // other texts
+            req.volume = text.volume.getValue();
+        }
+        return req;
+    }
+
+    public ClusterParams createClusterRequest() {
+        ClusterParams req = new ClusterParams();
+
+        if (text.author != null) {
+            // korpus texts
+            req.corpusType = CorpusType.STANDARD;
+            req.textStandard = createStandardTextFilter();
+        } else {
+            // other texts
+            req.corpusType = CorpusType.UNPROCESSED;
+            req.textUnprocessed = createUnprocessedTextFilter();
+        }
+
+        WordControl wc = words.get(0);
+        WordRequest w = new WordRequest();
+        w.word = wc.word.getValue();
+        w.allForms = Boolean.TRUE.equals(wc.allForms.getValue());
+        w.grammar = wc.wordGrammar;
+
+        req.word = w;
+
+        if (text.wordsBefore != null) {
+            req.wordsBefore = Integer.parseInt(text.wordsBefore.getValue());
+        }
+        if (text.wordsAfter != null) {
+            req.wordsAfter = Integer.parseInt(text.wordsAfter.getValue());
         }
 
         return req;

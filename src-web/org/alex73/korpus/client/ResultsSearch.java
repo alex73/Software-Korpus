@@ -1,6 +1,6 @@
 package org.alex73.korpus.client;
 
-import org.alex73.korpus.shared.dto.ResultSentence;
+import org.alex73.korpus.shared.dto.SearchResults;
 import org.alex73.korpus.shared.dto.WordResult;
 
 import com.google.gwt.user.client.ui.Anchor;
@@ -9,8 +9,13 @@ import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class ResultsSearch extends VerticalPanel {
+    Korpus korpus;
 
-    public void showResults(Korpus korpus, int pageIndex, ResultSentence[] sentences) {
+    public ResultsSearch(Korpus korpus) {
+        this.korpus = korpus;
+    }
+
+    public void showResults(int pageIndex, SearchResults[] sentences) {
         int c = 0;
         for (int[] p : korpus.pages) {
             c += p.length;
@@ -25,9 +30,9 @@ public class ResultsSearch extends VerticalPanel {
         korpus.widgetsInfoWord.clear();
         clear();
 
-        add(PagesIndexPanel.createPagesIndexPanel(korpus, pageIndex));
+        add(PagesIndexPanel.createPagesIndexPanel(korpus, pageIndex, korpus.pages.size(),pageShowCallback));
 
-        for (ResultSentence s : sentences) {
+        for (SearchResults s : sentences) {
             HTMLPanel p = new HTMLPanel("");
             Anchor doclabel = new Anchor("падрабязней... ");
             korpus.widgetsInfoDoc.put(doclabel, s);
@@ -69,8 +74,15 @@ public class ResultsSearch extends VerticalPanel {
             add(p);
         }
 
-        add(PagesIndexPanel.createPagesIndexPanel(korpus, pageIndex));
+        add(PagesIndexPanel.createPagesIndexPanel(korpus, pageIndex, korpus.pages.size(),pageShowCallback));
     }
+
+    PagesIndexPanel.IPageRequest pageShowCallback = new PagesIndexPanel.IPageRequest() {
+        @Override
+        public void showPage(int pageIndex) {
+            korpus.requestPageDetails(pageIndex);
+        }
+    };
 
     public static String wordToText(WordResult w) {
         if (w.value.equals(",") || w.value.equals(".")) {

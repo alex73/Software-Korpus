@@ -22,16 +22,21 @@
 
 package org.alex73.korpus.client;
 
-import org.alex73.korpus.shared.dto.ResultSentence;
+import org.alex73.korpus.shared.dto.ClusterParams;
+import org.alex73.korpus.shared.dto.ClusterResults;
+import org.alex73.korpus.shared.dto.SearchResults;
 import org.alex73.korpus.shared.dto.SearchParams;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface SearchServiceAsync {
-    void search(SearchParams params, SearchService.LatestMark latest, AsyncCallback<SearchService.SearchResult> callback)
+    void search(SearchParams params, SearchService.LatestMark latest,
+            AsyncCallback<SearchService.SearchResult> callback) throws Exception;
+
+    void getSentences(SearchParams params, int[] list, AsyncCallback<SearchResults[]> callback)
             throws Exception;
 
-    void getSentences(SearchParams params, int[] list, AsyncCallback<ResultSentence[]> callback) throws Exception;
-
     void getInitialData(AsyncCallback<SearchService.InitialData> callback) throws Exception;
+
+    void calculateClusters(ClusterParams params, AsyncCallback<ClusterResults> callback) throws Exception;
 }

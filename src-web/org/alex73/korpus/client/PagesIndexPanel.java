@@ -8,7 +8,8 @@ import com.google.gwt.user.client.ui.InlineLabel;
 
 public class PagesIndexPanel {
 
-    public static HTMLPanel createPagesIndexPanel(final Korpus korpus, int currentPageIndex) {
+    public static HTMLPanel createPagesIndexPanel(final Korpus korpus, int currentPageIndex, int pagesCount,
+            IPageRequest showCallbask) {
         HTMLPanel panelPages = new HTMLPanel("<br/><br/>");
         for (int i = 0; i < korpus.pages.size(); i++) {
             if (i == currentPageIndex) {
@@ -36,5 +37,9 @@ public class PagesIndexPanel {
         panelPages.add(new HTMLPanel("<br/><br/>"));
 
         return panelPages;
+    }
+
+    public interface IPageRequest {
+        void showPage(int pageIndex);
     }
 }

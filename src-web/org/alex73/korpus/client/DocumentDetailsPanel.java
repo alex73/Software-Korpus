@@ -22,7 +22,7 @@
 
 package org.alex73.korpus.client;
 
-import org.alex73.korpus.shared.dto.ResultSentence;
+import org.alex73.korpus.shared.dto.SearchResults;
 import org.alex73.korpus.shared.dto.WordResult;
 
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -30,7 +30,7 @@ import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class DocumentDetailsPanel extends VerticalPanel {
-    public DocumentDetailsPanel(ResultSentence s, Korpus screen) {
+    public DocumentDetailsPanel(SearchResults s, Korpus screen) {
         String html = "";
 
         html += "<i><u>";
@@ -68,7 +68,7 @@ public class DocumentDetailsPanel extends VerticalPanel {
         add(createWords(s, screen));
     }
 
-    HTMLPanel createWords(ResultSentence s, Korpus screen) {
+    HTMLPanel createWords(SearchResults s, Korpus screen) {
         HTMLPanel p = new HTMLPanel("");
 
         for (int i = 0; i < s.text.words.length; i++) {

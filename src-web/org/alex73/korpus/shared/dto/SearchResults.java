@@ -31,7 +31,7 @@ import org.alex73.korpus.base.TextInfo;
  * DTO for results of search by corpus documents.
  */
 @SuppressWarnings("serial")
-public class ResultSentence implements Serializable {
+public class SearchResults implements Serializable {
     public TextInfo doc;
     public OtherInfo docOther;
     public ResultText text;

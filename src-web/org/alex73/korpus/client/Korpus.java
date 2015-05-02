@@ -29,8 +29,10 @@ import java.util.Map;
 
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.client.controls.VisibleElement;
-import org.alex73.korpus.shared.dto.ResultSentence;
+import org.alex73.korpus.shared.dto.ClusterParams;
+import org.alex73.korpus.shared.dto.ClusterResults;
 import org.alex73.korpus.shared.dto.SearchParams;
+import org.alex73.korpus.shared.dto.SearchResults;
 import org.alex73.korpus.shared.dto.WordResult;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -44,6 +46,7 @@ import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
@@ -64,13 +67,21 @@ public class Korpus implements EntryPoint {
 
     ResultsSearch resultsSearch;
     ResultsConcordance resultsConcordance;
+    ResultsCluster resultsCluster;
 
     DecoratedPopupPanel docInfoPopup;
 
     List<int[]> pages = new ArrayList<int[]>();
+    ClusterResults clusterResults;
     boolean hasMore;
     SearchService.LatestMark latestMark;
     boolean search;
+    boolean cluster;
+
+    SearchParams currentSearchParams;
+    ClusterParams currentClusterParams;
+    Map<Anchor, SearchResults> widgetsInfoDoc = new HashMap<Anchor, SearchResults>();
+    Map<InlineLabel, WordResult> widgetsInfoWord = new HashMap<InlineLabel, WordResult>();
 
     public void onModuleLoad() {
         Button btnSearch = Button.wrap(DOM.getElementById("btnSearch"));
@@ -85,15 +96,19 @@ public class Korpus implements EntryPoint {
         searchControls = new SearchControls(History.getToken(), searchService);
 
         search = searchControls.orderPreset != null;
+        cluster = elBtnAddWord == null;
 
         if (searchControls.words.isEmpty()) {
             addWordhandler.onClick(null);
         }
         if (search) {
-            resultsSearch = new ResultsSearch();
+            resultsSearch = new ResultsSearch(this);
             RootPanel.get("resultTable").add(resultsSearch);
+        } else if (cluster) {
+            resultsCluster = new ResultsCluster(this);
+            RootPanel.get("resultTable").add(resultsCluster);
         } else {
-            resultsConcordance = new ResultsConcordance();
+            resultsConcordance = new ResultsConcordance(this);
             RootPanel.get("resultTable").add(resultsConcordance);
         }
 
@@ -106,13 +121,9 @@ public class Korpus implements EntryPoint {
         mainPart.setVisible(true);
     }
 
-    SearchParams curentParams;
-    Map<Anchor, ResultSentence> widgetsInfoDoc = new HashMap<Anchor, ResultSentence>();
-    Map<InlineLabel, WordResult> widgetsInfoWord = new HashMap<InlineLabel, WordResult>();
-
     ClickHandler handlerShowInfoDoc = new ClickHandler() {
         public void onClick(ClickEvent event) {
-            ResultSentence doc = widgetsInfoDoc.get(event.getSource());
+            SearchResults doc = widgetsInfoDoc.get(event.getSource());
             if (doc == null) {
                 return;
             }
@@ -168,14 +179,13 @@ public class Korpus implements EntryPoint {
         searchControls.errorMessage.setText("Дэталі...");
         try {
             int[] req = pages.get(pageIndex);
-            searchService.getSentences(curentParams, req, new AsyncCallback<ResultSentence[]>() {
+            searchService.getSentences(currentSearchParams, req, new AsyncCallback<SearchResults[]>() {
                 @Override
-                public void onSuccess(ResultSentence[] result) {
+                public void onSuccess(SearchResults[] result) {
                     if (search) {
-                        resultsSearch.showResults(Korpus.this, pageIndex, result);
+                        resultsSearch.showResults(pageIndex, result);
                     } else {
-                        resultsConcordance.showResults(Korpus.this, pageIndex, result,
-                                curentParams.words.size());
+                        resultsConcordance.showResults(pageIndex, result, currentSearchParams.words.size());
                     }
                 }
 
@@ -219,27 +229,45 @@ public class Korpus implements EntryPoint {
 
             History.newItem(searchControls.exportParameters());
             try {
-                final SearchParams params = searchControls.createRequest();
-                curentParams = params;
-                searchService.search(params, null, new AsyncCallback<SearchService.SearchResult>() {
-                    @Override
-                    public void onSuccess(SearchService.SearchResult result) {
-                        curentParams = result.params;
-                        latestMark = result.latest;
-                        hasMore = result.hasMore;
-                        if (result.foundIDs.length > 0) {
-                            pages.add(result.foundIDs);
-                            requestPageDetails(pages.size() - 1);
-                        } else {
-                            showEmptyResults();
-                        }
-                    }
+                if (cluster) {
+                    currentClusterParams = searchControls.createClusterRequest();
+                    searchService.calculateClusters(currentClusterParams,
+                            new AsyncCallback<ClusterResults>() {
+                                @Override
+                                public void onSuccess(ClusterResults result) {
+                                    clusterResults = result;
+                                    resultsCluster.showResults(0);
+                                }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                        searchControls.errorMessage.setText("Памылка сэрвера: " + caught.getMessage());
-                    }
-                });
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    searchControls.errorMessage.setText("Памылка сэрвера: "
+                                            + caught.getMessage());
+                                }
+                            });
+                } else {
+                    currentSearchParams = searchControls.createRequest();
+                    searchService.search(currentSearchParams, null,
+                            new AsyncCallback<SearchService.SearchResult>() {
+                                @Override
+                                public void onSuccess(SearchService.SearchResult result) {
+                                    latestMark = result.latest;
+                                    hasMore = result.hasMore;
+                                    if (result.foundIDs.length > 0) {
+                                        pages.add(result.foundIDs);
+                                        requestPageDetails(pages.size() - 1);
+                                    } else {
+                                        showEmptyResults();
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Throwable caught) {
+                                    searchControls.errorMessage.setText("Памылка сэрвера: "
+                                            + caught.getMessage());
+                                }
+                            });
+                }
             } catch (Exception ex) {
                 searchControls.errorMessage.setText("Памылка сэрвера: " + ex.getMessage());
             }
@@ -252,7 +280,7 @@ public class Korpus implements EntryPoint {
 
             hasMore = false;
             try {
-                searchService.search(curentParams, latestMark,
+                searchService.search(currentSearchParams, latestMark,
                         new AsyncCallback<SearchService.SearchResult>() {
                             @Override
                             public void onSuccess(SearchService.SearchResult result) {

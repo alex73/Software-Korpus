@@ -39,8 +39,10 @@ import javax.xml.bind.Unmarshaller;
 
 import org.alex73.korpus.client.SearchService;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
+import org.alex73.korpus.shared.dto.ClusterParams;
+import org.alex73.korpus.shared.dto.ClusterResults;
 import org.alex73.korpus.shared.dto.CorpusType;
-import org.alex73.korpus.shared.dto.ResultSentence;
+import org.alex73.korpus.shared.dto.SearchResults;
 import org.alex73.korpus.shared.dto.ResultText;
 import org.alex73.korpus.shared.dto.SearchParams;
 import org.alex73.korpus.shared.dto.WordRequest;
@@ -110,7 +112,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         super.destroy();
     }
 
-    private LuceneFilter getProcess(CorpusType corpusType) {
+    protected LuceneFilter getProcess(CorpusType corpusType) {
         if (corpusType == CorpusType.STANDARD) {
             return processKorpus;
         } else {
@@ -161,9 +163,9 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
             BooleanQuery query = new BooleanQuery();
             LuceneFilter process = getProcess(params.corpusType);
             if (params.corpusType == CorpusType.STANDARD) {
-                process.addKorpusTextFilter(query, params);
+                process.addKorpusTextFilter(query, params.textStandard);
             } else {
-                process.addOtherTextFilter(query, params);
+                process.addOtherTextFilter(query, params.textUnprocessed);
             }
 
             for (WordRequest w : params.words) {
@@ -199,19 +201,19 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
             } else {
                 latestDoc = null;
             }
-            ScoreDoc[] found = process.search(query, latestDoc, new LuceneDriverRead.DocFilter() {
-                public boolean isDocAllowed(int docID) {
-                    try {
-                        Document doc = getProcess(params.corpusType).getSentence(docID);
-                        ResultText text = restoreText(params, doc);
-                        return WordsDetailsChecks.isAllowed(params.wordsOrder, params.words, text);
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
-                    }
-                }
-            });
+            ScoreDoc[] found = process.search(query, latestDoc, Settings.KORPUS_SEARCH_RESULT_PAGE + 1,
+                    new LuceneDriverRead.DocFilter() {
+                        public boolean isDocAllowed(int docID) {
+                            try {
+                                Document doc = getProcess(params.corpusType).getSentence(docID);
+                                ResultText text = restoreText(params.corpusType, doc);
+                                return WordsDetailsChecks.isAllowed(params.wordsOrder, params.words, text);
+                            } catch (Exception ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        }
+                    });
             SearchResult result = new SearchResult();
-            result.params = params;
             if (found.length > Settings.KORPUS_SEARCH_RESULT_PAGE) {
                 result.hasMore = true;
                 result.foundIDs = new int[Settings.KORPUS_SEARCH_RESULT_PAGE];
@@ -237,6 +239,19 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         }
     }
 
+    @Override
+    public ClusterResults calculateClusters(ClusterParams params) throws Exception {
+        LOGGER.info(">> Request clusters from " + getThreadLocalRequest().getRemoteAddr());
+        try {
+            ClusterResults res = new ClusterServiceImpl(this).calc(params);
+            LOGGER.info("<< Result clusters");
+            return res;
+        } catch (Throwable ex) {
+            LOGGER.error("clusters", ex);
+            throw ex;
+        }
+    }
+
     List<String> findAllLemmas(String word) {
         Set<String> result = new HashSet<>();
         for (LiteParadigm p : GrammarDBLite.getInstance().getAllParadigms()) {
@@ -251,14 +266,14 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     }
 
     @Override
-    public ResultSentence[] getSentences(SearchParams params, int[] list) throws Exception {
+    public SearchResults[] getSentences(SearchParams params, int[] list) throws Exception {
         try {
-            ResultSentence[] result = new ResultSentence[list.length];
+            SearchResults[] result = new SearchResults[list.length];
             for (int i = 0; i < list.length; i++) {
                 Document doc = getProcess(params.corpusType).getSentence(list[i]);
-                result[i] = new ResultSentence();
+                result[i] = new SearchResults();
                 restoreTextInfo(params, doc, result[i]);
-                result[i].text = restoreText(params, doc);
+                result[i].text = restoreText(params.corpusType, doc);
                 // mark result words
                 WordsDetailsChecks.isAllowed(params.wordsOrder, params.words, result[i].text);
             }
@@ -269,7 +284,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         }
     }
 
-    protected void restoreTextInfo(SearchParams params, Document doc, ResultSentence result) throws Exception {
+    protected void restoreTextInfo(SearchParams params, Document doc, SearchResults result) throws Exception {
 
         if (params.corpusType == CorpusType.STANDARD) {
             result.doc = processKorpus.getKorpusTextInfo(doc);
@@ -278,9 +293,9 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         }
     }
 
-    protected ResultText restoreText(SearchParams params, Document doc) throws Exception {
+    protected ResultText restoreText(CorpusType corpusType, Document doc) throws Exception {
         LuceneFilter process;
-        if (params.corpusType == CorpusType.STANDARD) {
+        if (corpusType == CorpusType.STANDARD) {
             process = processKorpus;
         } else {
             process = processOther;

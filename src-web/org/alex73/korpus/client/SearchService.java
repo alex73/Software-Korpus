@@ -25,8 +25,10 @@ package org.alex73.korpus.client;
 import java.io.Serializable;
 import java.util.List;
 
-import org.alex73.korpus.shared.dto.ResultSentence;
+import org.alex73.korpus.shared.dto.ClusterParams;
+import org.alex73.korpus.shared.dto.ClusterResults;
 import org.alex73.korpus.shared.dto.SearchParams;
+import org.alex73.korpus.shared.dto.SearchResults;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -35,9 +37,9 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 public interface SearchService extends RemoteService {
     SearchResult search(SearchParams params, LatestMark latest) throws Exception;
 
-    ResultSentence[] getSentences(SearchParams params, int[] list) throws Exception;
-    
-    
+    SearchResults[] getSentences(SearchParams params, int[] list) throws Exception;
+
+    ClusterResults calculateClusters(ClusterParams params) throws Exception;
 
     /**
      * Get initial values for display.
@@ -45,7 +47,6 @@ public interface SearchService extends RemoteService {
     InitialData getInitialData() throws Exception;
 
     public static class SearchResult implements Serializable {
-        public SearchParams params;
         public int[] foundIDs;
         public LatestMark latest;
         public boolean hasMore;
@@ -56,7 +57,7 @@ public interface SearchService extends RemoteService {
         public int doc;
         public int shardIndex;
     }
-    
+
     public static class InitialData implements Serializable {
         public List<String> authors;
         public List<String> volumes;

@@ -26,7 +26,8 @@ import org.alex73.korpus.base.OtherInfo;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
 import org.alex73.korpus.server.engine.LuceneDriverRead.DocFilter;
-import org.alex73.korpus.shared.dto.SearchParams;
+import org.alex73.korpus.shared.dto.StandardTextRequest;
+import org.alex73.korpus.shared.dto.UnprocessedTextRequest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -49,17 +50,16 @@ public class LuceneFilter {
         lucene.shutdown();
     }
 
-    public void addKorpusTextFilter(BooleanQuery query, SearchParams params) {
+    public void addKorpusTextFilter(BooleanQuery query, StandardTextRequest filter) {
         // author
-        if (StringUtils.isNotEmpty(params.textStandard.author)) {
-            Query q = new TermQuery(new Term(lucene.fieldSentenceTextAuthor.name(),
-                    params.textStandard.author));
+        if (StringUtils.isNotEmpty(filter.author)) {
+            Query q = new TermQuery(new Term(lucene.fieldSentenceTextAuthor.name(), filter.author));
             query.add(q, BooleanClause.Occur.MUST);
         }
         // style/genre
-        if (!params.textStandard.stylegenres.isEmpty()) {
+        if (!filter.stylegenres.isEmpty()) {
             BooleanQuery q = new BooleanQuery();
-            for (String sg : params.textStandard.stylegenres) {
+            for (String sg : filter.stylegenres) {
                 q.add(new TermQuery(new Term(lucene.fieldSentenceTextStyleGenre.name(), sg)),
                         BooleanClause.Occur.SHOULD);
             }
@@ -67,30 +67,27 @@ public class LuceneFilter {
             query.add(q, BooleanClause.Occur.MUST);
         }
         // written year
-        if (params.textStandard.yearWrittenFrom != null || params.textStandard.yearWrittenTo != null) {
-            int yFrom = params.textStandard.yearWrittenFrom != null ? params.textStandard.yearWrittenFrom : 1;
-            int yTo = params.textStandard.yearWrittenTo != null ? params.textStandard.yearWrittenTo : 9999;
+        if (filter.yearWrittenFrom != null || filter.yearWrittenTo != null) {
+            int yFrom = filter.yearWrittenFrom != null ? filter.yearWrittenFrom : 1;
+            int yTo = filter.yearWrittenTo != null ? filter.yearWrittenTo : 9999;
             Query q = NumericRangeQuery.newIntRange(lucene.fieldSentenceTextWrittenYear.name(), yFrom, yTo,
                     true, true);
             query.add(q, BooleanClause.Occur.MUST);
         }
         // published year
-        if (params.textStandard.yearPublishedFrom != null || params.textStandard.yearPublishedTo != null) {
-            int yFrom = params.textStandard.yearPublishedFrom != null ? params.textStandard.yearPublishedFrom
-                    : 1;
-            int yTo = params.textStandard.yearPublishedTo != null ? params.textStandard.yearPublishedTo
-                    : 9999;
+        if (filter.yearPublishedFrom != null || filter.yearPublishedTo != null) {
+            int yFrom = filter.yearPublishedFrom != null ? filter.yearPublishedFrom : 1;
+            int yTo = filter.yearPublishedTo != null ? filter.yearPublishedTo : 9999;
             Query q = NumericRangeQuery.newIntRange(lucene.fieldSentenceTextPublishedYear.name(), yFrom, yTo,
                     true, true);
             query.add(q, BooleanClause.Occur.MUST);
         }
     }
 
-    public void addOtherTextFilter(BooleanQuery query, SearchParams params) {
+    public void addOtherTextFilter(BooleanQuery query, UnprocessedTextRequest filter) {
         // volume
-        if (StringUtils.isNotEmpty(params.textStandard.author)) {
-            Query q = new TermQuery(new Term(lucene.fieldSentenceTextVolume.name(),
-                    params.textUnprocessed.volume));
+        if (StringUtils.isNotEmpty(filter.volume)) {
+            Query q = new TermQuery(new Term(lucene.fieldSentenceTextVolume.name(), filter.volume));
             query.add(q, BooleanClause.Occur.MUST);
         }
     }
@@ -107,8 +104,8 @@ public class LuceneFilter {
         return new Term(lucene.fieldSentenceDBGrammarTags.name(), grammar);
     }
 
-    public ScoreDoc[] search(Query query, ScoreDoc latest, DocFilter filter) throws Exception {
-        return lucene.search(query, latest, filter);
+    public ScoreDoc[] search(Query query, ScoreDoc latest, int maxResults, DocFilter filter) throws Exception {
+        return lucene.search(query, latest, maxResults, filter);
     }
 
     public Document getSentence(int docID) throws Exception {

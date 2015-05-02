@@ -68,6 +68,7 @@ public abstract class BaseControlsWrapper {
         public final List<String> styleGenres = new ArrayList<>();
         public TextBox yearWrittenFrom, yearWrittenTo, yearPublishedFrom, yearPublishedTo;
         public SuggestBox volume;
+        public TextBox wordsBefore, wordsAfter;
     }
 
     public static class WordControl {

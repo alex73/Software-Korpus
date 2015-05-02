@@ -35,8 +35,8 @@ public class SearchParams implements Serializable {
     };
 
     public CorpusType corpusType;
-    public TextStandardInfo textStandard = new TextStandardInfo();
-    public TextUnprocessedInfo textUnprocessed = new TextUnprocessedInfo();
+    public StandardTextRequest textStandard;
+    public UnprocessedTextRequest textUnprocessed;
     public List<WordRequest> words = new ArrayList<WordRequest>();
     public WordsOrder wordsOrder = WordsOrder.PRESET;
 

@@ -127,7 +127,7 @@ public class WordsDetailsChecks {
     /**
      * Is the word corresponds with parameter ?
      */
-    private static boolean isWordMatchsParam(WordRequest wordParam, WordResult wordResult) {
+    public static boolean isWordMatchsParam(WordRequest wordParam, WordResult wordResult) {
         if (wordParam.word != null && !wordParam.word.trim().isEmpty()) {
             if (wordParam.allForms) {
                 // lemma

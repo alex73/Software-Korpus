@@ -26,7 +26,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 
 import org.alex73.korpus.base.TextInfo;
-import org.alex73.korpus.server.Settings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.document.Document;
@@ -62,17 +61,17 @@ public class LuceneDriverRead extends LuceneFields {
         dir.close();
     }
 
-    public ScoreDoc[] search(Query query, ScoreDoc latest, DocFilter filter) throws Exception {
+    public ScoreDoc[] search(Query query, ScoreDoc latest, int maxResults, DocFilter filter) throws Exception {
         LOGGER.info("   Lucene search: " + query);
-        ScoreDoc[] result = new ScoreDoc[Settings.KORPUS_SEARCH_RESULT_PAGE + 1];
+        ScoreDoc[] result = new ScoreDoc[maxResults];
 
         int found = 0;
 
         TopDocs rs;
         if (latest == null) {
-            rs = indexSearcher.search(query, Settings.KORPUS_SEARCH_RESULT_PAGE + 1);
+            rs = indexSearcher.search(query, maxResults);
         } else {
-            rs = indexSearcher.searchAfter(latest, query, Settings.KORPUS_SEARCH_RESULT_PAGE + 1);
+            rs = indexSearcher.searchAfter(latest, query, maxResults);
         }
         LOGGER.info("   Lucene found: total: " + rs.totalHits + ", block: " + rs.scoreDocs.length);
         while (rs.scoreDocs.length > 0 && found < result.length) {
@@ -83,8 +82,7 @@ public class LuceneDriverRead extends LuceneFields {
                 }
             }
             if (found < result.length) {
-                rs = indexSearcher.searchAfter(rs.scoreDocs[rs.scoreDocs.length - 1], query,
-                        Settings.KORPUS_SEARCH_RESULT_PAGE + 1);
+                rs = indexSearcher.searchAfter(rs.scoreDocs[rs.scoreDocs.length - 1], query, maxResults);
                 LOGGER.info("   Lucene found: block: " + rs.scoreDocs.length);
                 System.out.println("found block " + rs.scoreDocs.length);
             }

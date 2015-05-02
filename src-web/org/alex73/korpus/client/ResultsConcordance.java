@@ -1,6 +1,6 @@
 package org.alex73.korpus.client;
 
-import org.alex73.korpus.shared.dto.ResultSentence;
+import org.alex73.korpus.shared.dto.SearchResults;
 import org.alex73.korpus.shared.dto.WordResult;
 
 import com.google.gwt.user.client.ui.Anchor;
@@ -10,9 +10,14 @@ import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class ResultsConcordance extends VerticalPanel {
+    Korpus korpus;
     Grid grid;
 
-    public void showResults(Korpus korpus, int pageIndex, ResultSentence[] sentences, int wordsCount) {
+    public ResultsConcordance(Korpus korpus) {
+        this.korpus = korpus;
+    }
+
+    public void showResults(int pageIndex, SearchResults[] sentences, int wordsCount) {
         int c = 0;
         for (int[] p : korpus.pages) {
             c += p.length;
@@ -27,17 +32,17 @@ public class ResultsConcordance extends VerticalPanel {
         korpus.widgetsInfoWord.clear();
         clear();
 
-        add(PagesIndexPanel.createPagesIndexPanel(korpus, pageIndex));
+        add(PagesIndexPanel.createPagesIndexPanel(korpus, pageIndex, korpus.pages.size(), pageShowCallback));
 
         grid = new Grid(0, 4);
 
-        for (ResultSentence s : sentences) {
+        for (SearchResults s : sentences) {
             for (int i = 0; i < s.text.words.length; i++) {
                 for (int j = 0; j < s.text.words[i].length; j++) {
-               //     Window.alert(s.text.words[i][j].value+"  req="+s.text.words[i][j].requestedWord+" j="+j);
+                    // Window.alert(s.text.words[i][j].value+"  req="+s.text.words[i][j].requestedWord+" j="+j);
                     if (s.text.words[i][j].requestedWord && j + wordsCount < s.text.words[i].length) {
                         // show
-                        showRow(korpus, s, s.text.words[i], j, j + wordsCount - 1);
+                        showRow(s, s.text.words[i], j, j + wordsCount - 1);
                         j += wordsCount - 1;
                     }
                 }
@@ -46,11 +51,17 @@ public class ResultsConcordance extends VerticalPanel {
 
         add(grid);
 
-        add(PagesIndexPanel.createPagesIndexPanel(korpus, pageIndex));
+        add(PagesIndexPanel.createPagesIndexPanel(korpus, pageIndex, korpus.pages.size(), pageShowCallback));
     }
 
-    private void showRow(Korpus korpus, ResultSentence text, WordResult[] sentence, int wordsFrom,
-            int wordsTo) {
+    PagesIndexPanel.IPageRequest pageShowCallback = new PagesIndexPanel.IPageRequest() {
+        @Override
+        public void showPage(int pageIndex) {
+            korpus.requestPageDetails(pageIndex);
+        }
+    };
+
+    private void showRow(SearchResults text, WordResult[] sentence, int wordsFrom, int wordsTo) {
         int row = grid.insertRow(grid.getRowCount());
 
         Anchor doclabel = new Anchor("падрабязней... ");
@@ -88,6 +99,5 @@ public class ResultsConcordance extends VerticalPanel {
             line.add(w);
         }
         grid.setWidget(row, 3, line);
-
     }
 }
