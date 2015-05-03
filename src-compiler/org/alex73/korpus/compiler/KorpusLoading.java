@@ -46,6 +46,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.alex73.korpus.editor.core.structure.KorpusDocument;
 import org.alex73.korpus.parser.TEIParser;
 import org.alex73.korpus.parser.TextParser;
+import org.alex73.korpus.server.Settings;
 import org.alex73.korpus.server.engine.LuceneDriverWrite;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
@@ -63,7 +64,6 @@ public class KorpusLoading {
     static LuceneDriverWrite lucene;
 
     static int statTexts, statWords;
-    static int textId;
     static Set<String> authors = new TreeSet<>();
 
     static void processKorpus() throws Exception {
@@ -207,7 +207,8 @@ public class KorpusLoading {
 
     protected static void loadTextToCorpus(KorpusDocument doc) throws Exception {
         statTexts++;
-        textId++;
+
+        lucene.setTextInfo(doc.textInfo);
 
         for (String a : doc.textInfo.authors) {
             authors.add(a);
@@ -226,23 +227,15 @@ public class KorpusLoading {
         Marshaller m = TEIParser.CONTEXT.createMarshaller();
         for (P p : sentences) {
             ByteArrayOutputStream ba = new ByteArrayOutputStream();
-            try (GZIPOutputStream baz = new GZIPOutputStream(ba)) {
-                StreamResult mOut = new StreamResult(baz);
-                m.marshal(p, mOut);
+            if (Settings.GZIP_TEXT_XML) {
+                try (GZIPOutputStream baz = new GZIPOutputStream(ba)) {
+                    m.marshal(p, new StreamResult(baz));
+                }
+            } else {
+                m.marshal(p, new StreamResult(ba));
             }
-            int c = lucene.addSentence(p, ba.toByteArray(), textId, doc.textInfo, null, null);
+            int c = lucene.addSentence(p, ba.toByteArray());
             statWords += c;
         }
-
-        String title = "";
-        for (String a : doc.textInfo.authors) {
-            title += ", " + a;
-        }
-        if (!title.isEmpty()) {
-            title = title.substring(2) + ". " + doc.textInfo.title;
-        } else {
-            title = doc.textInfo.title;
-        }
-        lucene.addText(textId, doc.textInfo);
     }
 }

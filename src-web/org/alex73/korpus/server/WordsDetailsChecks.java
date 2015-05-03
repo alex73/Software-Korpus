@@ -23,6 +23,9 @@
 package org.alex73.korpus.server;
 
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.DBTagsGroups;
@@ -136,8 +139,14 @@ public class WordsDetailsChecks {
                 }
             } else {
                 // concrete form
-                if (!wordParam.word.equalsIgnoreCase(wordResult.value)) {
-                    return false;
+                if (wordParam.isWildcardWord()) {
+                    if (!getWildcardRegexp(wordParam.word).matcher(wordResult.value).matches()) {
+                        return false;
+                    }
+                } else {
+                    if (!wordParam.word.equalsIgnoreCase(wordResult.value)) {
+                        return false;
+                    }
                 }
             }
         }
@@ -161,5 +170,25 @@ public class WordsDetailsChecks {
             }
         }
         return false;
+    }
+
+    private static ThreadLocal<Map<String, Pattern>> REGEXPS = new ThreadLocal<Map<String, Pattern>>() {
+        @Override
+        protected Map<String, Pattern> initialValue() {
+            return new TreeMap<>();
+        }
+    };
+
+    public static void reset() {
+        REGEXPS.get().clear();
+    }
+
+    private static Pattern getWildcardRegexp(String wildcardWord) {
+        Pattern p = REGEXPS.get().get(wildcardWord);
+        if (p == null) {
+            p = Pattern.compile(wildcardWord.replace("*", ".*").replace('?', '.'));
+            REGEXPS.get().put(wildcardWord, p);
+        }
+        return p;
     }
 }

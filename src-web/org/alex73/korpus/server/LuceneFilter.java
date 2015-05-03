@@ -22,12 +22,19 @@
 
 package org.alex73.korpus.server;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.alex73.korpus.base.OtherInfo;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
 import org.alex73.korpus.server.engine.LuceneDriverRead.DocFilter;
 import org.alex73.korpus.shared.dto.StandardTextRequest;
 import org.alex73.korpus.shared.dto.UnprocessedTextRequest;
+import org.alex73.korpus.shared.dto.WordRequest;
+import org.alex73.korpus.utils.WordNormalizer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -36,8 +43,10 @@ import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.WildcardQuery;
 
 public class LuceneFilter {
     LuceneDriverRead lucene;
@@ -92,15 +101,46 @@ public class LuceneFilter {
         }
     }
 
-    public Term getLemmaTerm(String lemma) {
+    public void addWordFilter(BooleanQuery query, WordRequest w) {
+        w.word = WordNormalizer.normalize(w.word);
+        if (w.word.length() > 0) {
+            Query wq;
+            if (w.allForms) {
+                w.lemmas = findAllLemmas(w.word);
+                if (w.lemmas.isEmpty()) {
+                    throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
+                }
+                BooleanQuery qLemmas = new BooleanQuery();
+                for (String lemma : w.lemmas) {
+                    qLemmas.add(new TermQuery(getLemmaTerm(lemma)), BooleanClause.Occur.SHOULD);
+                }
+                wq = qLemmas;
+            } else {
+                if (w.isWildcardWord()) {
+                    // has wildcard
+                    wq = new WildcardQuery(getValueTerm(w.word));
+                } else {
+                    // simple word
+                    wq = new TermQuery(getValueTerm(w.word));
+                }
+            }
+            query.add(wq, BooleanClause.Occur.MUST);
+        }
+        if (w.grammar != null) {
+            Query wq = new RegexpQuery(getGrammarTerm(w.grammar));
+            query.add(wq, BooleanClause.Occur.MUST);
+        }
+    }
+
+    private Term getLemmaTerm(String lemma) {
         return new Term(lucene.fieldSentenceLemmas.name(), lemma);
     }
 
-    public Term getValueTerm(String value) {
+    private Term getValueTerm(String value) {
         return new Term(lucene.fieldSentenceValues.name(), value);
     }
 
-    public Term getGrammarTerm(String grammar) {
+    private Term getGrammarTerm(String grammar) {
         return new Term(lucene.fieldSentenceDBGrammarTags.name(), grammar);
     }
 
@@ -127,5 +167,18 @@ public class LuceneFilter {
         OtherInfo info = new OtherInfo();
         info.textURL = doc.getField(lucene.fieldSentenceTextURL.name()).stringValue();
         return info;
+    }
+
+    private List<String> findAllLemmas(String word) {
+        Set<String> result = new HashSet<>();
+        for (LiteParadigm p : GrammarDBLite.getInstance().getAllParadigms()) {
+            for (LiteForm f : p.forms) {
+                if (word.equals(WordNormalizer.normalize(f.value))) {
+                    result.add(p.lemma);
+                    break;
+                }
+            }
+        }
+        return new ArrayList<>(result);
     }
 }

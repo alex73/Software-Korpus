@@ -178,7 +178,7 @@ public abstract class BaseControlsWrapper {
         });
     }
 
-    RegExp RE_WORD = RegExp.compile("^[йцукенгшўзх'фывапролджэячсмітьбюёЙЦУКЕНГШЎЗХФЫВАПРОЛДЖЭЯЧСМІТЬБЮЁ]+$");
+    RegExp RE_WORD = RegExp.compile("^[йцукенгшўзх'фывапролджэячсмітьбюёЙЦУКЕНГШЎЗХФЫВАПРОЛДЖЭЯЧСМІТЬБЮЁ\\?\\*]+$");
 
     protected boolean isValidWord(TextBox txt) {
         if (txt.getValue().trim().isEmpty()) {

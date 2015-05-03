@@ -28,10 +28,8 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import javax.xml.bind.JAXBContext;
@@ -42,21 +40,16 @@ import org.alex73.korpus.server.engine.LuceneDriverRead;
 import org.alex73.korpus.shared.dto.ClusterParams;
 import org.alex73.korpus.shared.dto.ClusterResults;
 import org.alex73.korpus.shared.dto.CorpusType;
-import org.alex73.korpus.shared.dto.SearchResults;
 import org.alex73.korpus.shared.dto.ResultText;
 import org.alex73.korpus.shared.dto.SearchParams;
+import org.alex73.korpus.shared.dto.SearchResults;
 import org.alex73.korpus.shared.dto.WordRequest;
 import org.alex73.korpus.shared.dto.WordResult;
-import org.alex73.korpus.utils.WordNormalizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TermQuery;
 
 import alex73.corpus.paradigm.P;
 import alex73.corpus.paradigm.S;
@@ -156,6 +149,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     public SearchResult search(final SearchParams params, LatestMark latest) throws Exception {
         LOGGER.info(">> Request from " + getThreadLocalRequest().getRemoteAddr());
         try {
+            WordsDetailsChecks.reset();
             if (params.isTooSimple()) {
                 LOGGER.info("<< Request too simple");
                 throw new RuntimeException(ServerError.REQUIEST_TOO_SIMPLE);
@@ -169,30 +163,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
             }
 
             for (WordRequest w : params.words) {
-                w.word = WordNormalizer.normalize(w.word);
-                if (w.word.length() > 0) {
-                    Query wq;
-                    if (w.allForms) {
-                        w.lemmas = findAllLemmas(w.word);
-                        if (w.lemmas.isEmpty()) {
-                            throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
-                        }
-                        BooleanQuery qLemmas = new BooleanQuery();
-                        for (String lemma : w.lemmas) {
-                            qLemmas.add(new TermQuery(process.getLemmaTerm(lemma)),
-                                    BooleanClause.Occur.SHOULD);
-                        }
-                        wq = qLemmas;
-                    } else {
-                        wq = new TermQuery(process.getValueTerm(w.word));
-                    }
-
-                    query.add(wq, BooleanClause.Occur.MUST);
-                }
-                if (w.grammar != null) {
-                    Query wq = new RegexpQuery(process.getGrammarTerm(w.grammar));
-                    query.add(wq, BooleanClause.Occur.MUST);
-                }
+                process.addWordFilter(query, w);
             }
 
             ScoreDoc latestDoc;
@@ -243,6 +214,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     public ClusterResults calculateClusters(ClusterParams params) throws Exception {
         LOGGER.info(">> Request clusters from " + getThreadLocalRequest().getRemoteAddr());
         try {
+            WordsDetailsChecks.reset();
             ClusterResults res = new ClusterServiceImpl(this).calc(params);
             LOGGER.info("<< Result clusters");
             return res;
@@ -252,22 +224,10 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         }
     }
 
-    List<String> findAllLemmas(String word) {
-        Set<String> result = new HashSet<>();
-        for (LiteParadigm p : GrammarDBLite.getInstance().getAllParadigms()) {
-            for (LiteForm f : p.forms) {
-                if (word.equals(WordNormalizer.normalize(f.value))) {
-                    result.add(p.lemma);
-                    break;
-                }
-            }
-        }
-        return new ArrayList<>(result);
-    }
-
     @Override
     public SearchResults[] getSentences(SearchParams params, int[] list) throws Exception {
         try {
+            WordsDetailsChecks.reset();
             SearchResults[] result = new SearchResults[list.length];
             for (int i = 0; i < list.length; i++) {
                 Document doc = getProcess(params.corpusType).getSentence(list[i]);
@@ -285,7 +245,6 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     }
 
     protected void restoreTextInfo(SearchParams params, Document doc, SearchResults result) throws Exception {
-
         if (params.corpusType == CorpusType.STANDARD) {
             result.doc = processKorpus.getKorpusTextInfo(doc);
         } else {
@@ -304,7 +263,12 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         byte[] xml = process.getXML(doc);
 
         Unmarshaller unm = CONTEXT.createUnmarshaller();
-        P paragraph = (P) unm.unmarshal(new GZIPInputStream(new ByteArrayInputStream(xml)));
+        P paragraph;
+        if (Settings.GZIP_TEXT_XML) {
+            paragraph = (P) unm.unmarshal(new GZIPInputStream(new ByteArrayInputStream(xml)));
+        } else {
+            paragraph = (P) unm.unmarshal(new ByteArrayInputStream(xml));
+        }
 
         List<WordResult[]> sentences = new ArrayList<>();
 

@@ -45,6 +45,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.alex73.korpus.editor.core.structure.Line;
 import org.alex73.korpus.parser.Splitter;
 import org.alex73.korpus.parser.TEIParser;
+import org.alex73.korpus.server.Settings;
 import org.alex73.korpus.server.engine.LuceneDriverWrite;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -132,6 +133,8 @@ public class OtherLoading {
     protected static void loadTextToCorpus(String volume, String textUrl, String data) throws Exception {
         volumes.add(volume);
 
+        lucene.setOtherInfo(volume, textUrl);
+
         data = data.trim().replace('\n', ' ').replace('\r', ' ').replaceAll("\\s{2,}", " ");
         Line line = new Splitter(data).splitParagraph();
 
@@ -149,11 +152,14 @@ public class OtherLoading {
         Marshaller m = TEIParser.CONTEXT.createMarshaller();
         for (P p : sentences) {
             ByteArrayOutputStream ba = new ByteArrayOutputStream();
-            try (GZIPOutputStream baz = new GZIPOutputStream(ba)) {
-                StreamResult mOut = new StreamResult(baz);
-                m.marshal(p, mOut);
+            if (Settings.GZIP_TEXT_XML) {
+                try (GZIPOutputStream baz = new GZIPOutputStream(ba)) {
+                    m.marshal(p, new StreamResult(baz));
+                }
+            } else {
+                m.marshal(p, new StreamResult(ba));
             }
-            int c = lucene.addSentence(p, ba.toByteArray(),0,null, volume, textUrl);
+            int c = lucene.addSentence(p, ba.toByteArray());
             statWords += c;
         }
     }

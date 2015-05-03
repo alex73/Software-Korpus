@@ -13,15 +13,11 @@ import org.alex73.korpus.shared.dto.ResultText;
 import org.alex73.korpus.shared.dto.WordRequest;
 import org.alex73.korpus.shared.dto.WordResult;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.RegexpQuery;
 import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.TermQuery;
 
 public class ClusterServiceImpl {
-    private final static int SEARCH_BLOCK = 1000;
+    private final static int SEARCH_BLOCK = 10000;
     private final SearchServiceImpl parent;
     private ClusterParams params;
     private final Map<String, Integer> counts = new HashMap<>();
@@ -42,28 +38,7 @@ public class ClusterServiceImpl {
         }
 
         WordRequest w = params.word;
-        if (w.word.length() > 0) {
-            Query wq;
-            if (w.allForms) {
-                w.lemmas = parent.findAllLemmas(w.word);
-                if (w.lemmas.isEmpty()) {
-                    throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
-                }
-                BooleanQuery qLemmas = new BooleanQuery();
-                for (String lemma : w.lemmas) {
-                    qLemmas.add(new TermQuery(process.getLemmaTerm(lemma)), BooleanClause.Occur.SHOULD);
-                }
-                wq = qLemmas;
-            } else {
-                wq = new TermQuery(process.getValueTerm(w.word));
-            }
-
-            query.add(wq, BooleanClause.Occur.MUST);
-        }
-        if (w.grammar != null) {
-            Query wq = new RegexpQuery(process.getGrammarTerm(w.grammar));
-            query.add(wq, BooleanClause.Occur.MUST);
-        }
+        process.addWordFilter(query, w);
 
         ScoreDoc latestDoc = null;
         while (true) {

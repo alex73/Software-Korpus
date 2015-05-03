@@ -1,5 +1,7 @@
 package org.alex73.korpus.server.engine;
 
+import java.nio.file.Paths;
+
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.DBTagsGroups;
 import org.alex73.korpus.base.TextInfo;
@@ -13,6 +15,7 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.NIOFSDirectory;
 
 import alex73.corpus.paradigm.P;
 import alex73.corpus.paradigm.S;
@@ -28,10 +31,17 @@ public class LuceneDriverWrite extends LuceneFields {
     protected Document docText;
     protected Document docSentence;
 
+    protected int textId;
+    protected TextInfo currentTextInfo;
+    protected String currentVolume;
+    protected String currentUrl;
+
     public LuceneDriverWrite(String rootDir) throws Exception {
         IndexWriterConfig config = new IndexWriterConfig(new WhitespaceAnalyzer());
         config.setOpenMode(OpenMode.CREATE);
         config.setRAMBufferSizeMB(256);
+
+        dir = new NIOFSDirectory(Paths.get(rootDir));
         indexWriter = new IndexWriter(dir, config);
 
         docSentence = new Document();
@@ -65,13 +75,39 @@ public class LuceneDriverWrite extends LuceneFields {
         dir.close();
     }
 
+    public void setTextInfo(TextInfo info) throws Exception {
+        textId++;
+        currentTextInfo = info;
+
+        // String title = "";
+        // for (String a : doc.textInfo.authors) {
+        // title += ", " + a;
+        // }
+        // if (!title.isEmpty()) {
+        // title = title.substring(2) + ". " + doc.textInfo.title;
+        // } else {
+        // title = doc.textInfo.title;
+        // }
+
+        fieldTextID.setIntValue(textId);
+        fieldTextAuthors.setStringValue(merge(info.authors, ";"));
+        fieldTextTitle.setStringValue(info.title);
+        fieldTextYearWritten.setIntValue(info.writtenYear != null ? info.writtenYear : 0);
+        fieldTextYearPublished.setIntValue(info.publishedYear != null ? info.publishedYear : 0);
+        indexWriter.addDocument(docText);
+    }
+
+    public void setOtherInfo(String volume, String textURL) throws Exception {
+        currentVolume = volume;
+        currentUrl = textURL;
+    }
+
     /**
      * Add sentence to database. Sentence linked to previously added text.
      * 
      * @return words count
      */
-    public int addSentence(P paragraph, byte[] xml, int textId, TextInfo info, String volume, String textURL)
-            throws Exception {
+    public int addSentence(P paragraph, byte[] xml) throws Exception {
 
         StringBuilder values = new StringBuilder();
         StringBuilder dbGrammarTags = new StringBuilder();
@@ -107,34 +143,29 @@ public class LuceneDriverWrite extends LuceneFields {
         }
 
         // fieldID.setIntValue(id);
-        fieldSentenceTextVolume.setStringValue(volume);
-        fieldSentenceTextURL.setStringValue(textURL);
+        if (currentVolume != null && currentUrl != null) {
+            fieldSentenceTextVolume.setStringValue(currentVolume);
+            fieldSentenceTextURL.setStringValue(currentUrl);
+        } else {
+            fieldSentenceTextID.setIntValue(textId);
+        }
 
-        fieldSentenceTextID.setIntValue(textId);
         fieldSentenceValues.setStringValue(values.toString());
         fieldSentenceDBGrammarTags.setStringValue(dbGrammarTags.toString());
         fieldSentenceLemmas.setStringValue(lemmas.toString());
         fieldSentenceXML.setBytesValue(xml);
-        fieldSentenceTextStyleGenre.setTokenStream(new StringArrayTokenStream(info.styleGenres));
-        fieldSentenceTextWrittenYear.setIntValue(nvl(info.writtenYear));
-        fieldSentenceTextPublishedYear.setIntValue(nvl(info.publishedYear));
-        fieldSentenceTextAuthor.setTokenStream(new StringArrayTokenStream(info.authors));
+
+        if (currentTextInfo != null) {
+            fieldSentenceTextStyleGenre
+                    .setTokenStream(new StringArrayTokenStream(currentTextInfo.styleGenres));
+            fieldSentenceTextWrittenYear.setIntValue(nvl(currentTextInfo.writtenYear));
+            fieldSentenceTextPublishedYear.setIntValue(nvl(currentTextInfo.publishedYear));
+            fieldSentenceTextAuthor.setTokenStream(new StringArrayTokenStream(currentTextInfo.authors));
+        }
 
         indexWriter.addDocument(docSentence);
 
         return wordsCount;
-    }
-
-    /**
-     * Add text to database.
-     */
-    public void addText(int textId, TextInfo info) throws Exception {
-        fieldTextID.setIntValue(textId);
-        fieldTextAuthors.setStringValue(merge(info.authors, ";"));
-        fieldTextTitle.setStringValue(info.title);
-        fieldTextYearWritten.setIntValue(info.writtenYear != null ? info.writtenYear : 0);
-        fieldTextYearPublished.setIntValue(info.publishedYear != null ? info.publishedYear : 0);
-        indexWriter.addDocument(docText);
     }
 
     private String merge(String[] strs, String sep) {
@@ -146,10 +177,6 @@ public class LuceneDriverWrite extends LuceneFields {
             out.append(s);
         }
         return out.toString();
-    }
-
-    private String nvl(String n) {
-        return n != null ? n : "";
     }
 
     private int nvl(Integer n) {

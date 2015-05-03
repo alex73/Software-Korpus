@@ -29,6 +29,7 @@ import java.util.List;
 /**
  * Parameters for search corpus documents.
  */
+@SuppressWarnings("serial")
 public class SearchParams implements Serializable {
     public enum WordsOrder {
         PRESET, ANY_IN_SENTENCE, ANY_IN_PARAGRAPH
@@ -44,6 +45,14 @@ public class SearchParams implements Serializable {
         for (WordRequest w : words) {
             if (w.word != null) {
                 String wt = w.word.trim();
+                if (wt.indexOf('*') >= 0 || wt.indexOf('?') >= 0) {
+                    // contains wildcards
+                    if (w.allForms) {
+                        continue;
+                    } else if (wt.replace("*", "").replace("?", "").length() > 1) {
+                        return false;
+                    }
+                }
                 if (wt.length() > 1) {
                     return false;
                 }
