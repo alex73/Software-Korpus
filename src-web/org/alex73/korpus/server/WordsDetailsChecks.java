@@ -157,11 +157,12 @@ public class WordsDetailsChecks {
             return false;
         }
         // check grammar
+        Pattern reGrammar = getRegexp(wordParam.grammar);
         for (String t : wordResult.cat.split("_")) {
             if (BelarusianTags.getInstance().isValid(t, null)) {
                 try {
                     String findTag = DBTagsGroups.getDBTagString(t);
-                    if (findTag.matches(wordParam.grammar)) {
+                    if (reGrammar.matcher(findTag).matches()) {
                         return true;
                     }
                 } catch (Exception ex) {
@@ -172,6 +173,55 @@ public class WordsDetailsChecks {
         return false;
     }
 
+    public static boolean isTooSimpleWord(WordRequest w) {
+        if (w.word != null) {
+            String wt = w.word.trim();
+            if (w.isWildcardWord()) {
+                // contains wildcards
+                if (w.allForms) {
+                    return true;
+                } else if (wt.replace("*", "").replace("?", "").length() > 1) {
+                    return false;
+                }
+            }
+            if (wt.length() > 1) {
+                return false;
+            }
+            if (wt.length() == 1 && Character.isLetter(wt.charAt(0))) {
+                return false;
+            }
+
+            if (w.grammar != null) {
+                String gt = w.grammar.trim();
+                if (!gt.startsWith("K")) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public static void reset() {
+        WILDCARD_REGEXPS.get().clear();
+        REGEXPS.get().clear();
+    }
+
+    private static ThreadLocal<Map<String, Pattern>> WILDCARD_REGEXPS = new ThreadLocal<Map<String, Pattern>>() {
+        @Override
+        protected Map<String, Pattern> initialValue() {
+            return new TreeMap<>();
+        }
+    };
+
+    private static Pattern getWildcardRegexp(String wildcardWord) {
+        Pattern p = WILDCARD_REGEXPS.get().get(wildcardWord);
+        if (p == null) {
+            p = Pattern.compile(wildcardWord.replace("*", ".*").replace('?', '.'));
+            WILDCARD_REGEXPS.get().put(wildcardWord, p);
+        }
+        return p;
+    }
+
     private static ThreadLocal<Map<String, Pattern>> REGEXPS = new ThreadLocal<Map<String, Pattern>>() {
         @Override
         protected Map<String, Pattern> initialValue() {
@@ -179,15 +229,11 @@ public class WordsDetailsChecks {
         }
     };
 
-    public static void reset() {
-        REGEXPS.get().clear();
-    }
-
-    private static Pattern getWildcardRegexp(String wildcardWord) {
-        Pattern p = REGEXPS.get().get(wildcardWord);
+    private static Pattern getRegexp(String regexp) {
+        Pattern p = REGEXPS.get().get(regexp);
         if (p == null) {
-            p = Pattern.compile(wildcardWord.replace("*", ".*").replace('?', '.'));
-            REGEXPS.get().put(wildcardWord, p);
+            p = Pattern.compile(regexp);
+            REGEXPS.get().put(regexp, p);
         }
         return p;
     }

@@ -150,7 +150,14 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         LOGGER.info(">> Request from " + getThreadLocalRequest().getRemoteAddr());
         try {
             WordsDetailsChecks.reset();
-            if (params.isTooSimple()) {
+            boolean enoughComplex = false;
+            for (WordRequest w : params.words) {
+                if (!WordsDetailsChecks.isTooSimpleWord(w)) {
+                    enoughComplex = true;
+                    break;
+                }
+            }
+            if (!enoughComplex) {
                 LOGGER.info("<< Request too simple");
                 throw new RuntimeException(ServerError.REQUIEST_TOO_SIMPLE);
             }
@@ -215,6 +222,12 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         LOGGER.info(">> Request clusters from " + getThreadLocalRequest().getRemoteAddr());
         try {
             WordsDetailsChecks.reset();
+
+            if (!WordsDetailsChecks.isTooSimpleWord(params.word)) {
+                LOGGER.info("<< Request too simple");
+                throw new RuntimeException(ServerError.REQUIEST_TOO_SIMPLE);
+            }
+
             ClusterResults res = new ClusterServiceImpl(this).calc(params);
             LOGGER.info("<< Result clusters");
             return res;

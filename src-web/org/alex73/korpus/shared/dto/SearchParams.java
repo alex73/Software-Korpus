@@ -40,34 +40,4 @@ public class SearchParams implements Serializable {
     public UnprocessedTextRequest textUnprocessed;
     public List<WordRequest> words = new ArrayList<WordRequest>();
     public WordsOrder wordsOrder = WordsOrder.PRESET;
-
-    public boolean isTooSimple() {
-        for (WordRequest w : words) {
-            if (w.word != null) {
-                String wt = w.word.trim();
-                if (wt.indexOf('*') >= 0 || wt.indexOf('?') >= 0) {
-                    // contains wildcards
-                    if (w.allForms) {
-                        continue;
-                    } else if (wt.replace("*", "").replace("?", "").length() > 1) {
-                        return false;
-                    }
-                }
-                if (wt.length() > 1) {
-                    return false;
-                }
-                if (wt.length() == 1 && Character.isLetter(wt.charAt(0))) {
-                    return false;
-                }
-
-                if (w.grammar != null) {
-                    String gt = w.grammar.trim();
-                    if (!gt.startsWith("K")) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
-    }
 }
