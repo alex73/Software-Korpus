@@ -174,23 +174,11 @@ public class WordsDetailsChecks {
     }
 
     public static boolean isTooSimpleWord(WordRequest w) {
-        if (w.word != null) {
-            String wt = w.word.trim();
-            if (w.isWildcardWord()) {
-                // contains wildcards
-                if (w.allForms) {
-                    return true;
-                } else if (wt.replace("*", "").replace("?", "").length() > 1) {
-                    return false;
-                }
-            }
-            if (wt.length() > 1) {
-                return false;
-            }
-            if (wt.length() == 1 && Character.isLetter(wt.charAt(0))) {
-                return false;
-            }
-
+        if (w.word == null) {
+            return true;
+        }
+        String wt = w.word.trim();
+        if (wt.isEmpty()) {
             if (w.grammar != null) {
                 String gt = w.grammar.trim();
                 if (!gt.startsWith("K")) {
@@ -198,7 +186,18 @@ public class WordsDetailsChecks {
                 }
             }
         }
-        return true;
+        if (w.isWildcardWord()) {
+            // contains wildcards
+            if (w.allForms) {
+                return true;
+            } else if (wt.replace("*", "").replace("?", "").length() > 1) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            return false;
+        }
     }
 
     public static void reset() {

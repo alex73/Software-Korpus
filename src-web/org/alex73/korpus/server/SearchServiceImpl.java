@@ -223,7 +223,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         try {
             WordsDetailsChecks.reset();
 
-            if (!WordsDetailsChecks.isTooSimpleWord(params.word)) {
+            if (WordsDetailsChecks.isTooSimpleWord(params.word)) {
                 LOGGER.info("<< Request too simple");
                 throw new RuntimeException(ServerError.REQUIEST_TOO_SIMPLE);
             }
