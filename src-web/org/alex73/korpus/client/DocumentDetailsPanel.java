@@ -23,10 +23,8 @@
 package org.alex73.korpus.client;
 
 import org.alex73.korpus.shared.dto.SearchResults;
-import org.alex73.korpus.shared.dto.WordResult;
 
 import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class DocumentDetailsPanel extends VerticalPanel {
@@ -71,24 +69,7 @@ public class DocumentDetailsPanel extends VerticalPanel {
     HTMLPanel createWords(SearchResults s, Korpus screen) {
         HTMLPanel p = new HTMLPanel("");
 
-        for (int i = 0; i < s.text.words.length; i++) {
-            for (int j = 0; j < s.text.words[i].length; j++) {
-                WordResult w = s.text.words[i][j];
-                String text;
-                if (w.value.equals(",") || w.value.equals(".")) {
-                    text = w.value;
-                } else {
-                    text = " " + w.value;
-                }
-                InlineLabel wlabel = new InlineLabel(text);
-                if (w.requestedWord) {
-                    wlabel.setStyleName("wordFound");
-                }
-                // wlabel.addMouseDownHandler(screen.handlerShowInfoWord);
-                p.add(wlabel);
-                // screen.widgetsInfoWord.put(wlabel, w);
-            }
-        }
+        ResultsSearch.outputText(s, p, screen, false, 20, 3);
         return p;
     }
 }

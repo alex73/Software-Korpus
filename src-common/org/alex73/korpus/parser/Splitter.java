@@ -402,6 +402,7 @@ public class Splitter {
     }
 
     static final Pattern RE_TAG = Pattern.compile("<.+?>");
+    static final Pattern RE_DIGITS = Pattern.compile("[0-9]+");
 
     public static boolean mergeAndSplitItems(Line line) {
         boolean modified = false;
@@ -501,6 +502,25 @@ public class Splitter {
                     line.add(i + 1, new TagShortItem(textIn));
                     line.add(i + 2, new WordItem(textAfter));
                     modified = true;
+                }
+            }
+        }
+        for (int i = 0; i < line.size() - 1; i++) {
+            // merge numbers
+            BaseItem currentItem = line.get(i);
+            BaseItem nextItem = line.get(i + 1);
+            if (currentItem instanceof ZnakItem && nextItem instanceof ZnakItem) {
+                if (RE_DIGITS.matcher(currentItem.getText()).matches()) {
+                    if (RE_DIGITS.matcher(nextItem.getText()).matches()) {
+                        W w = new W();
+                        w.setValue(currentItem.getText() + nextItem.getText());
+                        ZnakItem newItem = new ZnakItem(w);
+                        line.remove(i);
+                        line.remove(i);
+                        line.add(i, newItem);
+                        i--;
+                        modified = true;
+                    }
                 }
             }
         }

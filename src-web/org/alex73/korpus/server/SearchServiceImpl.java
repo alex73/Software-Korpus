@@ -28,8 +28,10 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import javax.xml.bind.JAXBContext;
@@ -130,12 +132,24 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
                 props.load(in);
             }
             result.authors = Arrays.asList(props.getProperty("authors").split(";"));
+            result.statKorpus = new HashMap<>();
+            for (String k : (Set<String>) (Set) props.keySet()) {
+                if (k.startsWith("texts") || k.startsWith("words")) {
+                    result.statKorpus.put(k, Integer.parseInt(props.getProperty(k)));
+                }
+            }
 
             props = new Properties();
             try (InputStream in = new FileInputStream(dirPrefix + "/Other-cache/stat.properties")) {
                 props.load(in);
             }
             result.volumes = Arrays.asList(props.getProperty("volumes").split(";"));
+            result.statOther = new HashMap<>();
+            for (String k : (Set<String>) (Set) props.keySet()) {
+                if (k.startsWith("texts") || k.startsWith("words")) {
+                    result.statOther.put(k, Integer.parseInt(props.getProperty(k)));
+                }
+            }
 
             LOGGER.info("<< getInitialData");
             return result;
@@ -275,6 +289,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
         byte[] xml = process.getXML(doc);
 
+       
         Unmarshaller unm = CONTEXT.createUnmarshaller();
         P paragraph;
         if (Settings.GZIP_TEXT_XML) {
@@ -283,23 +298,20 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
             paragraph = (P) unm.unmarshal(new ByteArrayInputStream(xml));
         }
 
+        long be = System.currentTimeMillis();
         List<WordResult[]> sentences = new ArrayList<>();
 
         for (int i = 0; i < paragraph.getSOrTag().size(); i++) {
-            S sentence;
-            try {
-                sentence = (S) paragraph.getSOrTag().get(i);
-            } catch (ClassCastException ex) {
-                continue; // not a sentence
+            if (!(paragraph.getSOrTag().get(i) instanceof S)) {
+                continue;
             }
+            S sentence = (S) paragraph.getSOrTag().get(i);
             List<WordResult> words = new ArrayList<>();
             for (int j = 0; j < sentence.getWOrTag().size(); j++) {
-                W w;
-                try {
-                    w = (W) sentence.getWOrTag().get(j);
-                } catch (ClassCastException ex) {
-                    continue; // not a word
+                if (!(sentence.getWOrTag().get(j) instanceof W)) {
+                    continue;
                 }
+                W w = (W) sentence.getWOrTag().get(j);
                 WordResult rsw = new WordResult();
                 rsw.value = w.getValue();
                 rsw.lemma = w.getLemma();
@@ -310,6 +322,10 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         }
         ResultText text = new ResultText();
         text.words = sentences.toArray(new WordResult[0][]);
+        
+        long af = System.currentTimeMillis();
+        ClusterServiceImpl.timeParse+=af-be;
+        
         return text;
     }
 }

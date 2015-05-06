@@ -51,7 +51,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
+import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.UIObject;
@@ -82,7 +84,7 @@ public class Korpus implements EntryPoint {
     ClusterParams currentClusterParams;
     Map<Anchor, SearchResults> widgetsInfoDoc = new HashMap<Anchor, SearchResults>();
     Map<InlineLabel, WordResult> widgetsInfoWord = new HashMap<InlineLabel, WordResult>();
-
+    
     public void onModuleLoad() {
         Button btnSearch = Button.wrap(DOM.getElementById("btnSearch"));
         btnSearch.addClickHandler(searchHandler);
@@ -93,7 +95,7 @@ public class Korpus implements EntryPoint {
             btnAddWord.addClickHandler(addWordhandler);
         }
 
-        searchControls = new SearchControls(History.getToken(), searchService);
+        searchControls = new SearchControls(History.getToken(), searchService, this);
 
         search = searchControls.orderPreset != null;
         cluster = elBtnAddWord == null;
@@ -111,6 +113,11 @@ public class Korpus implements EntryPoint {
             resultsConcordance = new ResultsConcordance(this);
             RootPanel.get("resultTable").add(resultsConcordance);
         }
+        
+//        Element statKorpusDiv = DOM.getElementById("statKorpus");
+//        if (statKorpusDiv!=null) {
+//            HTMLPanel.wrap(statKorpusDiv);
+//        }
 
         docInfoPopup = new DecoratedPopupPanel(true);
         docInfoPopup.ensureDebugId("cwBasicPopup-simplePopup");
@@ -174,6 +181,31 @@ public class Korpus implements EntryPoint {
             docInfoPopup.hide();
         }
     };
+
+    void outStat(SearchService.InitialData result) {
+//        outStatTable("statKorpus", result.statKorpus);
+//        outStatTable("statOther", result.statOther);
+    }
+
+    void outStatTable(String id, Map<String, Integer> data) {
+        Element div = DOM.getElementById(id);
+        if (div != null) {
+           
+            Grid g = new Grid(2, 3);
+            g.setText(0, 1, "Тэкстаў");
+            g.setText(0, 2, "Слоў");
+
+            g.setText(1, 0, "Агулам");
+            g.setText(1, 1, "" + data.get("texts"));
+            g.setText(1, 2, "" + data.get("words"));
+            
+            Window.alert("show21 "+id);
+            HTMLPanel.wrap(div).add(g);
+            Window.alert("show31 "+id);
+        }else {
+            Window.alert("none "+id);
+        }
+    }
 
     void requestPageDetails(final int pageIndex) {
         searchControls.errorMessage.setText("Дэталі...");

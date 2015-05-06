@@ -24,6 +24,7 @@ package org.alex73.korpus.client;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 import org.alex73.korpus.shared.dto.ClusterParams;
 import org.alex73.korpus.shared.dto.ClusterResults;
@@ -61,5 +62,6 @@ public interface SearchService extends RemoteService {
     public static class InitialData implements Serializable {
         public List<String> authors;
         public List<String> volumes;
+        public Map<String,Integer> statKorpus, statOther;
     }
 }

@@ -30,7 +30,7 @@ public class ResultsSearch extends VerticalPanel {
         korpus.widgetsInfoWord.clear();
         clear();
 
-        add(PagesIndexPanel.createPagesIndexPanel(korpus, pageIndex, korpus.pages.size(),pageShowCallback));
+        add(PagesIndexPanel.createPagesIndexPanel(korpus, pageIndex, korpus.pages.size(), pageShowCallback));
 
         for (SearchResults s : sentences) {
             HTMLPanel p = new HTMLPanel("");
@@ -41,40 +41,12 @@ public class ResultsSearch extends VerticalPanel {
 
             p.add(doclabel);
 
-            boolean alreadyFound = false;
-            for (int i = 0; i < s.text.words.length; i++) {
-                int firstFoundWord = -1;
-                for (int j = 0; j < s.text.words[i].length; j++) {
-                    if (s.text.words[i][j].requestedWord) {
-                        firstFoundWord = j;
-                        break;
-                    }
-                }
-                if (firstFoundWord >= 0) {
-                    if (alreadyFound) {
-                        p.add(new InlineLabel(" ... "));
-                    } else {
-                        alreadyFound = true;
-                    }
-                    int begWord = Math.max(firstFoundWord - 6, 0);
-                    int endWord = Math.min(s.text.words[i].length - 1, firstFoundWord + 6);
-                    for (int j = begWord; j <= endWord; j++) {
-                        WordResult w = s.text.words[i][j];
-                        InlineLabel wlabel = new InlineLabel(wordToText(w));
-                        if (w.requestedWord) {
-                            wlabel.setStyleName("wordFound");
-                        }
-                        wlabel.addMouseDownHandler(korpus.handlerShowInfoWord);
-                        p.add(wlabel);
-                        korpus.widgetsInfoWord.put(wlabel, w);
-                    }
-                }
-            }
+            outputText(s, p, korpus, true, 5, 1);
 
             add(p);
         }
 
-        add(PagesIndexPanel.createPagesIndexPanel(korpus, pageIndex, korpus.pages.size(),pageShowCallback));
+        add(PagesIndexPanel.createPagesIndexPanel(korpus, pageIndex, korpus.pages.size(), pageShowCallback));
     }
 
     PagesIndexPanel.IPageRequest pageShowCallback = new PagesIndexPanel.IPageRequest() {
@@ -89,6 +61,40 @@ public class ResultsSearch extends VerticalPanel {
             return w.value;
         } else {
             return " " + w.value;
+        }
+    }
+
+    // TODO: output N words around, M sentences around
+    public static void outputText(SearchResults s, HTMLPanel p, Korpus korpus, boolean addWordInfoHandler,
+            int wordAround, int sentencesAround) {
+        boolean alreadyFound = false;
+        for (int i = 0; i < s.text.words.length; i++) {
+            int firstFoundWord = -1;
+            for (int j = 0; j < s.text.words[i].length; j++) {
+                if (s.text.words[i][j].requestedWord) {
+                    firstFoundWord = j;
+                    break;
+                }
+            }
+            if (firstFoundWord >= 0) {
+                if (alreadyFound) {
+                    p.add(new InlineLabel(" ... "));
+                } else {
+                    alreadyFound = true;
+                }
+                int begWord = Math.max(firstFoundWord - wordAround, 0);
+                int endWord = Math.min(s.text.words[i].length - 1, firstFoundWord + wordAround);
+                for (int j = begWord; j <= endWord; j++) {
+                    WordResult w = s.text.words[i][j];
+                    InlineLabel wlabel = new InlineLabel(wordToText(w));
+                    if (w.requestedWord) {
+                        wlabel.setStyleName("wordFound");
+                    }
+                    wlabel.addMouseDownHandler(korpus.handlerShowInfoWord);
+                    p.add(wlabel);
+                    korpus.widgetsInfoWord.put(wlabel, w);
+                }
+            }
         }
     }
 }

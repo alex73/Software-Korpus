@@ -15,9 +15,9 @@
   #end
 #elseif ( $mode == 'conco')
   #if ( $db == 'korpus' )
-    <title>Беларускі N-корпус: канкарданс корпуса</title>
+    <title>Беларускі N-корпус: KWIC корпуса</title>
   #else
-    <title>Беларускі N-корпус: канкарданс неапрацаваных тэкстаў</title>
+    <title>Беларускі N-корпус: KWIC неапрацаваных тэкстаў</title>
   #end
 #elseif ( $mode == 'cluster')
   #if ( $db == 'korpus' )
@@ -61,15 +61,15 @@
 #end
 #if ( $mode == 'search' )
   <span class="tabPage">Пошук</span>
-  <a class="tabPage" href="${prefix}Concordance.html">Канкарданс</a>
+  <a class="tabPage" href="${prefix}Concordance.html">KWIC</a>
   <a class="tabPage" href="${prefix}Cluster.html">Кластар</a>
 #elseif ( $mode == 'conco' )
   <a class="tabPage" href="${prefix}Search.html"><span class="tabPage">Пошук</a>
-  <span class="tabPage">Канкарданс</span>
+  <span class="tabPage">KWIC</span>
   <a class="tabPage" href="${prefix}Cluster.html">Кластар</a>
 #elseif ( $mode == 'cluster' )
   <a class="tabPage" href="${prefix}Search.html"><span class="tabPage">Пошук</a>
-  <a class="tabPage" href="${prefix}Concordance.html">Канкарданс</a>
+  <a class="tabPage" href="${prefix}Concordance.html">KWIC</a>
   <span class="tabPage">Кластар</span>
 #end
 </div>
@@ -133,9 +133,11 @@
 <div id="resultTable">
 
 #if ( $db == 'korpus' )
-  Корпус утрымлівае пашпартызаваныя тэксты з часткова зьнятай аманіміяй
+  Гэты раздзел змяшчае вычытаныя тэксты, якія маюць метаразметку: аўтар тэксту, назва тэксту і г.д.
+  <div id="statKorpus"></div>
 #else
-  Неапрацаваныя тэксты могуць утрымліваць памылкі сканаваньня...
+  Падкорпус неапрацаваных тэкстаў уяўляе сабой збор тэкстаў, якія былі распазнаныя ў аўтаматычным рэжыме і не прайшлі вычытку (ёсць праблемы з пераносамі, падзелам на сказы, абзацы і інш.). Падкорпус дазваляе шукаць слова  і словаформы, але не мае паўнавартаснай метаразметкі.
+  <div id="statOther"></div>
 #end
 
 

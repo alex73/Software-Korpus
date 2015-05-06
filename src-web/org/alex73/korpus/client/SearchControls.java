@@ -65,7 +65,7 @@ public class SearchControls extends BaseControlsWrapper {
     private MultiWordSuggestOracle oraAuthors;
     private MultiWordSuggestOracle oraVolumes;
 
-    public SearchControls(String parameters, SearchServiceAsync searchService) {
+    public SearchControls(String parameters, SearchServiceAsync searchService, final Korpus korpus) {
 
         Element elAuthor = Document.get().getElementById("text.author");
         if (elAuthor != null) {
@@ -173,6 +173,8 @@ public class SearchControls extends BaseControlsWrapper {
                     }
 
                     importParameters(ps);
+                    
+                    korpus.outStat(result);
                 }
 
                 @Override

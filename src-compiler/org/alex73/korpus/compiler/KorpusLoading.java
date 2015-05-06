@@ -32,7 +32,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
@@ -63,7 +65,9 @@ public class KorpusLoading {
 
     static LuceneDriverWrite lucene;
 
-    static int statTexts, statWords;
+    static StatInfo total = new StatInfo("");
+    static Map<String, StatInfo> parts = new HashMap<>();
+
     static Set<String> authors = new TreeSet<>();
 
     static void processKorpus() throws Exception {
@@ -73,9 +77,7 @@ public class KorpusLoading {
         lucene = new LuceneDriverWrite("Korpus-cache/");
 
         Properties stat = new Properties();
-        int allStatTexts = 0, allStatWords = 0;
-        statTexts = 0;
-        statWords = 0;
+
         List<File> files = new ArrayList<>(FileUtils.listFiles(new File("Korpus-texts/"), new String[] {
                 "xml", "text", "7z", "zip" }, true));
         if (files.isEmpty()) {
@@ -86,20 +88,16 @@ public class KorpusLoading {
         int c = 0;
         for (File f : files) {
             System.out.println("loadFileToCorpus " + f + ": " + (++c) + "/" + files.size());
-            statTexts = 0;
-            statWords = 0;
             if (f.getName().endsWith(".xml") || f.getName().endsWith(".text")) {
                 loadXmlOrTextFileToCorpus(f);
             } else if (f.getName().endsWith(".zip") || f.getName().endsWith(".7z")) {
                 loadArchiveFileToCorpus(f);
-                stat.setProperty("texts." + f.getName(), "" + statTexts);
-                stat.setProperty("words." + f.getName(), "" + statWords);
             }
-            allStatTexts += statTexts;
-            allStatWords += statWords;
         }
-        stat.setProperty("texts", "" + allStatTexts);
-        stat.setProperty("words", "" + allStatWords);
+        for (StatInfo si : parts.values()) {
+            si.write(stat);
+        }
+        total.write(stat);
 
         System.out.println("Optimize...");
         lucene.shutdown();
@@ -117,7 +115,7 @@ public class KorpusLoading {
         FileOutputStream o = new FileOutputStream("Korpus-cache/stat.properties");
         stat.store(o, null);
         o.close();
-        System.out.println(statTexts + " files processed");
+        System.out.println(total.texts + " files processed");
     }
 
     protected static void loadXmlOrTextFileToCorpus(File f) throws Exception {
@@ -206,8 +204,6 @@ public class KorpusLoading {
     }
 
     protected static void loadTextToCorpus(KorpusDocument doc) throws Exception {
-        statTexts++;
-
         lucene.setTextInfo(doc.textInfo);
 
         for (String a : doc.textInfo.authors) {
@@ -224,6 +220,7 @@ public class KorpusLoading {
         }
         sentences = Utils.randomizeOrder(sentences);
 
+        int wordsCount = 0;
         Marshaller m = TEIParser.CONTEXT.createMarshaller();
         for (P p : sentences) {
             ByteArrayOutputStream ba = new ByteArrayOutputStream();
@@ -235,7 +232,26 @@ public class KorpusLoading {
                 m.marshal(p, new StreamResult(ba));
             }
             int c = lucene.addSentence(p, ba.toByteArray());
-            statWords += c;
+            wordsCount += c;
         }
+        if (doc.textInfo.styleGenres.length > 0) {
+            for (String s : doc.textInfo.styleGenres) {
+                addStat(s, wordsCount);
+            }
+        } else {
+            addStat("other", wordsCount);
+        }
+        total.addText(wordsCount);
+    }
+
+    static void addStat(String styleGenre, int wordsCount) {
+        int p = styleGenre.indexOf('/');
+        String st = p < 0 ? styleGenre : styleGenre.substring(0, p);
+        StatInfo i = parts.get(st);
+        if (i == null) {
+            i = new StatInfo(st);
+            parts.put(st, i);
+        }
+        i.addText(wordsCount);
     }
 }

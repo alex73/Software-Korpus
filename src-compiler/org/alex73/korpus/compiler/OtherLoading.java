@@ -61,7 +61,7 @@ public class OtherLoading {
 
     static LuceneDriverWrite lucene;
 
-    static int statTexts, statWords;
+    static StatInfo total = new StatInfo("");
     static Set<String> volumes = new TreeSet<>();
 
     static void processOther() throws Exception {
@@ -71,9 +71,6 @@ public class OtherLoading {
         lucene = new LuceneDriverWrite("Other-cache/");
 
         Properties stat = new Properties();
-        int allStatTexts = 0, allStatWords = 0;
-        statTexts = 0;
-        statWords = 0;
         List<File> files = new ArrayList<>(FileUtils.listFiles(new File("Other-texts/"),
                 new String[] { "zip" }, true));
         if (files.isEmpty()) {
@@ -84,14 +81,9 @@ public class OtherLoading {
         int c = 0;
         for (File f : files) {
             System.out.println("loadFileToOther " + f + ": " + (++c) + "/" + files.size());
-            statTexts = 0;
-            statWords = 0;
             loadZipPagesToOther(f);
-            allStatTexts++;
-            allStatWords += statWords;
         }
-        stat.setProperty("texts", "" + allStatTexts);
-        stat.setProperty("words", "" + allStatWords);
+        total.write(stat);
 
         System.out.println("Optimize...");
         lucene.shutdown();
@@ -109,10 +101,11 @@ public class OtherLoading {
         FileOutputStream o = new FileOutputStream("Other-cache/stat.properties");
         stat.store(o, null);
         o.close();
-        System.out.println(statTexts + " files processed");
+        System.out.println(total.texts + " files processed");
     }
 
     protected static void loadZipPagesToOther(File f) throws Exception {
+        int wordsCount=0;
         try (ZipFile zip = new ZipFile(f)) {
             int c = 0;
             for (Enumeration<? extends ZipEntry> it = zip.entries(); it.hasMoreElements();) {
@@ -125,12 +118,13 @@ public class OtherLoading {
                 try (InputStream in = new BufferedInputStream(zip.getInputStream(en))) {
                     text = IOUtils.toString(in, "UTF-8");
                 }
-                loadTextToCorpus("kamunikat.org", "http://" + f.getName(), text);
+                wordsCount+=loadTextToCorpus("kamunikat.org", "http://" + f.getName(), text);
             }
         }
+        total.addText(wordsCount);
     }
 
-    protected static void loadTextToCorpus(String volume, String textUrl, String data) throws Exception {
+    protected static int loadTextToCorpus(String volume, String textUrl, String data) throws Exception {
         volumes.add(volume);
 
         lucene.setOtherInfo(volume, textUrl);
@@ -149,6 +143,7 @@ public class OtherLoading {
         }
         sentences = Utils.randomizeOrder(sentences);
 
+        int wordsCount=0;
         Marshaller m = TEIParser.CONTEXT.createMarshaller();
         for (P p : sentences) {
             ByteArrayOutputStream ba = new ByteArrayOutputStream();
@@ -160,7 +155,8 @@ public class OtherLoading {
                 m.marshal(p, new StreamResult(ba));
             }
             int c = lucene.addSentence(p, ba.toByteArray());
-            statWords += c;
+            wordsCount += c;
         }
+        return wordsCount;
     }
 }
