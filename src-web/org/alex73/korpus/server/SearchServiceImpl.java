@@ -86,7 +86,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     public SearchServiceImpl() {
         LOGGER.info("startup");
         try {
-            GrammarDBLite.initializeFromDir(new File("GrammarDB"));
+            GrammarDBLite.initializeFromDir(new File(dirPrefix + "/GrammarDB/"));
             processKorpus = new LuceneFilter(dirPrefix + "/Korpus-cache/");
             processOther = new LuceneFilter(dirPrefix + "/Other-cache/");
         } catch (Throwable ex) {
@@ -289,7 +289,6 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
         byte[] xml = process.getXML(doc);
 
-       
         Unmarshaller unm = CONTEXT.createUnmarshaller();
         P paragraph;
         if (Settings.GZIP_TEXT_XML) {
@@ -298,7 +297,6 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
             paragraph = (P) unm.unmarshal(new ByteArrayInputStream(xml));
         }
 
-        long be = System.currentTimeMillis();
         List<WordResult[]> sentences = new ArrayList<>();
 
         for (int i = 0; i < paragraph.getSOrTag().size(); i++) {
@@ -318,14 +316,13 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
                 rsw.cat = w.getCat();
                 words.add(rsw);
             }
-            sentences.add(words.toArray(new WordResult[0]));
+            if (!words.isEmpty()) {
+                sentences.add(words.toArray(new WordResult[0]));
+            }
         }
         ResultText text = new ResultText();
         text.words = sentences.toArray(new WordResult[0][]);
-        
-        long af = System.currentTimeMillis();
-        ClusterServiceImpl.timeParse+=af-be;
-        
+
         return text;
     }
 }

@@ -5,10 +5,10 @@
 	<property name="gwt.args" value="" />
 
 	<!-- Configure path to GWT SDK -->
-	<condition property="gwt.sdk" value="C:/opt/gwt-2.6.1">
+	<condition property="gwt.sdk" value="C:/opt/gwt-2.7.0">
 		<os family="windows"/>
 	</condition>
-	<condition property="gwt.sdk" value="/opt/gwt-2.6.1">
+	<condition property="gwt.sdk" value="/opt/gwt-2.7.0">
 		<os family="unix"/>
 	</condition>
 
@@ -83,7 +83,7 @@
 	<target name="build" depends="gwtc" description="Build this project" />
 
 	<target name="war" depends="build" description="Create a war file">
-		<zip destfile="build/ROOT.war" basedir="war"/>
+		<zip destfile="build/ROOT.war" basedir="war" excludes="logs/**, **/lib/sources/**"/>
 	</target>
 
 	<target name="clean" description="Cleans this project">

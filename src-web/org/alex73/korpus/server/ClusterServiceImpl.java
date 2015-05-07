@@ -50,15 +50,9 @@ public class ClusterServiceImpl {
                         }
                     });
 
-            timeAll = 0;
-            timeParse = 0;
-            long be = System.currentTimeMillis();
             for (ScoreDoc doc : found) {
                 process(doc.doc);
             }
-            long af = System.currentTimeMillis();
-            timeAll += af - be;
-            System.out.println("all: " + timeAll + "  parse:" + timeParse);
             if (found.length < SEARCH_BLOCK) {
                 break;
             }
@@ -67,8 +61,6 @@ public class ClusterServiceImpl {
 
         return createResults();
     }
-
-    static long timeAll, timeParse;
 
     private void process(int docID) throws Exception {
         Document doc = parent.getProcess(params.corpusType).getSentence(docID);
