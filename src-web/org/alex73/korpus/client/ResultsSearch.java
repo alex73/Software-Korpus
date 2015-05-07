@@ -150,8 +150,7 @@ public class ResultsSearch extends VerticalPanel {
 
     static void output(HTMLPanel p, Korpus korpus, ResultText text, TextPos from, TextPos to) {
         TextPos curr = from;
-        TextPos stopAt = to.addWords(1);
-        do {
+        while (true) {
             WordResult w = text.words[curr.getSentence()][curr.getWord()];
             InlineLabel wlabel = new InlineLabel(wordToText(w));
             if (w.requestedWord) {
@@ -160,8 +159,12 @@ public class ResultsSearch extends VerticalPanel {
             wlabel.addMouseDownHandler(korpus.handlerShowInfoWord);
             p.add(wlabel);
             korpus.widgetsInfoWord.put(wlabel, w);
-            curr = curr.addWords(1);
-        } while (!curr.equals(stopAt));
+            TextPos next = curr.addWords(1);
+            if (curr.equals(to)) {
+                break;
+            }
+            curr = next;
+        }
     }
 
     static TextPos getNextRequestedWordPosAfter(ResultText text, TextPos currentPos) {
