@@ -30,14 +30,6 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Cluster }
-     * 
-     */
-    public Cluster createCluster() {
-        return new Cluster();
-    }
-
-    /**
      * Create an instance of {@link Paradigm }
      * 
      */
@@ -46,75 +38,19 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link Cluster }
+     * 
+     */
+    public Cluster createCluster() {
+        return new Cluster();
+    }
+
+    /**
      * Create an instance of {@link Part }
      * 
      */
     public Part createPart() {
         return new Part();
-    }
-
-    /**
-     * Create an instance of {@link Clusters }
-     * 
-     */
-    public Clusters createClusters() {
-        return new Clusters();
-    }
-
-    /**
-     * Create an instance of {@link Cluster.Form }
-     * 
-     */
-    public Cluster.Form createClusterForm() {
-        return new Cluster.Form();
-    }
-
-    /**
-     * Create an instance of {@link Tag }
-     * 
-     */
-    public Tag createTag() {
-        return new Tag();
-    }
-
-    /**
-     * Create an instance of {@link Wordlist }
-     * 
-     */
-    public Wordlist createWordlist() {
-        return new Wordlist();
-    }
-
-    /**
-     * Create an instance of {@link Paradigm.Form }
-     * 
-     */
-    public Paradigm.Form createParadigmForm() {
-        return new Paradigm.Form();
-    }
-
-    /**
-     * Create an instance of {@link Text }
-     * 
-     */
-    public Text createText() {
-        return new Text();
-    }
-
-    /**
-     * Create an instance of {@link TeiHeader }
-     * 
-     */
-    public TeiHeader createTeiHeader() {
-        return new TeiHeader();
-    }
-
-    /**
-     * Create an instance of {@link W }
-     * 
-     */
-    public W createW() {
-        return new W();
     }
 
     /**
@@ -134,11 +70,75 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link W }
+     * 
+     */
+    public W createW() {
+        return new W();
+    }
+
+    /**
+     * Create an instance of {@link Tag }
+     * 
+     */
+    public Tag createTag() {
+        return new Tag();
+    }
+
+    /**
+     * Create an instance of {@link Paradigm.Form }
+     * 
+     */
+    public Paradigm.Form createParadigmForm() {
+        return new Paradigm.Form();
+    }
+
+    /**
+     * Create an instance of {@link TeiHeader }
+     * 
+     */
+    public TeiHeader createTeiHeader() {
+        return new TeiHeader();
+    }
+
+    /**
+     * Create an instance of {@link Clusters }
+     * 
+     */
+    public Clusters createClusters() {
+        return new Clusters();
+    }
+
+    /**
+     * Create an instance of {@link Cluster.Form }
+     * 
+     */
+    public Cluster.Form createClusterForm() {
+        return new Cluster.Form();
+    }
+
+    /**
      * Create an instance of {@link TEI }
      * 
      */
     public TEI createTEI() {
         return new TEI();
+    }
+
+    /**
+     * Create an instance of {@link Text }
+     * 
+     */
+    public Text createText() {
+        return new Text();
+    }
+
+    /**
+     * Create an instance of {@link Wordlist }
+     * 
+     */
+    public Wordlist createWordlist() {
+        return new Wordlist();
     }
 
     /**
