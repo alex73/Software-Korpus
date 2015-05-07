@@ -1,5 +1,7 @@
 package org.alex73.korpus.client;
 
+import org.alex73.korpus.client.utils.TextPos;
+import org.alex73.korpus.shared.dto.ResultText;
 import org.alex73.korpus.shared.dto.SearchResults;
 import org.alex73.korpus.shared.dto.WordResult;
 
@@ -41,7 +43,24 @@ public class ResultsSearch extends VerticalPanel {
 
             p.add(doclabel);
 
-            outputText(s, p, korpus, true, 5, 1);
+            int num = getRequestedWordsCountInResult(s.text) / korpus.currentSearchParams.words.size();
+            int wordsCount;
+            switch (num) {
+            case 0:
+            case 1:
+                wordsCount = 7;
+                break;
+            case 2:
+                wordsCount = 5;
+                break;
+            case 3:
+                wordsCount = 4;
+                break;
+            default:
+                wordsCount = 3;
+                break;
+            }
+            outputText(s, p, korpus, true, wordsCount, 0, " ... ");
 
             add(p);
         }
@@ -64,37 +83,109 @@ public class ResultsSearch extends VerticalPanel {
         }
     }
 
-    // TODO: output N words around, M sentences around
-    public static void outputText(SearchResults s, HTMLPanel p, Korpus korpus, boolean addWordInfoHandler,
-            int wordAround, int sentencesAround) {
-        boolean alreadyFound = false;
-        for (int i = 0; i < s.text.words.length; i++) {
-            int firstFoundWord = -1;
-            for (int j = 0; j < s.text.words[i].length; j++) {
-                if (s.text.words[i][j].requestedWord) {
-                    firstFoundWord = j;
-                    break;
-                }
-            }
-            if (firstFoundWord >= 0) {
-                if (alreadyFound) {
-                    p.add(new InlineLabel(" ... "));
-                } else {
-                    alreadyFound = true;
-                }
-                int begWord = Math.max(firstFoundWord - wordAround, 0);
-                int endWord = Math.min(s.text.words[i].length - 1, firstFoundWord + wordAround);
-                for (int j = begWord; j <= endWord; j++) {
-                    WordResult w = s.text.words[i][j];
-                    InlineLabel wlabel = new InlineLabel(wordToText(w));
-                    if (w.requestedWord) {
-                        wlabel.setStyleName("wordFound");
-                    }
-                    wlabel.addMouseDownHandler(korpus.handlerShowInfoWord);
-                    p.add(wlabel);
-                    korpus.widgetsInfoWord.put(wlabel, w);
+    int getRequestedWordsCountInResult(ResultText text) {
+        int count = 0;
+
+        for (int i = 0; i < text.words.length; i++) {
+            for (int j = 0; j < text.words[i].length; j++) {
+                if (text.words[i][j].requestedWord) {
+                    count++;
                 }
             }
         }
+        return count;
+    }
+
+    public static void outputText(SearchResults s, HTMLPanel p, Korpus korpus, boolean addWordInfoHandler,
+            int wordAround, int sentencesAround, String separatorText) {
+        TextPos begin = new TextPos(s.text, 0, 0);
+        TextPos end = new TextPos(s.text, s.text.words.length - 1,
+                s.text.words[s.text.words.length - 1].length - 1);
+
+        TextPos pos = getNextRequestedWordPosAfter(s.text, null);
+        TextPos currentAroundFrom = pos.addWords(-wordAround);
+        if (sentencesAround != 0) {
+            currentAroundFrom = currentAroundFrom.addSequences(-sentencesAround);
+        }
+        TextPos currentAroundTo = pos.addWords(wordAround);
+        if (sentencesAround != 0) {
+            currentAroundTo = currentAroundTo.addSequences(sentencesAround);
+        }
+
+        if (currentAroundFrom.after(begin)) {
+            p.add(new InlineLabel(separatorText));
+        }
+
+        while (true) {
+            TextPos next = getNextRequestedWordPosAfter(s.text, pos);
+            if (next == null) {
+                break;
+            }
+            TextPos nextAroundFrom = next.addWords(-wordAround);
+            if (sentencesAround != 0) {
+                nextAroundFrom = nextAroundFrom.addSequences(-sentencesAround);
+            }
+            TextPos nextAroundTo = next.addWords(wordAround);
+            if (sentencesAround != 0) {
+                nextAroundTo = nextAroundTo.addSequences(sentencesAround);
+            }
+
+            if (currentAroundTo.addWords(2).after(nextAroundFrom)) {
+                // merge
+                currentAroundTo = nextAroundTo;
+            } else {
+                output(p, korpus, s.text, currentAroundFrom, currentAroundTo);
+                p.add(new InlineLabel(separatorText));
+                currentAroundFrom = nextAroundFrom;
+                currentAroundTo = nextAroundTo;
+            }
+            pos = next;
+        }
+        output(p, korpus, s.text, currentAroundFrom, currentAroundTo);
+
+        if (end.after(currentAroundTo)) {
+            p.add(new InlineLabel(separatorText));
+        }
+    }
+
+    static void output(HTMLPanel p, Korpus korpus, ResultText text, TextPos from, TextPos to) {
+        TextPos curr = from;
+        TextPos stopAt = to.addWords(1);
+        do {
+            WordResult w = text.words[curr.getSentence()][curr.getWord()];
+            InlineLabel wlabel = new InlineLabel(wordToText(w));
+            if (w.requestedWord) {
+                wlabel.setStyleName("wordFound");
+            }
+            wlabel.addMouseDownHandler(korpus.handlerShowInfoWord);
+            p.add(wlabel);
+            korpus.widgetsInfoWord.put(wlabel, w);
+            curr = curr.addWords(1);
+        } while (!curr.equals(stopAt));
+    }
+
+    static TextPos getNextRequestedWordPosAfter(ResultText text, TextPos currentPos) {
+        int startI, startJ;
+        if (currentPos == null) {
+            startI = 0;
+            startJ = 0;
+        } else {
+            TextPos next = currentPos.addWords(1);
+            if (next.equals(currentPos)) {
+                return null;
+            }
+            startI = next.getSentence();
+            startJ = next.getWord();
+        }
+        int j = startJ;
+        for (int i = startI; i < text.words.length; i++) {
+            for (; j < text.words[i].length; j++) {
+                if (text.words[i][j].requestedWord) {
+                    return new TextPos(text, i, j);
+                }
+            }
+            j = 0;
+        }
+        return null;
     }
 }

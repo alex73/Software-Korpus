@@ -239,7 +239,7 @@ public class KorpusLoading {
                 addStat(s, wordsCount);
             }
         } else {
-            addStat("other", wordsCount);
+            addStat("_", wordsCount);
         }
         total.addText(wordsCount);
     }

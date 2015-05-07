@@ -68,8 +68,7 @@ public class DocumentDetailsPanel extends VerticalPanel {
 
     HTMLPanel createWords(SearchResults s, Korpus screen) {
         HTMLPanel p = new HTMLPanel("");
-
-        ResultsSearch.outputText(s, p, screen, false, 20, 3);
+        ResultsSearch.outputText(s, p, screen, false, 0, 3," <...> ");
         return p;
     }
 }

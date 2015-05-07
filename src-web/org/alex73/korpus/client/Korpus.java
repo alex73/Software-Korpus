@@ -23,6 +23,7 @@
 package org.alex73.korpus.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,9 +45,9 @@ import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseOutEvent;
 import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
@@ -82,9 +83,10 @@ public class Korpus implements EntryPoint {
 
     SearchParams currentSearchParams;
     ClusterParams currentClusterParams;
+    HTMLPanel statKorpus, statOther;
     Map<Anchor, SearchResults> widgetsInfoDoc = new HashMap<Anchor, SearchResults>();
     Map<InlineLabel, WordResult> widgetsInfoWord = new HashMap<InlineLabel, WordResult>();
-    
+
     public void onModuleLoad() {
         Button btnSearch = Button.wrap(DOM.getElementById("btnSearch"));
         btnSearch.addClickHandler(searchHandler);
@@ -103,6 +105,16 @@ public class Korpus implements EntryPoint {
         if (searchControls.words.isEmpty()) {
             addWordhandler.onClick(null);
         }
+
+        Element statKorpusDiv = DOM.getElementById("statKorpus");
+        if (statKorpusDiv != null) {
+            statKorpus = HTMLPanel.wrap(statKorpusDiv);
+        }
+        Element statOtherDiv = DOM.getElementById("statOther");
+        if (statOtherDiv != null) {
+            statOther = HTMLPanel.wrap(statOtherDiv);
+        }
+
         if (search) {
             resultsSearch = new ResultsSearch(this);
             RootPanel.get("resultTable").add(resultsSearch);
@@ -113,11 +125,6 @@ public class Korpus implements EntryPoint {
             resultsConcordance = new ResultsConcordance(this);
             RootPanel.get("resultTable").add(resultsConcordance);
         }
-        
-//        Element statKorpusDiv = DOM.getElementById("statKorpus");
-//        if (statKorpusDiv!=null) {
-//            HTMLPanel.wrap(statKorpusDiv);
-//        }
 
         docInfoPopup = new DecoratedPopupPanel(true);
         docInfoPopup.ensureDebugId("cwBasicPopup-simplePopup");
@@ -183,28 +190,57 @@ public class Korpus implements EntryPoint {
     };
 
     void outStat(SearchService.InitialData result) {
-//        outStatTable("statKorpus", result.statKorpus);
-//        outStatTable("statOther", result.statOther);
+        outStatTable(statKorpus, result.statKorpus);
+        outStatTable(statOther, result.statOther);
     }
 
-    void outStatTable(String id, Map<String, Integer> data) {
-        Element div = DOM.getElementById(id);
-        if (div != null) {
-           
-            Grid g = new Grid(2, 3);
+    void outStatTable(HTMLPanel panel, Map<String, Integer> data) {
+        if (panel != null) {
+
+            List<String> names = new ArrayList<>();
+            for (String k : data.keySet()) {
+                if (k.startsWith("texts.")) {
+                    names.add(k.substring(6));
+                }
+            }
+            Collections.sort(names);
+            if (names.contains("_")) {
+                names.remove("_");
+                names.add("_");
+            }
+
+            Grid g = new Grid(names.size() + 2, 3);
+            g.setBorderWidth(1);
             g.setText(0, 1, "Тэкстаў");
             g.setText(0, 2, "Слоў");
+            g.getCellFormatter().setStyleName(0, 1, "text-center");
+            g.getCellFormatter().setStyleName(0, 2, "text-center");
 
             g.setText(1, 0, "Агулам");
-            g.setText(1, 1, "" + data.get("texts"));
-            g.setText(1, 2, "" + data.get("words"));
-            
-            Window.alert("show21 "+id);
-            HTMLPanel.wrap(div).add(g);
-            Window.alert("show31 "+id);
-        }else {
-            Window.alert("none "+id);
+            setNumber(g, 1, 1, data.get("texts"));
+            setNumber(g, 1, 2, data.get("words"));
+            g.getCellFormatter().setStyleName(1, 1, "text-right");
+            g.getCellFormatter().setStyleName(1, 2, "text-right");
+            int i = 2;
+            for (String k : names) {
+                if ("_".equals(k)) {
+                    g.setText(i, 0, "нявызначаны");
+                } else {
+                    g.setText(i, 0, k);
+                }
+                setNumber(g, i, 1, data.get("texts." + k));
+                setNumber(g, i, 2, data.get("words." + k));
+                g.getCellFormatter().setStyleName(i, 1, "text-right");
+                g.getCellFormatter().setStyleName(i, 2, "text-right");
+                i++;
+            }
+
+            panel.add(g);
         }
+    }
+
+    void setNumber(Grid g, int row, int col, int value) {
+        g.setText(row, col, NumberFormat.getDecimalFormat().format(value));
     }
 
     void requestPageDetails(final int pageIndex) {
@@ -253,6 +289,8 @@ public class Korpus implements EntryPoint {
     ClickHandler searchHandler = new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
+            DOM.getElementById("promptMessage").setInnerText("");
+
             searchControls.errorMessage.setText("Пошук...");
 
             pages.clear();

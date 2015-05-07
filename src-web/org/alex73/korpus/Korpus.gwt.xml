@@ -48,5 +48,7 @@
   <source path='base'/>
   <source path='shared'/>
   <source path='client'/>
+  
+  <extend-property name="locale" values="be"/>
 
 </module>
