@@ -23,7 +23,6 @@
 package org.alex73.korpus.compiler;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -35,24 +34,20 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import javax.xml.bind.Marshaller;
-import javax.xml.transform.stream.StreamResult;
-
 import org.alex73.korpus.editor.core.structure.Line;
 import org.alex73.korpus.parser.Splitter;
-import org.alex73.korpus.parser.TEIParser;
-import org.alex73.korpus.server.Settings;
+import org.alex73.korpus.parser.TextParser;
 import org.alex73.korpus.server.engine.LuceneDriverWrite;
+import org.alex73.korpus.server.text.BinaryParagraphWriter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
-import alex73.corpus.paradigm.P;
-import alex73.corpus.paradigm.Part;
-import alex73.corpus.paradigm.Text;
+import alex73.corpus.text.P;
+import alex73.corpus.text.XMLText;
+
 
 /**
  * Class for loading Other texts into searchable cache.
@@ -131,30 +126,24 @@ public class OtherLoading {
 
         data = data.trim().replace('\n', ' ').replace('\r', ' ').replaceAll("\\s{2,}", " ");
         Line line = new Splitter(data).splitParagraph();
+        line.normalize();
 
-        Text text = TEIParser.constructXML(Arrays.asList(line));
-
+      XMLText text=  TextParser.constructXML(Arrays.asList(line));
+        
         List<P> sentences = new ArrayList<>();
-        for (Object o : text.getBody().getHeadOrPOrDiv()) {
+        for (Object o : text.getContent().getPOrTag()) {
             if (o instanceof P) {
                 sentences.add((P) o);
-            } else if (o instanceof Part) {
             }
         }
         sentences = Utils.randomizeOrder(sentences);
 
+        BinaryParagraphWriter wr=new BinaryParagraphWriter();
+        
         int wordsCount=0;
-        Marshaller m = TEIParser.CONTEXT.createMarshaller();
         for (P p : sentences) {
-            ByteArrayOutputStream ba = new ByteArrayOutputStream();
-            if (Settings.GZIP_TEXT_XML) {
-                try (GZIPOutputStream baz = new GZIPOutputStream(ba)) {
-                    m.marshal(p, new StreamResult(baz));
-                }
-            } else {
-                m.marshal(p, new StreamResult(ba));
-            }
-            int c = lucene.addSentence(p, ba.toByteArray());
+            byte[] pa = wr.write(p);
+            int c = lucene.addSentence(p, pa);
             wordsCount += c;
         }
         return wordsCount;

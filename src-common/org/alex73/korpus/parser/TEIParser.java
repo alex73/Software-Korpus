@@ -139,7 +139,7 @@ public class TEIParser {
         boolean poetryMode = false;
 
         P p = null;
-        S s = null;
+        Se s = null;
         for (Line line : doc) {
             if (!poetryMode) {
                 p = new P();
@@ -166,7 +166,7 @@ public class TEIParser {
             for (BaseItem item : line) {
                 if (item instanceof SentenceSeparatorItem) {
                     p.getSOrTag().add(s);
-                    s = new S();
+                    s = new Se();
                 } else if (item instanceof TagLongItem) {
                     p.getSOrTag().add(s);
                     text.getBody().getHeadOrPOrDiv().add(p);

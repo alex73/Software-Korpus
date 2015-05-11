@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import alex73.corpus.paradigm.P;
+import alex73.corpus.text.P;
 
 public class Utils {
 

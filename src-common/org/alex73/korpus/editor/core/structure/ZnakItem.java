@@ -22,12 +22,12 @@
 
 package org.alex73.korpus.editor.core.structure;
 
-import alex73.corpus.paradigm.W;
+import alex73.corpus.text.Z;
 
 public class ZnakItem extends BaseItem {
-    public W w;
+    public Z w;
 
-    public ZnakItem(W w) {
+    public ZnakItem(Z w) {
         this.w = w;
     }
 

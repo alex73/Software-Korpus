@@ -17,9 +17,10 @@ import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
 
-import alex73.corpus.paradigm.P;
-import alex73.corpus.paradigm.S;
-import alex73.corpus.paradigm.W;
+import alex73.corpus.text.P;
+import alex73.corpus.text.Se;
+import alex73.corpus.text.W;
+
 
 public class LuceneDriverWrite extends LuceneFields {
     protected final Logger LOGGER = LogManager.getLogger(LuceneDriverWrite.class);
@@ -114,9 +115,8 @@ public class LuceneDriverWrite extends LuceneFields {
         StringBuilder lemmas = new StringBuilder();
 
         int wordsCount = 0;
-        for (Object op : paragraph.getSOrTag()) {
-            if (op instanceof S) {
-                for (Object o : ((S) op).getWOrTag()) {
+        for (Se op : paragraph.getSe()) {
+                for (Object o : op.getWOrSOrZ()) {
                     if (!(o instanceof W)) {
                         continue;
                     }
@@ -139,7 +139,6 @@ public class LuceneDriverWrite extends LuceneFields {
                         lemmas.append(w.getLemma().replace('_', ' ')).append(' ');
                     }
                 }
-            }
         }
 
         // fieldID.setIntValue(id);

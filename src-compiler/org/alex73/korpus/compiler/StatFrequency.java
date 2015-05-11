@@ -38,36 +38,21 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import javax.xml.bind.JAXBContext;
-
 import org.alex73.korpus.editor.core.GrammarDB;
-import org.alex73.korpus.editor.core.structure.KorpusDocument;
-import org.alex73.korpus.parser.TEIParser;
 import org.alex73.korpus.parser.TextParser;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.commons.io.FileUtils;
 
-import alex73.corpus.paradigm.P;
-import alex73.corpus.paradigm.Part;
-import alex73.corpus.paradigm.S;
-import alex73.corpus.paradigm.TEI;
-import alex73.corpus.paradigm.Text;
-import alex73.corpus.paradigm.W;
+import alex73.corpus.text.P;
+import alex73.corpus.text.Se;
+import alex73.corpus.text.W;
+import alex73.corpus.text.XMLText;
 
 /**
  * Collects statistics of most frequently used lemmas.
  */
 public class StatFrequency {
-
-    public static JAXBContext CONTEXT;
-    static {
-        try {
-            CONTEXT = JAXBContext.newInstance(TEI.class.getPackage().getName());
-        } catch (Exception ex) {
-            throw new ExceptionInInitializerError(ex);
-        }
-    }
 
     static final Map<String, Long> lemmasCount = new HashMap<>();
 
@@ -153,16 +138,16 @@ public class StatFrequency {
 
     protected static void loadXmlOrTextFileToCorpus(File f) throws Exception {
         if (f.getName().endsWith(".xml")) {
-            KorpusDocument doc;
+            XMLText doc;
             InputStream in = new BufferedInputStream(new FileInputStream(f));
             try {
-                doc = TEIParser.parseXML(in);
+                doc = TextParser.parseXML(in);
             } finally {
                 in.close();
             }
             loadTextToCorpus(doc);
         } else if (f.getName().endsWith(".text")) {
-            KorpusDocument doc;
+            XMLText doc;
             InputStream in = new BufferedInputStream(new FileInputStream(f));
             try {
                 doc = TextParser.parseText(in, false);
@@ -185,13 +170,13 @@ public class StatFrequency {
                     continue;
                 }
                 System.out.println("loadFileToCorpus " + f + "/" + en.getName() + ": " + (++c));
-                KorpusDocument doc;
+                XMLText doc;
                 InputStream in = new BufferedInputStream(zip.getInputStream(en));
                 try {
                     if (en.getName().endsWith(".text")) {
                         doc = TextParser.parseText(in, false);
                     } else if (en.getName().endsWith(".xml")) {
-                        doc = TEIParser.parseXML(in);
+                        doc = TextParser.parseXML(in);
                     } else {
                         throw new RuntimeException("Unknown entry '" + en.getName() + "' in " + f);
                     }
@@ -215,13 +200,13 @@ public class StatFrequency {
                     p += sevenZFile.read(content, p, content.length - p);
                 }
                 try {
-                    KorpusDocument doc;
+                    XMLText doc;
                     InputStream in = new ByteArrayInputStream(content);
                     try {
                         if (en.getName().endsWith(".text")) {
                             doc = TextParser.parseText(in, false);
                         } else if (en.getName().endsWith(".xml")) {
-                            doc = TEIParser.parseXML(in);
+                            doc = TextParser.parseXML(in);
                         } else {
                             throw new RuntimeException("Unknown entry '" + en.getName() + "' in " + f);
                         }
@@ -239,27 +224,22 @@ public class StatFrequency {
         }
     }
 
-    protected static void loadTextToCorpus(KorpusDocument doc) throws Exception {
-        Text text = TEIParser.constructXML(doc);
-
-        List<S> sentences = new ArrayList<>();
-        for (Object o : text.getBody().getHeadOrPOrDiv()) {
+    protected static void loadTextToCorpus(XMLText text) throws Exception {
+        List<Se> sentences = new ArrayList<>();
+        for (Object o : text.getContent().getPOrTag()) {
             if (o instanceof P) {
                 P p = (P) o;
-                for (Object o2 : p.getSOrTag()) {
-                    if (o2 instanceof S) {
-                        sentences.add((S) o2);
-                    }
+                for (Se se : p.getSe()) {
+                        sentences.add(se);
                 }
-            } else if (o instanceof Part) {
             }
         }
         stat(sentences);
     }
 
-    protected static void stat(List<S> sentences) {
-        for (S s : sentences) {
-            for (Object o : s.getWOrTag()) {
+    protected static void stat(List<Se> sentences) {
+        for (Se se : sentences) {
+            for (Object o : se.getWOrSOrZ()) {
                 if (o instanceof W) {
                     W w = (W) o;
                     Long c = lemmasCount.get(w.getLemma());

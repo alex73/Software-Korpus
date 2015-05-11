@@ -14,18 +14,6 @@
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
-	<xs:element name="Clusters">
-		<xs:annotation>
-			<xs:documentation>Сьпіс кластэраў</xs:documentation>
-		</xs:annotation>
-		<xs:complexType>
-			<xs:sequence minOccurs="0" maxOccurs="unbounded">
-				<xs:choice>
-					<xs:element ref="Cluster" />
-				</xs:choice>
-			</xs:sequence>
-		</xs:complexType>
-	</xs:element>
 	<xs:simpleType name="Type">
 		<xs:annotation>
 			<xs:documentation>Тып словаформы</xs:documentation>
@@ -155,92 +143,6 @@
 				</xs:annotation>
 			</xs:attribute>
 			<xs:attribute name="meaning" type="xs:string" use="optional" />
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="Cluster">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element name="Form" minOccurs="0" maxOccurs="unbounded">
-					<xs:complexType>
-						<xs:attribute name="Tag" type="xs:string" use="required" />
-						<xs:attribute name="pdgId" type="xs:string" use="required" />
-					</xs:complexType>
-				</xs:element>
-			</xs:sequence>
-			<xs:attribute name="pdgId" type="xs:string" use="optional" />
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="text">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element name="body" type="Part" />
-			</xs:sequence>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="s">
-		<xs:complexType>
-			<xs:sequence minOccurs="0" maxOccurs="unbounded">
-				<xs:choice>
-					<xs:element ref="w" />
-					<xs:element ref="tag" />
-				</xs:choice>
-			</xs:sequence>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="w">
-		<xs:complexType>
-			<xs:simpleContent>
-				<xs:extension base="xs:string">
-					<xs:attribute name="cat" type="xs:string" use="required" />
-					<xs:attribute name="lemma" type="xs:string" use="required" />
-					<xs:attribute name="manual" type="xs:boolean" use="optional"
-						default="false" />
-				</xs:extension>
-			</xs:simpleContent>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="tag">
-		<xs:complexType>
-			<xs:attribute name="name" type="xs:string" use="required" />
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="p">
-		<xs:complexType>
-			<xs:sequence minOccurs="0" maxOccurs="unbounded">
-				<xs:choice>
-					<xs:element ref="s" />
-					<xs:element ref="tag" />
-				</xs:choice>
-			</xs:sequence>
-		</xs:complexType>
-	</xs:element>
-	<xs:complexType name="Part">
-		<xs:choice minOccurs="0" maxOccurs="unbounded">
-			<xs:element name="head">
-				<xs:complexType>
-					<xs:sequence>
-						<xs:element ref="s" maxOccurs="unbounded" />
-					</xs:sequence>
-				</xs:complexType>
-			</xs:element>
-			<xs:element ref="p" maxOccurs="unbounded" />
-			<xs:element name="div" type="Part" />
-		</xs:choice>
-	</xs:complexType>
-	<xs:element name="TEI">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:element ref="teiHeader" />
-				<xs:element ref="text" />
-			</xs:sequence>
-		</xs:complexType>
-	</xs:element>
-	<xs:element name="teiHeader">
-		<xs:complexType>
-			<xs:sequence>
-				<xs:any namespace="##any" minOccurs="0" maxOccurs="unbounded" />
-			</xs:sequence>
-			<xs:anyAttribute namespace="##any" />
 		</xs:complexType>
 	</xs:element>
 </xs:schema>

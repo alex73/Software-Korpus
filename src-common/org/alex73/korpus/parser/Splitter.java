@@ -42,7 +42,8 @@ import org.alex73.korpus.editor.core.structure.ZnakItem;
 import org.alex73.korpus.utils.WordNormalizer;
 
 import alex73.corpus.paradigm.Paradigm;
-import alex73.corpus.paradigm.W;
+import alex73.corpus.text.W;
+import alex73.corpus.text.Z;
 
 /**
  * Гэты код дзеліць радок на асобныя элемэнты.
@@ -58,7 +59,7 @@ public class Splitter {
     protected static final Pattern RE_AMP = Pattern.compile("&(#([0-9]+)|([a-z]+));");
 
     enum SPLIT_MODE {
-        WORD, SPACE, TAG_SHORT, TAG_LONG
+        WORD, SPACE, TAG_SHORT
     };
 
     String line;
@@ -190,9 +191,6 @@ public class Splitter {
             case SPACE:
                 result.add(new SpaceItem(line.substring(partStart, currentPos)));
                 break;
-            case TAG_LONG:
-                result.add(new TagLongItem(line.substring(partStart, currentPos)));
-                break;
             case TAG_SHORT:
                 result.add(new TagShortItem(line.substring(partStart, currentPos)));
                 break;
@@ -202,12 +200,8 @@ public class Splitter {
     }
 
     public Line splitParagraph() {
-        if (line.startsWith("##")) {
-            mode = SPLIT_MODE.TAG_LONG;
-        } else {
-            mode = SPLIT_MODE.SPACE;
-        }
-        for (currentPos = 0; currentPos < line.length(); currentPos++) {
+         mode = SPLIT_MODE.SPACE;
+         for (currentPos = 0; currentPos < line.length(); currentPos++) {
             char ch = line.charAt(currentPos);
             if (ch == CH_SENT_SEPARATOR) {
                 flush();
@@ -228,7 +222,7 @@ public class Splitter {
                     if (ch == ' ') {
                         result.add(new SpaceItem(" "));
                     } else {
-                        result.add(new ZnakItem(getWordInfo(line.substring(currentPos, currentPos + 1))));
+                        result.add(new ZnakItem(getZnakInfo(line.substring(currentPos, currentPos + 1))));
                     }
                     partStart = currentPos + 1;
                     mode = SPLIT_MODE.SPACE;
@@ -248,7 +242,7 @@ public class Splitter {
                     if (ch == ' ') {
                         result.add(new SpaceItem(" "));
                     } else {
-                        result.add(new ZnakItem(getWordInfo(line.substring(currentPos, currentPos + 1))));
+                        result.add(new ZnakItem(getZnakInfo(line.substring(currentPos, currentPos + 1))));
                     }
                     partStart = currentPos + 1;
                     mode = SPLIT_MODE.SPACE;
@@ -260,13 +254,6 @@ public class Splitter {
                     flush();
                     currentPos--;
                     partStart = currentPos + 1;
-                    mode = SPLIT_MODE.SPACE;
-                }
-                break;
-            case TAG_LONG:
-                if (Character.isWhitespace(ch)) {
-                    flush();
-                    partStart = currentPos;
                     mode = SPLIT_MODE.SPACE;
                 }
                 break;
@@ -284,7 +271,7 @@ public class Splitter {
         if (ch == CH_SENT_SEPARATOR) {
             return new SentenceSeparatorItem();
         } else if (GrammarDB.getInstance().getZnaki().indexOf(ch) >= 0) {
-            return new ZnakItem(getWordInfo("" + ch));
+            return new ZnakItem(getZnakInfo("" + ch));
         } else if (Character.isWhitespace(ch)) {
             return new SpaceItem("" + ch);
         } else {
@@ -303,20 +290,35 @@ public class Splitter {
         return result;
     }
 
+    protected static Z getZnakInfo(String w) {
+        String word = fixWord(w);
+        Z result = new Z();
+        result.setValue(w); // value must be original text
+        Paradigm[] paradigms = GrammarDB.getInstance().getParadigmsByForm(word);
+        if (paradigms != null) {
+            fillZnakInfoParadigms(result, word, paradigms);
+        }
+        return result;
+    }
+
     public static void fillWordsInfo(Line line) {
         for (BaseItem item : line) {
-            W w = null;
             if (item instanceof WordItem) {
-                w = ((WordItem) item).w;
-            } else if (item instanceof ZnakItem) {
-                w = ((ZnakItem) item).w;
-            }
-            if (w != null && w.getLemma() == null) {
-                String word = w.getValue();
-                Paradigm[] paradigms = GrammarDB.getInstance().getParadigmsByForm(word);
-                if (paradigms != null) {
-                    fillWordInfoParadigms(w, word, paradigms);
+                W     w = ((WordItem) item).w;
+                if (w.getLemma() == null) {
+                    String word = w.getValue();
+                    Paradigm[] paradigms = GrammarDB.getInstance().getParadigmsByForm(word);
+                    if (paradigms != null) {
+                        fillWordInfoParadigms(w, word, paradigms);
+                    }
                 }
+            } else if (item instanceof ZnakItem) {
+                Z z = ((ZnakItem) item).w;
+                    String word = z.getValue(); // TODO : check
+                    Paradigm[] paradigms = GrammarDB.getInstance().getParadigmsByForm(word);
+                    if (paradigms != null) {
+                        fillZnakInfoParadigms(z, word, paradigms);
+                    }
             }
         }
     }
@@ -381,6 +383,29 @@ public class Splitter {
         }
         w.setLemma(set2string(lemmas));
         w.setCat(set2string(cats));
+    }
+
+    static void fillZnakInfoParadigms(Z z, String word, Paradigm[] paradigms) {
+        Set<String> cats = new TreeSet<>();
+        for (Paradigm p : paradigms) {
+            boolean foundForm = false;
+            for (Paradigm.Form f : p.getForm()) {
+                if (word.equals(f.getValue())) {
+                    cats.add(p.getTag() + f.getTag());
+                    foundForm = true;
+                }
+            }
+            if (!foundForm) {
+                // the same find, but without stress and lowercase
+                String uw = WordNormalizer.normalize(word);
+                for (Paradigm.Form f : p.getForm()) {
+                    if (uw.equals(WordNormalizer.normalize(f.getValue()))) {
+                        cats.add(p.getTag() + f.getTag());
+                    }
+                }
+            }
+        }
+        z.setCat(set2string(cats));
     }
 
     protected static String set2string(Set<String> set) {
@@ -472,14 +497,14 @@ public class Splitter {
                 BaseItem newItem = null;
                 WordItem w = (WordItem) currentItem;
                 if (w.getText().startsWith("'")) {
-                    newItem = new ZnakItem(getWordInfo("'"));
+                    newItem = new ZnakItem(getZnakInfo("'"));
                     w = (WordItem) w.splitRight(1);
                     line.set(i, w);
                     line.add(i, newItem);
                     modified = true;
                 }
                 if (w.getText().endsWith("'")) {
-                    newItem = new ZnakItem(getWordInfo("'"));
+                    newItem = new ZnakItem(getZnakInfo("'"));
                     w = (WordItem) w.splitLeft(w.getText().length() - 1);
                     line.set(i, w);
                     line.add(i + 1, newItem);
@@ -509,12 +534,12 @@ public class Splitter {
             // merge numbers
             BaseItem currentItem = line.get(i);
             BaseItem nextItem = line.get(i + 1);
-            if (currentItem instanceof ZnakItem && nextItem instanceof ZnakItem) {
+            if (currentItem instanceof WordItem && nextItem instanceof WordItem) {
                 if (RE_DIGITS.matcher(currentItem.getText()).matches()) {
                     if (RE_DIGITS.matcher(nextItem.getText()).matches()) {
                         W w = new W();
                         w.setValue(currentItem.getText() + nextItem.getText());
-                        ZnakItem newItem = new ZnakItem(w);
+                        WordItem newItem = new WordItem(w);
                         line.remove(i);
                         line.remove(i);
                         line.add(i, newItem);

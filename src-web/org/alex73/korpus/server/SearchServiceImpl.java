@@ -53,11 +53,6 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.ScoreDoc;
 
-import alex73.corpus.paradigm.P;
-import alex73.corpus.paradigm.S;
-import alex73.corpus.paradigm.TEI;
-import alex73.corpus.paradigm.W;
-
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**

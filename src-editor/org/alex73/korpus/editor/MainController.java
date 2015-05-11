@@ -52,6 +52,7 @@ import org.alex73.korpus.parser.TextParser;
 
 import alex73.corpus.paradigm.TEI;
 import alex73.corpus.paradigm.W;
+import alex73.corpus.text.XMLText;
 
 public class MainController {
     static String baseFileName;
@@ -107,9 +108,9 @@ public class MainController {
     static ActionListener aFileSave = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             try {
-                TEI tei = new TEI();
-                tei.setText(TEIParser.constructXML(UI.doc.extractText()));
-                TEIParser.saveXML(getOutFile(), tei);
+                XMLText tei = new XMLText();
+                tei.setText(TextParser.constructXML(UI.doc.extractText()));
+                TextParser.saveXML(getOutFile(), tei);
                 UI.showInfo("Захавана ў " + getOutFile());
             } catch (Throwable ex) {
                 ex.printStackTrace();
@@ -212,7 +213,7 @@ public class MainController {
             if (f.getName().endsWith(".xml")) {
                 InputStream in = new BufferedInputStream(new FileInputStream(f));
                 try {
-                    kDoc = TEIParser.parseXML(in);
+                    kDoc = TextParser.parseXML(in);
                 } finally {
                     in.close();
                 }

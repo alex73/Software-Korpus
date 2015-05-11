@@ -27,6 +27,8 @@ import java.util.Arrays;
 
 import org.alex73.korpus.parser.Splitter;
 
+import alex73.corpus.text.P;
+
 /**
  * Сховішча для радку дакумэнту корпуса.
  */
@@ -133,7 +135,7 @@ public class Line extends ArrayList<BaseItem> {
             ;
         Splitter.fillWordsInfo(this);
     }
-
+    
     @Override
     public String toString() {
         return super.toString() + " length=" + length();

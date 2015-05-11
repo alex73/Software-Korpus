@@ -45,18 +45,18 @@ import java.util.zip.ZipFile;
 import javax.xml.bind.Marshaller;
 import javax.xml.transform.stream.StreamResult;
 
-import org.alex73.korpus.editor.core.structure.KorpusDocument;
-import org.alex73.korpus.parser.TEIParser;
+import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.parser.TextParser;
 import org.alex73.korpus.server.Settings;
 import org.alex73.korpus.server.engine.LuceneDriverWrite;
+import org.alex73.korpus.server.text.BinaryParagraphWriter;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.commons.io.FileUtils;
 
-import alex73.corpus.paradigm.P;
-import alex73.corpus.paradigm.Part;
-import alex73.corpus.paradigm.Text;
+import alex73.corpus.text.P;
+import alex73.corpus.text.Tag;
+import alex73.corpus.text.XMLText;
 
 /**
  * Class for loading Corpus texts into searchable cache.
@@ -120,16 +120,16 @@ public class KorpusLoading {
 
     protected static void loadXmlOrTextFileToCorpus(File f) throws Exception {
         if (f.getName().endsWith(".xml")) {
-            KorpusDocument doc;
+            XMLText doc;
             InputStream in = new BufferedInputStream(new FileInputStream(f));
             try {
-                doc = TEIParser.parseXML(in);
+                doc = TextParser.parseXML(in);
             } finally {
                 in.close();
             }
             loadTextToCorpus(doc);
         } else if (f.getName().endsWith(".text")) {
-            KorpusDocument doc;
+            XMLText doc;
             InputStream in = new BufferedInputStream(new FileInputStream(f));
             try {
                 doc = TextParser.parseText(in, false);
@@ -152,13 +152,13 @@ public class KorpusLoading {
                         continue;
                     }
                     System.out.println("loadFileToCorpus " + f + "/" + en.getName() + ": " + (++c));
-                    KorpusDocument doc;
+                    XMLText doc;
                     InputStream in = new BufferedInputStream(zip.getInputStream(en));
                     try {
                         if (en.getName().endsWith(".text")) {
                             doc = TextParser.parseText(in, false);
                         } else if (en.getName().endsWith(".xml")) {
-                            doc = TEIParser.parseXML(in);
+                            doc = TextParser.parseXML(in);
                         } else {
                             throw new RuntimeException("Unknown entry '" + en.getName() + "' in " + f);
                         }
@@ -182,12 +182,12 @@ public class KorpusLoading {
                     p += sevenZFile.read(content, p, content.length - p);
                 }
                 try {
-                    KorpusDocument doc;
+                    XMLText doc;
                     try (InputStream in = new ByteArrayInputStream(content)) {
                         if (en.getName().endsWith(".text")) {
                             doc = TextParser.parseText(in, false);
                         } else if (en.getName().endsWith(".xml")) {
-                            doc = TEIParser.parseXML(in);
+                            doc = TextParser.parseXML(in);
                         } else {
                             throw new RuntimeException("Unknown entry '" + en.getName() + "' in " + f);
                         }
@@ -203,39 +203,31 @@ public class KorpusLoading {
         }
     }
 
-    protected static void loadTextToCorpus(KorpusDocument doc) throws Exception {
-        lucene.setTextInfo(doc.textInfo);
+    protected static void loadTextToCorpus(XMLText doc) throws Exception {
+        TextInfo textInfo=createTextInfo(doc);
+        lucene.setTextInfo(textInfo);
 
-        for (String a : doc.textInfo.authors) {
+        for (String a : textInfo.authors) {
             authors.add(a);
         }
-        Text text = TEIParser.constructXML(doc);
 
         List<P> sentences = new ArrayList<>();
-        for (Object o : text.getBody().getHeadOrPOrDiv()) {
+        for (Object o : doc.getContent().getPOrTag()) {
             if (o instanceof P) {
                 sentences.add((P) o);
-            } else if (o instanceof Part) {
             }
         }
         sentences = Utils.randomizeOrder(sentences);
 
+        BinaryParagraphWriter wr=new BinaryParagraphWriter();
         int wordsCount = 0;
-        Marshaller m = TEIParser.CONTEXT.createMarshaller();
         for (P p : sentences) {
-            ByteArrayOutputStream ba = new ByteArrayOutputStream();
-            if (Settings.GZIP_TEXT_XML) {
-                try (GZIPOutputStream baz = new GZIPOutputStream(ba)) {
-                    m.marshal(p, new StreamResult(baz));
-                }
-            } else {
-                m.marshal(p, new StreamResult(ba));
-            }
-            int c = lucene.addSentence(p, ba.toByteArray());
+            byte[] pa = wr.write(p);
+            int c = lucene.addSentence(p, pa);
             wordsCount += c;
         }
-        if (doc.textInfo.styleGenres.length > 0) {
-            for (String s : doc.textInfo.styleGenres) {
+        if (textInfo.styleGenres.length > 0) {
+            for (String s : textInfo.styleGenres) {
                 addStat(s, wordsCount);
             }
         } else {
@@ -253,5 +245,37 @@ public class KorpusLoading {
             parts.put(st, i);
         }
         i.addText(wordsCount);
+    }
+
+    static TextInfo createTextInfo(XMLText text) {
+        TextInfo r = new TextInfo();
+        String authors = getTag(text, "Authors");
+        if (authors != null) {
+            r.authors = authors.split(",");
+        } else {
+            r.authors = new String[0];
+        }
+        String publishedYear = getTag(text, "PublishedYear");
+        r.publishedYear = publishedYear != null ? Integer.parseInt(publishedYear) : 0;
+        String writtenYear = getTag(text, "WrittenYear");
+        r.writtenYear = writtenYear != null ? Integer.parseInt(writtenYear) : 0;
+        String styleGenres = getTag(text, "StyleGenres");
+        if (styleGenres != null) {
+            r.styleGenres = styleGenres.split(",");
+        } else {
+            r.styleGenres = new String[0];
+        }
+        r.title = getTag(text, "Title");
+
+        return r;
+    }
+
+    static String getTag(XMLText text, String name) {
+        for (Tag tag : text.getHeader().getTag()) {
+            if (name.equals(tag.getName())) {
+                return tag.getValue();
+            }
+        }
+        return null;
     }
 }

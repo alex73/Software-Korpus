@@ -35,45 +35,57 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
 
-import org.alex73.korpus.editor.core.structure.KorpusDocument;
+import org.alex73.korpus.editor.core.structure.BaseItem;
 import org.alex73.korpus.editor.core.structure.Line;
+import org.alex73.korpus.editor.core.structure.SentenceSeparatorItem;
+import org.alex73.korpus.editor.core.structure.SpaceItem;
+import org.alex73.korpus.editor.core.structure.TagShortItem;
+import org.alex73.korpus.editor.core.structure.WordItem;
+import org.alex73.korpus.editor.core.structure.ZnakItem;
 
-import alex73.corpus.paradigm.TEI;
-import alex73.corpus.paradigm.TeiHeader;
+import alex73.corpus.text.Content;
+import alex73.corpus.text.Header;
+import alex73.corpus.text.P;
+import alex73.corpus.text.Se;
+import alex73.corpus.text.Tag;
+import alex73.corpus.text.XMLText;
 
 /**
  * Чытаньне тэкставага файлу й стварэньне дакумэнту корпуса.
  */
 public class TextParser {
-    protected static JAXBContext CONTEXT;
+    public static JAXBContext CONTEXT;
     static {
         try {
-            CONTEXT = JAXBContext.newInstance(TEI.class.getPackage().getName());
+            CONTEXT = JAXBContext.newInstance(XMLText.class.getPackage().getName());
         } catch (Exception ex) {
             throw new ExceptionInInitializerError(ex);
         }
     }
 
-    public static KorpusDocument parseText(InputStream in, boolean headerOnly) throws Exception {
+    public static XMLText parseXML(InputStream in) throws Exception {
+        Unmarshaller unm = CONTEXT.createUnmarshaller();
+
+        XMLText doc = (XMLText) unm.unmarshal(in);
+        return doc;
+    }
+
+    public static XMLText parseText(InputStream in, boolean headerOnly) throws Exception {
         BufferedReader rd = new BOMBufferedReader(new InputStreamReader(in, "UTF-8"));
 
         Map<String, String> headers = extractHeaders(rd);
 
-        KorpusDocument doc = new KorpusDocument();
-        String a = headers.get("Authors");
-        doc.textInfo.authors = a != null ? a.split(",") : new String[0];
-        doc.textInfo.title = headers.get("Title");
-        String sg = headers.get("StyleGenre");
-        doc.textInfo.styleGenres = sg != null ? sg.split(",") : new String[0];
-        doc.textInfo.writtenYear = parseDate(headers.get("YearWritten"));
-        doc.textInfo.publishedYear = parseDate(headers.get("YearPublished"));
+        XMLText doc = new XMLText();
+        doc.setHeader(new Header());
+        doc.setContent(new Content());
 
-        if (doc.textInfo.authors.length == 0) {
-            throw new Exception("Нявызначаны аўтар");
-        }
-        if (doc.textInfo.title == null || doc.textInfo.title.trim().isEmpty()) {
-            throw new Exception("Нявызначаная назва");
+        for (Map.Entry<String, String> en : headers.entrySet()) {
+            Tag t = new Tag();
+            t.setName(en.getKey());
+            t.setValue(en.getValue());
+            doc.getHeader().getTag().add(t);
         }
         if (headerOnly) {
             return doc;
@@ -81,24 +93,32 @@ public class TextParser {
 
         String s;
         while ((s = rd.readLine()) != null) {
-            Splitter sp = new Splitter(s);
-            doc.add(sp.splitParagraph());
+            s = s.trim();
+            if (s.startsWith("##")) {
+                Tag t = new Tag();
+                t.setValue(s);
+                doc.getContent().getPOrTag().add(t);
+            } else {
+                Splitter sp = new Splitter(s);
+                doc.getContent().getPOrTag().add(sp.splitParagraph());
+            }
         }
 
         return doc;
     }
-    
-    static final Pattern RE_DATE1=Pattern.compile("([0-9]{4})");
+
+    static final Pattern RE_DATE1 = Pattern.compile("([0-9]{4})");
+
     public static Integer parseDate(String date) {
-        if (date==null) {
+        if (date == null) {
             return null;
         }
-        
+
         Matcher m;
-        if ((m=RE_DATE1.matcher(date)).matches()) {
+        if ((m = RE_DATE1.matcher(date)).matches()) {
             return Integer.parseInt(m.group(1));
-        }else {
-            throw new RuntimeException("Wrong date: "+date);
+        } else {
+            throw new RuntimeException("Wrong date: " + date);
         }
     }
 
@@ -162,9 +182,57 @@ public class TextParser {
         throw new Exception("Wrong description header");
     }
 
-    static TeiHeader createTeiHeader(Map<String, String> headers) {
-        TeiHeader tei = new TeiHeader();
+    public static XMLText constructXML(List<Line> doc) {
+        XMLText text = new XMLText();
+        text.setContent(new Content());
 
-        return tei;
+        P p = null;
+        Se s = null;
+        for (Line line : doc) {
+            p = new P();
+            s = new Se();
+            for (BaseItem item : line) {
+                if (item instanceof SentenceSeparatorItem) {
+                    p.getSe().add(s);
+                    s = new Se();
+                } else {
+                    eventSimpleItem(item, s);
+                }
+            }
+            p.getSe().add(s);
+            text.getContent().getPOrTag().add(p);
+        }
+        // remove empty
+        for (int i = 0; i < text.getContent().getPOrTag().size(); i++) {
+            if (text.getContent().getPOrTag().get(i) instanceof P) {
+                p = (P) text.getContent().getPOrTag().get(i);
+                for (int j = 0; j < p.getSe().size(); j++) {
+                    s = p.getSe().get(j);
+                    if (s.getWOrSOrZ().isEmpty()) {
+                        p.getSe().remove(j);
+                        j--;
+                    }
+                }
+            }
+        }
+        return text;
+    }
+
+    static void eventSimpleItem(BaseItem item, Se s) {
+        if (item instanceof WordItem) {
+            WordItem it = (WordItem) item;
+            s.getWOrSOrZ().add(it.w);
+        } else if (item instanceof ZnakItem) {
+            ZnakItem it = (ZnakItem) item;
+            s.getWOrSOrZ().add(it.w);
+        } else if (item instanceof TagShortItem) {
+            TagShortItem it = (TagShortItem) item;
+            Tag tag = new Tag();
+            tag.setName(it.getText());
+            s.getWOrSOrZ().add(tag);
+        } else if (item instanceof SpaceItem) {
+        } else {
+            throw new RuntimeException("Unknown item: " + item.getClass().getSimpleName());
+        }
     }
 }

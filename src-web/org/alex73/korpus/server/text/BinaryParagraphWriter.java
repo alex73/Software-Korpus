@@ -1,8 +1,8 @@
 package org.alex73.korpus.server.text;
 
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,20 +14,20 @@ import alex73.corpus.text.W;
 import alex73.corpus.text.Z;
 
 public class BinaryParagraphWriter {
-    private static Charset UTF8 = Charset.forName("UTF-8");
     private ByteArrayOutputStream bytes = new ByteArrayOutputStream(8192);
-    private ByteArrayOutputStream wordBytes = new ByteArrayOutputStream(8192);
+    private DataOutputStream out = new DataOutputStream(bytes);
     private List<Object> words = new ArrayList<>();
 
-    public void write(P paragraph) {
+    public byte[] write(P paragraph) {
         try {
             bytes.reset();
 
-            if (paragraph.getSe().size() > 255) {
+            if (paragraph.getSe().size() > Short.MAX_VALUE) {
                 throw new RuntimeException("Too many sentences in paragraph: " + paragraph.getSe().size());
             }
 
-            bytes.write(paragraph.getSe().size());
+            out.writeShort(paragraph.getSe().size());
+
             for (Se se : paragraph.getSe()) {
                 words.clear();
                 for (Object o : se.getWOrSOrZ()) {
@@ -43,10 +43,10 @@ public class BinaryParagraphWriter {
                         throw new RuntimeException("Unknown type:" + o.getClass());
                     }
                 }
-                if (words.size() > 255) {
+                if (words.size() > Short.MAX_VALUE) {
                     throw new RuntimeException("Too many words in sentence: " + words.size());
                 }
-                bytes.write(words.size());
+                out.writeShort(words.size());
                 for (Object o : words) {
                     if (o instanceof W) {
                         writeW((W) o);
@@ -62,18 +62,28 @@ public class BinaryParagraphWriter {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
+        return bytes.toByteArray();
     }
 
     private void writeW(W w) throws IOException {
-        wordBytes.reset();
-        wordBytes.write(w.getValue().getBytes(UTF8));
+        writeString(w.getValue());
+        writeString(w.getCat());
+        writeString(w.getLemma());
     }
 
     private void writeS(S s) throws IOException {
-
+        writeString(s.getChar());
     }
 
     private void writeZ(Z z) throws IOException {
+        writeString(z.getValue());
+        writeString(z.getCat());
+    }
 
+    private void writeString(String str) throws IOException {
+        if (str == null) {
+            str = "";
+        }
+        out.writeUTF(str);
     }
 }

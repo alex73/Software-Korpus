@@ -28,5 +28,4 @@ package org.alex73.korpus.server;
 public class Settings {
     public static final int KORPUS_SEARCH_RESULT_PAGE = 100;
     public static final int GRAMMAR_SEARCH_RESULT_PAGE = 200;
-    public static final boolean GZIP_TEXT_XML = false;
 }
