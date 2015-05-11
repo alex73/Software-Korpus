@@ -24,7 +24,6 @@ package org.alex73.korpus.compiler;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -38,16 +37,11 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import javax.xml.bind.Marshaller;
-import javax.xml.transform.stream.StreamResult;
-
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.parser.TextParser;
-import org.alex73.korpus.server.Settings;
 import org.alex73.korpus.server.engine.LuceneDriverWrite;
 import org.alex73.korpus.server.text.BinaryParagraphWriter;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;

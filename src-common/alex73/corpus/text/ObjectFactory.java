@@ -70,6 +70,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link O }
+     * 
+     */
+    public O createO() {
+        return new O();
+    }
+
+    /**
      * Create an instance of {@link InlineTag }
      * 
      */

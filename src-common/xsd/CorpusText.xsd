@@ -55,13 +55,14 @@
                     <xs:element ref="w" />
                     <xs:element ref="s" />
                     <xs:element ref="z" />
+                    <xs:element ref="o" />
                     <xs:element ref="inlineTag" />
                 </xs:choice>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="w"><!-- word -->
+    <xs:element name="w"> <!-- word -->
         <xs:complexType>
             <xs:simpleContent>
                 <xs:extension base="xs:string">
@@ -79,6 +80,14 @@
                 <xs:extension base="xs:string">
                     <xs:attribute name="cat" type="xs:string" use="required" />
                 </xs:extension>
+            </xs:simpleContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="o"> <!-- other, like numbers, non-Belarusian words, etc -->
+        <xs:complexType>
+            <xs:simpleContent>
+                <xs:extension base="xs:string"/>
             </xs:simpleContent>
         </xs:complexType>
     </xs:element>

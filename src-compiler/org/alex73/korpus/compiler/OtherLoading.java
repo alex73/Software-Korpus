@@ -39,6 +39,7 @@ import java.util.zip.ZipFile;
 
 import org.alex73.korpus.editor.core.structure.Line;
 import org.alex73.korpus.parser.Splitter;
+import org.alex73.korpus.parser.Splitter2;
 import org.alex73.korpus.parser.TextParser;
 import org.alex73.korpus.server.engine.LuceneDriverWrite;
 import org.alex73.korpus.server.text.BinaryParagraphWriter;
@@ -47,7 +48,6 @@ import org.apache.commons.io.IOUtils;
 
 import alex73.corpus.text.P;
 import alex73.corpus.text.XMLText;
-
 
 /**
  * Class for loading Other texts into searchable cache.
@@ -100,7 +100,7 @@ public class OtherLoading {
     }
 
     protected static void loadZipPagesToOther(File f) throws Exception {
-        int wordsCount=0;
+        int wordsCount = 0;
         try (ZipFile zip = new ZipFile(f)) {
             int c = 0;
             for (Enumeration<? extends ZipEntry> it = zip.entries(); it.hasMoreElements();) {
@@ -113,7 +113,7 @@ public class OtherLoading {
                 try (InputStream in = new BufferedInputStream(zip.getInputStream(en))) {
                     text = IOUtils.toString(in, "UTF-8");
                 }
-                wordsCount+=loadTextToCorpus("kamunikat.org", "http://" + f.getName(), text);
+                wordsCount += loadTextToCorpus("kamunikat.org", "http://" + f.getName(), text);
             }
         }
         total.addText(wordsCount);
@@ -124,28 +124,14 @@ public class OtherLoading {
 
         lucene.setOtherInfo(volume, textUrl);
 
-        data = data.trim().replace('\n', ' ').replace('\r', ' ').replaceAll("\\s{2,}", " ");
-        Line line = new Splitter(data).splitParagraph();
-        line.normalize();
+        P p = new Splitter2(data).getP();
 
-      XMLText text=  TextParser.constructXML(Arrays.asList(line));
-        
-        List<P> sentences = new ArrayList<>();
-        for (Object o : text.getContent().getPOrTag()) {
-            if (o instanceof P) {
-                sentences.add((P) o);
-            }
-        }
-        sentences = Utils.randomizeOrder(sentences);
+        BinaryParagraphWriter wr = new BinaryParagraphWriter();
 
-        BinaryParagraphWriter wr=new BinaryParagraphWriter();
-        
-        int wordsCount=0;
-        for (P p : sentences) {
-            byte[] pa = wr.write(p);
-            int c = lucene.addSentence(p, pa);
-            wordsCount += c;
-        }
+        int wordsCount = 0;
+        byte[] pa = wr.write(p);
+        int c = lucene.addSentence(p, pa);
+        wordsCount += c;
         return wordsCount;
     }
 }

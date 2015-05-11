@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import alex73.corpus.text.InlineTag;
+import alex73.corpus.text.O;
 import alex73.corpus.text.P;
 import alex73.corpus.text.S;
 import alex73.corpus.text.Se;
@@ -37,6 +38,8 @@ public class BinaryParagraphWriter {
                         words.add(o);
                     } else if (o instanceof Z) {
                         words.add(o);
+                    } else if (o instanceof O) {
+                        words.add(o);
                     } else if (o instanceof InlineTag) {
                         // do not add
                     } else {
@@ -54,6 +57,8 @@ public class BinaryParagraphWriter {
                         writeS((S) o);
                     } else if (o instanceof Z) {
                         writeZ((Z) o);
+                    } else if (o instanceof O) {
+                        writeO((O) o);
                     } else {
                         throw new RuntimeException("Unknown type:" + o.getClass());
                     }
@@ -78,6 +83,9 @@ public class BinaryParagraphWriter {
     private void writeZ(Z z) throws IOException {
         writeString(z.getValue());
         writeString(z.getCat());
+    }
+    private void writeO(O o) throws IOException {
+        writeString(o.getValue());
     }
 
     private void writeString(String str) throws IOException {

@@ -23,6 +23,7 @@
 package org.alex73.korpus.parser;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -91,20 +92,57 @@ public class TextParser {
             return doc;
         }
 
-        String s;
-        while ((s = rd.readLine()) != null) {
-            s = s.trim();
-            if (s.startsWith("##")) {
-                Tag t = new Tag();
-                t.setValue(s);
-                doc.getContent().getPOrTag().add(t);
-            } else {
-                Splitter sp = new Splitter(s);
-                doc.getContent().getPOrTag().add(sp.splitParagraph());
+        boolean insidePoetry = false;
+        String s = null;
+        while (true) {
+            while (s != null) {
+                s = s.trim();
+                if (s.startsWith("##")) {
+                    Tag t = new Tag();
+                    t.setValue(s);
+                    doc.getContent().getPOrTag().add(t);
+                    if ("##Poetry:begin".equals(s)) {
+                        insidePoetry = true;
+                    } else if ("##Poetry:end".equals(s)) {
+                        insidePoetry = false;
+                    }
+                    s = null;
+                } else if (insidePoetry)
+                    s = addPoetry(rd, doc, s);
+                else {
+                    P p = new Splitter2(s).getP();
+                    doc.getContent().getPOrTag().add(p);
+                    s = null;
+                }
+            }
+            s = rd.readLine();
+            if (s == null) {
+                break;
             }
         }
 
         return doc;
+    }
+
+    static String addPoetry(BufferedReader rd, XMLText doc, String s) throws IOException {
+        StringBuilder str = new StringBuilder(s.length() * 10);
+        str.append(s).append('\n');
+
+        while ((s = rd.readLine()) != null) {
+            s = s.trim();
+            if (s.startsWith("##")) {
+                break;
+            }
+            str.append(s).append('\n');
+            if (s.isEmpty()) {
+                break;
+            }
+        }
+
+        P p = new Splitter2(str.toString()).getP();
+        doc.getContent().getPOrTag().add(p);
+
+        return s;
     }
 
     static final Pattern RE_DATE1 = Pattern.compile("([0-9]{4})");
