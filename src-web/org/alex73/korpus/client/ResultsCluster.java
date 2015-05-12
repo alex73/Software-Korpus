@@ -33,7 +33,7 @@ public class ResultsCluster extends VerticalPanel {
 
         for (int i = pageIndex * CLUSTER_PAGE_SIZE; i < Math.min((pageIndex + 1) * CLUSTER_PAGE_SIZE,
                 korpus.clusterResults.rows.length); i++) {
-            showRow(korpus.clusterResults.rows[i], korpus.currentClusterParams.wordsBefore);
+            showRow(korpus.clusterResults.rows[i]);
         }
 
         add(grid);
@@ -48,30 +48,34 @@ public class ResultsCluster extends VerticalPanel {
         }
     };
 
-    private void showRow(ClusterResults.Row rowData, int wordsBefore) {
+    private void showRow(ClusterResults.Row rowData) {
         int row = grid.insertRow(grid.getRowCount());
 
         HTMLPanel line = new HTMLPanel("");
         line.setStyleName("text-right");
-        for (int i = 0; i < wordsBefore; i++) {
-            line.add(new InlineLabel(rowData.words[i] + " "));
+        for (String w : rowData.wordsBefore) {
+            if (w != null) {
+                line.add(new InlineLabel(w + " "));
+            }
         }
         grid.setWidget(row, 0, line);
 
-        InlineLabel w = new InlineLabel(rowData.words[wordsBefore]);
-        w.setStyleName("text-center");
-        w.addStyleName("wordFound");
-        grid.setWidget(row, 1, w);
+        InlineLabel wc = new InlineLabel(rowData.word);
+        wc.setStyleName("text-center");
+        wc.addStyleName("wordFound");
+        grid.setWidget(row, 1, wc);
 
         line = new HTMLPanel("");
         line.setStyleName("text-left");
-        for (int i = wordsBefore + 1; i < rowData.words.length; i++) {
-            line.add(new InlineLabel(" " + rowData.words[i]));
+        for (String w : rowData.wordsAfter) {
+            if (w != null) {
+                line.add(new InlineLabel(" " + w));
+            }
         }
         grid.setWidget(row, 2, line);
 
-        w = new InlineLabel(Integer.toString(rowData.count));
-        w.setStyleName("text-right");
-        grid.setWidget(row, 3, w);
+        wc = new InlineLabel(Integer.toString(rowData.count));
+        wc.setStyleName("text-right");
+        grid.setWidget(row, 3, wc);
     }
 }

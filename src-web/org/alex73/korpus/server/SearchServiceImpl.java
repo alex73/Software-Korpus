@@ -40,17 +40,16 @@ import org.alex73.korpus.server.text.BinaryParagraphReader;
 import org.alex73.korpus.shared.dto.ClusterParams;
 import org.alex73.korpus.shared.dto.ClusterResults;
 import org.alex73.korpus.shared.dto.CorpusType;
+import org.alex73.korpus.shared.dto.LatestMark;
 import org.alex73.korpus.shared.dto.ResultText;
 import org.alex73.korpus.shared.dto.SearchParams;
 import org.alex73.korpus.shared.dto.SearchResults;
 import org.alex73.korpus.shared.dto.WordRequest;
 import org.alex73.korpus.shared.dto.WordResult;
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.ScoreDoc;
 
 import alex73.corpus.text.O;
 import alex73.corpus.text.P;
@@ -179,42 +178,32 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
                 process.addWordFilter(query, w);
             }
 
-            ScoreDoc latestDoc;
-            if (latest != null) {
-                latestDoc = new ScoreDoc(latest.doc, latest.score, latest.shardIndex);
-            } else {
-                latestDoc = null;
+            if (latest == null) {
+                latest = new LatestMark();
             }
-            ScoreDoc[] found = process.search(query, latestDoc, Settings.KORPUS_SEARCH_RESULT_PAGE + 1,
-                    new LuceneDriverRead.DocFilter() {
-                        public boolean isDocAllowed(int docID) {
+            List<Integer> found = process.search(query, latest, Settings.KORPUS_SEARCH_RESULT_PAGE,
+                    new LuceneDriverRead.DocFilter<Integer>() {
+                        public Integer processDoc(int docID) {
                             try {
                                 Document doc = getProcess(params.corpusType).getSentence(docID);
                                 ResultText text = restoreText(params.corpusType, doc);
-                                return WordsDetailsChecks.isAllowed(params.wordsOrder, params.words, text);
+                                if (WordsDetailsChecks.isAllowed(params.wordsOrder, params.words, text)) {
+                                    return docID;
+                                } else {
+                                    return null;
+                                }
                             } catch (Exception ex) {
                                 throw new RuntimeException(ex);
                             }
                         }
                     });
             SearchResult result = new SearchResult();
-            if (found.length > Settings.KORPUS_SEARCH_RESULT_PAGE) {
-                result.hasMore = true;
-                result.foundIDs = new int[Settings.KORPUS_SEARCH_RESULT_PAGE];
-            } else {
-                result.hasMore = false;
-                result.foundIDs = new int[found.length];
-            }
+            result.hasMore = found.size() >= Settings.KORPUS_SEARCH_RESULT_PAGE;
+            result.foundIDs = new int[found.size()];
             for (int i = 0; i < result.foundIDs.length; i++) {
-                result.foundIDs[i] = found[i].doc;
+                result.foundIDs[i] = found.get(i);
             }
-            if (result.hasMore) {
-                ScoreDoc f = found[result.foundIDs.length - 1];
-                result.latest = new LatestMark();
-                result.latest.doc = f.doc;
-                result.latest.score = f.score;
-                result.latest.shardIndex = f.shardIndex;
-            }
+            result.latest = latest;
             LOGGER.info("<< Result: found: " + result.foundIDs.length + " hasMore:" + result.hasMore);
             return result;
         } catch (Throwable ex) {

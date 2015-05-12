@@ -14,14 +14,12 @@ import org.alex73.korpus.shared.dto.WordRequest;
 import org.alex73.korpus.shared.dto.WordResult;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.ScoreDoc;
 
 public class ClusterServiceImpl {
     private final static int SEARCH_BLOCK = 10000;
     private final SearchServiceImpl parent;
     private ClusterParams params;
     private final Map<String, Result> results = new HashMap<>();
-    private StringBuilder str = new StringBuilder();
 
     public ClusterServiceImpl(SearchServiceImpl parent) {
         this.parent = parent;
@@ -41,23 +39,13 @@ public class ClusterServiceImpl {
         WordRequest w = params.word;
         process.addWordFilter(query, w);
 
-        ScoreDoc latestDoc = null;
-        while (true) {
-            ScoreDoc[] found = process.search(query, latestDoc, SEARCH_BLOCK,
-                    new LuceneDriverRead.DocFilter() {
-                        public boolean isDocAllowed(int docID) {
-                            return true;
-                        }
-                    });
-
-            for (ScoreDoc doc : found) {
-                process(doc.doc);
+        process.search(query, SEARCH_BLOCK, new LuceneDriverRead.DocFilter<Void>() {
+            @Override
+            public Void processDoc(int docID) throws Exception {
+                process(docID);
+                return null;
             }
-            if (found.length < SEARCH_BLOCK) {
-                break;
-            }
-            latestDoc = found[found.length - 1];
-        }
+        });
 
         return createResults();
     }
@@ -69,13 +57,7 @@ public class ClusterServiceImpl {
 
         for (int i = 0; i < text.words.length; i++) {
             for (int j = 0; j < text.words[i].length; j++) {
-                if (WordsDetailsChecks.isWordMatchsParam(params.word, text.words[i][j])) {
-                    if (params.wordsBefore > j) {
-                        continue; // no such many words before
-                    }
-                    if (params.wordsAfter > text.words[i].length - j - 1) {
-                        continue; // no such many words after
-                    }
+                if (WordsDetailsChecks.isOneWordMatchsParam(params.word, text.words[i][j])) {
                     process(text.words[i], j);
                 }
             }
@@ -83,17 +65,19 @@ public class ClusterServiceImpl {
     }
 
     private void process(WordResult[] words, int pos) {
-        Result r = new Result(words, pos - params.wordsBefore, pos + params.wordsAfter);
+        Result r = new Result(words, pos, params.wordsBefore, params.wordsAfter);
 
         String key = r.getKey();
-        Result prevResult = results.get(key);
-        if (prevResult == null) {
-            prevResult = r;
-            results.put(key, r);
-        } else if (!prevResult.equals(r)) {
-            prevResult.toLowerCase = true;
+        synchronized (results) {
+            Result prevResult = results.get(key);
+            if (prevResult == null) {
+                prevResult = r;
+                results.put(key, r);
+            } else if (!prevResult.equals(r)) {
+                prevResult.toLowerCase = true;
+            }
+            prevResult.counts++;
         }
-        prevResult.counts++;
     }
 
     private ClusterResults createResults() {
@@ -115,36 +99,59 @@ public class ClusterServiceImpl {
 
     public class Result {
         int counts;
-        String[] words;
+        String[] wordsBefore;
+        String word;
+        String[] wordsAfter;
         boolean toLowerCase;
 
-        public Result(WordResult[] w, int from, int to) {
-            words = new String[to - from + 1];
-            for (int i = 0; i < words.length; i++) {
-                words[i] = w[i + from].value;
+        public Result(WordResult[] w, int pos, int beforeCount, int afterCount) {
+            word = w[pos].value;
+            wordsBefore = new String[beforeCount];
+            wordsAfter = new String[afterCount];
+
+            for (int i = pos - 1, count = 0; i >= 0 && count < beforeCount; i--) {
+                if (w[i].isWord) {
+                    wordsBefore[beforeCount - count - 1] = w[i].value;
+                    count++;
+                }
+            }
+            for (int i = pos + 1, count = 0; i < w.length && count < afterCount; i++) {
+                if (w[i].isWord) {
+                    wordsAfter[count] = w[i].value;
+                    count++;
+                }
             }
         }
 
         public String getKey() {
-            str.setLength(0);
-            for (int i = 0; i < words.length; i++) {
-                str.append(words[i].toLowerCase());
+            StringBuilder str = new StringBuilder(256);
+            for (String w : wordsBefore) {
+                if (w != null) {
+                    str.append(w.toLowerCase());
+                }
                 str.append('\t');
             }
-            str.setLength(str.length() - 1);
+            str.append(word);
+            for (String w : wordsAfter) {
+                str.append('\t');
+                if (w != null) {
+                    str.append(w.toLowerCase());
+                }
+            }
             return str.toString();
         }
 
         @Override
         public boolean equals(Object other) {
             Result r = (Result) other;
-            if (words.length != r.words.length) {
+            if (!Arrays.equals(wordsBefore, r.wordsBefore)) {
                 return false;
             }
-            for (int i = 0; i < words.length; i++) {
-                if (!words[i].equals(r.words[i])) {
-                    return false;
-                }
+            if (word.equals(r.word)) {
+                return false;
+            }
+            if (!Arrays.equals(wordsAfter, r.wordsAfter)) {
+                return false;
             }
             return true;
         }
@@ -152,11 +159,21 @@ public class ClusterServiceImpl {
         public ClusterResults.Row toRow() {
             ClusterResults.Row r = new ClusterResults.Row();
             if (toLowerCase) {
-                for (int i = 0; i < words.length; i++) {
-                    words[i] = words[i].toLowerCase();
+                for (int i = 0; i < wordsBefore.length; i++) {
+                    if (wordsBefore[i] != null) {
+                        wordsBefore[i] = wordsBefore[i].toLowerCase();
+                    }
+                }
+                word = word.toLowerCase();
+                for (int i = 0; i < wordsAfter.length; i++) {
+                    if (wordsAfter[i] != null) {
+                        wordsAfter[i] = wordsAfter[i].toLowerCase();
+                    }
                 }
             }
-            r.words = words;
+            r.wordsBefore = wordsBefore;
+            r.word = word;
+            r.wordsAfter = wordsAfter;
             r.count = counts;
             return r;
         }

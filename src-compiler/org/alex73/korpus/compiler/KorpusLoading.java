@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -214,21 +215,25 @@ public class KorpusLoading {
         }
         sentences = Utils.randomizeOrder(sentences);
 
-        BinaryParagraphWriter wr = new BinaryParagraphWriter();
-        int wordsCount = 0;
-        for (P p : sentences) {
-            byte[] pa = wr.write(p);
-            int c = lucene.addSentence(p, pa);
-            wordsCount += c;
-        }
+        AtomicInteger wordsCount = new AtomicInteger();
+        sentences.parallelStream().forEach(p -> {
+            try {
+                byte[] pa = new BinaryParagraphWriter().write(p);
+                int c = lucene.addSentence(p, pa);
+                wordsCount.addAndGet(c);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
         if (textInfo.styleGenres.length > 0) {
             for (String s : textInfo.styleGenres) {
-                addStat(s, wordsCount);
+                addStat(s, wordsCount.get());
             }
         } else {
-            addStat("_", wordsCount);
+            addStat("_", wordsCount.get());
         }
-        total.addText(wordsCount);
+        total.addText(wordsCount.get());
     }
 
     static void addStat(String styleGenre, int wordsCount) {

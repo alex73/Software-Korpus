@@ -23,9 +23,11 @@
 package org.alex73.korpus.server.engine;
 
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.alex73.korpus.base.TextInfo;
+import org.alex73.korpus.shared.dto.LatestMark;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.document.Document;
@@ -61,34 +63,87 @@ public class LuceneDriverRead extends LuceneFields {
         dir.close();
     }
 
-    public ScoreDoc[] search(Query query, ScoreDoc latest, int maxResults, DocFilter filter) throws Exception {
+    public <T> List<T> search(Query query, LatestMark latest, int maxResults, DocFilter<T> filter)
+            throws Exception {
         LOGGER.info("   Lucene search: " + query);
-        ScoreDoc[] result = new ScoreDoc[maxResults];
-
-        int found = 0;
+        final List<T> result = new ArrayList<>(maxResults);
 
         TopDocs rs;
-        if (latest == null) {
+        if (latest.doc == 0 && latest.shardIndex == 0) {
             rs = indexSearcher.search(query, maxResults);
         } else {
-            rs = indexSearcher.searchAfter(latest, query, maxResults);
+            ScoreDoc latestDoc = new ScoreDoc(latest.doc, latest.score, latest.shardIndex);
+            rs = indexSearcher.searchAfter(latestDoc, query, maxResults);
+            latest.doc = 0;
+            latest.shardIndex = 0;
         }
         LOGGER.info("   Lucene found: total: " + rs.totalHits + ", block: " + rs.scoreDocs.length);
-        while (rs.scoreDocs.length > 0 && found < result.length) {
-            for (int i = 0; i < rs.scoreDocs.length && found < result.length; i++) {
-                if (filter.isDocAllowed(rs.scoreDocs[i].doc)) {
-                    result[found] = rs.scoreDocs[i];
-                    found++;
+        while (rs.scoreDocs.length > 0) {
+            List<Integer> pos = new ArrayList<>(rs.scoreDocs.length);
+            List<T> resultPart = new ArrayList<>(rs.scoreDocs.length);
+            for (int i = 0; i < rs.scoreDocs.length; i++) {
+                pos.add(i);
+                resultPart.add(null);
+            }
+            final ScoreDoc[] docs = rs.scoreDocs;
+            // parallel check
+            pos.parallelStream().forEach(p -> {
+                try {
+                    int id = docs[p].doc;
+                    T res = filter.processDoc(id);
+                    if (res != null) {
+                        resultPart.set(p, res);
+                    }
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+            for (int i = 0; i < resultPart.size(); i++) {
+                T res = resultPart.get(i);
+                if (res != null) {
+                    result.add(res);
+                    if (result.size() >= maxResults) {
+                        latest.doc = docs[i].doc;
+                        latest.score = docs[i].score;
+                        latest.shardIndex = docs[i].shardIndex;
+                        break;
+                    }
                 }
             }
-            if (found < result.length) {
+            if (result.size() < maxResults) {
                 rs = indexSearcher.searchAfter(rs.scoreDocs[rs.scoreDocs.length - 1], query, maxResults);
                 LOGGER.info("   Lucene found: block: " + rs.scoreDocs.length);
                 System.out.println("found block " + rs.scoreDocs.length);
+            } else {
+                break;
             }
         }
+        return result;
+    }
 
-        return Arrays.copyOf(result, found);
+    public void search(Query query, int pageSize, DocFilter<Void> filter) throws Exception {
+        LOGGER.info("   Lucene search: " + query);
+
+        TopDocs rs;
+        rs = indexSearcher.search(query, pageSize);
+        LOGGER.info("   Lucene found: total: " + rs.totalHits + ", block: " + rs.scoreDocs.length);
+        while (rs.scoreDocs.length > 0) {
+            List<Integer> docs = new ArrayList<>(rs.scoreDocs.length);
+            for (int i = 0; i < rs.scoreDocs.length; i++) {
+                docs.add(rs.scoreDocs[i].doc);
+            }
+            // parallel check
+            docs.parallelStream().forEach(id -> {
+                try {
+                    filter.processDoc(id);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+            rs = indexSearcher.searchAfter(rs.scoreDocs[rs.scoreDocs.length - 1], query, pageSize);
+            LOGGER.info("   Lucene found: block: " + rs.scoreDocs.length);
+            System.out.println("found block " + rs.scoreDocs.length);
+        }
     }
 
     public Document getSentence(int docID) throws Exception {
@@ -114,7 +169,7 @@ public class LuceneDriverRead extends LuceneFields {
         return result;
     }
 
-    public interface DocFilter {
-        public boolean isDocAllowed(int docID);
+    public interface DocFilter<T> {
+        public T processDoc(int docID) throws Exception;
     }
 }

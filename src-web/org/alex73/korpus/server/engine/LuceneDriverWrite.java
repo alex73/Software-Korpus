@@ -1,13 +1,11 @@
 package org.alex73.korpus.server.engine;
 
-import java.io.File;
 import java.nio.file.Paths;
 
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.DBTagsGroups;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.utils.WordNormalizer;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,7 +20,6 @@ import org.apache.lucene.store.NIOFSDirectory;
 import alex73.corpus.text.P;
 import alex73.corpus.text.Se;
 import alex73.corpus.text.W;
-
 
 public class LuceneDriverWrite extends LuceneFields {
     protected final Logger LOGGER = LogManager.getLogger(LuceneDriverWrite.class);
@@ -78,19 +75,9 @@ public class LuceneDriverWrite extends LuceneFields {
         dir.close();
     }
 
-    public void setTextInfo(TextInfo info) throws Exception {
+    public synchronized void setTextInfo(TextInfo info) throws Exception {
         textId++;
         currentTextInfo = info;
-
-        // String title = "";
-        // for (String a : doc.textInfo.authors) {
-        // title += ", " + a;
-        // }
-        // if (!title.isEmpty()) {
-        // title = title.substring(2) + ". " + doc.textInfo.title;
-        // } else {
-        // title = doc.textInfo.title;
-        // }
 
         fieldTextID.setIntValue(textId);
         fieldTextAuthors.setStringValue(merge(info.authors, ";"));
@@ -100,7 +87,7 @@ public class LuceneDriverWrite extends LuceneFields {
         indexWriter.addDocument(docText);
     }
 
-    public void setOtherInfo(String volume, String textURL) throws Exception {
+    public synchronized void setOtherInfo(String volume, String textURL) throws Exception {
         currentVolume = volume;
         currentUrl = textURL;
     }
@@ -117,53 +104,54 @@ public class LuceneDriverWrite extends LuceneFields {
 
         int wordsCount = 0;
         for (Se op : paragraph.getSe()) {
-                for (Object o : op.getWOrSOrZ()) {
-                    if (!(o instanceof W)) {
-                        continue;
-                    }
-                    W w = (W) o;
-                    wordsCount++;
-                    if (w.getValue() != null) {
-                        String wc = WordNormalizer.normalize(w.getValue());
-                        values.append(wc).append(' ');
-                    }
-                    if (StringUtils.isNotEmpty(w.getCat())) {
-                        for (String t : w.getCat().split("_")) {
-                            if (!BelarusianTags.getInstance().isValid(t, null)) {
-                                // TODO throw new Exception("Няправільны тэг: " + t);
-                            } else {
-                                dbGrammarTags.append(DBTagsGroups.getDBTagString(t)).append(' ');
-                            }
+            for (Object o : op.getWOrSOrZ()) {
+                if (!(o instanceof W)) {
+                    continue;
+                }
+                W w = (W) o;
+                wordsCount++;
+                if (w.getValue() != null) {
+                    String wc = WordNormalizer.normalize(w.getValue());
+                    values.append(wc).append(' ');
+                }
+                if (StringUtils.isNotEmpty(w.getCat())) {
+                    for (String t : w.getCat().split("_")) {
+                        if (!BelarusianTags.getInstance().isValid(t, null)) {
+                            // TODO throw new Exception("Няправільны тэг: " + t);
+                        } else {
+                            dbGrammarTags.append(DBTagsGroups.getDBTagString(t)).append(' ');
                         }
                     }
-                    if (w.getLemma() != null) {
-                        lemmas.append(w.getLemma().replace('_', ' ')).append(' ');
-                    }
                 }
+                if (w.getLemma() != null) {
+                    lemmas.append(w.getLemma().replace('_', ' ')).append(' ');
+                }
+            }
         }
 
-        // fieldID.setIntValue(id);
-        if (currentVolume != null && currentUrl != null) {
-            fieldSentenceTextVolume.setStringValue(currentVolume);
-            fieldSentenceTextURL.setStringValue(currentUrl);
-        } else {
-            fieldSentenceTextID.setIntValue(textId);
+        synchronized (this) {
+            if (currentVolume != null && currentUrl != null) {
+                fieldSentenceTextVolume.setStringValue(currentVolume);
+                fieldSentenceTextURL.setStringValue(currentUrl);
+            } else {
+                fieldSentenceTextID.setIntValue(textId);
+            }
+
+            fieldSentenceValues.setStringValue(values.toString());
+            fieldSentenceDBGrammarTags.setStringValue(dbGrammarTags.toString());
+            fieldSentenceLemmas.setStringValue(lemmas.toString());
+            fieldSentencePBinary.setBytesValue(xml);
+
+            if (currentTextInfo != null) {
+                fieldSentenceTextStyleGenre.setTokenStream(new StringArrayTokenStream(
+                        currentTextInfo.styleGenres));
+                fieldSentenceTextWrittenYear.setIntValue(nvl(currentTextInfo.writtenYear));
+                fieldSentenceTextPublishedYear.setIntValue(nvl(currentTextInfo.publishedYear));
+                fieldSentenceTextAuthor.setTokenStream(new StringArrayTokenStream(currentTextInfo.authors));
+            }
+
+            indexWriter.addDocument(docSentence);
         }
-
-        fieldSentenceValues.setStringValue(values.toString());
-        fieldSentenceDBGrammarTags.setStringValue(dbGrammarTags.toString());
-        fieldSentenceLemmas.setStringValue(lemmas.toString());
-        fieldSentencePBinary.setBytesValue(xml);
-
-        if (currentTextInfo != null) {
-            fieldSentenceTextStyleGenre
-                    .setTokenStream(new StringArrayTokenStream(currentTextInfo.styleGenres));
-            fieldSentenceTextWrittenYear.setIntValue(nvl(currentTextInfo.writtenYear));
-            fieldSentenceTextPublishedYear.setIntValue(nvl(currentTextInfo.publishedYear));
-            fieldSentenceTextAuthor.setTokenStream(new StringArrayTokenStream(currentTextInfo.authors));
-        }
-
-        indexWriter.addDocument(docSentence);
 
         return wordsCount;
     }

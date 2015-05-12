@@ -32,6 +32,7 @@ import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.client.controls.VisibleElement;
 import org.alex73.korpus.shared.dto.ClusterParams;
 import org.alex73.korpus.shared.dto.ClusterResults;
+import org.alex73.korpus.shared.dto.LatestMark;
 import org.alex73.korpus.shared.dto.SearchParams;
 import org.alex73.korpus.shared.dto.SearchResults;
 import org.alex73.korpus.shared.dto.WordResult;
@@ -77,7 +78,7 @@ public class Korpus implements EntryPoint {
     List<int[]> pages = new ArrayList<int[]>();
     ClusterResults clusterResults;
     boolean hasMore;
-    SearchService.LatestMark latestMark;
+    LatestMark latestMark;
     boolean search;
     boolean cluster;
 
@@ -98,6 +99,7 @@ public class Korpus implements EntryPoint {
         }
 
         searchControls = new SearchControls(History.getToken(), searchService, this);
+        searchControls.setProcessHandler(searchHandler);
 
         search = searchControls.orderPreset != null;
         cluster = elBtnAddWord == null;

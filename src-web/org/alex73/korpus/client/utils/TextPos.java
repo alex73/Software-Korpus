@@ -38,6 +38,13 @@ public class TextPos {
         return r;
     }
 
+    public TextPos addPos(int count) {
+        TextPos r = new TextPos(text, sentence, word);
+        r.word += count;
+        r.normalize();
+        return r;
+    }
+
     public TextPos addSequences(int count) {
         int newSentence = sentence + count;
 

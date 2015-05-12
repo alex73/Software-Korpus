@@ -53,9 +53,14 @@ public class WordsDetailsChecks {
         case PRESET:
             for (int i = 0; i < resultText.words.length; i++) {
                 for (int j = 0; j < resultText.words[i].length; j++) {
-                    if (isWordMatchsParamsAround(words, 0, resultText.words[i], j)) {
-                        for (int k = 0; k < words.size(); k++) { // mark found words as requested
-                            resultText.words[i][j + k].requestedWord = true;
+                    if (resultText.words[i][j].isWord
+                            && isWordsAroundMatchParams(words, resultText.words[i], j)) {
+                        for (int k = 0, count = 0; count < words.size(); k++) {
+                            // mark found words as requested
+                            if (resultText.words[i][j + k].isWord) {
+                                resultText.words[i][j + k].requestedWord = true;
+                                count++;
+                            }
                         }
                         found = true;
                     }
@@ -68,7 +73,7 @@ public class WordsDetailsChecks {
                 for (WordRequest pw : words) {
                     boolean foundWord = false;
                     for (int j = 0; j < resultText.words[i].length; j++) {
-                        if (isWordMatchsParam(pw, resultText.words[i][j])) {
+                        if (resultText.words[i][j].isWord && isOneWordMatchsParam(pw, resultText.words[i][j])) {
                             resultText.words[i][j].requestedWord = true;
                             foundWord = true;
                         }
@@ -88,7 +93,7 @@ public class WordsDetailsChecks {
                 boolean foundWord = false;
                 for (int i = 0; i < resultText.words.length; i++) {
                     for (int j = 0; j < resultText.words[i].length; j++) {
-                        if (isWordMatchsParam(pw, resultText.words[i][j])) {
+                        if (resultText.words[i][j].isWord && isOneWordMatchsParam(pw, resultText.words[i][j])) {
                             resultText.words[i][j].requestedWord = true;
                             foundWord = true;
                         }
@@ -109,18 +114,21 @@ public class WordsDetailsChecks {
      * For the wordsOrder=PRESET: specified words should correspond with specified parameter and all other
      * parameters.
      */
-    private static boolean isWordMatchsParamsAround(List<WordRequest> words, int paramIndex,
-            WordResult[] resultWords, int wordIndex) {
-        int startWord = wordIndex - paramIndex;
-        if (startWord < 0) {
-            return false;
+    private static boolean isWordsAroundMatchParams(List<WordRequest> words, WordResult[] resultWords,
+            int wordIndex) {
+        WordResult[] checks = new WordResult[words.size()];
+        int count = 0;
+        for (int i = wordIndex; i < resultWords.length && count < words.size(); i++) {
+            if (resultWords[i].isWord) {
+                checks[count] = resultWords[i];
+                count++;
+            }
         }
-        int endWord = words.size() - paramIndex + wordIndex;
-        if (endWord > resultWords.length) {
+        if (count < words.size()) {
             return false;
         }
         for (int i = 0; i < words.size(); i++) {
-            if (!isWordMatchsParam(words.get(i), resultWords[startWord + i])) {
+            if (!isOneWordMatchsParam(words.get(i), checks[i])) {
                 return false;
             }
         }
@@ -130,7 +138,7 @@ public class WordsDetailsChecks {
     /**
      * Is the word corresponds with parameter ?
      */
-    public static boolean isWordMatchsParam(WordRequest wordParam, WordResult wordResult) {
+    public static boolean isOneWordMatchsParam(WordRequest wordParam, WordResult wordResult) {
         if (wordParam.word != null && !wordParam.word.trim().isEmpty()) {
             if (wordParam.allForms) {
                 // lemma

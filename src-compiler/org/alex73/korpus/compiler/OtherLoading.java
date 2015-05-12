@@ -27,27 +27,23 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.alex73.korpus.editor.core.structure.Line;
-import org.alex73.korpus.parser.Splitter;
 import org.alex73.korpus.parser.Splitter2;
-import org.alex73.korpus.parser.TextParser;
 import org.alex73.korpus.server.engine.LuceneDriverWrite;
 import org.alex73.korpus.server.text.BinaryParagraphWriter;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 import alex73.corpus.text.P;
-import alex73.corpus.text.XMLText;
 
 /**
  * Class for loading Other texts into searchable cache.
@@ -100,36 +96,42 @@ public class OtherLoading {
     }
 
     protected static void loadZipPagesToOther(File f) throws Exception {
-        int wordsCount = 0;
+        volumes.add("kamunikat.org");
+        lucene.setOtherInfo("kamunikat.org", "http://" + f.getName());
+
+        System.out.println("loadFileToOther " + f);
+
+        AtomicInteger wordsCount = new AtomicInteger();
+        List<String> book = new ArrayList<>();
         try (ZipFile zip = new ZipFile(f)) {
-            int c = 0;
             for (Enumeration<? extends ZipEntry> it = zip.entries(); it.hasMoreElements();) {
                 ZipEntry en = it.nextElement();
                 if (en.isDirectory()) {
                     continue;
                 }
-                System.out.println("loadFileToOther " + f + "/" + en.getName() + ": " + (++c));
                 String text;
                 try (InputStream in = new BufferedInputStream(zip.getInputStream(en))) {
                     text = IOUtils.toString(in, "UTF-8");
                 }
-                wordsCount += loadTextToCorpus("kamunikat.org", "http://" + f.getName(), text);
+                book.add(text);
             }
         }
-        total.addText(wordsCount);
+        book.parallelStream().forEach(text -> {
+            try {
+                int w = loadTextToCorpus(text);
+                wordsCount.addAndGet(w);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
+        total.addText(wordsCount.get());
     }
 
-    protected static int loadTextToCorpus(String volume, String textUrl, String data) throws Exception {
-        volumes.add(volume);
-
-        lucene.setOtherInfo(volume, textUrl);
-
+    protected static int loadTextToCorpus(String data) throws Exception {
         P p = new Splitter2(data).getP();
-
-        BinaryParagraphWriter wr = new BinaryParagraphWriter();
-
         int wordsCount = 0;
-        byte[] pa = wr.write(p);
+        byte[] pa = new BinaryParagraphWriter().write(p);
         int c = lucene.addSentence(p, pa);
         wordsCount += c;
         return wordsCount;

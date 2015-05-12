@@ -123,7 +123,8 @@ public class GrammarServiceImpl extends RemoteServiceServlet implements GrammarS
                     w.lemma = p.lemma;
                     w.lemmaGrammar = p.tag;
                     result.add(w);
-                    if (result.size() >= Settings.GRAMMAR_SEARCH_RESULT_PAGE + 1) {
+                    if (Settings.GRAMMAR_SEARCH_RESULT_PAGE > 0
+                            && result.size() >= Settings.GRAMMAR_SEARCH_RESULT_PAGE + 1) {
                         break begpar;
                     }
                 }
@@ -171,7 +172,8 @@ public class GrammarServiceImpl extends RemoteServiceServlet implements GrammarS
                     li.words = words.toArray(new LemmaInfo.Word[words.size()]);
                 }
 
-                if (result.size() >= Settings.GRAMMAR_SEARCH_RESULT_PAGE + 1) {
+                if (Settings.GRAMMAR_SEARCH_RESULT_PAGE > 0
+                        && result.size() >= Settings.GRAMMAR_SEARCH_RESULT_PAGE + 1) {
                     break begpar;
                 }
             }

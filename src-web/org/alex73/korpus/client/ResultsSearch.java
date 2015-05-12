@@ -6,7 +6,9 @@ import org.alex73.korpus.shared.dto.SearchResults;
 import org.alex73.korpus.shared.dto.WordResult;
 
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -74,14 +76,6 @@ public class ResultsSearch extends VerticalPanel {
             korpus.requestPageDetails(pageIndex);
         }
     };
-
-    public static String wordToText(WordResult w) {
-        if (w.value.equals(",") || w.value.equals(".")) {
-            return w.value;
-        } else {
-            return " " + w.value;
-        }
-    }
 
     int getRequestedWordsCountInResult(ResultText text) {
         int count = 0;
@@ -152,14 +146,20 @@ public class ResultsSearch extends VerticalPanel {
         TextPos curr = from;
         while (true) {
             WordResult w = text.words[curr.getSentence()][curr.getWord()];
-            InlineLabel wlabel = new InlineLabel(wordToText(w));
-            if (w.requestedWord) {
-                wlabel.setStyleName("wordFound");
+            if (!w.isWord && !w.value.isEmpty() && w.value.charAt(0) == '\n') {
+                p.add(new InlineHTML("<br/>"));
+            } else {
+                InlineLabel wlabel = new InlineLabel(w.value);
+                if (w.requestedWord) {
+                    wlabel.setStyleName("wordFound");
+                }
+                if (w.isWord) {
+                    wlabel.addMouseDownHandler(korpus.handlerShowInfoWord);
+                    korpus.widgetsInfoWord.put(wlabel, w);
+                }
+                p.add(wlabel);
             }
-            wlabel.addMouseDownHandler(korpus.handlerShowInfoWord);
-            p.add(wlabel);
-            korpus.widgetsInfoWord.put(wlabel, w);
-            TextPos next = curr.addWords(1);
+            TextPos next = curr.addPos(1);
             if (curr.equals(to)) {
                 break;
             }

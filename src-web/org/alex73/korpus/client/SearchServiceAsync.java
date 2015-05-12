@@ -24,13 +24,14 @@ package org.alex73.korpus.client;
 
 import org.alex73.korpus.shared.dto.ClusterParams;
 import org.alex73.korpus.shared.dto.ClusterResults;
-import org.alex73.korpus.shared.dto.SearchResults;
+import org.alex73.korpus.shared.dto.LatestMark;
 import org.alex73.korpus.shared.dto.SearchParams;
+import org.alex73.korpus.shared.dto.SearchResults;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public interface SearchServiceAsync {
-    void search(SearchParams params, SearchService.LatestMark latest,
+    void search(SearchParams params, LatestMark latest,
             AsyncCallback<SearchService.SearchResult> callback) throws Exception;
 
     void getSentences(SearchParams params, int[] list, AsyncCallback<SearchResults[]> callback)

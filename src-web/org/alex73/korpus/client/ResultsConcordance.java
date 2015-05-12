@@ -1,5 +1,8 @@
 package org.alex73.korpus.client;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.alex73.korpus.shared.dto.SearchResults;
 import org.alex73.korpus.shared.dto.WordResult;
 
@@ -42,8 +45,8 @@ public class ResultsConcordance extends VerticalPanel {
                     // Window.alert(s.text.words[i][j].value+"  req="+s.text.words[i][j].requestedWord+" j="+j);
                     if (s.text.words[i][j].requestedWord && j + wordsCount < s.text.words[i].length) {
                         // show
-                        showRow(s, s.text.words[i], j, j + wordsCount - 1);
-                        j += wordsCount - 1;
+                        int wordsTo = showRow(s, s.text.words[i], j, wordsCount);
+                        j = wordsTo;
                     }
                 }
             }
@@ -61,7 +64,7 @@ public class ResultsConcordance extends VerticalPanel {
         }
     };
 
-    private void showRow(SearchResults text, WordResult[] sentence, int wordsFrom, int wordsTo) {
+    private int showRow(SearchResults text, WordResult[] sentence, int wordsFrom, int wordsCount) {
         int row = grid.insertRow(grid.getRowCount());
 
         Anchor doclabel = new Anchor("падрабязней... ");
@@ -71,20 +74,32 @@ public class ResultsConcordance extends VerticalPanel {
 
         HTMLPanel line = new HTMLPanel("");
         line.setStyleName("text-right");
-        for (int i = Math.max(0, wordsFrom - 8); i < wordsFrom; i++) {
-            InlineLabel w = new InlineLabel(ResultsSearch.wordToText(sentence[i]));
-            korpus.widgetsInfoWord.put(w, sentence[i]);
-            w.addMouseDownHandler(korpus.handlerShowInfoWord);
-            line.add(w);
+        List<InlineLabel> back = new ArrayList<>();
+        for (int i = wordsFrom - 1, count = 0; i >= 0 && count < 8; i--) {
+            InlineLabel w = new InlineLabel(sentence[i].value);
+            if (sentence[i].isWord) {
+                korpus.widgetsInfoWord.put(w, sentence[i]);
+                w.addMouseDownHandler(korpus.handlerShowInfoWord);
+                count++;
+            }
+            back.add(w);
+        }
+        for (int i = back.size() - 1; i >= 0; i--) {
+            line.add(back.get(i));
         }
         grid.setWidget(row, 1, line);
 
+        int wordsTo = wordsFrom;
         line = new HTMLPanel("");
         line.setStyleName("text-center");
-        for (int i = wordsFrom; i <= wordsTo; i++) {
-            InlineLabel w = new InlineLabel(ResultsSearch.wordToText(sentence[i]));
-            korpus.widgetsInfoWord.put(w, sentence[i]);
-            w.addMouseDownHandler(korpus.handlerShowInfoWord);
+        for (int i = wordsFrom, count = 0; i < sentence.length && count < wordsCount; i++) {
+            InlineLabel w = new InlineLabel(sentence[i].value);
+            if (sentence[i].isWord) {
+                korpus.widgetsInfoWord.put(w, sentence[i]);
+                w.addMouseDownHandler(korpus.handlerShowInfoWord);
+                count++;
+                wordsTo = i;
+            }
             line.add(w);
             w.setStyleName("wordFound");
         }
@@ -92,12 +107,17 @@ public class ResultsConcordance extends VerticalPanel {
 
         line = new HTMLPanel("");
         line.setStyleName("text-left");
-        for (int i = wordsTo + 1; i < Math.min(sentence.length, wordsTo + 9); i++) {
-            InlineLabel w = new InlineLabel(ResultsSearch.wordToText(sentence[i]));
-            korpus.widgetsInfoWord.put(w, sentence[i]);
-            w.addMouseDownHandler(korpus.handlerShowInfoWord);
+        for (int i = wordsTo + 1, count = 0; i < sentence.length && count < 8; i++) {
+            InlineLabel w = new InlineLabel(sentence[i].value);
+            if (sentence[i].isWord) {
+                korpus.widgetsInfoWord.put(w, sentence[i]);
+                w.addMouseDownHandler(korpus.handlerShowInfoWord);
+                count++;
+            }
             line.add(w);
         }
         grid.setWidget(row, 3, line);
+
+        return wordsTo;
     }
 }

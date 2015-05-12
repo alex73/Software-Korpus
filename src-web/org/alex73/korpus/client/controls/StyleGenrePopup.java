@@ -36,8 +36,9 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.DecoratorPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class StyleGenrePopup extends DecoratedPopupPanel {
@@ -59,18 +60,40 @@ public class StyleGenrePopup extends DecoratedPopupPanel {
 
         for (String g : StyleGenres.KNOWN_GROUPS) {
             VerticalPanel panel = new VerticalPanel();
-            panel.add(new Label(g));
+            final String prefix = g + '/';
 
-            String prefix = g + '/';
+            HTMLPanel gr = new HTMLPanel("");
+            gr.add(new InlineLabel(g));
+            final CheckBox cbg = new CheckBox();
+            gr.add(cbg);
+            panel.add(gr);
+            cbg.addClickHandler(new ClickHandler() {
+                @Override
+                public void onClick(ClickEvent event) {
+                    for (CheckBox cb : allCheckboxes) {
+                        if (cb.getFormValue().startsWith(prefix)) {
+                            cb.setValue(cbg.getValue());
+                        }
+                    }
+                }
+            });
+
+            boolean allChecked = true;
             for (String sg : StyleGenres.KNOWN) {
                 if (sg.startsWith(prefix)) {
                     CheckBox cb = new CheckBox(sg.substring(prefix.length()));
                     cb.setFormValue(sg);
                     cb.setWordWrap(false);
+                    if (!selectedSet.contains(sg)) {
+                        allChecked = false;
+                    }
                     cb.setValue(selectedSet.contains(sg));
                     panel.add(cb);
                     allCheckboxes.add(cb);
                 }
+            }
+            if (allChecked) {
+                cbg.setValue(true);
             }
             DecoratorPanel dp = new DecoratorPanel();
             dp.setWidget(panel);

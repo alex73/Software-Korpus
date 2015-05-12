@@ -28,6 +28,7 @@ import java.util.Map;
 
 import org.alex73.korpus.shared.dto.ClusterParams;
 import org.alex73.korpus.shared.dto.ClusterResults;
+import org.alex73.korpus.shared.dto.LatestMark;
 import org.alex73.korpus.shared.dto.SearchParams;
 import org.alex73.korpus.shared.dto.SearchResults;
 
@@ -51,12 +52,6 @@ public interface SearchService extends RemoteService {
         public int[] foundIDs;
         public LatestMark latest;
         public boolean hasMore;
-    }
-
-    public static class LatestMark implements Serializable {
-        public float score;
-        public int doc;
-        public int shardIndex;
     }
 
     public static class InitialData implements Serializable {

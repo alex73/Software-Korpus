@@ -31,6 +31,7 @@ import org.alex73.korpus.base.OtherInfo;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
 import org.alex73.korpus.server.engine.LuceneDriverRead.DocFilter;
+import org.alex73.korpus.shared.dto.LatestMark;
 import org.alex73.korpus.shared.dto.StandardTextRequest;
 import org.alex73.korpus.shared.dto.UnprocessedTextRequest;
 import org.alex73.korpus.shared.dto.WordRequest;
@@ -44,7 +45,6 @@ import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.RegexpQuery;
-import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.WildcardQuery;
 
@@ -143,8 +143,12 @@ public class LuceneFilter {
     private Term getGrammarTerm(String grammar) {
         return new Term(lucene.fieldSentenceDBGrammarTags.name(), grammar);
     }
+    
+    public void search(Query query, int pageSize, DocFilter<Void> filter) throws Exception {
+        lucene.search(query, pageSize, filter);
+    }
 
-    public ScoreDoc[] search(Query query, ScoreDoc latest, int maxResults, DocFilter filter) throws Exception {
+    public <T> List<T> search(Query query, LatestMark latest, int maxResults, DocFilter<T> filter) throws Exception {
         return lucene.search(query, latest, maxResults, filter);
     }
 
