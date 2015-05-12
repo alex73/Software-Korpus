@@ -2,6 +2,13 @@ package org.alex73.korpus.parser;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.TreeSet;
+
+import org.alex73.korpus.editor.core.GrammarDB;
+import org.junit.Before;
 import org.junit.Test;
 
 import alex73.corpus.text.O;
@@ -14,11 +21,26 @@ public class TestSplitter2 {
     P p;
     int se, w;
 
+    @Before
+    public void before() throws Exception {
+        GrammarDB.initializeFromDir(new File("GrammarDB"), new GrammarDB.LoaderProgress() {
+            public void setFilesCount(int count) {
+            }
+
+            public void beforeFileLoading(String file) {
+            }
+
+            public void afterFileLoading() {
+            }
+        });
+    }
+
     @Test
     public void testText() {
-        p = new Splitter2("Адно слова... А потым ? 123").getP();
+        p = new Splitter2("Адно, слова... А: потым ? 123").getP();
 
         nextW("Адно");
+        nextZ(",");
         nextS(" ");
         nextW("слова");
         nextZ("\u2026");
@@ -26,6 +48,7 @@ public class TestSplitter2 {
 
         nextS(" ");
         nextW("А");
+        nextZ(":");
         nextS(" ");
         nextW("потым");
         nextS(" ");
@@ -39,28 +62,50 @@ public class TestSplitter2 {
         endText();
     }
 
-    private void nextW(String value) {
+    private W nextW(String value) {
         Object obj = p.getSe().get(se).getWOrSOrZ().get(w);
-        assertEquals(value, ((W) obj).getValue());
+        W result = (W) obj;
+        assertEquals(value, result.getValue());
         w++;
+        return result;
     }
 
-    private void nextS(String value) {
+    private W nextW(String value, String lemma, String tags) {
         Object obj = p.getSe().get(se).getWOrSOrZ().get(w);
-        assertEquals(value, ((S) obj).getChar());
+        W result = (W) obj;
+        assertEquals(value, result.getValue());
         w++;
+
+        assertEquals(lemma, result.getLemma());
+        Set<String> t1 = new TreeSet<>(Arrays.asList(tags.split("_")));
+        Set<String> t2 = new TreeSet<>(Arrays.asList(result.getCat().split("_")));
+        assertEquals(t1, t2);
+
+        return result;
     }
 
-    private void nextZ(String value) {
+    private S nextS(String value) {
         Object obj = p.getSe().get(se).getWOrSOrZ().get(w);
-        assertEquals(value, ((Z) obj).getValue());
+        S result = (S) obj;
+        assertEquals(value, result.getChar());
         w++;
+        return result;
     }
 
-    private void nextO(String value) {
+    private Z nextZ(String value) {
         Object obj = p.getSe().get(se).getWOrSOrZ().get(w);
-        assertEquals(value, ((O) obj).getValue());
+        Z result = (Z) obj;
+        assertEquals(value, result.getValue());
         w++;
+        return result;
+    }
+
+    private O nextO(String value) {
+        Object obj = p.getSe().get(se).getWOrSOrZ().get(w);
+        O result = (O) obj;
+        assertEquals(value, result.getValue());
+        w++;
+        return result;
     }
 
     private void endSentence() {
@@ -71,5 +116,17 @@ public class TestSplitter2 {
 
     private void endText() {
         assertEquals(p.getSe().size(), se);
+    }
+
+    @Test
+    public void testGrammar() {
+        p = new Splitter2("Беларусь п'еса").getP();
+
+        nextW("Беларусь", "Беларусь", "NPIINF3AS_NPIINF3NS");
+        nextS(" ");
+        nextW("п'еса", "п'е´са", "NCIINF2NS");
+        endSentence();
+
+        endText();
     }
 }

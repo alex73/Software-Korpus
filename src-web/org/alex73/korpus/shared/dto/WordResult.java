@@ -9,6 +9,8 @@ public class WordResult implements Serializable {
     /** True if word is requested by user, i.e. should be marked in output. */
     public boolean requestedWord;
 
+    public boolean isWord;
+
     @Override
     public String toString() {
         return value;

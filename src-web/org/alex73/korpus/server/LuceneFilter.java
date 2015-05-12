@@ -153,7 +153,7 @@ public class LuceneFilter {
     }
 
     public byte[] getXML(Document doc) {
-        return doc.getField(lucene.fieldSentenceXML.name()).binaryValue().bytes;
+        return doc.getField(lucene.fieldSentencePBinary.name()).binaryValue().bytes;
     }
 
     public TextInfo getKorpusTextInfo(Document doc) throws Exception {

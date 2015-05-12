@@ -52,12 +52,16 @@ public class BinaryParagraphWriter {
                 out.writeShort(words.size());
                 for (Object o : words) {
                     if (o instanceof W) {
+                        out.writeByte(1);
                         writeW((W) o);
                     } else if (o instanceof S) {
+                        out.writeByte(2);
                         writeS((S) o);
                     } else if (o instanceof Z) {
+                        out.writeByte(3);
                         writeZ((Z) o);
                     } else if (o instanceof O) {
+                        out.writeByte(4);
                         writeO((O) o);
                     } else {
                         throw new RuntimeException("Unknown type:" + o.getClass());

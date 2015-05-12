@@ -1,11 +1,13 @@
 package org.alex73.korpus.server.engine;
 
+import java.io.File;
 import java.nio.file.Paths;
 
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.DBTagsGroups;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.utils.WordNormalizer;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,7 +51,7 @@ public class LuceneDriverWrite extends LuceneFields {
         docSentence.add(fieldSentenceValues);
         docSentence.add(fieldSentenceDBGrammarTags);
         docSentence.add(fieldSentenceLemmas);
-        docSentence.add(fieldSentenceXML);
+        docSentence.add(fieldSentencePBinary);
 
         docSentence.add(fieldSentenceTextID);
         docSentence.add(fieldSentenceTextStyleGenre);
@@ -109,7 +111,6 @@ public class LuceneDriverWrite extends LuceneFields {
      * @return words count
      */
     public int addSentence(P paragraph, byte[] xml) throws Exception {
-
         StringBuilder values = new StringBuilder();
         StringBuilder dbGrammarTags = new StringBuilder();
         StringBuilder lemmas = new StringBuilder();
@@ -152,7 +153,7 @@ public class LuceneDriverWrite extends LuceneFields {
         fieldSentenceValues.setStringValue(values.toString());
         fieldSentenceDBGrammarTags.setStringValue(dbGrammarTags.toString());
         fieldSentenceLemmas.setStringValue(lemmas.toString());
-        fieldSentenceXML.setBytesValue(xml);
+        fieldSentencePBinary.setBytesValue(xml);
 
         if (currentTextInfo != null) {
             fieldSentenceTextStyleGenre

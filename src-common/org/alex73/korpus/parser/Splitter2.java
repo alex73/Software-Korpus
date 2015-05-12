@@ -273,11 +273,13 @@ public class Splitter2 {
     }
 
     private boolean isZnak() {
-        return ",-".indexOf(currentChar) >= 0;
+        String znaki = GrammarDB.getInstance().getZnaki();
+        return znaki.indexOf(currentChar) >= 0;
     }
 
     private boolean isLetter() {
-        return Character.isLetter(currentChar);
+        String letters = GrammarDB.getInstance().getLetters();
+        return letters.indexOf(currentChar) >= 0;
     }
 
     private void addToSentence(Object obj) {
@@ -301,21 +303,23 @@ public class Splitter2 {
     static void fillWordInfoParadigms(W w, String word, Paradigm[] paradigms) {
         Set<String> lemmas = new TreeSet<>();
         Set<String> cats = new TreeSet<>();
-        for (Paradigm p : paradigms) {
-            lemmas.add(p.getLemma());
-            boolean foundForm = false;
-            for (Paradigm.Form f : p.getForm()) {
-                if (word.equals(f.getValue())) {
-                    cats.add(p.getTag() + f.getTag());
-                    foundForm = true;
-                }
-            }
-            if (!foundForm) {
-                // the same find, but without stress and lowercase
-                String uw = WordNormalizer.normalize(word);
+        if (paradigms != null) {
+            for (Paradigm p : paradigms) {
+                lemmas.add(p.getLemma());
+                boolean foundForm = false;
                 for (Paradigm.Form f : p.getForm()) {
-                    if (uw.equals(WordNormalizer.normalize(f.getValue()))) {
+                    if (word.equals(f.getValue())) {
                         cats.add(p.getTag() + f.getTag());
+                        foundForm = true;
+                    }
+                }
+                if (!foundForm) {
+                    // the same find, but without stress and lowercase
+                    String uw = WordNormalizer.normalize(word);
+                    for (Paradigm.Form f : p.getForm()) {
+                        if (uw.equals(WordNormalizer.normalize(f.getValue()))) {
+                            cats.add(p.getTag() + f.getTag());
+                        }
                     }
                 }
             }

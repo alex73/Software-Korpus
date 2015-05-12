@@ -52,7 +52,7 @@ public class LuceneFields {
     public Field fieldSentenceValues;
     public Field fieldSentenceDBGrammarTags;
     public Field fieldSentenceLemmas;
-    public Field fieldSentenceXML;
+    public Field fieldSentencePBinary;
 
     public Field fieldSentenceTextURL;
     public Field fieldSentenceTextVolume;
@@ -68,7 +68,7 @@ public class LuceneFields {
         fieldSentenceValues = new Field("value", "", TYPE_NOTSTORED_INDEXED);
         fieldSentenceDBGrammarTags = new Field("dbGrammarTag", "", TYPE_NOTSTORED_INDEXED);
         fieldSentenceLemmas = new Field("lemma", "", TYPE_NOTSTORED_INDEXED);
-        fieldSentenceXML = new Field("xml", new byte[0], TYPE_STORED_NOTINDEXED);
+        fieldSentencePBinary = new Field("pbinary", new byte[0], TYPE_STORED_NOTINDEXED);
 
         // korpus text fields for filtering
         fieldSentenceTextID = new IntField("textId", 0, TYPE_STORED_NOTINDEXED_INT);

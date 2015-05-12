@@ -25,8 +25,16 @@ public class TextPos {
     }
 
     public TextPos addWords(int count) {
-        TextPos r = new TextPos(text, sentence, word + count);
-        r.normalize();
+        TextPos r = new TextPos(text, sentence, word);
+        if (count >= 0) {
+            for (int i = 0; i < count; i++) {
+                r.nextWord();
+            }
+        } else {
+            for (int i = 0; i < -count; i++) {
+                r.prevWord();
+            }
+        }
         return r;
     }
 
@@ -46,6 +54,36 @@ public class TextPos {
             newWord = 0;
         }
         return new TextPos(text, newSentence, newWord);
+    }
+
+    private void nextWord() {
+        word++;
+        for (; sentence < text.words.length; sentence++) {
+            for (; word < text.words[sentence].length; word++) {
+                if (text.words[sentence][word].isWord) {
+                    return;
+                }
+            }
+            word = 0;
+        }
+        sentence = text.words.length - 1;
+        word = text.words[sentence].length - 1;
+    }
+
+    private void prevWord() {
+        word--;
+        for (; sentence >= 0; sentence--) {
+            for (; word >= 0; word--) {
+                if (text.words[sentence][word].isWord) {
+                    return;
+                }
+            }
+            if (sentence > 0) {
+                word = text.words[sentence - 1].length - 1;
+            }
+        }
+        sentence = 0;
+        word = 0;
     }
 
     protected void normalize() {

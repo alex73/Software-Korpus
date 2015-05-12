@@ -22,7 +22,6 @@
 
 package org.alex73.korpus.server;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -32,13 +31,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import java.util.zip.GZIPInputStream;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
 
 import org.alex73.korpus.client.SearchService;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
+import org.alex73.korpus.server.text.BinaryParagraphReader;
 import org.alex73.korpus.shared.dto.ClusterParams;
 import org.alex73.korpus.shared.dto.ClusterResults;
 import org.alex73.korpus.shared.dto.CorpusType;
@@ -47,11 +45,19 @@ import org.alex73.korpus.shared.dto.SearchParams;
 import org.alex73.korpus.shared.dto.SearchResults;
 import org.alex73.korpus.shared.dto.WordRequest;
 import org.alex73.korpus.shared.dto.WordResult;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.ScoreDoc;
+
+import alex73.corpus.text.O;
+import alex73.corpus.text.P;
+import alex73.corpus.text.S;
+import alex73.corpus.text.Se;
+import alex73.corpus.text.W;
+import alex73.corpus.text.Z;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -68,15 +74,6 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     public static String dirPrefix = System.getProperty("KORPUS_DIR");
     LuceneFilter processKorpus;
     LuceneFilter processOther;
-
-    static {
-        try {
-            CONTEXT = JAXBContext.newInstance(TEI.class.getPackage().getName());
-        } catch (Exception ex) {
-            LOGGER.error("JAXB initialization", ex);
-            throw new ExceptionInInitializerError(ex);
-        }
-    }
 
     public SearchServiceImpl() {
         LOGGER.info("startup");
@@ -284,31 +281,28 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
         byte[] xml = process.getXML(doc);
 
-        Unmarshaller unm = CONTEXT.createUnmarshaller();
-        P paragraph;
-        if (Settings.GZIP_TEXT_XML) {
-            paragraph = (P) unm.unmarshal(new GZIPInputStream(new ByteArrayInputStream(xml)));
-        } else {
-            paragraph = (P) unm.unmarshal(new ByteArrayInputStream(xml));
-        }
+        P paragraph = new BinaryParagraphReader(xml).read();
 
         List<WordResult[]> sentences = new ArrayList<>();
 
-        for (int i = 0; i < paragraph.getSOrTag().size(); i++) {
-            if (!(paragraph.getSOrTag().get(i) instanceof S)) {
-                continue;
-            }
-            S sentence = (S) paragraph.getSOrTag().get(i);
+        for (int i = 0; i < paragraph.getSe().size(); i++) {
+            Se sentence = paragraph.getSe().get(i);
             List<WordResult> words = new ArrayList<>();
-            for (int j = 0; j < sentence.getWOrTag().size(); j++) {
-                if (!(sentence.getWOrTag().get(j) instanceof W)) {
-                    continue;
-                }
-                W w = (W) sentence.getWOrTag().get(j);
+            for (int j = 0; j < sentence.getWOrSOrZ().size(); j++) {
+                Object o = sentence.getWOrSOrZ().get(j);
                 WordResult rsw = new WordResult();
-                rsw.value = w.getValue();
-                rsw.lemma = w.getLemma();
-                rsw.cat = w.getCat();
+                if (o instanceof W) {
+                    rsw.value = ((W) o).getValue();
+                    rsw.lemma = ((W) o).getLemma();
+                    rsw.cat = ((W) o).getCat();
+                    rsw.isWord = true;
+                } else if (o instanceof S) {
+                    rsw.value = ((S) o).getChar();
+                } else if (o instanceof Z) {
+                    rsw.value = ((Z) o).getValue();
+                } else if (o instanceof O) {
+                    rsw.value = ((O) o).getValue();
+                }
                 words.add(rsw);
             }
             if (!words.isEmpty()) {

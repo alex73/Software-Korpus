@@ -43,6 +43,7 @@ import java.util.zip.ZipFile;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.parser.TextParser;
 import org.alex73.korpus.server.engine.LuceneDriverWrite;
+import org.alex73.korpus.server.text.BinaryParagraphReader;
 import org.alex73.korpus.server.text.BinaryParagraphWriter;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
@@ -198,7 +199,7 @@ public class KorpusLoading {
     }
 
     protected static void loadTextToCorpus(XMLText doc) throws Exception {
-        TextInfo textInfo=createTextInfo(doc);
+        TextInfo textInfo = createTextInfo(doc);
         lucene.setTextInfo(textInfo);
 
         for (String a : textInfo.authors) {
@@ -213,7 +214,7 @@ public class KorpusLoading {
         }
         sentences = Utils.randomizeOrder(sentences);
 
-        BinaryParagraphWriter wr=new BinaryParagraphWriter();
+        BinaryParagraphWriter wr = new BinaryParagraphWriter();
         int wordsCount = 0;
         for (P p : sentences) {
             byte[] pa = wr.write(p);
@@ -253,7 +254,7 @@ public class KorpusLoading {
         r.publishedYear = publishedYear != null ? Integer.parseInt(publishedYear) : 0;
         String writtenYear = getTag(text, "WrittenYear");
         r.writtenYear = writtenYear != null ? Integer.parseInt(writtenYear) : 0;
-        String styleGenres = getTag(text, "StyleGenres");
+        String styleGenres = getTag(text, "StyleGenre");
         if (styleGenres != null) {
             r.styleGenres = styleGenres.split(",");
         } else {
