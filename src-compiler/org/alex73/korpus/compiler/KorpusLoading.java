@@ -44,7 +44,6 @@ import java.util.zip.ZipFile;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.parser.TextParser;
 import org.alex73.korpus.server.engine.LuceneDriverWrite;
-import org.alex73.korpus.server.text.BinaryParagraphReader;
 import org.alex73.korpus.server.text.BinaryParagraphWriter;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
@@ -128,7 +127,7 @@ public class KorpusLoading {
             XMLText doc;
             InputStream in = new BufferedInputStream(new FileInputStream(f));
             try {
-                doc = TextParser.parseText(in, false);
+                doc = TextParser.parseText(in, false, PrepareCache.errors);
             } finally {
                 in.close();
             }
@@ -152,7 +151,7 @@ public class KorpusLoading {
                     InputStream in = new BufferedInputStream(zip.getInputStream(en));
                     try {
                         if (en.getName().endsWith(".text")) {
-                            doc = TextParser.parseText(in, false);
+                            doc = TextParser.parseText(in, false, PrepareCache.errors);
                         } else if (en.getName().endsWith(".xml")) {
                             doc = TextParser.parseXML(in);
                         } else {
@@ -181,7 +180,7 @@ public class KorpusLoading {
                     XMLText doc;
                     try (InputStream in = new ByteArrayInputStream(content)) {
                         if (en.getName().endsWith(".text")) {
-                            doc = TextParser.parseText(in, false);
+                            doc = TextParser.parseText(in, false, PrepareCache.errors);
                         } else if (en.getName().endsWith(".xml")) {
                             doc = TextParser.parseXML(in);
                         } else {
@@ -216,15 +215,7 @@ public class KorpusLoading {
         sentences = Utils.randomizeOrder(sentences);
 
         AtomicInteger wordsCount = new AtomicInteger();
-        sentences.parallelStream().forEach(p -> {
-            try {
-                byte[] pa = new BinaryParagraphWriter().write(p);
-                int c = lucene.addSentence(p, pa);
-                wordsCount.addAndGet(c);
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-        });
+        sentences.parallelStream().forEach(p -> wordsCount.addAndGet(processP(p)));
 
         if (textInfo.styleGenres.length > 0) {
             for (String s : textInfo.styleGenres) {
@@ -234,6 +225,16 @@ public class KorpusLoading {
             addStat("_", wordsCount.get());
         }
         total.addText(wordsCount.get());
+    }
+    
+    static int processP(P p) {
+        try {
+            byte[] pa = new BinaryParagraphWriter().write(p);
+            int c = lucene.addSentence(p, pa);
+            return c;
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     static void addStat(String styleGenre, int wordsCount) {

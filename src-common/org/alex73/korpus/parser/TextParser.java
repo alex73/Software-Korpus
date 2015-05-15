@@ -73,7 +73,7 @@ public class TextParser {
         return doc;
     }
 
-    public static XMLText parseText(InputStream in, boolean headerOnly) throws Exception {
+    public static XMLText parseText(InputStream in, boolean headerOnly, IError errors) throws Exception {
         BufferedReader rd = new BOMBufferedReader(new InputStreamReader(in, "UTF-8"));
 
         Map<String, String> headers = extractHeaders(rd);
@@ -108,9 +108,9 @@ public class TextParser {
                     }
                     s = null;
                 } else if (insidePoetry)
-                    s = addPoetry(rd, doc, s);
+                    s = addPoetry(rd, doc, s, errors);
                 else {
-                    P p = new Splitter2(s).getP();
+                    P p = new Splitter2(s, true, errors).getP();
                     doc.getContent().getPOrTag().add(p);
                     s = null;
                 }
@@ -124,7 +124,7 @@ public class TextParser {
         return doc;
     }
 
-    static String addPoetry(BufferedReader rd, XMLText doc, String s) throws IOException {
+    static String addPoetry(BufferedReader rd, XMLText doc, String s, IError errors) throws IOException {
         StringBuilder str = new StringBuilder(s.length() * 10);
         str.append(s).append('\n');
 
@@ -139,7 +139,7 @@ public class TextParser {
             }
         }
 
-        P p = new Splitter2(str.toString()).getP();
+        P p = new Splitter2(str.toString(), true, errors).getP();
         doc.getContent().getPOrTag().add(p);
 
         return s;

@@ -23,9 +23,16 @@
 package org.alex73.korpus.compiler;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.alex73.korpus.editor.core.GrammarDB;
+import org.alex73.korpus.parser.IError;
 
 /**
  * Class for prepare data for search.
@@ -50,5 +57,32 @@ public class PrepareCache {
 
         KorpusLoading.processKorpus();
         OtherLoading.processOther();
+
+        List<String> errorNames = new ArrayList<>(errorsCount.keySet());
+        Collections.sort(errorNames, new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                int c1 = errorsCount.get(o1);
+                int c2 = errorsCount.get(o2);
+                return c1 - c2;
+            }
+        });
+        for (String e : errorNames) {
+            System.err.println("ERROR: " + e + ": " + errorsCount.get(e));
+        }
     }
+
+    static Map<String, Integer> errorsCount = new HashMap<>();
+    static IError errors = new IError() {
+        @Override
+        public synchronized void reportError(String error) {
+            Integer count = errorsCount.get(error);
+            if (count == null) {
+                count = 1;
+            } else {
+                count++;
+            }
+            errorsCount.put(error, count);
+        }
+    };
 }

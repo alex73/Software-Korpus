@@ -5,9 +5,7 @@
 	<classpathentry kind="src" path="test-web"/>
 	<classpathentry kind="src" path="src-web-templates"/>
 	<classpathentry kind="src" path="src-lat"/>
-	<classpathentry kind="src" path="src-editor"/>
 	<classpathentry kind="src" path="src-compiler"/>
-	<classpathentry kind="src" path="test-editor"/>
 	<classpathentry kind="src" path="src-common"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="lib" path="lib-editor/vldocking_2.1.4.jar"/>

@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.alex73.korpus.editor.core.GrammarDB;
+import org.alex73.korpus.utils.SetUtils;
 import org.alex73.korpus.utils.WordNormalizer;
 
 import alex73.corpus.paradigm.Paradigm;
@@ -41,19 +42,24 @@ import alex73.corpus.text.Z;
  * Гэты код дзеліць радок(ці некалькі радкоў для вершаў) на асобныя элемэнты XMLText.
  */
 public class Splitter2 {
+    private final IError errors;
     private final String para;
     private int pos;
     private char currentChar;
     private final P p = new P();
     private Se se;
 
-    public Splitter2(String para) {
+    public Splitter2(String para, boolean processAmp, IError errors) {
+        this.errors = errors;
         this.para = para;
         for (pos = 0; pos < para.length();) {
             currentChar = para.charAt(pos);
 
-            if (currentChar == '&') {
+            if (currentChar == '&' && processAmp) {
                 parseCharNameOrNumber();
+                if (currentChar == 0) {
+                    continue;
+                }
             }
 
             switch (currentChar) {
@@ -172,8 +178,11 @@ public class Splitter2 {
             case "mdash":
                 currentChar = '—';
                 break;
+            case "shy":
+                currentChar = 0; // soft hyphen
+                break;
             default:
-                System.err.println("Error in amp: " + name);
+                errors.reportError("Error in amp: " + name);
                 currentChar = ' ';
             }
         }
@@ -324,8 +333,8 @@ public class Splitter2 {
                 }
             }
         }
-        w.setLemma(set2string(lemmas));
-        w.setCat(set2string(cats));
+        w.setLemma(SetUtils.set2string(lemmas));
+        w.setCat(SetUtils.set2string(cats));
     }
 
     static void fillZnakInfoParadigms(Z z, String word, Paradigm[] paradigms) {
@@ -348,17 +357,6 @@ public class Splitter2 {
                 }
             }
         }
-        z.setCat(set2string(cats));
-    }
-
-    protected static String set2string(Set<String> set) {
-        StringBuilder r = new StringBuilder();
-        for (String s : set) {
-            if (r.length() > 0) {
-                r.append('_');
-            }
-            r.append(s);
-        }
-        return r.toString();
+        z.setCat(SetUtils.set2string(cats));
     }
 }

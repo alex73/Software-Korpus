@@ -150,7 +150,7 @@ public class StatFrequency {
             XMLText doc;
             InputStream in = new BufferedInputStream(new FileInputStream(f));
             try {
-                doc = TextParser.parseText(in, false);
+                doc = TextParser.parseText(in, false, PrepareCache.errors);
             } finally {
                 in.close();
             }
@@ -174,7 +174,7 @@ public class StatFrequency {
                 InputStream in = new BufferedInputStream(zip.getInputStream(en));
                 try {
                     if (en.getName().endsWith(".text")) {
-                        doc = TextParser.parseText(in, false);
+                        doc = TextParser.parseText(in, false, PrepareCache.errors);
                     } else if (en.getName().endsWith(".xml")) {
                         doc = TextParser.parseXML(in);
                     } else {
@@ -204,7 +204,7 @@ public class StatFrequency {
                     InputStream in = new ByteArrayInputStream(content);
                     try {
                         if (en.getName().endsWith(".text")) {
-                            doc = TextParser.parseText(in, false);
+                            doc = TextParser.parseText(in, false, PrepareCache.errors);
                         } else if (en.getName().endsWith(".xml")) {
                             doc = TextParser.parseXML(in);
                         } else {

@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -46,6 +47,7 @@ import org.alex73.korpus.shared.dto.SearchParams;
 import org.alex73.korpus.shared.dto.SearchResults;
 import org.alex73.korpus.shared.dto.WordRequest;
 import org.alex73.korpus.shared.dto.WordResult;
+import org.alex73.korpus.utils.WordNormalizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.document.Document;
@@ -166,6 +168,15 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
                 LOGGER.info("<< Request too simple");
                 throw new RuntimeException(ServerError.REQUIEST_TOO_SIMPLE);
             }
+            for (WordRequest w : params.words) {
+                if (w.allForms) {
+                    w.lemmas = findAllLemmas(w.word);
+                    if (w.lemmas.isEmpty()) {
+                        throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
+                    }
+                }
+            }
+
             BooleanQuery query = new BooleanQuery();
             LuceneFilter process = getProcess(params.corpusType);
             if (params.corpusType == CorpusType.STANDARD) {
@@ -222,6 +233,12 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
                 LOGGER.info("<< Request too simple");
                 throw new RuntimeException(ServerError.REQUIEST_TOO_SIMPLE);
             }
+            if (params.word.allForms) {
+                params.word.lemmas = findAllLemmas(params.word.word);
+                if (params.word.lemmas.isEmpty()) {
+                    throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
+                }
+            }
 
             ClusterResults res = new ClusterServiceImpl(this).calc(params);
             LOGGER.info("<< Result clusters");
@@ -234,6 +251,14 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
     @Override
     public SearchResults[] getSentences(SearchParams params, int[] list) throws Exception {
+        for (WordRequest w : params.words) {
+            if (w.allForms) {
+                w.lemmas = findAllLemmas(w.word);
+                if (w.lemmas.isEmpty()) {
+                    throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
+                }
+            }
+        }
         try {
             WordsDetailsChecks.reset();
             SearchResults[] result = new SearchResults[list.length];
@@ -302,5 +327,18 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         text.words = sentences.toArray(new WordResult[0][]);
 
         return text;
+    }
+
+    private List<String> findAllLemmas(String word) {
+        Set<String> result = new HashSet<>();
+        for (LiteParadigm p : GrammarDBLite.getInstance().getAllParadigms()) {
+            for (LiteForm f : p.forms) {
+                if (word.equals(WordNormalizer.normalize(f.value))) {
+                    result.add(p.lemma);
+                    break;
+                }
+            }
+        }
+        return new ArrayList<>(result);
     }
 }

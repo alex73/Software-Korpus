@@ -106,10 +106,6 @@ public class LuceneFilter {
         if (w.word.length() > 0) {
             Query wq;
             if (w.allForms) {
-                w.lemmas = findAllLemmas(w.word);
-                if (w.lemmas.isEmpty()) {
-                    throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
-                }
                 BooleanQuery qLemmas = new BooleanQuery();
                 for (String lemma : w.lemmas) {
                     qLemmas.add(new TermQuery(getLemmaTerm(lemma)), BooleanClause.Occur.SHOULD);
@@ -171,18 +167,5 @@ public class LuceneFilter {
         OtherInfo info = new OtherInfo();
         info.textURL = doc.getField(lucene.fieldSentenceTextURL.name()).stringValue();
         return info;
-    }
-
-    private List<String> findAllLemmas(String word) {
-        Set<String> result = new HashSet<>();
-        for (LiteParadigm p : GrammarDBLite.getInstance().getAllParadigms()) {
-            for (LiteForm f : p.forms) {
-                if (word.equals(WordNormalizer.normalize(f.value))) {
-                    result.add(p.lemma);
-                    break;
-                }
-            }
-        }
-        return new ArrayList<>(result);
     }
 }

@@ -21,6 +21,12 @@ public class TestSplitter2 {
     P p;
     int se, w;
 
+    IError errors = new IError() {
+        @Override
+        public void reportError(String error) {
+        }
+    };
+
     @Before
     public void before() throws Exception {
         GrammarDB.initializeFromDir(new File("GrammarDB"), new GrammarDB.LoaderProgress() {
@@ -37,7 +43,7 @@ public class TestSplitter2 {
 
     @Test
     public void testText() {
-        p = new Splitter2("Адно, слова... А: потым ? 123").getP();
+        p = new Splitter2("Адно, слова... А: потым ? 123", true, errors).getP();
 
         nextW("Адно");
         nextZ(",");
@@ -120,7 +126,7 @@ public class TestSplitter2 {
 
     @Test
     public void testGrammar() {
-        p = new Splitter2("Беларусь п'еса").getP();
+        p = new Splitter2("Беларусь п'еса", true, errors).getP();
 
         nextW("Беларусь", "Беларусь", "NPIINF3AS_NPIINF3NS");
         nextS(" ");

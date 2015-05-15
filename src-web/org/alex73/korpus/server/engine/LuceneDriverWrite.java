@@ -5,7 +5,6 @@ import java.nio.file.Paths;
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.DBTagsGroups;
 import org.alex73.korpus.base.TextInfo;
-import org.alex73.korpus.utils.WordNormalizer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -102,16 +101,18 @@ public class LuceneDriverWrite extends LuceneFields {
         StringBuilder dbGrammarTags = new StringBuilder();
         StringBuilder lemmas = new StringBuilder();
 
-        int wordsCount = 0;
-        for (Se op : paragraph.getSe()) {
-            for (Object o : op.getWOrSOrZ()) {
+        int wordsCount = 0; // TODO: check performance
+        for (int i = 0; i < paragraph.getSe().size(); i++) {
+            Se op = paragraph.getSe().get(i);
+            for (int j = 0; j < op.getWOrSOrZ().size(); j++) {
+                Object o = op.getWOrSOrZ().get(j);
                 if (!(o instanceof W)) {
                     continue;
                 }
                 W w = (W) o;
                 wordsCount++;
                 if (w.getValue() != null) {
-                    String wc = WordNormalizer.normalize(w.getValue());
+                    String wc = w.getValue(); //WordNormalizer.normalize(w.getValue());
                     values.append(wc).append(' ');
                 }
                 if (StringUtils.isNotEmpty(w.getCat())) {

@@ -129,7 +129,7 @@ public class OtherLoading {
     }
 
     protected static int loadTextToCorpus(String data) throws Exception {
-        P p = new Splitter2(data).getP();
+        P p = new Splitter2(data, false, PrepareCache.errors).getP();
         int wordsCount = 0;
         byte[] pa = new BinaryParagraphWriter().write(p);
         int c = lucene.addSentence(p, pa);
