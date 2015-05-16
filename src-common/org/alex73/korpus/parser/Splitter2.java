@@ -42,14 +42,14 @@ import alex73.corpus.text.Z;
  * Гэты код дзеліць радок(ці некалькі радкоў для вершаў) на асобныя элемэнты XMLText.
  */
 public class Splitter2 {
-    private final IError errors;
+    private final IProcess errors;
     private final String para;
     private int pos;
     private char currentChar;
     private final P p = new P();
     private Se se;
 
-    public Splitter2(String para, boolean processAmp, IError errors) {
+    public Splitter2(String para, boolean processAmp, IProcess errors) {
         this.errors = errors;
         this.para = para;
         for (pos = 0; pos < para.length();) {
@@ -177,6 +177,9 @@ public class Splitter2 {
                 break;
             case "mdash":
                 currentChar = '—';
+                break;
+            case "rsquo":
+                currentChar = '\u2019';
                 break;
             case "shy":
                 currentChar = 0; // soft hyphen

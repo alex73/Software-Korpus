@@ -32,7 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.alex73.korpus.editor.core.GrammarDB;
-import org.alex73.korpus.parser.IError;
+import org.alex73.korpus.parser.IProcess;
 
 /**
  * Class for prepare data for search.
@@ -73,7 +73,12 @@ public class PrepareCache {
     }
 
     static Map<String, Integer> errorsCount = new HashMap<>();
-    static IError errors = new IError() {
+    static IProcess errors = new IProcess() {
+        @Override
+        public void showStatus(String status) {
+           // System.out.println(status);
+        }
+
         @Override
         public synchronized void reportError(String error) {
             Integer count = errorsCount.get(error);
@@ -83,6 +88,7 @@ public class PrepareCache {
                 count++;
             }
             errorsCount.put(error, count);
+            System.err.println(error);
         }
     };
 }

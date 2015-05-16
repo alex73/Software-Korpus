@@ -73,7 +73,7 @@ public class TextParser {
         return doc;
     }
 
-    public static XMLText parseText(InputStream in, boolean headerOnly, IError errors) throws Exception {
+    public static XMLText parseText(InputStream in, boolean headerOnly, IProcess errors) throws Exception {
         BufferedReader rd = new BOMBufferedReader(new InputStreamReader(in, "UTF-8"));
 
         Map<String, String> headers = extractHeaders(rd);
@@ -124,7 +124,7 @@ public class TextParser {
         return doc;
     }
 
-    static String addPoetry(BufferedReader rd, XMLText doc, String s, IError errors) throws IOException {
+    static String addPoetry(BufferedReader rd, XMLText doc, String s, IProcess errors) throws IOException {
         StringBuilder str = new StringBuilder(s.length() * 10);
         str.append(s).append('\n');
 

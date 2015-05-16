@@ -71,12 +71,12 @@ public class OtherLoading {
         Collections.sort(files);
         int c = 0;
         for (File f : files) {
-            System.out.println("loadFileToOther " + f + ": " + (++c) + "/" + files.size());
+            PrepareCache.errors.showStatus("loadFileToOther " + f + ": " + (++c) + "/" + files.size());
             loadZipPagesToOther(f);
         }
         total.write(stat);
 
-        System.out.println("Optimize...");
+        PrepareCache.errors.showStatus("Optimize...");
         lucene.shutdown();
 
         String volumesstr = "";
@@ -92,14 +92,14 @@ public class OtherLoading {
         FileOutputStream o = new FileOutputStream("Other-cache/stat.properties");
         stat.store(o, null);
         o.close();
-        System.out.println(total.texts + " files processed");
+        PrepareCache.errors.showStatus(total.texts + " files processed");
     }
 
     protected static void loadZipPagesToOther(File f) throws Exception {
         volumes.add("kamunikat.org");
         lucene.setOtherInfo("kamunikat.org", "http://" + f.getName());
 
-        System.out.println("loadFileToOther " + f);
+        PrepareCache.errors.showStatus("loadFileToOther " + f);
 
         AtomicInteger wordsCount = new AtomicInteger();
         List<String> book = new ArrayList<>();

@@ -82,7 +82,7 @@ public class KorpusLoading {
         Collections.sort(files);
         int c = 0;
         for (File f : files) {
-            System.out.println("loadFileToCorpus " + f + ": " + (++c) + "/" + files.size());
+            PrepareCache.errors.showStatus("loadFileToCorpus " + f + ": " + (++c) + "/" + files.size());
             if (f.getName().endsWith(".xml") || f.getName().endsWith(".text")) {
                 loadXmlOrTextFileToCorpus(f);
             } else if (f.getName().endsWith(".zip") || f.getName().endsWith(".7z")) {
@@ -94,7 +94,7 @@ public class KorpusLoading {
         }
         total.write(stat);
 
-        System.out.println("Optimize...");
+        PrepareCache.errors.showStatus("Optimize...");
         lucene.shutdown();
 
         String authorsstr = "";
@@ -110,7 +110,7 @@ public class KorpusLoading {
         FileOutputStream o = new FileOutputStream("Korpus-cache/stat.properties");
         stat.store(o, null);
         o.close();
-        System.out.println(total.texts + " files processed");
+        PrepareCache.errors.showStatus(total.texts + " files processed");
     }
 
     protected static void loadXmlOrTextFileToCorpus(File f) throws Exception {
@@ -146,7 +146,7 @@ public class KorpusLoading {
                     if (en.isDirectory()) {
                         continue;
                     }
-                    System.out.println("loadFileToCorpus " + f + "/" + en.getName() + ": " + (++c));
+                    PrepareCache.errors.showStatus("loadFileToCorpus " + f + "/" + en.getName() + ": " + (++c));
                     XMLText doc;
                     InputStream in = new BufferedInputStream(zip.getInputStream(en));
                     try {
@@ -171,7 +171,7 @@ public class KorpusLoading {
                 if (en.isDirectory()) {
                     continue;
                 }
-                System.out.println("loadFileToCorpus " + f + "/" + en.getName() + ": " + (++c));
+                PrepareCache.errors.showStatus("loadFileToCorpus " + f + "/" + en.getName() + ": " + (++c));
                 byte[] content = new byte[(int) en.getSize()];
                 for (int p = 0; p < content.length;) {
                     p += sevenZFile.read(content, p, content.length - p);
