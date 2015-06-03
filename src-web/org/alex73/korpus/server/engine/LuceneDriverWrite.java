@@ -97,9 +97,9 @@ public class LuceneDriverWrite extends LuceneFields {
      * @return words count
      */
     public int addSentence(P paragraph, byte[] xml) throws Exception {
-        StringBuilder values = new StringBuilder();
-        StringBuilder dbGrammarTags = new StringBuilder();
-        StringBuilder lemmas = new StringBuilder();
+        StringBuilder values = new StringBuilder(8192);
+        StringBuilder dbGrammarTags = new StringBuilder(8192);
+        StringBuilder lemmas = new StringBuilder(8192);
 
         int wordsCount = 0; // TODO: check performance
         for (int i = 0; i < paragraph.getSe().size(); i++) {

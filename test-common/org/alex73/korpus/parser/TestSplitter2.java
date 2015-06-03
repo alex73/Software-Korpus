@@ -22,8 +22,13 @@ public class TestSplitter2 {
     int se, w;
 
     IProcess errors = new IProcess() {
+        
         @Override
         public void reportError(String error) {
+        }
+
+        @Override
+        public void showStatus(String status) {
         }
     };
 
