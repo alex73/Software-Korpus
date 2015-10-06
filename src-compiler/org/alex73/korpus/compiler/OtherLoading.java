@@ -34,6 +34,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -54,6 +56,8 @@ public class OtherLoading {
 
     static StatInfo total = new StatInfo("");
     static Set<String> volumes = new TreeSet<>();
+
+    static Pattern RE_ID=Pattern.compile("([0-9]+).+?OCR\\-texts\\.zip");
 
     static void processOther() throws Exception {
         File dir = new File("Other-cache/");
@@ -96,17 +100,26 @@ public class OtherLoading {
     }
 
     protected static void loadZipPagesToOther(File f) throws Exception {
-        volumes.add("kamunikat.org");
-        lucene.setOtherInfo("kamunikat.org", "http://" + f.getName());
+        if (f.length()==0) {
+            return;
+        }
 
-        PrepareCache.errors.showStatus("loadFileToOther " + f);
+        Matcher m = RE_ID.matcher(f.getName());
+        if (!m.matches()) {
+            throw new Exception("Wrong name: " + f);
+        }
+
+        volumes.add("kamunikat.org");
+        lucene.setOtherInfo("kamunikat.org", "http://kamunikat.org/halounaja.html?pubid=" + m.group(1));
+
+        System.out.println("loadFileToOther " + f);
 
         AtomicInteger wordsCount = new AtomicInteger();
         List<String> book = new ArrayList<>();
         try (ZipFile zip = new ZipFile(f)) {
             for (Enumeration<? extends ZipEntry> it = zip.entries(); it.hasMoreElements();) {
                 ZipEntry en = it.nextElement();
-                if (en.isDirectory()) {
+                if (en.isDirectory() || en.getSize() == 0) {
                     continue;
                 }
                 String text;

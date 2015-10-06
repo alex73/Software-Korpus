@@ -79,7 +79,7 @@ public class Splitter2 {
                 } else if (isLetter()) {
                     parseWord();
                 } else {
-                    parseOther();
+                    parseOther(processAmp);
                 }
                 break;
             }
@@ -265,11 +265,14 @@ public class Splitter2 {
         addToSentence(w);
     }
 
-    private void parseOther() {
+    private void parseOther(boolean processAmp) {
         int end = pos;
         for (; end < para.length(); end++) {
             currentChar = para.charAt(end);
-            if (isLetter() || isZnak() || isSpace() || currentChar == '&' || currentChar == '<') {
+            if (isLetter() || isZnak() || isSpace() || currentChar == '<') {
+                break;
+            }
+            if (processAmp && currentChar == '&') {
                 break;
             }
         }

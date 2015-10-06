@@ -55,7 +55,7 @@ public class PrepareCache {
             }
         });
 
-        KorpusLoading.processKorpus();
+        //KorpusLoading.processKorpus();
         OtherLoading.processOther();
 
         List<String> errorNames = new ArrayList<>(errorsCount.keySet());
@@ -87,7 +87,7 @@ public class PrepareCache {
             } else {
                 count++;
             }
-            errorsCount.put(error, count);
+          //  errorsCount.put(error, count);
             System.err.println(error);
         }
     };
