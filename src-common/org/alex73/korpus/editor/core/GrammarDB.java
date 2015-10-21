@@ -66,7 +66,7 @@ public class GrammarDB {
     public static final JAXBContext CONTEXT;
     public static final Schema schema;
 
-    private static GrammarDB instance;
+    protected static GrammarDB instance;
 
     List<Paradigm> allParadigms = new ArrayList<>();
     List<Paradigm> docLevelParadigms = new ArrayList<>();
@@ -115,6 +115,10 @@ public class GrammarDB {
         stat();
     }
 
+    protected GrammarDB() {
+    }
+
+    
     public void stat() {
         int fill = 6;
         DecimalFormat fo = new DecimalFormat("###,###,##0");

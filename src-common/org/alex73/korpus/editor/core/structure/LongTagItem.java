@@ -1,7 +1,7 @@
 /**************************************************************************
  Korpus - Corpus Linguistics Software.
 
- Copyright (C) 2013 Aleś Bułojčyk (alex73mail@gmail.com)
+ Copyright (C) 2015 Aleś Bułojčyk (alex73mail@gmail.com)
                Home page: https://sourceforge.net/projects/korpus/
 
  This file is part of Korpus.
@@ -22,10 +22,18 @@
 
 package org.alex73.korpus.editor.core.structure;
 
-public abstract class BaseItem {
-    public abstract String getText();
+public class LongTagItem {
+    private String text;
 
-    public abstract BaseItem splitLeft(int pos);
+    public LongTagItem(String text) {
+        this.text = text;
+    }
 
-    public abstract BaseItem splitRight(int pos);
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
 }

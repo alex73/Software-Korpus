@@ -46,12 +46,10 @@ import org.alex73.korpus.editor.core.doc.KorpusDocument3;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyLineElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyWordElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocumentViewFactory;
-import org.alex73.korpus.editor.core.structure.KorpusDocument;
-import org.alex73.korpus.parser.TEIParser;
+import org.alex73.korpus.parser.IProcess;
 import org.alex73.korpus.parser.TextParser;
 
-import alex73.corpus.paradigm.TEI;
-import alex73.corpus.paradigm.W;
+import alex73.corpus.text.W;
 import alex73.corpus.text.XMLText;
 
 public class MainController {
@@ -108,9 +106,8 @@ public class MainController {
     static ActionListener aFileSave = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             try {
-                XMLText tei = new XMLText();
-                tei.setText(TextParser.constructXML(UI.doc.extractText()));
-                TextParser.saveXML(getOutFile(), tei);
+                XMLText text = UI.doc.extractText();
+                TextParser.saveXML(getOutFile(), text);
                 UI.showInfo("Захавана ў " + getOutFile());
             } catch (Throwable ex) {
                 ex.printStackTrace();
@@ -209,7 +206,7 @@ public class MainController {
                 GrammarDB.getInstance().addXMLFile(getGrammarFile(), true);
             }
 
-            KorpusDocument kDoc;
+            XMLText kDoc;
             if (f.getName().endsWith(".xml")) {
                 InputStream in = new BufferedInputStream(new FileInputStream(f));
                 try {
@@ -220,7 +217,15 @@ public class MainController {
             } else {
                 InputStream in = new BufferedInputStream(new FileInputStream(f));
                 try {
-                    kDoc = TextParser.parseText(in, false);
+                    kDoc = TextParser.parseText(in, false, new IProcess() {
+                        @Override
+                        public void showStatus(String status) {
+                        }
+                        @Override
+                        public void reportError(String error) {
+                            throw new RuntimeException(error);
+                        }
+                    });
                 } finally {
                     in.close();
                 }

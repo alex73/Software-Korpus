@@ -39,17 +39,22 @@ import javax.swing.text.Position;
 import javax.swing.text.StyleContext;
 
 import org.alex73.korpus.editor.UI;
-import org.alex73.korpus.editor.core.structure.BaseItem;
+import org.alex73.korpus.editor.core.structure.ItemHelper;
 import org.alex73.korpus.editor.core.structure.KorpusDocument;
 import org.alex73.korpus.editor.core.structure.Line;
-import org.alex73.korpus.editor.core.structure.SpaceItem;
-import org.alex73.korpus.editor.core.structure.TagLongItem;
-import org.alex73.korpus.editor.core.structure.TagShortItem;
-import org.alex73.korpus.editor.core.structure.WordItem;
-import org.alex73.korpus.editor.core.structure.ZnakItem;
+import org.alex73.korpus.editor.core.structure.LongTagItem;
+import org.alex73.korpus.editor.core.structure.SentenceSeparatorItem;
 import org.alex73.korpus.parser.Splitter;
+import org.alex73.korpus.parser.TextParser;
 
-import alex73.corpus.paradigm.W;
+import alex73.corpus.text.InlineTag;
+import alex73.corpus.text.P;
+import alex73.corpus.text.S;
+import alex73.corpus.text.Se;
+import alex73.corpus.text.Tag;
+import alex73.corpus.text.W;
+import alex73.corpus.text.XMLText;
+import alex73.corpus.text.Z;
 
 /**
  * Рэдактар дакумэнту корпуса.
@@ -62,31 +67,55 @@ public class KorpusDocument3 extends AbstractDocument {
     MyRootElement rootElem;
     public MARK_WORDS markType = MARK_WORDS.UNK_LEMMA;
 
-    public KorpusDocument3(KorpusDocument fs) throws Exception {
+private     StringBuilder text = new StringBuilder(100000);
+
+    
+    public KorpusDocument3(XMLText fs) throws Exception {
         super(new GapContent(65536), new StyleContext());
 
         rootElem = new MyRootElement();
 
-        StringBuilder str = new StringBuilder(100000);
 
-        for (Line line : fs) {
-            MyLineElement pElem = new MyLineElement(rootElem);
-            rootElem.children.add(pElem);
-            pElem.addWords(str.length(), 0, line);
-            for (BaseItem item : line) {
-                str.append(item.getText());
+        for (Object line : fs.getContent().getPOrTag()) {
+            MyLineElement pLine = new MyLineElement(rootElem);
+            rootElem.children.add(pLine);
+            if (line instanceof P) {
+                P p=(P)line;
+                for(Se sentence:p.getSe()) {
+                    for(Object inc: sentence.getWOrSOrZ()) {
+                        MyWordElement we;
+                        if (inc instanceof W) {
+                            we = new MyWordElement(pLine,  inc);
+                        }else if (inc instanceof S) {
+                            we = new MyWordElement(pLine,  inc);
+                        }else if (inc instanceof Z) {
+                            we = new MyWordElement(pLine,  inc);
+                        }else  {
+                            throw new RuntimeException("Wrong tag");
+                        }
+                        pLine.add(we);
+                    }
+                    pLine.add(new MyWordElement(pLine, new SentenceSeparatorItem()));
+                }
+            } else if (line instanceof Tag) {
+                Tag tag=(Tag)line;
+                MyLineElement pElem = new MyLineElement(rootElem);
+                rootElem.children.add(pElem);
+                pElem.add(new MyWordElement(pElem, new LongTagItem("##"+tag.getName()+": "+tag.getValue())));
+            }else {
+                throw new RuntimeException("Wrong tag");
             }
-            pElem.addWord(str.length(), pElem.getChildCount(), new SpaceItem("\n"));
-            str.append('\n');
+            text.append('\n');
         }
         {
             // Ctrl+End hack
             MyLineElement pElem = new MyLineElement(rootElem);
             rootElem.children.add(pElem);
-            pElem.addWord(str.length(), 0, new SpaceItem(" "));
+            pElem.add(new MyWordElement(pElem, ItemHelper.createS(" ")));
         }
         Content c = getContent();
-        c.insertString(0, str.toString());
+        c.insertString(0, text.toString());
+        text = null;
         for (int i = 0; i < rootElem.getChildCount(); i++) {
             MyLineElement p = rootElem.getElement(i);
             for (int j = 0; j < p.getChildCount(); j++) {
@@ -98,7 +127,7 @@ public class KorpusDocument3 extends AbstractDocument {
         addUndoableEditListener(UI.editorUndoManager);
     }
 
-    public KorpusDocument extractText() {
+    public XMLText extractText() {
         KorpusDocument doc = new KorpusDocument();
         for (MyLineElement pd : rootElem.children) {
             Line line = new Line();
@@ -107,7 +136,7 @@ public class KorpusDocument3 extends AbstractDocument {
             }
             doc.add(line);
         }
-        return doc;
+        return TextParser.constructXML(doc);
     }
 
     @Override
@@ -138,7 +167,8 @@ public class KorpusDocument3 extends AbstractDocument {
     public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
         writeLock();
         try {
-            DefaultDocumentEvent e = new DefaultDocumentEvent(offs, str.length(), DocumentEvent.EventType.INSERT);
+            DefaultDocumentEvent e = new DefaultDocumentEvent(offs, str.length(),
+                    DocumentEvent.EventType.INSERT);
 
             String[] newStrs = splitInserted(str);
             List<Line> newLines = new ArrayList<>();
@@ -202,14 +232,6 @@ public class KorpusDocument3 extends AbstractDocument {
         return result.toArray(new String[result.size()]);
     }
 
-    BaseItem[] extractItems(MyWordElement[] els) {
-        BaseItem[] result = new BaseItem[els.length];
-        for (int i = 0; i < els.length; i++) {
-            result[i] = els[i].item;
-        }
-        return result;
-    }
-
     @Override
     public void remove(int offs, int len) throws BadLocationException {
         writeLock();
@@ -255,8 +277,15 @@ public class KorpusDocument3 extends AbstractDocument {
         MyLineElement[] newParagraphs = new MyLineElement[newLines.size()];
         for (int i = 0; i < newParagraphs.length; i++) {
             MyLineElement p = newParagraphs[i] = new MyLineElement(rootElem);
-            newLines.get(i).normalize();
-            p.addWords(pOffset, 0, newLines.get(i));
+            Line newLine = 
+            newLines.get(i);
+            newLine.normalize();
+            
+            int startOffset=0;
+            for(Object item:newLine) {
+               p.add(new MyWordElement(p,startOffset, item));
+               startOffset+=ItemHelper.getText(item).length();
+            }
             for (int j = 0; j < p.getChildCount(); j++) {
                 p.getElement(j).createPositions();
             }
@@ -270,7 +299,9 @@ public class KorpusDocument3 extends AbstractDocument {
         public void replace(int offset, int length, Element[] elems);
     }
 
-    public abstract class MyGroupElement<T extends AbstractElement> extends AbstractElement implements ElementChanger {
+    @SuppressWarnings("serial")
+    public abstract class MyGroupElement<T extends AbstractElement> extends AbstractElement
+            implements ElementChanger {
         List<T> children = new ArrayList<>();
 
         public MyGroupElement(Element parent) {
@@ -293,6 +324,7 @@ public class KorpusDocument3 extends AbstractDocument {
             }
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public void replace(int offset, int length, Element[] elems) {
             for (int i = 0; i < length; i++) {
@@ -350,37 +382,28 @@ public class KorpusDocument3 extends AbstractDocument {
 
         @Override
         public String toString() {
-            return getClass().getSimpleName() + "(" + getName() + ") " + getStartOffset() + "-" + getEndOffset() + "\n";
+            return getClass().getSimpleName() + "(" + getName() + ") " + getStartOffset() + "-"
+                    + getEndOffset() + "\n";
         }
     }
 
+    @SuppressWarnings("serial")
     protected class MyRootElement extends MyGroupElement<MyLineElement> {
         public MyRootElement() {
             super(null);
         }
     }
 
+    @SuppressWarnings("serial")
     public class MyLineElement extends MyGroupElement<MyWordElement> {
 
         public MyLineElement(Element parent) {
             super(parent);
         }
 
-        public MyWordElement[] addWords(int startOffset, int atIndex, Line items) {
-            MyWordElement[] result = new MyWordElement[items.size()];
-            for (int i = 0; i < result.length; i++) {
-                result[i] = new MyWordElement(this, startOffset, items.get(i));
-                children.add(atIndex, result[i]);
-                startOffset += items.get(i).getText().length();
-                atIndex++;
-            }
-            return result;
-        }
 
-        public MyWordElement addWord(int startOffset, int atIndex, BaseItem item) {
-            MyWordElement result = new MyWordElement(this, startOffset, item);
-            children.add(atIndex, result);
-            return result;
+        public void add(MyWordElement elem) {
+            children.add(elem);
         }
 
         public Line extractItems() {
@@ -392,41 +415,50 @@ public class KorpusDocument3 extends AbstractDocument {
         }
     }
 
+    @SuppressWarnings("serial")
     public class MyWordElement extends AbstractElement {
-        BaseItem item;
+        public final Object item;
 
         private transient Position p0;
         private transient Position p1;
         int p0v, p1v;
 
-        public MyWordElement(Element parent, int offs0, BaseItem item) {
+        public MyWordElement(Element parent,  Object item) {
             super(parent, null);
             this.item = item;
-            p0v = offs0;
-            p1v = offs0 + item.getText().length();
+            p0v = text.length();
+            text.append(ItemHelper.getText(item));
+            p1v = text.length() ;
         }
 
+        public MyWordElement(Element parent, int startOffset, Object item) {
+            super(parent, null);
+            this.item = item;
+            p0v = startOffset;
+            p1v = startOffset+ItemHelper.getText(item) .length();
+        }
+        
+
         public boolean isTag() {
-            return (item instanceof TagShortItem) || (item instanceof TagLongItem);
+            return (item instanceof InlineTag) || (item instanceof LongTagItem);
         }
 
         public W getWordInfo() {
-            if (item instanceof WordItem) {
-                return ((WordItem) item).w;
-            } else if (item instanceof WordItem) {
-                return ((ZnakItem) item).w;
+            if (item instanceof W) {
+                return (W) item;
             } else {
                 return null;
             }
         }
 
-        public void setWordInfo(W w) {
-            if (item instanceof WordItem) {
-                ((WordItem) item).w = w;
-            } else if (item instanceof WordItem) {
-                ((WordItem) item).w = w;
+        public void setWordInfo(W otherW) {
+            if (item instanceof W) {
+                W w=(W)item;
+                w.setCat(otherW.getCat());
+                w.setLemma(otherW.getLemma());
             } else {
-                throw new ClassCastException("Trying to set word info into " + item.getClass().getSimpleName());
+                throw new ClassCastException(
+                        "Trying to set word info into " + item.getClass().getSimpleName());
             }
         }
 

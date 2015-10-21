@@ -23,32 +23,26 @@
 package org.alex73.korpus.editor.core.structure;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import org.alex73.korpus.parser.Splitter;
-
-import alex73.corpus.text.P;
 
 /**
  * Сховішча для радку дакумэнту корпуса.
  */
-public class Line extends ArrayList<BaseItem> {
+@SuppressWarnings("serial")
+public class Line extends ArrayList<Object> {
     public Line() {
-    }
-
-    public Line(BaseItem[] items) {
-        super(Arrays.asList(items));
     }
 
     void splitAt(int offset) {
         int pos = 0;
         for (int i = 0; i < size(); i++) {
-            BaseItem item = get(i);
-            int len = item.getText().length();
+            Object item = get(i);
+            int len = ItemHelper.getText(item).length();
             if (pos < offset && offset < pos + len) {
                 // inside item
-                BaseItem itLeft = item.splitLeft(offset - pos);
-                BaseItem itRight = item.splitRight(offset - pos);
+                Object itLeft = ItemHelper.splitLeft(item, offset - pos);
+                Object itRight = ItemHelper.splitRight(item, offset - pos);
                 remove(i);
                 add(i, itLeft);
                 add(i + 1, itRight);
@@ -61,19 +55,19 @@ public class Line extends ArrayList<BaseItem> {
     public int length() {
         int len = 0;
         for (int i = 0; i < size(); i++) {
-            len += get(i).getText().length();
+            len += ItemHelper.getText(get(i)).length();
         }
         return len;
     }
 
-    public void insertItemAt(int offset, BaseItem newItem) {
+    public void insertItemAt(int offset, Object newItem) {
         int pos = 0;
         for (int i = 0; i <= size(); i++) {
             if (pos == offset) {
                 add(i, newItem);
                 return;
             }
-            pos += get(i).getText().length();
+            pos += ItemHelper.getText(get(i)).length();
         }
         throw new RuntimeException("Invalid insertItemAt");
     }
@@ -83,7 +77,7 @@ public class Line extends ArrayList<BaseItem> {
         for (int i = 0; i <= size(); i++) {
             if (pos == offset) {
                 while (length > 0) {
-                    int itlen = get(i).getText().length();
+                    int itlen = ItemHelper.getText(get(i)).length();
                     if (length < itlen) {
                         throw new RuntimeException("Invalid removeItems");
                     }
@@ -92,7 +86,7 @@ public class Line extends ArrayList<BaseItem> {
                 }
                 return;
             }
-            pos += get(i).getText().length();
+            pos += ItemHelper.getText(get(i)).length();
         }
         throw new RuntimeException("Invalid removeItemsAt");
     }
@@ -106,7 +100,7 @@ public class Line extends ArrayList<BaseItem> {
                 return result;
             }
             result.add(get(i));
-            pos += get(i).getText().length();
+            pos += ItemHelper.getText(get(i)).length();
         }
         throw new RuntimeException("Invalid leftAt");
     }
@@ -122,7 +116,7 @@ public class Line extends ArrayList<BaseItem> {
             if (result != null) {
                 result.add(get(i));
             }
-            pos += get(i).getText().length();
+            pos += ItemHelper.getText(get(i)).length();
         }
         if (result == null) {
             throw new RuntimeException("Invalid rightAt");
@@ -135,7 +129,7 @@ public class Line extends ArrayList<BaseItem> {
             ;
         Splitter.fillWordsInfo(this);
     }
-    
+
     @Override
     public String toString() {
         return super.toString() + " length=" + length();

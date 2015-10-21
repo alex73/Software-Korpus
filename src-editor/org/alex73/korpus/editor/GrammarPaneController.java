@@ -41,7 +41,7 @@ import org.alex73.korpus.editor.core.GrammarDB;
 import org.alex73.korpus.parser.Splitter;
 
 import alex73.corpus.paradigm.Paradigm;
-import alex73.corpus.paradigm.W;
+import alex73.corpus.text.W;
 
 public class GrammarPaneController {
     static W currentWord;

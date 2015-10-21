@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src-web"/>
+	<classpathentry kind="src" path="test-editor"/>
+	<classpathentry kind="src" path="src-editor"/>
 	<classpathentry kind="src" path="test-common"/>
 	<classpathentry kind="src" path="test-web"/>
 	<classpathentry kind="src" path="src-web-templates"/>

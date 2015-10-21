@@ -24,30 +24,34 @@ package org.alex73.korpus.editor.core.structure;
 
 import static org.junit.Assert.assertEquals;
 
+import org.alex73.korpus.editor.core.GrammarDBTestInit;
 import org.junit.Before;
 import org.junit.Test;
 
-import alex73.corpus.paradigm.W;
+import alex73.corpus.text.W;
+import alex73.corpus.text.Z;
 
 public class ItemsHelperTest {
     Line line;
 
     @Before
-    public void before() {
+    public void before() throws Exception {
+        GrammarDBTestInit.initEmpty();
+
         line = new Line();
-        line.add(new SpaceItem("  "));
+        line.add(ItemHelper.createS("  "));
         W w1 = new W();
         w1.setValue("word");
-        line.add(new WordItem(w1));
-        W wz = new W();
+        line.add(ItemHelper.createW("word"));
+        Z wz = new Z();
         wz.setValue(".");
-        line.add(new ZnakItem(wz));
+        line.add(ItemHelper.createZ("."));
     }
 
     void check(String... itemTexts) {
         assertEquals(line.size(), itemTexts.length);
         for (int i = 0; i < itemTexts.length; i++) {
-            assertEquals(line.get(i).getText(), itemTexts[i]);
+            assertEquals(ItemHelper.getText(line.get(i)), itemTexts[i]);
         }
     }
 
@@ -98,59 +102,55 @@ public class ItemsHelperTest {
 
     @Test(expected = Exception.class)
     public void insertWrongInside() {
-        line.insertItemAt(1, new SpaceItem(" "));
+        line.insertItemAt(1, ItemHelper.createS(" "));
     }
 
     @Test(expected = Exception.class)
     public void insertWrongAfter() {
-        line.insertItemAt(100, new SpaceItem(" "));
+        line.insertItemAt(100, ItemHelper.createS(" "));
     }
 
     @Test
     public void insertBefore() {
-        line.insertItemAt(0, new SpaceItem(" "));
+        line.insertItemAt(0, ItemHelper.createS(" "));
         check(" ", "  ", "word", ".");
     }
 
     @Test
     public void insertAfter() {
-        line.insertItemAt(7, new SpaceItem(" "));
+        line.insertItemAt(7, ItemHelper.createS(" "));
         check("  ", "word", ".", " ");
     }
 
     @Test
     public void insertInside1() {
-        line.insertItemAt(2, new SpaceItem(" "));
+        line.insertItemAt(2, ItemHelper.createS(" "));
         check("  ", " ", "word", ".");
     }
 
     @Test
     public void insertInside2() {
-        line.insertItemAt(6, new SpaceItem(" "));
+        line.insertItemAt(6, ItemHelper.createS(" "));
         check("  ", "word", " ", ".");
     }
 
     @Test
     public void normalizeSpaces() {
-        line.insertItemAt(0, new SpaceItem(" "));
+        line.insertItemAt(0, ItemHelper.createS(" "));
         line.normalize();
         check("   ", "word", ".");
     }
 
     @Test
     public void normalizeWords() {
-        W w = new W();
-        w.setValue("tt");
-        line.insertItemAt(2, new WordItem(w));
+        line.insertItemAt(2, ItemHelper.createW("tt"));
         line.normalize();
         check("  ", "ttword", ".");
     }
 
     @Test
     public void normalizeZnak() {
-        W w = new W();
-        w.setValue(",");
-        line.insertItemAt(6, new ZnakItem(w));
+        line.insertItemAt(6, ItemHelper.createZ(","));
         line.normalize();
         check("  ", "word", ",", ".");
     }

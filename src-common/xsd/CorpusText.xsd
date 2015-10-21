@@ -87,16 +87,22 @@
     <xs:element name="o"> <!-- other, like numbers, non-Belarusian words, etc -->
         <xs:complexType>
             <xs:simpleContent>
-                <xs:extension base="xs:string"/>
+                <xs:extension base="xs:string" />
             </xs:simpleContent>
         </xs:complexType>
     </xs:element>
 
     <xs:element name="s"> <!-- space -->
         <xs:complexType>
-            <xs:attribute name="char" type="xs:string" use="optional" default=" " />
+            <xs:attribute name="char" type="S1" use="optional" default=" " />
         </xs:complexType>
     </xs:element>
+
+    <xs:simpleType name="S1">
+        <xs:restriction base="xs:string">
+            <xs:maxLength value="1" />
+        </xs:restriction>
+    </xs:simpleType>
 
     <xs:element name="inlineTag">
         <xs:complexType>

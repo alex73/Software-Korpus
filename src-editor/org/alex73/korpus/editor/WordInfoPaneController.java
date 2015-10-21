@@ -34,7 +34,7 @@ import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.editor.ui.WordInfoPane;
 import org.alex73.korpus.parser.Splitter;
 
-import alex73.corpus.paradigm.W;
+import alex73.corpus.text.W;
 
 public class WordInfoPaneController {
     public static void init() {

@@ -24,19 +24,8 @@ package org.alex73.korpus.editor.core.structure;
 
 import org.alex73.korpus.parser.Splitter;
 
-public class SentenceSeparatorItem extends BaseItem {
-    @Override
+public class SentenceSeparatorItem {
     public String getText() {
         return "" + Splitter.CH_SENT_SEPARATOR;
-    }
-
-    @Override
-    public BaseItem splitLeft(int pos) {
-        throw new RuntimeException("Can't split");
-    }
-
-    @Override
-    public BaseItem splitRight(int pos) {
-        throw new RuntimeException("Can't split");
     }
 }

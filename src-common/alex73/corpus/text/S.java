@@ -17,7 +17,7 @@ import javax.xml.bind.annotation.XmlType;
  * &lt;complexType>
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;attribute name="char" type="{http://www.w3.org/2001/XMLSchema}string" default=" " />
+ *       &lt;attribute name="char" type="{}S1" default=" " />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>

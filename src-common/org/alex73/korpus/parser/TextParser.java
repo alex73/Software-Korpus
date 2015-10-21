@@ -23,6 +23,7 @@
 package org.alex73.korpus.parser;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -36,15 +37,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import org.alex73.korpus.editor.core.structure.BaseItem;
 import org.alex73.korpus.editor.core.structure.Line;
 import org.alex73.korpus.editor.core.structure.SentenceSeparatorItem;
-import org.alex73.korpus.editor.core.structure.SpaceItem;
-import org.alex73.korpus.editor.core.structure.TagShortItem;
-import org.alex73.korpus.editor.core.structure.WordItem;
-import org.alex73.korpus.editor.core.structure.ZnakItem;
 
 import alex73.corpus.text.Content;
 import alex73.corpus.text.Header;
@@ -58,6 +55,7 @@ import alex73.corpus.text.XMLText;
  */
 public class TextParser {
     public static JAXBContext CONTEXT;
+
     static {
         try {
             CONTEXT = JAXBContext.newInstance(XMLText.class.getPackage().getName());
@@ -71,6 +69,12 @@ public class TextParser {
 
         XMLText doc = (XMLText) unm.unmarshal(in);
         return doc;
+    }
+
+    public static void saveXML(File outFile, XMLText xml) throws Exception {
+        Marshaller m = CONTEXT.createMarshaller();
+
+        m.marshal(xml, outFile);
     }
 
     public static XMLText parseText(InputStream in, boolean headerOnly, IProcess errors) throws Exception {
@@ -229,12 +233,12 @@ public class TextParser {
         for (Line line : doc) {
             p = new P();
             s = new Se();
-            for (BaseItem item : line) {
+            for (Object item : line) {
                 if (item instanceof SentenceSeparatorItem) {
                     p.getSe().add(s);
                     s = new Se();
                 } else {
-                    eventSimpleItem(item, s);
+                    s.getWOrSOrZ().add(item);
                 }
             }
             p.getSe().add(s);
@@ -254,23 +258,5 @@ public class TextParser {
             }
         }
         return text;
-    }
-
-    static void eventSimpleItem(BaseItem item, Se s) {
-        if (item instanceof WordItem) {
-            WordItem it = (WordItem) item;
-            s.getWOrSOrZ().add(it.w);
-        } else if (item instanceof ZnakItem) {
-            ZnakItem it = (ZnakItem) item;
-            s.getWOrSOrZ().add(it.w);
-        } else if (item instanceof TagShortItem) {
-            TagShortItem it = (TagShortItem) item;
-            Tag tag = new Tag();
-            tag.setName(it.getText());
-            s.getWOrSOrZ().add(tag);
-        } else if (item instanceof SpaceItem) {
-        } else {
-            throw new RuntimeException("Unknown item: " + item.getClass().getSimpleName());
-        }
     }
 }
