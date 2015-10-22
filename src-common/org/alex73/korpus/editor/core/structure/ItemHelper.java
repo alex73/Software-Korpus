@@ -23,6 +23,7 @@
 package org.alex73.korpus.editor.core.structure;
 
 import alex73.corpus.text.InlineTag;
+import alex73.corpus.text.O;
 import alex73.corpus.text.S;
 import alex73.corpus.text.W;
 import alex73.corpus.text.Z;
@@ -60,8 +61,12 @@ public class ItemHelper {
             return ((Z) o).getValue();
         } else if (o instanceof S) {
             return ((S) o).getChar();
+        } else if (o instanceof O) {
+            return ((O) o).getValue();
         } else if (o instanceof LongTagItem) {
             return ((LongTagItem) o).getText();
+        } else if (o instanceof SentenceSeparatorItem) {
+            return ((SentenceSeparatorItem) o).getText();
         } else {
             throw new RuntimeException("Wrong object type");
         }

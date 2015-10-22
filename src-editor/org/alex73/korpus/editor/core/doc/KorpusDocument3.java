@@ -48,6 +48,7 @@ import org.alex73.korpus.parser.Splitter;
 import org.alex73.korpus.parser.TextParser;
 
 import alex73.corpus.text.InlineTag;
+import alex73.corpus.text.O;
 import alex73.corpus.text.P;
 import alex73.corpus.text.S;
 import alex73.corpus.text.Se;
@@ -90,6 +91,8 @@ private     StringBuilder text = new StringBuilder(100000);
                             we = new MyWordElement(pLine,  inc);
                         }else if (inc instanceof Z) {
                             we = new MyWordElement(pLine,  inc);
+                        }else if (inc instanceof O) {
+                            we = new MyWordElement(pLine,  inc);
                         }else  {
                             throw new RuntimeException("Wrong tag");
                         }
@@ -105,7 +108,7 @@ private     StringBuilder text = new StringBuilder(100000);
             }else {
                 throw new RuntimeException("Wrong tag");
             }
-            text.append('\n');
+            pLine.add(new MyWordElement(pLine, ItemHelper.createS("\n")));
         }
         {
             // Ctrl+End hack

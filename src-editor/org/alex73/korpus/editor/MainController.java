@@ -33,6 +33,7 @@ import java.io.InputStream;
 import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.JMenuBar;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
@@ -65,8 +66,11 @@ public class MainController {
         UI.mainWindow.mUnk3.addActionListener(aUnderChange);
         UI.mainWindow.mUndo.addActionListener(aUndo);
         UI.mainWindow.mRedo.addActionListener(aRedo);
-        UI.mainWindow.mFontDec.addActionListener(aFontDec);
-        UI.mainWindow.mFontInc.addActionListener(aFontInc);
+        for (JRadioButtonMenuItem rb : new JRadioButtonMenuItem[] { UI.mainWindow.f10, UI.mainWindow.f12,
+                UI.mainWindow.f16, UI.mainWindow.f20, UI.mainWindow.f24, UI.mainWindow.f30, UI.mainWindow.f36,
+                UI.mainWindow.f44 }) {
+            rb.addActionListener(aFontSet);
+        }
 
         UI.mainWindow.mGoEditor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -86,8 +90,27 @@ public class MainController {
 
         UI.editor.getInputMap().put(KeyStroke.getKeyStroke("F6"), "GoGrammar");
         UI.editor.getActionMap().put("GoGrammar", actionGoGrammar);
-    }
 
+        Font font = UI.editor.getFont();
+        if (font.getSize() <= 10) {
+            UI.mainWindow.f10.setSelected(true);
+        } else if (font.getSize() <= 12) {
+            UI.mainWindow.f12.setSelected(true);
+        } else if (font.getSize() <= 16) {
+            UI.mainWindow.f16.setSelected(true);
+        } else if (font.getSize() <= 20) {
+            UI.mainWindow.f20.setSelected(true);
+        } else if (font.getSize() <= 24) {
+            UI.mainWindow.f24.setSelected(true);
+        } else if (font.getSize() <= 30) {
+            UI.mainWindow.f30.setSelected(true);
+        } else if (font.getSize() <= 36) {
+            UI.mainWindow.f36.setSelected(true);
+        } else {
+            UI.mainWindow.f44.setSelected(true);
+        }
+    }
+    
     static AbstractAction actionGoGrammar = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
             UI.grammarPane.txtWord.requestFocus();
@@ -149,18 +172,11 @@ public class MainController {
         }
     };
 
-    static ActionListener aFontInc = new ActionListener() {
+    static ActionListener aFontSet = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
+            String size = ((JRadioButtonMenuItem)e.getSource()).getText();
             Font font = UI.editor.getFont();
-            font = new Font(font.getFamily(), font.getStyle(), font.getSize() + 1);
-            UI.editor.setFont(font);
-        }
-    };
-
-    static ActionListener aFontDec = new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            Font font = UI.editor.getFont();
-            font = new Font(font.getFamily(), font.getStyle(), font.getSize() - 1);
+            font = new Font(font.getFamily(), font.getStyle(), Integer.parseInt(size));
             UI.editor.setFont(font);
         }
     };
@@ -201,7 +217,6 @@ public class MainController {
         try {
             baseFileName = f.getPath().replace("\\.[a-z]+$", "");
 
-            UI.mainWindow.mFileOpen.setEnabled(false);
             if (getGrammarFile().exists()) {
                 GrammarDB.getInstance().addXMLFile(getGrammarFile(), true);
             }
@@ -244,6 +259,8 @@ public class MainController {
             });
             // UI.editor.setDocument(UI.doc);
             UI.editor.addCaretListener(onWordChanged);
+            
+            UI.mainWindow.mFileOpen.setEnabled(false);
         } catch (Throwable ex) {
             ex.printStackTrace();
             UI.showError(ex.getClass().getSimpleName() + ": " + ex.getMessage());
