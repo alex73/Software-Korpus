@@ -40,13 +40,13 @@ import javax.swing.text.StyleContext;
 
 import org.alex73.korpus.editor.UI;
 import org.alex73.korpus.editor.core.structure.ItemHelper;
-import org.alex73.korpus.editor.core.structure.KorpusDocument;
 import org.alex73.korpus.editor.core.structure.Line;
 import org.alex73.korpus.editor.core.structure.LongTagItem;
 import org.alex73.korpus.editor.core.structure.SentenceSeparatorItem;
 import org.alex73.korpus.parser.Splitter;
 import org.alex73.korpus.parser.TextParser;
 
+import alex73.corpus.text.Header;
 import alex73.corpus.text.InlineTag;
 import alex73.corpus.text.O;
 import alex73.corpus.text.P;
@@ -60,6 +60,7 @@ import alex73.corpus.text.Z;
 /**
  * Рэдактар дакумэнту корпуса.
  */
+@SuppressWarnings("serial")
 public class KorpusDocument3 extends AbstractDocument {
     public enum MARK_WORDS {
         UNK_LEMMA, AMAN_LEMMA, AMAN_GRAM
@@ -68,44 +69,48 @@ public class KorpusDocument3 extends AbstractDocument {
     MyRootElement rootElem;
     public MARK_WORDS markType = MARK_WORDS.UNK_LEMMA;
 
-private     StringBuilder text = new StringBuilder(100000);
+    private Header header;
 
-    
+    private StringBuilder text = new StringBuilder(100000);
+
     public KorpusDocument3(XMLText fs) throws Exception {
         super(new GapContent(65536), new StyleContext());
 
-        rootElem = new MyRootElement();
+        header = fs.getHeader();
 
+        rootElem = new MyRootElement();
 
         for (Object line : fs.getContent().getPOrTag()) {
             MyLineElement pLine = new MyLineElement(rootElem);
             rootElem.children.add(pLine);
             if (line instanceof P) {
-                P p=(P)line;
-                for(Se sentence:p.getSe()) {
-                    for(Object inc: sentence.getWOrSOrZ()) {
+                P p = (P) line;
+                for (int s = 0; s < p.getSe().size(); s++) {
+                    Se sentence = p.getSe().get(s);
+                    for (Object inc : sentence.getWOrSOrZ()) {
                         MyWordElement we;
                         if (inc instanceof W) {
-                            we = new MyWordElement(pLine,  inc);
-                        }else if (inc instanceof S) {
-                            we = new MyWordElement(pLine,  inc);
-                        }else if (inc instanceof Z) {
-                            we = new MyWordElement(pLine,  inc);
-                        }else if (inc instanceof O) {
-                            we = new MyWordElement(pLine,  inc);
-                        }else  {
+                            we = new MyWordElement(pLine, inc);
+                        } else if (inc instanceof S) {
+                            we = new MyWordElement(pLine, inc);
+                        } else if (inc instanceof Z) {
+                            we = new MyWordElement(pLine, inc);
+                        } else if (inc instanceof O) {
+                            we = new MyWordElement(pLine, inc);
+                        } else {
                             throw new RuntimeException("Wrong tag");
                         }
                         pLine.add(we);
                     }
-                    pLine.add(new MyWordElement(pLine, new SentenceSeparatorItem()));
+                    if (s < p.getSe().size() - 1) {
+                        pLine.add(new MyWordElement(pLine, new SentenceSeparatorItem()));
+                    }
                 }
             } else if (line instanceof Tag) {
-                Tag tag=(Tag)line;
-                MyLineElement pElem = new MyLineElement(rootElem);
-                rootElem.children.add(pElem);
-                pElem.add(new MyWordElement(pElem, new LongTagItem("##"+tag.getName()+": "+tag.getValue())));
-            }else {
+                Tag tag = (Tag) line;
+                pLine.add(new MyWordElement(pLine,
+                        new LongTagItem("##" + tag.getName() + ": " + tag.getValue())));
+            } else {
                 throw new RuntimeException("Wrong tag");
             }
             pLine.add(new MyWordElement(pLine, ItemHelper.createS("\n")));
@@ -131,15 +136,17 @@ private     StringBuilder text = new StringBuilder(100000);
     }
 
     public XMLText extractText() {
-        KorpusDocument doc = new KorpusDocument();
+        List<Line> lines = new ArrayList<>();
         for (MyLineElement pd : rootElem.children) {
             Line line = new Line();
             for (MyWordElement el : pd.children) {
                 line.add(el.item);
             }
-            doc.add(line);
+            lines.add(line);
         }
-        return TextParser.constructXML(doc);
+        XMLText out = TextParser.constructXML(lines);
+        out.setHeader(header);
+        return out;
     }
 
     @Override
@@ -280,14 +287,13 @@ private     StringBuilder text = new StringBuilder(100000);
         MyLineElement[] newParagraphs = new MyLineElement[newLines.size()];
         for (int i = 0; i < newParagraphs.length; i++) {
             MyLineElement p = newParagraphs[i] = new MyLineElement(rootElem);
-            Line newLine = 
-            newLines.get(i);
+            Line newLine = newLines.get(i);
             newLine.normalize();
-            
-            int startOffset=0;
-            for(Object item:newLine) {
-               p.add(new MyWordElement(p,startOffset, item));
-               startOffset+=ItemHelper.getText(item).length();
+
+            int startOffset = 0;
+            for (Object item : newLine) {
+                p.add(new MyWordElement(p, startOffset, item));
+                startOffset += ItemHelper.getText(item).length();
             }
             for (int j = 0; j < p.getChildCount(); j++) {
                 p.getElement(j).createPositions();
@@ -404,7 +410,6 @@ private     StringBuilder text = new StringBuilder(100000);
             super(parent);
         }
 
-
         public void add(MyWordElement elem) {
             children.add(elem);
         }
@@ -426,21 +431,20 @@ private     StringBuilder text = new StringBuilder(100000);
         private transient Position p1;
         int p0v, p1v;
 
-        public MyWordElement(Element parent,  Object item) {
+        public MyWordElement(Element parent, Object item) {
             super(parent, null);
             this.item = item;
             p0v = text.length();
             text.append(ItemHelper.getText(item));
-            p1v = text.length() ;
+            p1v = text.length();
         }
 
         public MyWordElement(Element parent, int startOffset, Object item) {
             super(parent, null);
             this.item = item;
             p0v = startOffset;
-            p1v = startOffset+ItemHelper.getText(item) .length();
+            p1v = startOffset + ItemHelper.getText(item).length();
         }
-        
 
         public boolean isTag() {
             return (item instanceof InlineTag) || (item instanceof LongTagItem);
@@ -456,7 +460,7 @@ private     StringBuilder text = new StringBuilder(100000);
 
         public void setWordInfo(W otherW) {
             if (item instanceof W) {
-                W w=(W)item;
+                W w = (W) item;
                 w.setCat(otherW.getCat());
                 w.setLemma(otherW.getLemma());
             } else {

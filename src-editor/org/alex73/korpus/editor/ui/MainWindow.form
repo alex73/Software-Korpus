@@ -30,6 +30,13 @@
                   <KeyStroke key="Ctrl+S"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="&#x417;&#x430;&#x445;&#x430;&#x432;&#x430;&#x446;&#x44c;"/>
+                <Property name="enabled" type="boolean" value="false"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="mFileClose">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="&#x417;&#x430;&#x447;&#x44b;&#x43d;&#x456;&#x446;&#x44c;"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
             </MenuItem>
           </SubComponents>

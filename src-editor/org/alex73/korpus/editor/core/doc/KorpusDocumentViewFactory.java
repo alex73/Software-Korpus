@@ -118,6 +118,10 @@ public class KorpusDocumentViewFactory implements ViewFactory {
 
             return r;
         }
+        @Override
+        public View getView(int n) {
+            return super.getView(n);
+        }
     }
 
     public static class MyParagraphView extends ParagraphView {
@@ -133,6 +137,15 @@ public class KorpusDocumentViewFactory implements ViewFactory {
             g.setColor(Color.BLUE);
             Rectangle r = a.getBounds();
             g.drawLine(r.x, r.y + r.height, r.x + r.width, r.y + r.height);
+        }
+        @Override
+        public View getView(int n) {
+            try {
+            return super.getView(n);
+            } catch(ArrayIndexOutOfBoundsException ex) {
+                ex=null;
+                return null;
+            }
         }
     }
 }

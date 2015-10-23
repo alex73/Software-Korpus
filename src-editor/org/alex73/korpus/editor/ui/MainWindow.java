@@ -46,6 +46,7 @@ public class MainWindow extends javax.swing.JFrame {
         jMenu1 = new javax.swing.JMenu();
         mFileOpen = new javax.swing.JMenuItem();
         mFileSave = new javax.swing.JMenuItem();
+        mFileClose = new javax.swing.JMenuItem();
         jMenu4 = new javax.swing.JMenu();
         mUndo = new javax.swing.JMenuItem();
         mRedo = new javax.swing.JMenuItem();
@@ -86,7 +87,12 @@ public class MainWindow extends javax.swing.JFrame {
 
         mFileSave.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
         mFileSave.setText("Захаваць");
+        mFileSave.setEnabled(false);
         jMenu1.add(mFileSave);
+
+        mFileClose.setText("Зачыніць");
+        mFileClose.setEnabled(false);
+        jMenu1.add(mFileClose);
 
         jMenuBar1.add(jMenu1);
 
@@ -248,6 +254,7 @@ public class MainWindow extends javax.swing.JFrame {
     public javax.swing.JMenuBar jMenuBar1;
     public javax.swing.JPopupMenu.Separator jSeparator1;
     public javax.swing.JPopupMenu.Separator jSeparator2;
+    public javax.swing.JMenuItem mFileClose;
     public javax.swing.JMenuItem mFileOpen;
     public javax.swing.JMenuItem mFileSave;
     public javax.swing.JMenuItem mGoEditor;

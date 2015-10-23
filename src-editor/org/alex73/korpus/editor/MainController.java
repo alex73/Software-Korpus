@@ -59,6 +59,7 @@ public class MainController {
     public static void init() {
         UI.mainWindow.mFileOpen.addActionListener(aFileOpen);
         UI.mainWindow.mFileSave.addActionListener(aFileSave);
+        UI.mainWindow.mFileClose.addActionListener(aFileClose);
         UI.mainWindow.mUnk1.addActionListener(aUnderChange);
         UI.mainWindow.mGoNextMark.addActionListener(aGoNextMark);
         UI.mainWindow.mUnk1.addActionListener(aUnderChange);
@@ -136,6 +137,11 @@ public class MainController {
                 ex.printStackTrace();
                 UI.showError(ex.getClass().getSimpleName() + ": " + ex.getMessage());
             }
+        }
+    };
+    static ActionListener aFileClose = new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            
         }
     };
 
@@ -244,6 +250,7 @@ public class MainController {
                 } finally {
                     in.close();
                 }
+                TextParser.saveXML(new File(f.getPath().replaceAll("\\.[a-zA-Z0-9]+$", ".xml")), kDoc);
             }
 
             UI.doc = new KorpusDocument3(kDoc);
@@ -261,6 +268,8 @@ public class MainController {
             UI.editor.addCaretListener(onWordChanged);
             
             UI.mainWindow.mFileOpen.setEnabled(false);
+            UI.mainWindow.mFileSave.setEnabled(true);
+//            UI.mainWindow.mFileClose.setEnabled(true);
         } catch (Throwable ex) {
             ex.printStackTrace();
             UI.showError(ex.getClass().getSimpleName() + ": " + ex.getMessage());

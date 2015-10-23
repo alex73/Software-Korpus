@@ -41,11 +41,13 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 import org.alex73.korpus.editor.core.structure.Line;
+import org.alex73.korpus.editor.core.structure.LongTagItem;
 import org.alex73.korpus.editor.core.structure.SentenceSeparatorItem;
 
 import alex73.corpus.text.Content;
 import alex73.corpus.text.Header;
 import alex73.corpus.text.P;
+import alex73.corpus.text.S;
 import alex73.corpus.text.Se;
 import alex73.corpus.text.Tag;
 import alex73.corpus.text.XMLText;
@@ -73,7 +75,7 @@ public class TextParser {
 
     public static void saveXML(File outFile, XMLText xml) throws Exception {
         Marshaller m = CONTEXT.createMarshaller();
-
+        m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         m.marshal(xml, outFile);
     }
 
@@ -102,8 +104,13 @@ public class TextParser {
             while (s != null) {
                 s = s.trim();
                 if (s.startsWith("##")) {
+                    Matcher m = RE_TAG.matcher(s);
+                    if (!m.matches()) {
+                        throw new RuntimeException("Wrong tag: " + s);
+                    }
                     Tag t = new Tag();
-                    t.setValue(s);
+                    t.setName(m.group(1));
+                    t.setValue(m.group(2).trim());
                     doc.getContent().getPOrTag().add(t);
                     if ("##Poetry:begin".equals(s)) {
                         insidePoetry = true;
@@ -177,7 +184,7 @@ public class TextParser {
         return result;
     }
 
-    static Pattern RE_HEADER = Pattern.compile("##([A-Za-z0-9]+):\\s*(.*)");
+    static Pattern RE_TAG = Pattern.compile("##([A-Za-z0-9]+):\\s*(.*)");
 
     static Map<String, String> extractHeaders(BufferedReader rd) throws Exception {
         Map<String, String> result = new TreeMap<String, String>();
@@ -187,7 +194,7 @@ public class TextParser {
             if (s.trim().length() == 0) {
                 break;
             }
-            Matcher m = RE_HEADER.matcher(s);
+            Matcher m = RE_TAG.matcher(s);
             if (m.matches()) {
                 if (m.group(1).equals("Description") && m.group(2).trim().equals("begin")) {
                     result.put(m.group(1), readDescription(rd));
@@ -210,7 +217,7 @@ public class TextParser {
 
         String s;
         while ((s = rd.readLine()) != null) {
-            Matcher m = RE_HEADER.matcher(s);
+            Matcher m = RE_TAG.matcher(s);
             if (m.matches()) {
                 if (m.group(1).equals("Description") && m.group(2).trim().equals("end")) {
                     return out;
@@ -233,16 +240,43 @@ public class TextParser {
         for (Line line : doc) {
             p = new P();
             s = new Se();
-            for (Object item : line) {
+            for (int i = 0; i < line.size(); i++) {
+                Object item = line.get(i);
                 if (item instanceof SentenceSeparatorItem) {
                     p.getSe().add(s);
                     s = new Se();
+                } else if (item instanceof LongTagItem) {
+                    if (line.size() != 2 || i != 0) {
+                        throw new RuntimeException("Памылка фармату LongTagItem1");
+                    }
+                    Object item2 = line.get(1);
+                    if (!(item2 instanceof S) || !((S) item2).getChar().equals("\n")) {
+                        throw new RuntimeException("Памылка фармату LongTagItem2");
+                    }
+
+                    Tag tag = new Tag();
+                    Matcher m = RE_TAG.matcher(((LongTagItem) item).getText());
+                    if (!m.matches()) {
+                        throw new RuntimeException("Wrong long tag: " + ((LongTagItem) item).getText());
+                    }
+                    tag.setName(m.group(1));
+                    tag.setValue(m.group(2).trim());
+                    text.getContent().getPOrTag().add(tag);
+
+                    p = null;
+                    i++;
                 } else {
-                    s.getWOrSOrZ().add(item);
+                    if (i == line.size() - 1 && item instanceof S && ((S) item).getChar().equals("\n")) {
+                        // skip
+                    } else {
+                        s.getWOrSOrZ().add(item);
+                    }
                 }
             }
-            p.getSe().add(s);
-            text.getContent().getPOrTag().add(p);
+            if (p != null) {
+                p.getSe().add(s);
+                text.getContent().getPOrTag().add(p);
+            }
         }
         // remove empty
         for (int i = 0; i < text.getContent().getPOrTag().size(); i++) {
@@ -257,6 +291,18 @@ public class TextParser {
                 }
             }
         }
+
+        try {
+            // апошні параграф - толькі прагал што быў даданы ў канец тэксту
+            P lastP = (P) text.getContent().getPOrTag().get(text.getContent().getPOrTag().size() - 1);
+            if (lastP.getSe().size() == 1 && lastP.getSe().get(0).getWOrSOrZ().size() == 1
+                    && lastP.getSe().get(0).getWOrSOrZ().get(0) instanceof S
+                    && ((S) lastP.getSe().get(0).getWOrSOrZ().get(0)).getChar().equals(" ")) {
+                text.getContent().getPOrTag().remove(text.getContent().getPOrTag().size() - 1);
+            }
+        } catch (Exception ex) {
+        }
+
         return text;
     }
 }
