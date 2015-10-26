@@ -6,13 +6,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import alex73.corpus.text.InlineTag;
-import alex73.corpus.text.O;
-import alex73.corpus.text.P;
-import alex73.corpus.text.S;
-import alex73.corpus.text.Se;
-import alex73.corpus.text.W;
-import alex73.corpus.text.Z;
+import org.alex73.korpus.text.xml.InlineTag;
+import org.alex73.korpus.text.xml.O;
+import org.alex73.korpus.text.xml.P;
+import org.alex73.korpus.text.xml.S;
+import org.alex73.korpus.text.xml.Se;
+import org.alex73.korpus.text.xml.W;
+import org.alex73.korpus.text.xml.Z;
 
 public class BinaryParagraphWriter {
     private ByteArrayOutputStream bytes = new ByteArrayOutputStream(8192);

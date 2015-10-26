@@ -23,8 +23,10 @@
 package org.alex73.korpus.editor.core.structure;
 
 import org.alex73.korpus.parser.Splitter;
+import org.alex73.korpus.text.xml.ITextLineElement;
 
-public class SentenceSeparatorItem {
+public class SentenceSeparatorItem implements ITextLineElement {
+    @Override
     public String getText() {
         return "" + Splitter.CH_SENT_SEPARATOR;
     }

@@ -1,5 +1,5 @@
 
-package alex73.corpus.text;
+package org.alex73.korpus.text.xml;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -33,7 +33,7 @@ import javax.xml.bind.annotation.XmlValue;
     "value"
 })
 @XmlRootElement(name = "w")
-public class W {
+public class W implements ITextLineElement {
 
     @XmlValue
     protected String value;
@@ -144,4 +144,8 @@ public class W {
         this.manual = value;
     }
 
+    @Override
+    public String getText() {
+        return value;
+    }
 }

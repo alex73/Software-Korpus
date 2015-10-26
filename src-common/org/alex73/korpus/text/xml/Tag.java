@@ -1,5 +1,5 @@
 
-package alex73.corpus.text;
+package org.alex73.korpus.text.xml;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -18,7 +18,7 @@ import javax.xml.bind.annotation.XmlValue;
  * &lt;complexType>
  *   &lt;simpleContent>
  *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
- *       &lt;attribute name="cat" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/extension>
  *   &lt;/simpleContent>
  * &lt;/complexType>
@@ -30,13 +30,13 @@ import javax.xml.bind.annotation.XmlValue;
 @XmlType(name = "", propOrder = {
     "value"
 })
-@XmlRootElement(name = "z")
-public class Z {
+@XmlRootElement(name = "Tag")
+public class Tag {
 
     @XmlValue
     protected String value;
-    @XmlAttribute(name = "cat", required = true)
-    protected String cat;
+    @XmlAttribute(name = "name", required = true)
+    protected String name;
 
     /**
      * Gets the value of the value property.
@@ -63,27 +63,27 @@ public class Z {
     }
 
     /**
-     * Gets the value of the cat property.
+     * Gets the value of the name property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getCat() {
-        return cat;
+    public String getName() {
+        return name;
     }
 
     /**
-     * Sets the value of the cat property.
+     * Sets the value of the name property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setCat(String value) {
-        this.cat = value;
+    public void setName(String value) {
+        this.name = value;
     }
 
 }

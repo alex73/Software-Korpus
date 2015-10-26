@@ -6,6 +6,8 @@
     </Component>
     <Component class="javax.swing.ButtonGroup" name="buttonGroup2">
     </Component>
+    <Component class="javax.swing.ButtonGroup" name="buttonGroup3">
+    </Component>
     <Menu class="javax.swing.JMenuBar" name="jMenuBar1">
       <SubComponents>
         <Menu class="javax.swing.JMenu" name="jMenu1">
@@ -41,7 +43,7 @@
             </MenuItem>
           </SubComponents>
         </Menu>
-        <Menu class="javax.swing.JMenu" name="jMenu4">
+        <Menu class="javax.swing.JMenu" name="menuEdit">
           <Properties>
             <Property name="text" type="java.lang.String" value="&#x420;&#x44d;&#x434;&#x430;&#x433;&#x430;&#x432;&#x430;&#x43d;&#x44c;&#x43d;&#x435;"/>
           </Properties>
@@ -60,6 +62,33 @@
                   <KeyStroke key="Ctrl+Y"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="&#x423;&#x437;&#x43d;&#x430;&#x432;&#x456;&#x446;&#x44c;"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator3">
+            </MenuItem>
+            <MenuItem class="javax.swing.JRadioButtonMenuItem" name="mSetText">
+              <Properties>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="buttonGroup3"/>
+                </Property>
+                <Property name="selected" type="boolean" value="true"/>
+                <Property name="text" type="java.lang.String" value="&#x417;&#x432;&#x44b;&#x447;&#x430;&#x439;&#x43d;&#x44b; &#x442;&#x44d;&#x43a;&#x441;&#x442;"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JRadioButtonMenuItem" name="mSetOtherLanguage">
+              <Properties>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="buttonGroup3"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="&#x406;&#x43d;&#x448;&#x430;&#x43c;&#x43e;&#x45e;&#x43d;&#x430;&#x435;"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JRadioButtonMenuItem" name="mSetDigits">
+              <Properties>
+                <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
+                  <ComponentRef name="buttonGroup3"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="&#x41b;&#x456;&#x447;&#x431;&#x44b;"/>
               </Properties>
             </MenuItem>
           </SubComponents>
@@ -217,7 +246,6 @@
   </NonVisualComponents>
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="3"/>
-    <Property name="title" type="java.lang.String" value="&#x420;&#x44d;&#x434;&#x430;&#x433;&#x430;&#x432;&#x430;&#x43d;&#x44c;&#x43d;&#x435; &#x444;&#x430;&#x439;&#x43b;&#x430;&#x45e; &#x43a;&#x43e;&#x440;&#x43f;&#x443;&#x441;&#x443;, v.1.1"/>
   </Properties>
   <SyntheticProperties>
     <SyntheticProperty name="menuBar" type="java.lang.String" value="jMenuBar1"/>

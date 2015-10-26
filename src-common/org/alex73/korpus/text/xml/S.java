@@ -1,5 +1,5 @@
 
-package alex73.corpus.text;
+package org.alex73.korpus.text.xml;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -28,7 +28,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "")
 @XmlRootElement(name = "s")
-public class S {
+public class S implements ITextLineElement {
 
     @XmlAttribute(name = "char")
     protected String _char;
@@ -61,4 +61,8 @@ public class S {
         this._char = value;
     }
 
+    @Override
+    public String getText() {
+        return _char;
+    }
 }

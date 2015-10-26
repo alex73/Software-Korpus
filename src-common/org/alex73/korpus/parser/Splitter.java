@@ -35,14 +35,15 @@ import org.alex73.korpus.editor.core.structure.ItemHelper;
 import org.alex73.korpus.editor.core.structure.Line;
 import org.alex73.korpus.editor.core.structure.LongTagItem;
 import org.alex73.korpus.editor.core.structure.SentenceSeparatorItem;
+import org.alex73.korpus.text.xml.ITextLineElement;
+import org.alex73.korpus.text.xml.InlineTag;
+import org.alex73.korpus.text.xml.S;
+import org.alex73.korpus.text.xml.Tag;
+import org.alex73.korpus.text.xml.W;
+import org.alex73.korpus.text.xml.Z;
 import org.alex73.korpus.utils.WordNormalizer;
 
 import alex73.corpus.paradigm.Paradigm;
-import alex73.corpus.text.InlineTag;
-import alex73.corpus.text.S;
-import alex73.corpus.text.Tag;
-import alex73.corpus.text.W;
-import alex73.corpus.text.Z;
 
 /**
  * Гэты код дзеліць радок на асобныя элемэнты.
@@ -434,7 +435,7 @@ public class Splitter {
         boolean modified = false;
         for (int i = 0; i < line.size(); i++) {
             // convert non-tags to words
-            Object currentItem = line.get(i);
+            ITextLineElement currentItem = line.get(i);
             if (currentItem instanceof InlineTag) {
                 String text = ((InlineTag) currentItem).getValue();
                 if (!RE_TAG.matcher(text).matches()) {
@@ -453,7 +454,7 @@ public class Splitter {
         }
         if (line.size() > 0) {
             // convert words to tags
-            Object currentItem = line.get(0);
+            ITextLineElement currentItem = line.get(0);
             if (currentItem instanceof W) {
                 String text = ((W) currentItem).getValue();
                 if (text.startsWith("##")) {
@@ -465,18 +466,18 @@ public class Splitter {
         }
         while (line.size() >= 2 && (line.get(0) instanceof LongTagItem)) {
             // merge big tags
-            String newTagText = ItemHelper.getText(line.get(0)) + ItemHelper.getText(line.get(1));
+            String newTagText = line.get(0).getText() + line.get(1).getText();
             line.set(0, new LongTagItem(newTagText));
             line.remove(1);
             modified = true;
         }
         for (int i = 0; i < line.size() - 1; i++) {
             // merge words and spaces
-            Object currentItem = line.get(i);
-            Object nextItem = line.get(i + 1);
-            Object newItem = null;
+            ITextLineElement currentItem = line.get(i);
+            ITextLineElement nextItem = line.get(i + 1);
+            ITextLineElement newItem = null;
             if (currentItem instanceof W && nextItem instanceof W) {
-                newItem = ItemHelper.createW(((W) currentItem).getValue() + ((W) nextItem).getValue());
+                newItem = ItemHelper.createW(currentItem.getText() + nextItem.getText());
             }
             if (newItem != null) {
                 line.remove(i);
@@ -488,9 +489,9 @@ public class Splitter {
         }
         for (int i = 0; i < line.size() - 1; i++) {
             // split words and apostrophes
-            Object currentItem = line.get(i);
+            ITextLineElement currentItem = line.get(i);
             if (currentItem instanceof W) {
-                Object newItem = null;
+                ITextLineElement newItem = null;
                 W w = (W) currentItem;
                 if (w.getValue().startsWith("'")) {
                     newItem = getZnakInfo("'");

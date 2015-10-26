@@ -22,13 +22,16 @@
 
 package org.alex73.korpus.editor.core.structure;
 
-public class LongTagItem {
+import org.alex73.korpus.text.xml.ITextLineElement;
+
+public class LongTagItem implements ITextLineElement {
     private String text;
 
     public LongTagItem(String text) {
         this.text = text;
     }
 
+    @Override
     public String getText() {
         return text;
     }

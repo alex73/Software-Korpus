@@ -1,5 +1,5 @@
 
-package alex73.corpus.text;
+package org.alex73.korpus.text.xml;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -29,7 +29,7 @@ import javax.xml.bind.annotation.XmlValue;
     "value"
 })
 @XmlRootElement(name = "inlineTag")
-public class InlineTag {
+public class InlineTag implements ITextLineElement {
 
     @XmlValue
     protected String value;
@@ -58,4 +58,8 @@ public class InlineTag {
         this.value = value;
     }
 
+    @Override
+    public String getText() {
+        return value;
+    }
 }

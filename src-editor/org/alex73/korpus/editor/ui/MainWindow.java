@@ -42,14 +42,19 @@ public class MainWindow extends javax.swing.JFrame {
 
         buttonGroup1 = new javax.swing.ButtonGroup();
         buttonGroup2 = new javax.swing.ButtonGroup();
+        buttonGroup3 = new javax.swing.ButtonGroup();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         mFileOpen = new javax.swing.JMenuItem();
         mFileSave = new javax.swing.JMenuItem();
         mFileClose = new javax.swing.JMenuItem();
-        jMenu4 = new javax.swing.JMenu();
+        menuEdit = new javax.swing.JMenu();
         mUndo = new javax.swing.JMenuItem();
         mRedo = new javax.swing.JMenuItem();
+        jSeparator3 = new javax.swing.JPopupMenu.Separator();
+        mSetText = new javax.swing.JRadioButtonMenuItem();
+        mSetOtherLanguage = new javax.swing.JRadioButtonMenuItem();
+        mSetDigits = new javax.swing.JRadioButtonMenuItem();
         jMenu2 = new javax.swing.JMenu();
         mUnk1 = new javax.swing.JRadioButtonMenuItem();
         mUnk2 = new javax.swing.JRadioButtonMenuItem();
@@ -72,7 +77,6 @@ public class MainWindow extends javax.swing.JFrame {
         mGoGrammar = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Рэдагаваньне файлаў корпусу, v.1.1");
 
         jMenu1.setText("Тэксты");
 
@@ -96,17 +100,31 @@ public class MainWindow extends javax.swing.JFrame {
 
         jMenuBar1.add(jMenu1);
 
-        jMenu4.setText("Рэдагаваньне");
+        menuEdit.setText("Рэдагаваньне");
 
         mUndo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Z, java.awt.event.InputEvent.CTRL_MASK));
         mUndo.setText("Адрабіць");
-        jMenu4.add(mUndo);
+        menuEdit.add(mUndo);
 
         mRedo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Y, java.awt.event.InputEvent.CTRL_MASK));
         mRedo.setText("Узнавіць");
-        jMenu4.add(mRedo);
+        menuEdit.add(mRedo);
+        menuEdit.add(jSeparator3);
 
-        jMenuBar1.add(jMenu4);
+        buttonGroup3.add(mSetText);
+        mSetText.setSelected(true);
+        mSetText.setText("Звычайны тэкст");
+        menuEdit.add(mSetText);
+
+        buttonGroup3.add(mSetOtherLanguage);
+        mSetOtherLanguage.setText("Іншамоўнае");
+        menuEdit.add(mSetOtherLanguage);
+
+        buttonGroup3.add(mSetDigits);
+        mSetDigits.setText("Лічбы");
+        menuEdit.add(mSetDigits);
+
+        jMenuBar1.add(menuEdit);
 
         jMenu2.setText("Паказваць");
 
@@ -238,6 +256,7 @@ public class MainWindow extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.ButtonGroup buttonGroup1;
     public javax.swing.ButtonGroup buttonGroup2;
+    public javax.swing.ButtonGroup buttonGroup3;
     public javax.swing.JRadioButtonMenuItem f10;
     public javax.swing.JRadioButtonMenuItem f12;
     public javax.swing.JRadioButtonMenuItem f16;
@@ -249,11 +268,11 @@ public class MainWindow extends javax.swing.JFrame {
     public javax.swing.JMenu jMenu1;
     public javax.swing.JMenu jMenu2;
     public javax.swing.JMenu jMenu3;
-    public javax.swing.JMenu jMenu4;
     public javax.swing.JMenu jMenu5;
     public javax.swing.JMenuBar jMenuBar1;
     public javax.swing.JPopupMenu.Separator jSeparator1;
     public javax.swing.JPopupMenu.Separator jSeparator2;
+    public javax.swing.JPopupMenu.Separator jSeparator3;
     public javax.swing.JMenuItem mFileClose;
     public javax.swing.JMenuItem mFileOpen;
     public javax.swing.JMenuItem mFileSave;
@@ -262,9 +281,13 @@ public class MainWindow extends javax.swing.JFrame {
     public javax.swing.JMenuItem mGoNextMark;
     public javax.swing.JMenuItem mGoWordInfo;
     public javax.swing.JMenuItem mRedo;
+    public javax.swing.JRadioButtonMenuItem mSetDigits;
+    public javax.swing.JRadioButtonMenuItem mSetOtherLanguage;
+    public javax.swing.JRadioButtonMenuItem mSetText;
     public javax.swing.JMenuItem mUndo;
     public javax.swing.JRadioButtonMenuItem mUnk1;
     public javax.swing.JRadioButtonMenuItem mUnk2;
     public javax.swing.JRadioButtonMenuItem mUnk3;
+    public javax.swing.JMenu menuEdit;
     // End of variables declaration//GEN-END:variables
 }

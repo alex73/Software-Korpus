@@ -36,6 +36,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 import javax.swing.text.GapContent;
 import javax.swing.text.Position;
+import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleContext;
 
 import org.alex73.korpus.editor.UI;
@@ -45,17 +46,14 @@ import org.alex73.korpus.editor.core.structure.LongTagItem;
 import org.alex73.korpus.editor.core.structure.SentenceSeparatorItem;
 import org.alex73.korpus.parser.Splitter;
 import org.alex73.korpus.parser.TextParser;
-
-import alex73.corpus.text.Header;
-import alex73.corpus.text.InlineTag;
-import alex73.corpus.text.O;
-import alex73.corpus.text.P;
-import alex73.corpus.text.S;
-import alex73.corpus.text.Se;
-import alex73.corpus.text.Tag;
-import alex73.corpus.text.W;
-import alex73.corpus.text.XMLText;
-import alex73.corpus.text.Z;
+import org.alex73.korpus.text.xml.Header;
+import org.alex73.korpus.text.xml.ITextLineElement;
+import org.alex73.korpus.text.xml.InlineTag;
+import org.alex73.korpus.text.xml.P;
+import org.alex73.korpus.text.xml.Se;
+import org.alex73.korpus.text.xml.Tag;
+import org.alex73.korpus.text.xml.W;
+import org.alex73.korpus.text.xml.XMLText;
 
 /**
  * Рэдактар дакумэнту корпуса.
@@ -65,6 +63,9 @@ public class KorpusDocument3 extends AbstractDocument {
     public enum MARK_WORDS {
         UNK_LEMMA, AMAN_LEMMA, AMAN_GRAM
     };
+
+    public static final SimpleAttributeSet ATTRS_OTHER_LANGUAGE = new SimpleAttributeSet();
+    public static final SimpleAttributeSet ATTRS_DIGITS = new SimpleAttributeSet();
 
     MyRootElement rootElem;
     public MARK_WORDS markType = MARK_WORDS.UNK_LEMMA;
@@ -87,20 +88,8 @@ public class KorpusDocument3 extends AbstractDocument {
                 P p = (P) line;
                 for (int s = 0; s < p.getSe().size(); s++) {
                     Se sentence = p.getSe().get(s);
-                    for (Object inc : sentence.getWOrSOrZ()) {
-                        MyWordElement we;
-                        if (inc instanceof W) {
-                            we = new MyWordElement(pLine, inc);
-                        } else if (inc instanceof S) {
-                            we = new MyWordElement(pLine, inc);
-                        } else if (inc instanceof Z) {
-                            we = new MyWordElement(pLine, inc);
-                        } else if (inc instanceof O) {
-                            we = new MyWordElement(pLine, inc);
-                        } else {
-                            throw new RuntimeException("Wrong tag");
-                        }
-                        pLine.add(we);
+                    for (ITextLineElement inc : sentence.getWOrSOrZ()) {
+                        pLine.add(new MyWordElement(pLine, inc));
                     }
                     if (s < p.getSe().size() - 1) {
                         pLine.add(new MyWordElement(pLine, new SentenceSeparatorItem()));
@@ -284,16 +273,17 @@ public class KorpusDocument3 extends AbstractDocument {
     }
 
     MyLineElement[] recreateParagraphs(List<Line> newLines, int pOffset, int pIndex) {
+        int startOffset = 0;
+
         MyLineElement[] newParagraphs = new MyLineElement[newLines.size()];
         for (int i = 0; i < newParagraphs.length; i++) {
             MyLineElement p = newParagraphs[i] = new MyLineElement(rootElem);
             Line newLine = newLines.get(i);
             newLine.normalize();
 
-            int startOffset = 0;
-            for (Object item : newLine) {
-                p.add(new MyWordElement(p, startOffset, item));
-                startOffset += ItemHelper.getText(item).length();
+            for (ITextLineElement item : newLine) {
+                p.add(new MyWordElement(p, pOffset + startOffset, item));
+                startOffset += item.getText().length();
             }
             for (int j = 0; j < p.getChildCount(); j++) {
                 p.getElement(j).createPositions();
@@ -425,25 +415,25 @@ public class KorpusDocument3 extends AbstractDocument {
 
     @SuppressWarnings("serial")
     public class MyWordElement extends AbstractElement {
-        public final Object item;
+        public final ITextLineElement item;
 
         private transient Position p0;
         private transient Position p1;
         int p0v, p1v;
 
-        public MyWordElement(Element parent, Object item) {
+        public MyWordElement(Element parent, ITextLineElement item) {
             super(parent, null);
             this.item = item;
             p0v = text.length();
-            text.append(ItemHelper.getText(item));
+            text.append(item.getText());
             p1v = text.length();
         }
 
-        public MyWordElement(Element parent, int startOffset, Object item) {
+        public MyWordElement(Element parent, int startOffset, ITextLineElement item) {
             super(parent, null);
             this.item = item;
             p0v = startOffset;
-            p1v = startOffset + ItemHelper.getText(item).length();
+            p1v = startOffset + item.getText().length();
         }
 
         public boolean isTag() {

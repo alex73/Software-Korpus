@@ -1,11 +1,12 @@
 
-package alex73.corpus.text;
+package org.alex73.korpus.text.xml;
 
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
@@ -19,8 +20,11 @@ import javax.xml.bind.annotation.XmlType;
  * &lt;complexType>
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element ref="{}Tag" maxOccurs="unbounded" minOccurs="0"/>
+ *       &lt;sequence maxOccurs="unbounded" minOccurs="0">
+ *         &lt;choice>
+ *           &lt;element ref="{}p"/>
+ *           &lt;element ref="{}Tag"/>
+ *         &lt;/choice>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -31,41 +35,45 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "tag"
+    "pOrTag"
 })
-@XmlRootElement(name = "Header")
-public class Header {
+@XmlRootElement(name = "Content")
+public class Content {
 
-    @XmlElement(name = "Tag")
-    protected List<Tag> tag;
+    @XmlElements({
+        @XmlElement(name = "p", type = P.class),
+        @XmlElement(name = "Tag", type = Tag.class)
+    })
+    protected List<Object> pOrTag;
 
     /**
-     * Gets the value of the tag property.
+     * Gets the value of the pOrTag property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the tag property.
+     * This is why there is not a <CODE>set</CODE> method for the pOrTag property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getTag().add(newItem);
+     *    getPOrTag().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
+     * {@link P }
      * {@link Tag }
      * 
      * 
      */
-    public List<Tag> getTag() {
-        if (tag == null) {
-            tag = new ArrayList<Tag>();
+    public List<Object> getPOrTag() {
+        if (pOrTag == null) {
+            pOrTag = new ArrayList<Object>();
         }
-        return this.tag;
+        return this.pOrTag;
     }
 
 }

@@ -45,13 +45,12 @@ import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.parser.TextParser;
 import org.alex73.korpus.server.engine.LuceneDriverWrite;
 import org.alex73.korpus.server.text.BinaryParagraphWriter;
+import org.alex73.korpus.text.xml.P;
+import org.alex73.korpus.text.xml.Tag;
+import org.alex73.korpus.text.xml.XMLText;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.commons.io.FileUtils;
-
-import alex73.corpus.text.P;
-import alex73.corpus.text.Tag;
-import alex73.corpus.text.XMLText;
 
 /**
  * Class for loading Corpus texts into searchable cache.

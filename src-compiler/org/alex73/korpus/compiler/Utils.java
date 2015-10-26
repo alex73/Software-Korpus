@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import alex73.corpus.text.P;
+import org.alex73.korpus.text.xml.P;
 
 public class Utils {
 

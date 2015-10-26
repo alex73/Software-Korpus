@@ -1,5 +1,5 @@
 
-package alex73.corpus.text;
+package org.alex73.korpus.text.xml;
 
 import javax.xml.bind.annotation.XmlRegistry;
 

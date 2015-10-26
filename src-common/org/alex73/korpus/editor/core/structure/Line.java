@@ -25,24 +25,25 @@ package org.alex73.korpus.editor.core.structure;
 import java.util.ArrayList;
 
 import org.alex73.korpus.parser.Splitter;
+import org.alex73.korpus.text.xml.ITextLineElement;
 
 /**
  * Сховішча для радку дакумэнту корпуса.
  */
 @SuppressWarnings("serial")
-public class Line extends ArrayList<Object> {
+public class Line extends ArrayList<ITextLineElement> {
     public Line() {
     }
 
     void splitAt(int offset) {
         int pos = 0;
         for (int i = 0; i < size(); i++) {
-            Object item = get(i);
-            int len = ItemHelper.getText(item).length();
+            ITextLineElement item = get(i);
+            int len = item.getText().length();
             if (pos < offset && offset < pos + len) {
                 // inside item
-                Object itLeft = ItemHelper.splitLeft(item, offset - pos);
-                Object itRight = ItemHelper.splitRight(item, offset - pos);
+                ITextLineElement itLeft = ItemHelper.splitLeft(item, offset - pos);
+                ITextLineElement itRight = ItemHelper.splitRight(item, offset - pos);
                 remove(i);
                 add(i, itLeft);
                 add(i + 1, itRight);
@@ -55,19 +56,19 @@ public class Line extends ArrayList<Object> {
     public int length() {
         int len = 0;
         for (int i = 0; i < size(); i++) {
-            len += ItemHelper.getText(get(i)).length();
+            len += get(i).getText().length();
         }
         return len;
     }
 
-    public void insertItemAt(int offset, Object newItem) {
+    public void insertItemAt(int offset, ITextLineElement newItem) {
         int pos = 0;
         for (int i = 0; i <= size(); i++) {
             if (pos == offset) {
                 add(i, newItem);
                 return;
             }
-            pos += ItemHelper.getText(get(i)).length();
+            pos += get(i).getText().length();
         }
         throw new RuntimeException("Invalid insertItemAt");
     }
@@ -77,7 +78,7 @@ public class Line extends ArrayList<Object> {
         for (int i = 0; i <= size(); i++) {
             if (pos == offset) {
                 while (length > 0) {
-                    int itlen = ItemHelper.getText(get(i)).length();
+                    int itlen = get(i).getText().length();
                     if (length < itlen) {
                         throw new RuntimeException("Invalid removeItems");
                     }
@@ -86,7 +87,7 @@ public class Line extends ArrayList<Object> {
                 }
                 return;
             }
-            pos += ItemHelper.getText(get(i)).length();
+            pos += get(i).getText().length();
         }
         throw new RuntimeException("Invalid removeItemsAt");
     }
@@ -100,7 +101,7 @@ public class Line extends ArrayList<Object> {
                 return result;
             }
             result.add(get(i));
-            pos += ItemHelper.getText(get(i)).length();
+            pos += get(i).getText().length();
         }
         throw new RuntimeException("Invalid leftAt");
     }
@@ -116,7 +117,7 @@ public class Line extends ArrayList<Object> {
             if (result != null) {
                 result.add(get(i));
             }
-            pos += ItemHelper.getText(get(i)).length();
+            pos += get(i).getText().length();
         }
         if (result == null) {
             throw new RuntimeException("Invalid rightAt");

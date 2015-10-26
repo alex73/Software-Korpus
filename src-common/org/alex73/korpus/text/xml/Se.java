@@ -1,5 +1,5 @@
 
-package alex73.corpus.text;
+package org.alex73.korpus.text.xml;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +22,11 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence maxOccurs="unbounded" minOccurs="0">
  *         &lt;choice>
- *           &lt;element ref="{}p"/>
- *           &lt;element ref="{}Tag"/>
+ *           &lt;element ref="{}w"/>
+ *           &lt;element ref="{}s"/>
+ *           &lt;element ref="{}z"/>
+ *           &lt;element ref="{}o"/>
+ *           &lt;element ref="{}inlineTag"/>
  *         &lt;/choice>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -35,45 +38,51 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "pOrTag"
+    "wOrSOrZ"
 })
-@XmlRootElement(name = "Content")
-public class Content {
+@XmlRootElement(name = "se")
+public class Se {
 
     @XmlElements({
-        @XmlElement(name = "p", type = P.class),
-        @XmlElement(name = "Tag", type = Tag.class)
+        @XmlElement(name = "w", type = W.class),
+        @XmlElement(name = "s", type = S.class),
+        @XmlElement(name = "z", type = Z.class),
+        @XmlElement(name = "o", type = O.class),
+        @XmlElement(name = "inlineTag", type = InlineTag.class)
     })
-    protected List<Object> pOrTag;
+    protected List<ITextLineElement> wOrSOrZ;
 
     /**
-     * Gets the value of the pOrTag property.
+     * Gets the value of the wOrSOrZ property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the pOrTag property.
+     * This is why there is not a <CODE>set</CODE> method for the wOrSOrZ property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getPOrTag().add(newItem);
+     *    getWOrSOrZ().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link P }
-     * {@link Tag }
+     * {@link W }
+     * {@link S }
+     * {@link Z }
+     * {@link O }
+     * {@link InlineTag }
      * 
      * 
      */
-    public List<Object> getPOrTag() {
-        if (pOrTag == null) {
-            pOrTag = new ArrayList<Object>();
+    public List<ITextLineElement> getWOrSOrZ() {
+        if (wOrSOrZ == null) {
+            wOrSOrZ = new ArrayList<ITextLineElement>();
         }
-        return this.pOrTag;
+        return this.wOrSOrZ;
     }
 
 }

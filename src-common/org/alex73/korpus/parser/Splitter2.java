@@ -26,17 +26,18 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.alex73.korpus.editor.core.GrammarDB;
+import org.alex73.korpus.text.xml.ITextLineElement;
+import org.alex73.korpus.text.xml.InlineTag;
+import org.alex73.korpus.text.xml.O;
+import org.alex73.korpus.text.xml.P;
+import org.alex73.korpus.text.xml.S;
+import org.alex73.korpus.text.xml.Se;
+import org.alex73.korpus.text.xml.W;
+import org.alex73.korpus.text.xml.Z;
 import org.alex73.korpus.utils.SetUtils;
 import org.alex73.korpus.utils.WordNormalizer;
 
 import alex73.corpus.paradigm.Paradigm;
-import alex73.corpus.text.InlineTag;
-import alex73.corpus.text.O;
-import alex73.corpus.text.P;
-import alex73.corpus.text.S;
-import alex73.corpus.text.Se;
-import alex73.corpus.text.W;
-import alex73.corpus.text.Z;
 
 /**
  * Гэты код дзеліць радок(ці некалькі радкоў для вершаў) на асобныя элемэнты XMLText.
@@ -297,7 +298,7 @@ public class Splitter2 {
         return letters.indexOf(currentChar) >= 0;
     }
 
-    private void addToSentence(Object obj) {
+    private void addToSentence(ITextLineElement obj) {
         if (se == null) {
             se = new Se();
             p.getSe().add(se);

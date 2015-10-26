@@ -37,6 +37,7 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
@@ -49,9 +50,8 @@ import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyWordElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocumentViewFactory;
 import org.alex73.korpus.parser.IProcess;
 import org.alex73.korpus.parser.TextParser;
-
-import alex73.corpus.text.W;
-import alex73.corpus.text.XMLText;
+import org.alex73.korpus.text.xml.W;
+import org.alex73.korpus.text.xml.XMLText;
 
 public class MainController {
     static String baseFileName;
@@ -110,8 +110,12 @@ public class MainController {
         } else {
             UI.mainWindow.f44.setSelected(true);
         }
+
+        UI.mainWindow.mSetText.addActionListener(aSetText);
+        UI.mainWindow.mSetOtherLanguage.addActionListener(aSetOtherLanguage);
+        UI.mainWindow.mSetDigits.addActionListener(aSetDigits);doto
     }
-    
+
     static AbstractAction actionGoGrammar = new AbstractAction() {
         public void actionPerformed(ActionEvent e) {
             UI.grammarPane.txtWord.requestFocus();
@@ -141,7 +145,7 @@ public class MainController {
     };
     static ActionListener aFileClose = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-            
+
         }
     };
 
@@ -178,9 +182,51 @@ public class MainController {
         }
     };
 
+    static ActionListener aSetText = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int p0 = UI.editor.getSelectionStart();
+            int p1 = UI.editor.getSelectionEnd();
+            try {
+                String text = UI.doc.getText(p0, p1 - p0);
+                UI.doc.replace(p0, p1 - p0, text, null);
+            } catch (BadLocationException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+    };
+
+    static ActionListener aSetOtherLanguage = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int p0 = UI.editor.getSelectionStart();
+            int p1 = UI.editor.getSelectionEnd();
+            try {
+                String text = UI.doc.getText(p0, p1 - p0);
+                UI.doc.replace(p0, p1 - p0, text, KorpusDocument3.ATTRS_OTHER_LANGUAGE);
+            } catch (BadLocationException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+    };
+
+    static ActionListener aSetDigits = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int p0 = UI.editor.getSelectionStart();
+            int p1 = UI.editor.getSelectionEnd();
+            try {
+                String text = UI.doc.getText(p0, p1 - p0);
+                UI.doc.replace(p0, p1 - p0, text, KorpusDocument3.ATTRS_DIGITS);
+            } catch (BadLocationException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+    };
+
     static ActionListener aFontSet = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-            String size = ((JRadioButtonMenuItem)e.getSource()).getText();
+            String size = ((JRadioButtonMenuItem) e.getSource()).getText();
             Font font = UI.editor.getFont();
             font = new Font(font.getFamily(), font.getStyle(), Integer.parseInt(size));
             UI.editor.setFont(font);
@@ -242,6 +288,7 @@ public class MainController {
                         @Override
                         public void showStatus(String status) {
                         }
+
                         @Override
                         public void reportError(String error) {
                             throw new RuntimeException(error);
@@ -250,7 +297,7 @@ public class MainController {
                 } finally {
                     in.close();
                 }
-                TextParser.saveXML(new File(f.getPath().replaceAll("\\.[a-zA-Z0-9]+$", ".xml")), kDoc);
+                TextParser.saveXML(new File(f.getPath().replaceAll("\\.[a-zA-Z0-9]+$", ".orig.xml")), kDoc);
             }
 
             UI.doc = new KorpusDocument3(kDoc);
@@ -266,10 +313,10 @@ public class MainController {
             });
             // UI.editor.setDocument(UI.doc);
             UI.editor.addCaretListener(onWordChanged);
-            
+
             UI.mainWindow.mFileOpen.setEnabled(false);
             UI.mainWindow.mFileSave.setEnabled(true);
-//            UI.mainWindow.mFileClose.setEnabled(true);
+            // UI.mainWindow.mFileClose.setEnabled(true);
         } catch (Throwable ex) {
             ex.printStackTrace();
             UI.showError(ex.getClass().getSimpleName() + ": " + ex.getMessage());

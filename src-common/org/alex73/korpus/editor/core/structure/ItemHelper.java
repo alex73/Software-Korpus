@@ -22,11 +22,11 @@
 
 package org.alex73.korpus.editor.core.structure;
 
-import alex73.corpus.text.InlineTag;
-import alex73.corpus.text.O;
-import alex73.corpus.text.S;
-import alex73.corpus.text.W;
-import alex73.corpus.text.Z;
+import org.alex73.korpus.text.xml.ITextLineElement;
+import org.alex73.korpus.text.xml.InlineTag;
+import org.alex73.korpus.text.xml.S;
+import org.alex73.korpus.text.xml.W;
+import org.alex73.korpus.text.xml.Z;
 
 public class ItemHelper {
 
@@ -54,25 +54,7 @@ public class ItemHelper {
         return w;
     }
 
-    public static String getText(Object o) {
-        if (o instanceof W) {
-            return ((W) o).getValue();
-        } else if (o instanceof Z) {
-            return ((Z) o).getValue();
-        } else if (o instanceof S) {
-            return ((S) o).getChar();
-        } else if (o instanceof O) {
-            return ((O) o).getValue();
-        } else if (o instanceof LongTagItem) {
-            return ((LongTagItem) o).getText();
-        } else if (o instanceof SentenceSeparatorItem) {
-            return ((SentenceSeparatorItem) o).getText();
-        } else {
-            throw new RuntimeException("Wrong object type");
-        }
-    }
-
-    public static Object splitLeft(Object o, int pos) {
+    public static ITextLineElement splitLeft(ITextLineElement o, int pos) {
         if (o instanceof W) {
             String text = ((W) o).getValue();
             return createW(text.substring(0, pos));
@@ -84,7 +66,7 @@ public class ItemHelper {
         }
     }
 
-    public static Object splitRight(Object o, int pos) {
+    public static ITextLineElement splitRight(ITextLineElement o, int pos) {
         if (o instanceof W) {
             String text = ((W) o).getValue();
             return createW(text.substring(pos));

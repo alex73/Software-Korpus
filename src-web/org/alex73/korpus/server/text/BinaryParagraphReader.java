@@ -4,12 +4,12 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import alex73.corpus.text.O;
-import alex73.corpus.text.P;
-import alex73.corpus.text.S;
-import alex73.corpus.text.Se;
-import alex73.corpus.text.W;
-import alex73.corpus.text.Z;
+import org.alex73.korpus.text.xml.O;
+import org.alex73.korpus.text.xml.P;
+import org.alex73.korpus.text.xml.S;
+import org.alex73.korpus.text.xml.Se;
+import org.alex73.korpus.text.xml.W;
+import org.alex73.korpus.text.xml.Z;
 
 public class BinaryParagraphReader {
     private ByteArrayInputStream bytes;

@@ -5,6 +5,9 @@ import java.nio.file.Paths;
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.DBTagsGroups;
 import org.alex73.korpus.base.TextInfo;
+import org.alex73.korpus.text.xml.P;
+import org.alex73.korpus.text.xml.Se;
+import org.alex73.korpus.text.xml.W;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,10 +18,6 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
-
-import alex73.corpus.text.P;
-import alex73.corpus.text.Se;
-import alex73.corpus.text.W;
 
 public class LuceneDriverWrite extends LuceneFields {
     protected final Logger LOGGER = LogManager.getLogger(LuceneDriverWrite.class);

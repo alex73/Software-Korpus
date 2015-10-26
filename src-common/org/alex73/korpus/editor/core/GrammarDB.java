@@ -66,7 +66,7 @@ public class GrammarDB {
     public static final JAXBContext CONTEXT;
     public static final Schema schema;
 
-    protected static GrammarDB instance;
+    private static GrammarDB instance;
 
     List<Paradigm> allParadigms = new ArrayList<>();
     List<Paradigm> docLevelParadigms = new ArrayList<>();

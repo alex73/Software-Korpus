@@ -43,14 +43,14 @@ import javax.xml.bind.Unmarshaller;
 import org.alex73.korpus.editor.core.structure.Line;
 import org.alex73.korpus.editor.core.structure.LongTagItem;
 import org.alex73.korpus.editor.core.structure.SentenceSeparatorItem;
-
-import alex73.corpus.text.Content;
-import alex73.corpus.text.Header;
-import alex73.corpus.text.P;
-import alex73.corpus.text.S;
-import alex73.corpus.text.Se;
-import alex73.corpus.text.Tag;
-import alex73.corpus.text.XMLText;
+import org.alex73.korpus.text.xml.Content;
+import org.alex73.korpus.text.xml.Header;
+import org.alex73.korpus.text.xml.ITextLineElement;
+import org.alex73.korpus.text.xml.P;
+import org.alex73.korpus.text.xml.S;
+import org.alex73.korpus.text.xml.Se;
+import org.alex73.korpus.text.xml.Tag;
+import org.alex73.korpus.text.xml.XMLText;
 
 /**
  * Чытаньне тэкставага файлу й стварэньне дакумэнту корпуса.
@@ -241,7 +241,7 @@ public class TextParser {
             p = new P();
             s = new Se();
             for (int i = 0; i < line.size(); i++) {
-                Object item = line.get(i);
+                ITextLineElement item = line.get(i);
                 if (item instanceof SentenceSeparatorItem) {
                     p.getSe().add(s);
                     s = new Se();

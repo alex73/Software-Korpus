@@ -47,18 +47,17 @@ import org.alex73.korpus.shared.dto.SearchParams;
 import org.alex73.korpus.shared.dto.SearchResults;
 import org.alex73.korpus.shared.dto.WordRequest;
 import org.alex73.korpus.shared.dto.WordResult;
+import org.alex73.korpus.text.xml.O;
+import org.alex73.korpus.text.xml.P;
+import org.alex73.korpus.text.xml.S;
+import org.alex73.korpus.text.xml.Se;
+import org.alex73.korpus.text.xml.W;
+import org.alex73.korpus.text.xml.Z;
 import org.alex73.korpus.utils.WordNormalizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.BooleanQuery;
-
-import alex73.corpus.text.O;
-import alex73.corpus.text.P;
-import alex73.corpus.text.S;
-import alex73.corpus.text.Se;
-import alex73.corpus.text.W;
-import alex73.corpus.text.Z;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
