@@ -24,6 +24,7 @@ package org.alex73.korpus.editor.core.structure;
 
 import org.alex73.korpus.text.xml.ITextLineElement;
 import org.alex73.korpus.text.xml.InlineTag;
+import org.alex73.korpus.text.xml.O;
 import org.alex73.korpus.text.xml.S;
 import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.Z;
@@ -55,25 +56,27 @@ public class ItemHelper {
     }
 
     public static ITextLineElement splitLeft(ITextLineElement o, int pos) {
+        String text = o.getText().substring(0, pos);
         if (o instanceof W) {
-            String text = ((W) o).getValue();
-            return createW(text.substring(0, pos));
+            return createW(text);
         } else if (o instanceof S) {
-            String text = ((S) o).getChar();
-            return createS(text.substring(0, pos));
+            return createS(text);
+        } else if (o instanceof O) {
+            return new O(((O) o).getType(), text);
         } else {
             throw new RuntimeException("Wrong object type");
         }
     }
 
     public static ITextLineElement splitRight(ITextLineElement o, int pos) {
+        String text = o.getText().substring(pos);
         if (o instanceof W) {
-            String text = ((W) o).getValue();
-            return createW(text.substring(pos));
+            return createW(text);
         } else if (o instanceof S) {
-            String text = ((S) o).getChar();
-            return createS(text.substring(pos));
-       } else {
+            return createS(text);
+        } else if (o instanceof O) {
+            return new O(((O) o).getType(), text);
+        } else {
             throw new RuntimeException("Wrong object type");
         }
     }

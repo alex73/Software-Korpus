@@ -69,13 +69,13 @@ public class Splitter {
     SPLIT_MODE mode;
 
     public Splitter(String line) {
-        this.line = presplit(line);
+        this.line = line;
     }
 
     private static StringBuilder str = new StringBuilder();
     private static StringBuilder temp = new StringBuilder();
 
-    private static synchronized String presplit(String line) {
+    public static synchronized String presplit(String line) {
         str.setLength(0);
         for (int i = 0; i < line.length(); i++) {
             char ch = line.charAt(i);

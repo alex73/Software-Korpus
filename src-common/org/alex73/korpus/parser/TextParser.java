@@ -177,7 +177,7 @@ public class TextParser {
         BufferedReader rd = new BufferedReader(new StringReader(text));
         String s;
         while ((s = rd.readLine()) != null) {
-            Splitter sp = new Splitter(s);
+            Splitter sp = new Splitter(Splitter.presplit(s));
             result.add(sp.splitParagraph());
         }
 

@@ -36,6 +36,7 @@ import javax.swing.text.ViewFactory;
 
 public class KorpusDocumentViewFactory implements ViewFactory {
     static final Color TAG_BACKGROUND_COLOR = new Color(224, 224, 224);
+    static final Color OTHER_BACKGROUND_COLOR = new Color(0xbcfcec);
 
     public View create(Element elem) {
         if (elem instanceof KorpusDocument3.MyWordElement) {
@@ -47,23 +48,6 @@ public class KorpusDocumentViewFactory implements ViewFactory {
         } else {
             throw new RuntimeException("Unknown element: " + elem.getClass().getSimpleName());
         }
-        // String kind = elem.getName();
-        // if (kind != null) {
-        // if (kind.equals(AbstractDocument.ContentElementName)) {
-        // return new MyGlyphView(elem);
-        // } else if (kind.equals(AbstractDocument.ParagraphElementName)) {
-        // return new MyParagraphView(elem);
-        // } else if (kind.equals(AbstractDocument.SectionElementName)) {
-        // return new BoxView(elem, View.Y_AXIS);
-        // } else if (kind.equals(StyleConstants.ComponentElementName)) {
-        // return new ComponentView(elem);
-        // } else if (kind.equals(StyleConstants.IconElementName)) {
-        // return new IconView(elem);
-        // }
-        // }
-        //
-        // // default to text display
-        // return new MyGlyphView(elem);
     }
 
     public static class MyGlyphView extends GlyphView {
@@ -74,7 +58,13 @@ public class KorpusDocumentViewFactory implements ViewFactory {
         @Override
         public Color getBackground() {
             KorpusDocument3.MyWordElement wordElement = (KorpusDocument3.MyWordElement) getElement();
-            return wordElement.isTag() ? TAG_BACKGROUND_COLOR : super.getBackground();
+            if (wordElement.isTag()) {
+                return TAG_BACKGROUND_COLOR;
+            }else if (wordElement.isOther()) {
+                return OTHER_BACKGROUND_COLOR;
+            }else {
+                return super.getBackground();
+            }
         }
 
         @Override
@@ -106,8 +96,9 @@ public class KorpusDocumentViewFactory implements ViewFactory {
 
         @Override
         public int getBreakWeight(int axis, float pos, float len) {
+            KorpusDocument3.MyWordElement wordElement = (KorpusDocument3.MyWordElement) getElement();
             int r;
-            if (axis == View.X_AXIS) {
+            if (axis == View.X_AXIS && !wordElement.isOther()) {
                 checkPainter();
                 int p0 = getStartOffset();
                 int p1 = getGlyphPainter().getBoundedPosition(this, p0, pos, len);

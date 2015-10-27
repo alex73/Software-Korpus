@@ -3,15 +3,19 @@ package org.alex73.korpus.text.xml;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 
+import alex73.corpus.paradigm.FormOptions;
 
 /**
- * <p>Java class for anonymous complex type.
+ * <p>
+ * Java class for anonymous complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType>
@@ -25,22 +29,29 @@ import javax.xml.bind.annotation.XmlValue;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-    "value"
-})
+@XmlType(name = "", propOrder = { "value" })
 @XmlRootElement(name = "o")
 public class O implements ITextLineElement {
+
+    public O() {
+    }
+
+    public O(OtherType type, String value) {
+        this.type = type;
+        this.value = value;
+    }
 
     @XmlValue
     protected String value;
 
+    @XmlAttribute(name = "type")
+    protected OtherType type;
+
     /**
      * Gets the value of the value property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getValue() {
         return value;
@@ -50,12 +61,19 @@ public class O implements ITextLineElement {
      * Sets the value of the value property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public OtherType getType() {
+        return type;
+    }
+
+    public void setType(OtherType type) {
+        this.type = type;
     }
 
     @Override

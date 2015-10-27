@@ -49,6 +49,8 @@ import org.alex73.korpus.parser.TextParser;
 import org.alex73.korpus.text.xml.Header;
 import org.alex73.korpus.text.xml.ITextLineElement;
 import org.alex73.korpus.text.xml.InlineTag;
+import org.alex73.korpus.text.xml.O;
+import org.alex73.korpus.text.xml.OtherType;
 import org.alex73.korpus.text.xml.P;
 import org.alex73.korpus.text.xml.Se;
 import org.alex73.korpus.text.xml.Tag;
@@ -172,7 +174,17 @@ public class KorpusDocument3 extends AbstractDocument {
             String[] newStrs = splitInserted(str);
             List<Line> newLines = new ArrayList<>();
             for (int i = 0; i < newStrs.length; i++) {
-                newLines.add(new Splitter(newStrs[i]).splitParagraph());
+                Line line;
+                if (a == ATTRS_OTHER_LANGUAGE) {
+                    line = new Line();
+                    line.add(new O(OtherType.OTHER_LANGUAGE, newStrs[i]));
+                } else if (a == ATTRS_DIGITS) {
+                    line = new Line();
+                    line.add(new O(OtherType.NUMBER, newStrs[i]));
+                } else {
+                    line = new Splitter(newStrs[i]).splitParagraph();
+                }
+                newLines.add(line);
             }
 
             int pIndex = rootElem.getElementIndex(offs);
@@ -285,11 +297,14 @@ public class KorpusDocument3 extends AbstractDocument {
                 p.add(new MyWordElement(p, pOffset + startOffset, item));
                 startOffset += item.getText().length();
             }
+        }
+        for (int i = 0; i < newParagraphs.length; i++) {
+            MyLineElement p = newParagraphs[i];
             for (int j = 0; j < p.getChildCount(); j++) {
                 p.getElement(j).createPositions();
             }
             rootElem.children.add(pIndex + i, p);
-            pOffset = p.getEndOffset();
+//            pOffset = p.getEndOffset();
         }
         return newParagraphs;
     }
@@ -438,6 +453,10 @@ public class KorpusDocument3 extends AbstractDocument {
 
         public boolean isTag() {
             return (item instanceof InlineTag) || (item instanceof LongTagItem);
+        }
+        
+        public boolean isOther() {
+            return item instanceof O;
         }
 
         public W getWordInfo() {

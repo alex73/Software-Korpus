@@ -113,7 +113,7 @@ public class MainController {
 
         UI.mainWindow.mSetText.addActionListener(aSetText);
         UI.mainWindow.mSetOtherLanguage.addActionListener(aSetOtherLanguage);
-        UI.mainWindow.mSetDigits.addActionListener(aSetDigits);doto
+        UI.mainWindow.mSetDigits.addActionListener(aSetDigits);
     }
 
     static AbstractAction actionGoGrammar = new AbstractAction() {
