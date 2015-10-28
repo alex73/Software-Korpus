@@ -34,9 +34,12 @@ import javax.swing.text.ParagraphView;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 
+import org.alex73.korpus.editor.core.structure.SentenceSeparatorItem;
+
 public class KorpusDocumentViewFactory implements ViewFactory {
     static final Color TAG_BACKGROUND_COLOR = new Color(224, 224, 224);
-    static final Color OTHER_BACKGROUND_COLOR = new Color(0xbcfcec);
+    static final Color OTHER_BACKGROUND_COLOR = new Color(0x9ac2ff);
+    static final Color SE_BACKGROUND_COLOR = new Color(0x9afff7);
 
     public View create(Element elem) {
         if (elem instanceof KorpusDocument3.MyWordElement) {
@@ -62,6 +65,8 @@ public class KorpusDocumentViewFactory implements ViewFactory {
                 return TAG_BACKGROUND_COLOR;
             }else if (wordElement.isOther()) {
                 return OTHER_BACKGROUND_COLOR;
+            } else if (wordElement.item instanceof SentenceSeparatorItem) {
+                return SE_BACKGROUND_COLOR;
             }else {
                 return super.getBackground();
             }

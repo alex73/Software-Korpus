@@ -42,7 +42,6 @@ public class MainWindow extends javax.swing.JFrame {
 
         buttonGroup1 = new javax.swing.ButtonGroup();
         buttonGroup2 = new javax.swing.ButtonGroup();
-        buttonGroup3 = new javax.swing.ButtonGroup();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         mFileOpen = new javax.swing.JMenuItem();
@@ -52,9 +51,9 @@ public class MainWindow extends javax.swing.JFrame {
         mUndo = new javax.swing.JMenuItem();
         mRedo = new javax.swing.JMenuItem();
         jSeparator3 = new javax.swing.JPopupMenu.Separator();
-        mSetText = new javax.swing.JRadioButtonMenuItem();
-        mSetOtherLanguage = new javax.swing.JRadioButtonMenuItem();
-        mSetDigits = new javax.swing.JRadioButtonMenuItem();
+        mSetText = new javax.swing.JMenuItem();
+        mSetOtherLanguage = new javax.swing.JMenuItem();
+        mSetDigits = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         mUnk1 = new javax.swing.JRadioButtonMenuItem();
         mUnk2 = new javax.swing.JRadioButtonMenuItem();
@@ -111,16 +110,12 @@ public class MainWindow extends javax.swing.JFrame {
         menuEdit.add(mRedo);
         menuEdit.add(jSeparator3);
 
-        buttonGroup3.add(mSetText);
-        mSetText.setSelected(true);
         mSetText.setText("Звычайны тэкст");
         menuEdit.add(mSetText);
 
-        buttonGroup3.add(mSetOtherLanguage);
         mSetOtherLanguage.setText("Іншамоўнае");
         menuEdit.add(mSetOtherLanguage);
 
-        buttonGroup3.add(mSetDigits);
         mSetDigits.setText("Лічбы");
         menuEdit.add(mSetDigits);
 
@@ -256,7 +251,6 @@ public class MainWindow extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.ButtonGroup buttonGroup1;
     public javax.swing.ButtonGroup buttonGroup2;
-    public javax.swing.ButtonGroup buttonGroup3;
     public javax.swing.JRadioButtonMenuItem f10;
     public javax.swing.JRadioButtonMenuItem f12;
     public javax.swing.JRadioButtonMenuItem f16;
@@ -281,9 +275,9 @@ public class MainWindow extends javax.swing.JFrame {
     public javax.swing.JMenuItem mGoNextMark;
     public javax.swing.JMenuItem mGoWordInfo;
     public javax.swing.JMenuItem mRedo;
-    public javax.swing.JRadioButtonMenuItem mSetDigits;
-    public javax.swing.JRadioButtonMenuItem mSetOtherLanguage;
-    public javax.swing.JRadioButtonMenuItem mSetText;
+    public javax.swing.JMenuItem mSetDigits;
+    public javax.swing.JMenuItem mSetOtherLanguage;
+    public javax.swing.JMenuItem mSetText;
     public javax.swing.JMenuItem mUndo;
     public javax.swing.JRadioButtonMenuItem mUnk1;
     public javax.swing.JRadioButtonMenuItem mUnk2;

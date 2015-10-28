@@ -176,11 +176,9 @@ public class KorpusDocument3 extends AbstractDocument {
             for (int i = 0; i < newStrs.length; i++) {
                 Line line;
                 if (a == ATTRS_OTHER_LANGUAGE) {
-                    line = new Line();
-                    line.add(new O(OtherType.OTHER_LANGUAGE, newStrs[i]));
+                    line = new Splitter(newStrs[i]).splitOther(OtherType.OTHER_LANGUAGE);
                 } else if (a == ATTRS_DIGITS) {
-                    line = new Line();
-                    line.add(new O(OtherType.NUMBER, newStrs[i]));
+                    line = new Splitter(newStrs[i]).splitOther(OtherType.NUMBER);
                 } else {
                     line = new Splitter(newStrs[i]).splitParagraph();
                 }
@@ -313,7 +311,6 @@ public class KorpusDocument3 extends AbstractDocument {
         public void replace(int offset, int length, Element[] elems);
     }
 
-    @SuppressWarnings("serial")
     public abstract class MyGroupElement<T extends AbstractElement> extends AbstractElement
             implements ElementChanger {
         List<T> children = new ArrayList<>();
@@ -401,14 +398,12 @@ public class KorpusDocument3 extends AbstractDocument {
         }
     }
 
-    @SuppressWarnings("serial")
     protected class MyRootElement extends MyGroupElement<MyLineElement> {
         public MyRootElement() {
             super(null);
         }
     }
 
-    @SuppressWarnings("serial")
     public class MyLineElement extends MyGroupElement<MyWordElement> {
 
         public MyLineElement(Element parent) {
@@ -428,7 +423,6 @@ public class KorpusDocument3 extends AbstractDocument {
         }
     }
 
-    @SuppressWarnings("serial")
     public class MyWordElement extends AbstractElement {
         public final ITextLineElement item;
 

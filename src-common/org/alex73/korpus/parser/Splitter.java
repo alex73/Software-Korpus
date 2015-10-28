@@ -37,6 +37,8 @@ import org.alex73.korpus.editor.core.structure.LongTagItem;
 import org.alex73.korpus.editor.core.structure.SentenceSeparatorItem;
 import org.alex73.korpus.text.xml.ITextLineElement;
 import org.alex73.korpus.text.xml.InlineTag;
+import org.alex73.korpus.text.xml.O;
+import org.alex73.korpus.text.xml.OtherType;
 import org.alex73.korpus.text.xml.S;
 import org.alex73.korpus.text.xml.Tag;
 import org.alex73.korpus.text.xml.W;
@@ -198,6 +200,23 @@ public class Splitter {
             }
             partStart = currentPos;
         }
+    }
+
+    public Line splitOther(OtherType type) {
+        for (currentPos = 0; currentPos < line.length(); currentPos++) {
+            char ch = line.charAt(currentPos);
+            if (ch == CH_SENT_SEPARATOR) {
+                String part = line.substring(partStart, currentPos);
+                result.add(new O(type, part));
+                result.add(new SentenceSeparatorItem());
+                partStart = currentPos + 1;
+            }
+        }
+        String part = line.substring(partStart, currentPos);
+        result.add(new O(type, part));
+
+        result.normalize();
+        return result;
     }
 
     public Line splitParagraph() {
