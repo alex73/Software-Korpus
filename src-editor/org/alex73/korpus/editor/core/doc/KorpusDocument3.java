@@ -39,23 +39,25 @@ import javax.swing.text.Position;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleContext;
 
+import org.alex73.korpus.editor.Splitter;
 import org.alex73.korpus.editor.UI;
-import org.alex73.korpus.editor.core.structure.ItemHelper;
 import org.alex73.korpus.editor.core.structure.Line;
 import org.alex73.korpus.editor.core.structure.LongTagItem;
 import org.alex73.korpus.editor.core.structure.SentenceSeparatorItem;
-import org.alex73.korpus.parser.Splitter;
-import org.alex73.korpus.parser.TextParser;
+import org.alex73.korpus.editor.core.structure.XML2Lines;
+import org.alex73.korpus.text.parser.TextParser;
 import org.alex73.korpus.text.xml.Header;
 import org.alex73.korpus.text.xml.ITextLineElement;
 import org.alex73.korpus.text.xml.InlineTag;
 import org.alex73.korpus.text.xml.O;
 import org.alex73.korpus.text.xml.OtherType;
 import org.alex73.korpus.text.xml.P;
+import org.alex73.korpus.text.xml.S;
 import org.alex73.korpus.text.xml.Se;
 import org.alex73.korpus.text.xml.Tag;
 import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.XMLText;
+import org.alex73.korpus.utils.ItemHelper;
 
 /**
  * Рэдактар дакумэнту корпуса.
@@ -81,37 +83,8 @@ public class KorpusDocument3 extends AbstractDocument {
 
         header = fs.getHeader();
 
-        rootElem = new MyRootElement();
+        rootElem = new MyRootElement(XML2Lines.convertToLines(fs.getContent()));
 
-        for (Object line : fs.getContent().getPOrTag()) {
-            MyLineElement pLine = new MyLineElement(rootElem);
-            rootElem.children.add(pLine);
-            if (line instanceof P) {
-                P p = (P) line;
-                for (int s = 0; s < p.getSe().size(); s++) {
-                    Se sentence = p.getSe().get(s);
-                    for (ITextLineElement inc : sentence.getWOrSOrZ()) {
-                        pLine.add(new MyWordElement(pLine, inc));
-                    }
-                    if (s < p.getSe().size() - 1) {
-                        pLine.add(new MyWordElement(pLine, new SentenceSeparatorItem()));
-                    }
-                }
-            } else if (line instanceof Tag) {
-                Tag tag = (Tag) line;
-                pLine.add(new MyWordElement(pLine,
-                        new LongTagItem("##" + tag.getName() + ": " + tag.getValue())));
-            } else {
-                throw new RuntimeException("Wrong tag");
-            }
-            pLine.add(new MyWordElement(pLine, ItemHelper.createS("\n")));
-        }
-        {
-            // Ctrl+End hack
-            MyLineElement pElem = new MyLineElement(rootElem);
-            rootElem.children.add(pElem);
-            pElem.add(new MyWordElement(pElem, ItemHelper.createS(" ")));
-        }
         Content c = getContent();
         c.insertString(0, text.toString());
         text = null;
@@ -135,8 +108,9 @@ public class KorpusDocument3 extends AbstractDocument {
             }
             lines.add(line);
         }
-        XMLText out = TextParser.constructXML(lines);
+        XMLText out =new XMLText();
         out.setHeader(header);
+        out.setContent(XML2Lines.convertToXML(lines));
         return out;
     }
 
@@ -156,7 +130,8 @@ public class KorpusDocument3 extends AbstractDocument {
 
     @Override
     protected Element createBranchElement(Element parent, AttributeSet a) {
-        return new MyLineElement(parent);
+        // return new MyLineElement(parent);
+        throw new RuntimeException("Not implemented");
     }
 
     @Override
@@ -176,9 +151,9 @@ public class KorpusDocument3 extends AbstractDocument {
             for (int i = 0; i < newStrs.length; i++) {
                 Line line;
                 if (a == ATTRS_OTHER_LANGUAGE) {
-                    line = new Splitter(newStrs[i]).splitOther(OtherType.OTHER_LANGUAGE);
+                    line = Line.splitOther(newStrs[i], OtherType.OTHER_LANGUAGE);
                 } else if (a == ATTRS_DIGITS) {
-                    line = new Splitter(newStrs[i]).splitOther(OtherType.NUMBER);
+                    line = Line.splitOther(newStrs[i], OtherType.NUMBER);
                 } else {
                     line = new Splitter(newStrs[i]).splitParagraph();
                 }
@@ -287,12 +262,13 @@ public class KorpusDocument3 extends AbstractDocument {
 
         MyLineElement[] newParagraphs = new MyLineElement[newLines.size()];
         for (int i = 0; i < newParagraphs.length; i++) {
-            MyLineElement p = newParagraphs[i] = new MyLineElement(rootElem);
             Line newLine = newLines.get(i);
             newLine.normalize();
 
+            MyLineElement p = newParagraphs[i] = new MyLineElement(rootElem);
+
             for (ITextLineElement item : newLine) {
-                p.add(new MyWordElement(p, pOffset + startOffset, item));
+                p.children.add(new MyWordElement(p, pOffset + startOffset, item));
                 startOffset += item.getText().length();
             }
         }
@@ -302,7 +278,7 @@ public class KorpusDocument3 extends AbstractDocument {
                 p.getElement(j).createPositions();
             }
             rootElem.children.add(pIndex + i, p);
-//            pOffset = p.getEndOffset();
+            // pOffset = p.getEndOffset();
         }
         return newParagraphs;
     }
@@ -399,19 +375,23 @@ public class KorpusDocument3 extends AbstractDocument {
     }
 
     protected class MyRootElement extends MyGroupElement<MyLineElement> {
-        public MyRootElement() {
+        public MyRootElement(List<Line> lines) {
             super(null);
+            for (Line line : lines) {
+                children.add(new MyLineElement(this, line));
+            }
         }
     }
 
     public class MyLineElement extends MyGroupElement<MyWordElement> {
-
         public MyLineElement(Element parent) {
             super(parent);
         }
-
-        public void add(MyWordElement elem) {
-            children.add(elem);
+        public MyLineElement(Element parent, Line chs) {
+            super(parent);
+            for (ITextLineElement el : chs) {
+                children.add(new MyWordElement(this, el));
+            }
         }
 
         public Line extractItems() {
@@ -448,7 +428,7 @@ public class KorpusDocument3 extends AbstractDocument {
         public boolean isTag() {
             return (item instanceof InlineTag) || (item instanceof LongTagItem);
         }
-        
+
         public boolean isOther() {
             return item instanceof O;
         }

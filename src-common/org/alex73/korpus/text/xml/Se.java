@@ -85,4 +85,13 @@ public class Se {
         return this.wOrSOrZ;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Se) {
+            Se o = (Se) obj;
+            return o.wOrSOrZ.equals(wOrSOrZ);
+        } else {
+            return false;
+        }
+    }
 }

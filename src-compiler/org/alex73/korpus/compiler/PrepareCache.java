@@ -32,7 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.alex73.korpus.editor.core.GrammarDB;
-import org.alex73.korpus.parser.IProcess;
+import org.alex73.korpus.text.parser.IProcess;
 
 /**
  * Class for prepare data for search.

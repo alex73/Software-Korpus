@@ -39,7 +39,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.alex73.korpus.editor.core.GrammarDB;
-import org.alex73.korpus.parser.TextParser;
+import org.alex73.korpus.text.TextIO;
+import org.alex73.korpus.text.parser.TextParser;
 import org.alex73.korpus.text.xml.P;
 import org.alex73.korpus.text.xml.Se;
 import org.alex73.korpus.text.xml.W;
@@ -140,7 +141,7 @@ public class StatFrequency {
             XMLText doc;
             InputStream in = new BufferedInputStream(new FileInputStream(f));
             try {
-                doc = TextParser.parseXML(in);
+                doc = TextIO.parseXML(in);
             } finally {
                 in.close();
             }
@@ -175,7 +176,7 @@ public class StatFrequency {
                     if (en.getName().endsWith(".text")) {
                         doc = TextParser.parseText(in, false, PrepareCache.errors);
                     } else if (en.getName().endsWith(".xml")) {
-                        doc = TextParser.parseXML(in);
+                        doc = TextIO.parseXML(in);
                     } else {
                         throw new RuntimeException("Unknown entry '" + en.getName() + "' in " + f);
                     }
@@ -205,7 +206,7 @@ public class StatFrequency {
                         if (en.getName().endsWith(".text")) {
                             doc = TextParser.parseText(in, false, PrepareCache.errors);
                         } else if (en.getName().endsWith(".xml")) {
-                            doc = TextParser.parseXML(in);
+                            doc = TextIO.parseXML(in);
                         } else {
                             throw new RuntimeException("Unknown entry '" + en.getName() + "' in " + f);
                         }
@@ -225,7 +226,7 @@ public class StatFrequency {
 
     protected static void loadTextToCorpus(XMLText text) throws Exception {
         List<Se> sentences = new ArrayList<>();
-        for (Object o : text.getContent().getPOrTag()) {
+        for (Object o : text.getContent().getPOrTagOrPoetry()) {
             if (o instanceof P) {
                 P p = (P) o;
                 for (Se se : p.getSe()) {

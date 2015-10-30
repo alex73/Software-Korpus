@@ -20,7 +20,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
 
-package org.alex73.korpus.parser;
+package org.alex73.korpus.text.parser;
 
 import java.util.Set;
 import java.util.TreeSet;
@@ -101,6 +101,9 @@ public class Splitter2 {
                     fillWordInfoParadigms(w, word, paradigms);
                 } else if (o instanceof S) {
                 } else if (o instanceof Z) {
+                    Z z=(Z)o;
+                    Paradigm[] paradigms = GrammarDB.getInstance().getParadigmsByForm(z.getText());
+                    fillZnakInfoParadigms(z, paradigms);
                 } else if (o instanceof O) {
                 } else if (o instanceof InlineTag) {
                 } else {
@@ -112,6 +115,10 @@ public class Splitter2 {
 
     public P getP() {
         return p;
+    }
+
+    public boolean isSentenceFinished() {
+        return se == null;
     }
 
     /**
@@ -344,23 +351,12 @@ public class Splitter2 {
         w.setCat(SetUtils.set2string(cats));
     }
 
-    static void fillZnakInfoParadigms(Z z, String word, Paradigm[] paradigms) {
+    static void fillZnakInfoParadigms(Z z, Paradigm[] paradigms) {
         Set<String> cats = new TreeSet<>();
         for (Paradigm p : paradigms) {
-            boolean foundForm = false;
             for (Paradigm.Form f : p.getForm()) {
-                if (word.equals(f.getValue())) {
+                if (z.getText().equals(f.getValue())) {
                     cats.add(p.getTag() + f.getTag());
-                    foundForm = true;
-                }
-            }
-            if (!foundForm) {
-                // the same find, but without stress and lowercase
-                String uw = WordNormalizer.normalize(word);
-                for (Paradigm.Form f : p.getForm()) {
-                    if (uw.equals(WordNormalizer.normalize(f.getValue()))) {
-                        cats.add(p.getTag() + f.getTag());
-                    }
                 }
             }
         }

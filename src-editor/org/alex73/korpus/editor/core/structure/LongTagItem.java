@@ -23,6 +23,7 @@
 package org.alex73.korpus.editor.core.structure;
 
 import org.alex73.korpus.text.xml.ITextLineElement;
+import org.apache.commons.lang.StringUtils;
 
 public class LongTagItem implements ITextLineElement {
     private String text;
@@ -38,5 +39,20 @@ public class LongTagItem implements ITextLineElement {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof LongTagItem) {
+            LongTagItem o = (LongTagItem) obj;
+            return StringUtils.equals(o.text, text);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return text;
     }
 }

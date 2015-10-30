@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.alex73.korpus.editor.core.GrammarDB;
+import org.alex73.korpus.text.parser.IProcess;
+import org.alex73.korpus.text.parser.Splitter2;
 import org.alex73.korpus.text.xml.O;
 import org.alex73.korpus.text.xml.P;
 import org.alex73.korpus.text.xml.S;

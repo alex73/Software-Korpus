@@ -80,4 +80,19 @@ public class O implements ITextLineElement {
     public String getText() {
         return value;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof O) {
+            O o = (O) obj;
+            return o.value.equals(value) && o.type.equals(type);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "o(" + value + ")";
+    }
 }

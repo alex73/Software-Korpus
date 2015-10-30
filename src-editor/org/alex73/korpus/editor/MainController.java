@@ -48,8 +48,9 @@ import org.alex73.korpus.editor.core.doc.KorpusDocument3;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyLineElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyWordElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocumentViewFactory;
-import org.alex73.korpus.parser.IProcess;
-import org.alex73.korpus.parser.TextParser;
+import org.alex73.korpus.text.TextIO;
+import org.alex73.korpus.text.parser.IProcess;
+import org.alex73.korpus.text.parser.TextParser;
 import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.XMLText;
 
@@ -135,7 +136,7 @@ public class MainController {
         public void actionPerformed(ActionEvent e) {
             try {
                 XMLText text = UI.doc.extractText();
-                TextParser.saveXML(getOutFile(), text);
+                TextIO.saveXML(getOutFile(), text);
                 UI.showInfo("Захавана ў " + getOutFile());
             } catch (Throwable ex) {
                 ex.printStackTrace();
@@ -277,7 +278,7 @@ public class MainController {
             if (f.getName().endsWith(".xml")) {
                 InputStream in = new BufferedInputStream(new FileInputStream(f));
                 try {
-                    kDoc = TextParser.parseXML(in);
+                    kDoc = TextIO.parseXML(in);
                 } finally {
                     in.close();
                 }
@@ -297,7 +298,7 @@ public class MainController {
                 } finally {
                     in.close();
                 }
-                TextParser.saveXML(new File(f.getPath().replaceAll("\\.[a-zA-Z0-9]+$", ".orig.xml")), kDoc);
+                TextIO.saveXML(new File(f.getPath().replaceAll("\\.[a-zA-Z0-9]+$", ".orig.xml")), kDoc);
             }
 
             UI.doc = new KorpusDocument3(kDoc);

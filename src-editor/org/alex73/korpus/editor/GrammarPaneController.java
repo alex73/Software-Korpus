@@ -38,7 +38,6 @@ import javax.xml.bind.Marshaller;
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.TagLetter;
 import org.alex73.korpus.editor.core.GrammarDB;
-import org.alex73.korpus.parser.Splitter;
 import org.alex73.korpus.text.xml.W;
 
 import alex73.corpus.paradigm.Paradigm;

@@ -88,5 +88,4 @@ public class XMLText {
     public void setContent(Content value) {
         this.content = value;
     }
-
 }

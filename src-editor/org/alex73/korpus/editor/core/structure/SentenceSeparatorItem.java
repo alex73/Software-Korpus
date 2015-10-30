@@ -20,31 +20,28 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
 
-package org.alex73.korpus.parser;
+package org.alex73.korpus.editor.core.structure;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.Reader;
+import org.alex73.korpus.editor.Splitter;
+import org.alex73.korpus.text.xml.ITextLineElement;
 
-public class BOMBufferedReader extends BufferedReader {
-    private int lineNumber = 0;
+public class SentenceSeparatorItem implements ITextLineElement {
+    @Override
+    public String getText() {
+        return "" + Splitter.CH_SENT_SEPARATOR;
+    }
 
-    public BOMBufferedReader(Reader rd) throws IOException {
-        super(rd);
-        mark(4);
-
-        int char1 = read();
-        if (char1 != 65279) { // BOM: EF BB BF
-            reset();
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof SentenceSeparatorItem) {
+            return true;
+        } else {
+            return false;
         }
     }
 
-    public String readLine() throws IOException {
-        lineNumber++;
-        return super.readLine();
-    }
-
-    public int getLineNumber() {
-        return lineNumber;
+    @Override
+    public String toString() {
+        return getText();
     }
 }

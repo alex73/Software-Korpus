@@ -32,7 +32,6 @@ import javax.swing.JRadioButton;
 
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.editor.ui.WordInfoPane;
-import org.alex73.korpus.parser.Splitter;
 import org.alex73.korpus.text.xml.W;
 
 public class WordInfoPaneController {

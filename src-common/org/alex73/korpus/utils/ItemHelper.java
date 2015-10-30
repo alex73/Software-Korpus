@@ -20,47 +20,21 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
 
-package org.alex73.korpus.editor.core.structure;
+package org.alex73.korpus.utils;
 
 import org.alex73.korpus.text.xml.ITextLineElement;
-import org.alex73.korpus.text.xml.InlineTag;
 import org.alex73.korpus.text.xml.O;
 import org.alex73.korpus.text.xml.S;
 import org.alex73.korpus.text.xml.W;
-import org.alex73.korpus.text.xml.Z;
 
 public class ItemHelper {
-
-    public static S createS(String spaceChar) {
-        S s = new S();
-        s.setChar(spaceChar);
-        return s;
-    }
-
-    public static Z createZ(String znak) {
-        Z z = new Z();
-        z.setValue(znak);
-        return z;
-    }
-
-    public static InlineTag createInlineTag(String tag) {
-        InlineTag t = new InlineTag();
-        t.setValue(tag);
-        return t;
-    }
-
-    public static W createW(String word) {
-        W w = new W();
-        w.setValue(word);
-        return w;
-    }
 
     public static ITextLineElement splitLeft(ITextLineElement o, int pos) {
         String text = o.getText().substring(0, pos);
         if (o instanceof W) {
-            return createW(text);
+            return new W(text);
         } else if (o instanceof S) {
-            return createS(text);
+            return new S(text);
         } else if (o instanceof O) {
             return new O(((O) o).getType(), text);
         } else {
@@ -71,9 +45,9 @@ public class ItemHelper {
     public static ITextLineElement splitRight(ITextLineElement o, int pos) {
         String text = o.getText().substring(pos);
         if (o instanceof W) {
-            return createW(text);
+            return new W(text);
         } else if (o instanceof S) {
-            return createS(text);
+            return new S(text);
         } else if (o instanceof O) {
             return new O(((O) o).getType(), text);
         } else {

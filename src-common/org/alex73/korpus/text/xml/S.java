@@ -7,11 +7,12 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
- * <p>Java class for anonymous complex type.
+ * <p>
+ * Java class for anonymous complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType>
@@ -30,16 +31,25 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "s")
 public class S implements ITextLineElement {
 
+    public S() {
+    }
+
+    public S(char s) {
+        _char = Character.toString(s);
+    }
+
+    public S(String s) {
+        _char = s;
+    }
+
     @XmlAttribute(name = "char")
     protected String _char;
 
     /**
      * Gets the value of the char property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getChar() {
         if (_char == null) {
@@ -53,9 +63,8 @@ public class S implements ITextLineElement {
      * Sets the value of the char property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setChar(String value) {
         this._char = value;
@@ -64,5 +73,20 @@ public class S implements ITextLineElement {
     @Override
     public String getText() {
         return _char;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof S) {
+            S o = (S) obj;
+            return o._char.equals(_char);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "S(" + _char + ")";
     }
 }

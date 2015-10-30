@@ -20,27 +20,20 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
 
-package org.alex73.korpus.parser;
+package org.alex73.korpus.editor;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.alex73.korpus.editor.core.GrammarDB;
-import org.alex73.korpus.editor.core.structure.ItemHelper;
 import org.alex73.korpus.editor.core.structure.Line;
-import org.alex73.korpus.editor.core.structure.LongTagItem;
 import org.alex73.korpus.editor.core.structure.SentenceSeparatorItem;
-import org.alex73.korpus.text.xml.ITextLineElement;
 import org.alex73.korpus.text.xml.InlineTag;
-import org.alex73.korpus.text.xml.O;
-import org.alex73.korpus.text.xml.OtherType;
 import org.alex73.korpus.text.xml.S;
-import org.alex73.korpus.text.xml.Tag;
 import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.Z;
 import org.alex73.korpus.utils.WordNormalizer;
@@ -192,31 +185,14 @@ public class Splitter {
                 result.add(getWordInfo(part));
                 break;
             case SPACE:
-                result.add(ItemHelper.createS(part));
+                result.add(new S(part));
                 break;
             case TAG_SHORT:
-                result.add(ItemHelper.createInlineTag(part));
+                result.add(new InlineTag(part));
                 break;
             }
             partStart = currentPos;
         }
-    }
-
-    public Line splitOther(OtherType type) {
-        for (currentPos = 0; currentPos < line.length(); currentPos++) {
-            char ch = line.charAt(currentPos);
-            if (ch == CH_SENT_SEPARATOR) {
-                String part = line.substring(partStart, currentPos);
-                result.add(new O(type, part));
-                result.add(new SentenceSeparatorItem());
-                partStart = currentPos + 1;
-            }
-        }
-        String part = line.substring(partStart, currentPos);
-        result.add(new O(type, part));
-
-        result.normalize();
-        return result;
     }
 
     public Line splitParagraph() {
@@ -262,7 +238,7 @@ public class Splitter {
                 } else {
                     flush();
                     if (ch == ' ') {
-                        result.add(ItemHelper.createS(" "));
+                        result.add(new S(' '));
                     } else {
                         result.add(getZnakInfo(line.substring(currentPos, currentPos + 1)));
                     }
@@ -295,7 +271,7 @@ public class Splitter {
         } else if (GrammarDB.getInstance().getZnaki().indexOf(ch) >= 0) {
             return getZnakInfo("" + ch);
         } else if (Character.isWhitespace(ch)) {
-            return ItemHelper.createS("" + ch);
+            return new S(ch);
         } else {
             return getWordInfo("" + ch);
         }
@@ -303,7 +279,7 @@ public class Splitter {
 
     protected static W getWordInfo(String w) {
         String word = fixWord(w);
-        W result = ItemHelper.createW(w); // value must be original text
+        W result = new W(w); // value must be original text
         Paradigm[] paradigms = GrammarDB.getInstance().getParadigmsByForm(word);
         if (paradigms != null) {
             fillWordInfoParadigms(result, word, paradigms);
@@ -311,7 +287,7 @@ public class Splitter {
         return result;
     }
 
-    protected static Z getZnakInfo(String w) {
+    public static Z getZnakInfo(String w) {
         String word = fixWord(w);
         Z result = new Z();
         result.setValue(w); // value must be original text
@@ -445,125 +421,6 @@ public class Splitter {
             return null;
         }
         return v.substring(1, v.length() - 1);
-    }
-
-    static final Pattern RE_TAG = Pattern.compile("<.+?>");
-    static final Pattern RE_DIGITS = Pattern.compile("[0-9]+");
-
-    public static boolean mergeAndSplitItems(Line line) {
-        boolean modified = false;
-        for (int i = 0; i < line.size(); i++) {
-            // convert non-tags to words
-            ITextLineElement currentItem = line.get(i);
-            if (currentItem instanceof InlineTag) {
-                String text = ((InlineTag) currentItem).getValue();
-                if (!RE_TAG.matcher(text).matches()) {
-                    currentItem = ItemHelper.createW(text);
-                    line.set(i, currentItem);
-                    modified = true;
-                }
-            } else if (currentItem instanceof Tag) {
-                String text = ((Tag) currentItem).getValue();
-                if (!text.startsWith("##")) {
-                    currentItem = ItemHelper.createW(text);
-                    line.set(i, currentItem);
-                    modified = true;
-                }
-            }
-        }
-        if (line.size() > 0) {
-            // convert words to tags
-            ITextLineElement currentItem = line.get(0);
-            if (currentItem instanceof W) {
-                String text = ((W) currentItem).getValue();
-                if (text.startsWith("##")) {
-                    currentItem = new LongTagItem(text);
-                    line.set(0, currentItem);
-                    modified = true;
-                }
-            }
-        }
-        while (line.size() >= 2 && (line.get(0) instanceof LongTagItem)) {
-            // merge big tags
-            String newTagText = line.get(0).getText() + line.get(1).getText();
-            line.set(0, new LongTagItem(newTagText));
-            line.remove(1);
-            modified = true;
-        }
-        for (int i = 0; i < line.size() - 1; i++) {
-            // merge words and spaces
-            ITextLineElement currentItem = line.get(i);
-            ITextLineElement nextItem = line.get(i + 1);
-            ITextLineElement newItem = null;
-            if (currentItem instanceof W && nextItem instanceof W) {
-                newItem = ItemHelper.createW(currentItem.getText() + nextItem.getText());
-            }
-            if (newItem != null) {
-                line.remove(i);
-                line.remove(i);
-                line.add(i, newItem);
-                i--;
-                modified = true;
-            }
-        }
-        for (int i = 0; i < line.size() - 1; i++) {
-            // split words and apostrophes
-            ITextLineElement currentItem = line.get(i);
-            if (currentItem instanceof W) {
-                ITextLineElement newItem = null;
-                W w = (W) currentItem;
-                if (w.getValue().startsWith("'")) {
-                    newItem = getZnakInfo("'");
-                    w = (W) ItemHelper.splitRight(w, 1);
-                    line.set(i, w);
-                    line.add(i, newItem);
-                    modified = true;
-                }
-                if (w.getValue().endsWith("'")) {
-                    newItem = getZnakInfo("'");
-                    w = (W) ItemHelper.splitLeft(w, w.getValue().length() - 1);
-                    line.set(i, w);
-                    line.add(i + 1, newItem);
-                    i--;
-                    modified = true;
-                }
-            }
-        }
-        for (int i = 0; i < line.size(); i++) {
-            // split words by tags
-            Object currentItem = line.get(i);
-            if (currentItem instanceof W) {
-                String text = ((W) currentItem).getValue();
-                Matcher m = RE_TAG.matcher(text);
-                if (m.find()) {
-                    String textBefore = text.substring(0, m.start());
-                    String textIn = text.substring(m.start(), m.end());
-                    String textAfter = text.substring(m.end());
-                    line.set(i, ItemHelper.createW(textBefore));
-                    line.add(i + 1, ItemHelper.createInlineTag(textIn));
-                    line.add(i + 2, ItemHelper.createW(textAfter));
-                    modified = true;
-                }
-            }
-        }
-        for (int i = 0; i < line.size() - 1; i++) {
-            // merge numbers
-            Object currentItem = line.get(i);
-            Object nextItem = line.get(i + 1);
-            if (currentItem instanceof W && nextItem instanceof W) {
-                if (RE_DIGITS.matcher(((W) currentItem).getValue()).matches()) {
-                    if (RE_DIGITS.matcher(((W) nextItem).getValue()).matches()) {
-                        W w = ItemHelper.createW(((W) currentItem).getValue() + ((W) nextItem).getValue());
-                        line.remove(i);
-                        line.remove(i);
-                        line.add(i, w);
-                        i--;
-                        modified = true;
-                    }
-                }
-            }
-        }
-        return modified;
     }
 
     protected static void punctuations(List<String> words) {

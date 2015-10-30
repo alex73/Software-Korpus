@@ -66,4 +66,13 @@ public class P {
         return this.se;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof P) {
+            P o = (P) obj;
+            return o.se.equals(se);
+        } else {
+            return false;
+        }
+    }
 }

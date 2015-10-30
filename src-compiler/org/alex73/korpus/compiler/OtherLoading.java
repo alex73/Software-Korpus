@@ -39,9 +39,9 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.alex73.korpus.parser.Splitter2;
 import org.alex73.korpus.server.engine.LuceneDriverWrite;
 import org.alex73.korpus.server.text.BinaryParagraphWriter;
+import org.alex73.korpus.text.parser.Splitter2;
 import org.alex73.korpus.text.xml.P;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;

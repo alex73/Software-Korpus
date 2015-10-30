@@ -7,11 +7,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 
-
 /**
- * <p>Java class for anonymous complex type.
+ * <p>
+ * Java class for anonymous complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType>
@@ -25,11 +26,16 @@ import javax.xml.bind.annotation.XmlValue;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-    "value"
-})
+@XmlType(name = "", propOrder = { "value" })
 @XmlRootElement(name = "inlineTag")
 public class InlineTag implements ITextLineElement {
+
+    public InlineTag() {
+    }
+
+    public InlineTag(String v) {
+        value = v;
+    }
 
     @XmlValue
     protected String value;
@@ -37,10 +43,8 @@ public class InlineTag implements ITextLineElement {
     /**
      * Gets the value of the value property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getValue() {
         return value;
@@ -50,9 +54,8 @@ public class InlineTag implements ITextLineElement {
      * Sets the value of the value property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setValue(String value) {
         this.value = value;
@@ -61,5 +64,20 @@ public class InlineTag implements ITextLineElement {
     @Override
     public String getText() {
         return value;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof InlineTag) {
+            InlineTag o = (InlineTag) obj;
+            return o.value.equals(value);
+        } else {
+            return false;
+        }
+    }
+    
+    @Override
+    public String toString() {
+        return "<" + value + ">";
     }
 }

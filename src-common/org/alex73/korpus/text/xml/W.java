@@ -8,11 +8,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.XmlValue;
 
+import org.apache.commons.lang.StringUtils;
 
 /**
- * <p>Java class for anonymous complex type.
+ * <p>
+ * Java class for anonymous complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType>
@@ -29,11 +32,22 @@ import javax.xml.bind.annotation.XmlValue;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-    "value"
-})
+@XmlType(name = "", propOrder = { "value" })
 @XmlRootElement(name = "w")
 public class W implements ITextLineElement {
+    public W() {
+    }
+
+    public W(String v) {
+        value = v;
+    }
+
+    public W(String v, String c, String l, Boolean m) {
+        value = v;
+        cat = c;
+        lemma = l;
+        manual = m;
+    }
 
     @XmlValue
     protected String value;
@@ -47,10 +61,8 @@ public class W implements ITextLineElement {
     /**
      * Gets the value of the value property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getValue() {
         return value;
@@ -60,9 +72,8 @@ public class W implements ITextLineElement {
      * Sets the value of the value property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setValue(String value) {
         this.value = value;
@@ -71,10 +82,8 @@ public class W implements ITextLineElement {
     /**
      * Gets the value of the cat property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getCat() {
         return cat;
@@ -84,9 +93,8 @@ public class W implements ITextLineElement {
      * Sets the value of the cat property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setCat(String value) {
         this.cat = value;
@@ -95,10 +103,8 @@ public class W implements ITextLineElement {
     /**
      * Gets the value of the lemma property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
+     * @return possible object is {@link String }
+     * 
      */
     public String getLemma() {
         return lemma;
@@ -108,9 +114,8 @@ public class W implements ITextLineElement {
      * Sets the value of the lemma property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     *            allowed object is {@link String }
+     * 
      */
     public void setLemma(String value) {
         this.lemma = value;
@@ -119,10 +124,8 @@ public class W implements ITextLineElement {
     /**
      * Gets the value of the manual property.
      * 
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *     
+     * @return possible object is {@link Boolean }
+     * 
      */
     public boolean isManual() {
         if (manual == null) {
@@ -136,9 +139,8 @@ public class W implements ITextLineElement {
      * Sets the value of the manual property.
      * 
      * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *     
+     *            allowed object is {@link Boolean }
+     * 
      */
     public void setManual(Boolean value) {
         this.manual = value;
@@ -147,5 +149,30 @@ public class W implements ITextLineElement {
     @Override
     public String getText() {
         return value;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof W) {
+            W o = (W) obj;
+            return StringUtils.equals(o.lemma, lemma) && StringUtils.equals(o.value, value) && StringUtils.equals(o.cat, cat) && eq(o.manual, manual);
+        } else {
+            return false;
+        }
+    }
+
+    private boolean eq(Object o1, Object o2) {
+        if (o1 == null && o2 == null) {
+            return true;
+        } else if (o1 != null && o2 != null) {
+            return o1.equals(o2);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "W(" + lemma + "/" + cat + "/" + value + "/" + manual + ")";
     }
 }

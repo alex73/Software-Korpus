@@ -35,45 +35,22 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "pOrTag"
+    "pOrTagOrPoetry"
 })
 @XmlRootElement(name = "Content")
 public class Content {
 
     @XmlElements({
         @XmlElement(name = "p", type = P.class),
-        @XmlElement(name = "Tag", type = Tag.class)
+        @XmlElement(name = "Tag", type = Tag.class),
+        @XmlElement(name = "Poetry", type = Poetry.class)
     })
-    protected List<Object> pOrTag;
+    protected List<Object> pOrTagOrPoetry;
 
-    /**
-     * Gets the value of the pOrTag property.
-     * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the pOrTag property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getPOrTag().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link P }
-     * {@link Tag }
-     * 
-     * 
-     */
-    public List<Object> getPOrTag() {
-        if (pOrTag == null) {
-            pOrTag = new ArrayList<Object>();
+    public List<Object> getPOrTagOrPoetry() {
+        if (pOrTagOrPoetry == null) {
+            pOrTagOrPoetry = new ArrayList<Object>();
         }
-        return this.pOrTag;
+        return this.pOrTagOrPoetry;
     }
-
 }

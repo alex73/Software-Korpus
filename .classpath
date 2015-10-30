@@ -11,7 +11,6 @@
 	<classpathentry kind="src" path="src-common"/>
 	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="lib" path="lib-editor/vldocking_2.1.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib-editor/junit-4.10.jar"/>
 	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-lang-2.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib-editor/commons-compress-1.6-SNAPSHOT.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib-editor/xz-1.4.jar"/>
@@ -23,5 +22,7 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-core-5.1.0.jar" sourcepath="war/WEB-INF/lib/sources/lucene-5.1.0.zip"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-analyzers-common-5.1.0.jar" sourcepath="war/WEB-INF/lib/sources/lucene-5.1.0.zip"/>
 	<classpathentry kind="lib" path="lib-web-templates/velocity-1.7.jar" sourcepath="/home/alex/gits/sources/velocity-1.7.zip"/>
+	<classpathentry kind="lib" path="lib-test/junit-4.10.jar"/>
+	<classpathentry kind="lib" path="lib-test/xmlunit-1.6.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<XMLText>
+    <Header>
+        <Tag name="Title">Назва</Tag>
+    </Header>
+    <Content>
+        <p>
+            <se>
+                <w>Першы</w>
+                <s char=" "/>
+                <w>сказ</w>
+                <z>.</z>
+            </se>
+            <se>
+                <s char=" "/>
+                <inlineTag>&lt;i&gt;</inlineTag>
+                <w>Другі</w>
+                <inlineTag>&lt;/i&gt;</inlineTag>
+                <z>.</z>
+            </se>
+        </p>
+        <Poetry>
+            <p>
+                <se>
+                    <w>Слова</w>
+                    <z>,</z>
+                    <s char=" "/>
+                    <w>другое</w>
+                    <z>,</z>
+                    <s char="&#xA;"/>
+                    <w>трэцяе</w>
+                    <z>.</z>
+                    <s char="&#xA;"/>
+                </se>
+            </p>
+            <p>
+                <se>
+                    <w>Новы</w>
+                    <s char=" "/>
+                    <w>параграф</w>
+                    <z>.</z>
+                    <s char="&#xA;"/>
+                </se>
+            </p>
+            <Tag name="Sign">подпіс</Tag>
+        </Poetry>
+        <p>
+            <se>
+                <w>Яшчэ</w>
+                <z>.</z>
+            </se>
+        </p>
+        <Tag name="Long">tag</Tag>
+    </Content>
+</XMLText>
