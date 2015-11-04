@@ -10,7 +10,11 @@ public enum OtherType {
 
     @XmlEnumValue("other_language") OTHER_LANGUAGE("other_language"),
 
-    @XmlEnumValue("number") NUMBER("number");
+    @XmlEnumValue("number") NUMBER("number"),
+
+    @XmlEnumValue("trasianka") TRASIANKA("trasianka"),
+
+    @XmlEnumValue("dyjalekt") DYJALEKT("dyjalekt");
 
     private final String value;
 

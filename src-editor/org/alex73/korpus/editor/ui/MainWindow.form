@@ -79,6 +79,16 @@
                 <Property name="text" type="java.lang.String" value="&#x41b;&#x456;&#x447;&#x431;&#x44b;"/>
               </Properties>
             </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="mSetTrasianka">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="&#x422;&#x440;&#x430;&#x441;&#x44f;&#x43d;&#x43a;&#x430;"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="mSetDyjalekt">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="&#x414;&#x44b;&#x44f;&#x43b;&#x435;&#x43a;&#x442;&#x43d;&#x430;&#x435;"/>
+              </Properties>
+            </MenuItem>
           </SubComponents>
         </Menu>
         <Menu class="javax.swing.JMenu" name="jMenu2">

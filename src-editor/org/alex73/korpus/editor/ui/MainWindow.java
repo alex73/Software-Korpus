@@ -54,6 +54,8 @@ public class MainWindow extends javax.swing.JFrame {
         mSetText = new javax.swing.JMenuItem();
         mSetOtherLanguage = new javax.swing.JMenuItem();
         mSetDigits = new javax.swing.JMenuItem();
+        mSetTrasianka = new javax.swing.JMenuItem();
+        mSetDyjalekt = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         mUnk1 = new javax.swing.JRadioButtonMenuItem();
         mUnk2 = new javax.swing.JRadioButtonMenuItem();
@@ -118,6 +120,12 @@ public class MainWindow extends javax.swing.JFrame {
 
         mSetDigits.setText("Лічбы");
         menuEdit.add(mSetDigits);
+
+        mSetTrasianka.setText("Трасянка");
+        menuEdit.add(mSetTrasianka);
+
+        mSetDyjalekt.setText("Дыялектнае");
+        menuEdit.add(mSetDyjalekt);
 
         jMenuBar1.add(menuEdit);
 
@@ -276,8 +284,10 @@ public class MainWindow extends javax.swing.JFrame {
     public javax.swing.JMenuItem mGoWordInfo;
     public javax.swing.JMenuItem mRedo;
     public javax.swing.JMenuItem mSetDigits;
+    public javax.swing.JMenuItem mSetDyjalekt;
     public javax.swing.JMenuItem mSetOtherLanguage;
     public javax.swing.JMenuItem mSetText;
+    public javax.swing.JMenuItem mSetTrasianka;
     public javax.swing.JMenuItem mUndo;
     public javax.swing.JRadioButtonMenuItem mUnk1;
     public javax.swing.JRadioButtonMenuItem mUnk2;

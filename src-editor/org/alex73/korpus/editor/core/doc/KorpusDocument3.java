@@ -43,21 +43,14 @@ import org.alex73.korpus.editor.Splitter;
 import org.alex73.korpus.editor.UI;
 import org.alex73.korpus.editor.core.structure.Line;
 import org.alex73.korpus.editor.core.structure.LongTagItem;
-import org.alex73.korpus.editor.core.structure.SentenceSeparatorItem;
 import org.alex73.korpus.editor.core.structure.XML2Lines;
-import org.alex73.korpus.text.parser.TextParser;
 import org.alex73.korpus.text.xml.Header;
 import org.alex73.korpus.text.xml.ITextLineElement;
 import org.alex73.korpus.text.xml.InlineTag;
 import org.alex73.korpus.text.xml.O;
 import org.alex73.korpus.text.xml.OtherType;
-import org.alex73.korpus.text.xml.P;
-import org.alex73.korpus.text.xml.S;
-import org.alex73.korpus.text.xml.Se;
-import org.alex73.korpus.text.xml.Tag;
 import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.XMLText;
-import org.alex73.korpus.utils.ItemHelper;
 
 /**
  * Рэдактар дакумэнту корпуса.
@@ -68,8 +61,21 @@ public class KorpusDocument3 extends AbstractDocument {
         UNK_LEMMA, AMAN_LEMMA, AMAN_GRAM
     };
 
-    public static final SimpleAttributeSet ATTRS_OTHER_LANGUAGE = new SimpleAttributeSet();
-    public static final SimpleAttributeSet ATTRS_DIGITS = new SimpleAttributeSet();
+    public static final SimpleAttributeSet ATTRS_OTHER_LANGUAGE;
+    public static final SimpleAttributeSet ATTRS_DIGITS;
+    public static final SimpleAttributeSet ATTRS_TRASIANKA;
+    public static final SimpleAttributeSet ATTRS_DYJALEKT;
+
+    static {
+        ATTRS_OTHER_LANGUAGE = new SimpleAttributeSet();
+        ATTRS_OTHER_LANGUAGE.addAttribute("OtherType", OtherType.OTHER_LANGUAGE);
+        ATTRS_DIGITS = new SimpleAttributeSet();
+        ATTRS_DIGITS.addAttribute("OtherType", OtherType.NUMBER);
+        ATTRS_TRASIANKA = new SimpleAttributeSet();
+        ATTRS_TRASIANKA.addAttribute("OtherType", OtherType.TRASIANKA);
+        ATTRS_DYJALEKT = new SimpleAttributeSet();
+        ATTRS_DYJALEKT.addAttribute("OtherType", OtherType.DYJALEKT);
+    }
 
     MyRootElement rootElem;
     public MARK_WORDS markType = MARK_WORDS.UNK_LEMMA;
@@ -108,7 +114,7 @@ public class KorpusDocument3 extends AbstractDocument {
             }
             lines.add(line);
         }
-        XMLText out =new XMLText();
+        XMLText out = new XMLText();
         out.setHeader(header);
         out.setContent(XML2Lines.convertToXML(lines));
         return out;
@@ -150,12 +156,11 @@ public class KorpusDocument3 extends AbstractDocument {
             List<Line> newLines = new ArrayList<>();
             for (int i = 0; i < newStrs.length; i++) {
                 Line line;
-                if (a == ATTRS_OTHER_LANGUAGE) {
-                    line = Line.splitOther(newStrs[i], OtherType.OTHER_LANGUAGE);
-                } else if (a == ATTRS_DIGITS) {
-                    line = Line.splitOther(newStrs[i], OtherType.NUMBER);
-                } else {
+                OtherType type = a == null ? null : (OtherType) a.getAttribute("OtherType");
+                if (a==null) {
                     line = new Splitter(newStrs[i]).splitParagraph();
+                }else {
+                    line = Line.splitOther(newStrs[i], type);
                 }
                 newLines.add(line);
             }
@@ -387,6 +392,7 @@ public class KorpusDocument3 extends AbstractDocument {
         public MyLineElement(Element parent) {
             super(parent);
         }
+
         public MyLineElement(Element parent, Line chs) {
             super(parent);
             for (ITextLineElement el : chs) {
@@ -446,6 +452,7 @@ public class KorpusDocument3 extends AbstractDocument {
                 W w = (W) item;
                 w.setCat(otherW.getCat());
                 w.setLemma(otherW.getLemma());
+                w.setManual(otherW.getManual());
             } else {
                 throw new ClassCastException(
                         "Trying to set word info into " + item.getClass().getSimpleName());

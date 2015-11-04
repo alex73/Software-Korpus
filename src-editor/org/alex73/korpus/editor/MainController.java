@@ -22,6 +22,8 @@
 
 package org.alex73.korpus.editor;
 
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -41,6 +43,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
+import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.ViewFactory;
 
 import org.alex73.korpus.editor.core.GrammarDB;
@@ -93,7 +96,7 @@ public class MainController {
         UI.editor.getInputMap().put(KeyStroke.getKeyStroke("F6"), "GoGrammar");
         UI.editor.getActionMap().put("GoGrammar", actionGoGrammar);
 
-        Font font = UI.editor.getFont();
+        Font font = UI.mainWindow.getFont();
         if (font.getSize() <= 10) {
             UI.mainWindow.f10.setSelected(true);
         } else if (font.getSize() <= 12) {
@@ -112,9 +115,14 @@ public class MainController {
             UI.mainWindow.f44.setSelected(true);
         }
 
-        UI.mainWindow.mSetText.addActionListener(aSetText);
-        UI.mainWindow.mSetOtherLanguage.addActionListener(aSetOtherLanguage);
-        UI.mainWindow.mSetDigits.addActionListener(aSetDigits);
+        UI.mainWindow.mSetText.addActionListener(new SetActionListener(null));
+        UI.mainWindow.mSetOtherLanguage.addActionListener(new SetActionListener(KorpusDocument3.ATTRS_OTHER_LANGUAGE));
+        UI.mainWindow.mSetDigits.addActionListener(new SetActionListener(KorpusDocument3.ATTRS_DIGITS));
+        UI.mainWindow.mSetTrasianka.addActionListener(new SetActionListener(KorpusDocument3.ATTRS_TRASIANKA));
+        UI.mainWindow.mSetDyjalekt.addActionListener(new SetActionListener(KorpusDocument3.ATTRS_DYJALEKT));
+        
+        UI.mainWindow.f16.setSelected(true);
+        aFontSet.actionPerformed(new ActionEvent(UI.mainWindow.f16,0,null));
     }
 
     static AbstractAction actionGoGrammar = new AbstractAction() {
@@ -135,6 +143,9 @@ public class MainController {
     static ActionListener aFileSave = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             try {
+                File bak=new File(getOutFile().getPath()+".bak");
+                bak.delete();
+                getOutFile().renameTo(bak);
                 XMLText text = UI.doc.extractText();
                 TextIO.saveXML(getOutFile(), text);
                 UI.showInfo("Захавана ў " + getOutFile());
@@ -183,42 +194,18 @@ public class MainController {
         }
     };
 
-    static ActionListener aSetText = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            int p0 = UI.editor.getSelectionStart();
-            int p1 = UI.editor.getSelectionEnd();
-            try {
-                String text = UI.doc.getText(p0, p1 - p0);
-                UI.doc.replace(p0, p1 - p0, text, null);
-            } catch (BadLocationException ex) {
-                throw new RuntimeException(ex);
-            }
+    static class SetActionListener implements ActionListener {
+        private final SimpleAttributeSet attrs;
+        public SetActionListener(SimpleAttributeSet attrs) {
+            this.attrs=attrs;
         }
-    };
-
-    static ActionListener aSetOtherLanguage = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
             int p0 = UI.editor.getSelectionStart();
             int p1 = UI.editor.getSelectionEnd();
             try {
                 String text = UI.doc.getText(p0, p1 - p0);
-                UI.doc.replace(p0, p1 - p0, text, KorpusDocument3.ATTRS_OTHER_LANGUAGE);
-            } catch (BadLocationException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
-    };
-
-    static ActionListener aSetDigits = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            int p0 = UI.editor.getSelectionStart();
-            int p1 = UI.editor.getSelectionEnd();
-            try {
-                String text = UI.doc.getText(p0, p1 - p0);
-                UI.doc.replace(p0, p1 - p0, text, KorpusDocument3.ATTRS_DIGITS);
+                UI.doc.replace(p0, p1 - p0, text, attrs);
             } catch (BadLocationException ex) {
                 throw new RuntimeException(ex);
             }
@@ -228,11 +215,21 @@ public class MainController {
     static ActionListener aFontSet = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             String size = ((JRadioButtonMenuItem) e.getSource()).getText();
-            Font font = UI.editor.getFont();
+            Font font = UI.mainWindow.getFont();
             font = new Font(font.getFamily(), font.getStyle(), Integer.parseInt(size));
-            UI.editor.setFont(font);
+            setFont(UI.mainWindow, font);
         }
     };
+    
+    static void setFont(Component c, Font font) {
+        c.setFont(font);
+        if (c instanceof Container) {
+            Container co=(Container)c;
+            for(int i=0;i<co.getComponentCount();i++) {
+                setFont(co.getComponent(i), font);
+            }
+        }
+    }
 
     static ActionListener aGoNextMark = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -268,7 +265,7 @@ public class MainController {
 
     public static void openFile(File f) {
         try {
-            baseFileName = f.getPath().replace("\\.[a-z]+$", "");
+            baseFileName = f.getPath().replaceAll("\\.[a-z]+$", "");
 
             if (getGrammarFile().exists()) {
                 GrammarDB.getInstance().addXMLFile(getGrammarFile(), true);
@@ -298,7 +295,7 @@ public class MainController {
                 } finally {
                     in.close();
                 }
-                TextIO.saveXML(new File(f.getPath().replaceAll("\\.[a-zA-Z0-9]+$", ".orig.xml")), kDoc);
+                TextIO.saveXML(new File(baseFileName+ ".orig.xml"), kDoc);
             }
 
             UI.doc = new KorpusDocument3(kDoc);
@@ -329,7 +326,7 @@ public class MainController {
     }
 
     static File getOutFile() {
-        return new File(baseFileName + "-out.xml");
+        return new File(baseFileName + ".xml");
     }
 
     static CaretListener onWordChanged = new CaretListener() {

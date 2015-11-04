@@ -145,6 +145,7 @@ public class WordInfoPaneController {
             w.setCat(getSelected(p.pGrammar));
             w.setManual(true);
             MainController.setWordInfo(w);
+            UI.editor.repaint();
         }
     };
 }

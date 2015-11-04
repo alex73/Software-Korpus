@@ -134,6 +134,10 @@ public class W implements ITextLineElement {
             return manual;
         }
     }
+    
+    public Boolean getManual() {
+        return manual;
+    }
 
     /**
      * Sets the value of the manual property.
