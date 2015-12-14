@@ -54,6 +54,7 @@ public class WordInfoPaneController {
                 for (String t : word.getLemma().split("_")) {
                     JRadioButton rb = new JRadioButton(t);
                     rb.setToolTipText(t);
+                    rb.setFont(p.pLemma.getFont());
                     rbGroupLemma.add(rb);
                     p.pLemma.add(rb);
                     rb.addActionListener(lemmaClick);
@@ -81,17 +82,18 @@ public class WordInfoPaneController {
             for (String c : word.getCat().split("_")) {
                 String outText;
                 try {
-                    outText = c + ":";
+                    outText = c + ": ";
                     for (String d : BelarusianTags.getInstance().describe(c)) {
-                        outText += d + ",";
+                        outText += d + ", ";
                     }
                     outText = outText.substring(0, outText.length() - 1);
                 } catch (Exception ex) {
                     // unknown code
                     outText = c + ":няправільны код";
                 }
-                JRadioButton rb = new JRadioButton(outText);
+                JRadioButton rb = new JRadioButton("<html>"+outText+"</html>");
                 rb.setToolTipText(c);
+                rb.setFont(p.pGrammar.getFont());
                 rbGroupGrammar.add(rb);
                 gbc.gridy = p.pGrammar.getComponentCount();
                 p.pGrammar.add(rb, gbc);

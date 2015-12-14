@@ -58,7 +58,7 @@ public class GrammarPane extends javax.swing.JPanel {
 
         setFocusable(false);
         setMinimumSize(new java.awt.Dimension(150, 166));
-        setName("");
+        setName(""); // NOI18N
         setPreferredSize(new java.awt.Dimension(200, 74));
         setLayout(new java.awt.GridBagLayout());
 
@@ -155,8 +155,9 @@ public class GrammarPane extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 5);
         add(txtLooksLike, gridBagConstraints);
 
-        outInfo.setContentType("text/html");
         outInfo.setEditable(false);
+        outInfo.setContentType("text/html"); // NOI18N
+        outInfo.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         outInfo.setMinimumSize(new java.awt.Dimension(100, 100));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;

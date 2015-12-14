@@ -6,6 +6,12 @@
     </Component>
     <Component class="javax.swing.ButtonGroup" name="buttonGroup2">
     </Component>
+    <Component class="javax.swing.ButtonGroup" name="bgText">
+    </Component>
+    <Component class="javax.swing.ButtonGroup" name="bgInfo">
+    </Component>
+    <Component class="javax.swing.ButtonGroup" name="bgGrammar">
+    </Component>
     <Menu class="javax.swing.JMenuBar" name="jMenuBar1">
       <SubComponents>
         <Menu class="javax.swing.JMenu" name="jMenu1">
@@ -123,77 +129,20 @@
             </MenuItem>
             <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator2">
             </MenuItem>
-            <Menu class="javax.swing.JMenu" name="jMenu5">
+            <Menu class="javax.swing.JMenu" name="fontText">
               <Properties>
-                <Property name="text" type="java.lang.String" value="&#x428;&#x440;&#x44b;&#x444;&#x442;"/>
+                <Property name="text" type="java.lang.String" value="&#x428;&#x440;&#x44b;&#x444;&#x442; &#x442;&#x44d;&#x43a;&#x441;&#x442;&#x443;"/>
               </Properties>
-              <SubComponents>
-                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="f10">
-                  <Properties>
-                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                      <ComponentRef name="buttonGroup2"/>
-                    </Property>
-                    <Property name="selected" type="boolean" value="true"/>
-                    <Property name="text" type="java.lang.String" value="10"/>
-                  </Properties>
-                </MenuItem>
-                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="f12">
-                  <Properties>
-                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                      <ComponentRef name="buttonGroup2"/>
-                    </Property>
-                    <Property name="text" type="java.lang.String" value="12"/>
-                  </Properties>
-                </MenuItem>
-                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="f16">
-                  <Properties>
-                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                      <ComponentRef name="buttonGroup2"/>
-                    </Property>
-                    <Property name="text" type="java.lang.String" value="16"/>
-                  </Properties>
-                </MenuItem>
-                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="f20">
-                  <Properties>
-                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                      <ComponentRef name="buttonGroup2"/>
-                    </Property>
-                    <Property name="text" type="java.lang.String" value="20"/>
-                  </Properties>
-                </MenuItem>
-                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="f24">
-                  <Properties>
-                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                      <ComponentRef name="buttonGroup2"/>
-                    </Property>
-                    <Property name="text" type="java.lang.String" value="24"/>
-                  </Properties>
-                </MenuItem>
-                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="f30">
-                  <Properties>
-                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                      <ComponentRef name="buttonGroup2"/>
-                    </Property>
-                    <Property name="text" type="java.lang.String" value="30"/>
-                  </Properties>
-                </MenuItem>
-                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="f36">
-                  <Properties>
-                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                      <ComponentRef name="buttonGroup2"/>
-                    </Property>
-                    <Property name="text" type="java.lang.String" value="36"/>
-                  </Properties>
-                </MenuItem>
-                <MenuItem class="javax.swing.JRadioButtonMenuItem" name="f44">
-                  <Properties>
-                    <Property name="buttonGroup" type="javax.swing.ButtonGroup" editor="org.netbeans.modules.form.RADComponent$ButtonGroupPropertyEditor">
-                      <ComponentRef name="buttonGroup2"/>
-                    </Property>
-                    <Property name="text" type="java.lang.String" value="44"/>
-                  </Properties>
-                </MenuItem>
-              </SubComponents>
+            </Menu>
+            <Menu class="javax.swing.JMenu" name="fontInfo">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="&#x428;&#x440;&#x44b;&#x444;&#x442; &#x437;&#x432;&#x435;&#x441;&#x442;&#x430;&#x43a;"/>
+              </Properties>
+            </Menu>
+            <Menu class="javax.swing.JMenu" name="fontGrammar">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="&#x428;&#x440;&#x44b;&#x444;&#x442; &#x433;&#x440;&#x430;&#x43c;&#x430;&#x442;&#x44b;&#x447;&#x43d;&#x430;&#x439; &#x431;&#x430;&#x437;&#x44b;"/>
+              </Properties>
             </Menu>
           </SubComponents>
         </Menu>

@@ -170,7 +170,7 @@ public class TextParser {
         }
     }
 
-    static Pattern RE_TAG = Pattern.compile("##([A-Za-z0-9]+):\\s*(.*)");
+    static Pattern RE_TAG = Pattern.compile("##([A-Za-z0-9]+):?\\s*(.*)");
 
     static Map<String, String> extractHeaders(BufferedReader rd) throws Exception {
         Map<String, String> result = new TreeMap<String, String>();

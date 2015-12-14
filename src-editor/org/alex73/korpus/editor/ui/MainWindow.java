@@ -42,6 +42,9 @@ public class MainWindow extends javax.swing.JFrame {
 
         buttonGroup1 = new javax.swing.ButtonGroup();
         buttonGroup2 = new javax.swing.ButtonGroup();
+        bgText = new javax.swing.ButtonGroup();
+        bgInfo = new javax.swing.ButtonGroup();
+        bgGrammar = new javax.swing.ButtonGroup();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         mFileOpen = new javax.swing.JMenuItem();
@@ -61,15 +64,9 @@ public class MainWindow extends javax.swing.JFrame {
         mUnk2 = new javax.swing.JRadioButtonMenuItem();
         mUnk3 = new javax.swing.JRadioButtonMenuItem();
         jSeparator2 = new javax.swing.JPopupMenu.Separator();
-        jMenu5 = new javax.swing.JMenu();
-        f10 = new javax.swing.JRadioButtonMenuItem();
-        f12 = new javax.swing.JRadioButtonMenuItem();
-        f16 = new javax.swing.JRadioButtonMenuItem();
-        f20 = new javax.swing.JRadioButtonMenuItem();
-        f24 = new javax.swing.JRadioButtonMenuItem();
-        f30 = new javax.swing.JRadioButtonMenuItem();
-        f36 = new javax.swing.JRadioButtonMenuItem();
-        f44 = new javax.swing.JRadioButtonMenuItem();
+        fontText = new javax.swing.JMenu();
+        fontInfo = new javax.swing.JMenu();
+        fontGrammar = new javax.swing.JMenu();
         jMenu3 = new javax.swing.JMenu();
         mGoNextMark = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
@@ -145,42 +142,14 @@ public class MainWindow extends javax.swing.JFrame {
         jMenu2.add(mUnk3);
         jMenu2.add(jSeparator2);
 
-        jMenu5.setText("Шрыфт");
+        fontText.setText("Шрыфт тэксту");
+        jMenu2.add(fontText);
 
-        buttonGroup2.add(f10);
-        f10.setSelected(true);
-        f10.setText("10");
-        jMenu5.add(f10);
+        fontInfo.setText("Шрыфт звестак");
+        jMenu2.add(fontInfo);
 
-        buttonGroup2.add(f12);
-        f12.setText("12");
-        jMenu5.add(f12);
-
-        buttonGroup2.add(f16);
-        f16.setText("16");
-        jMenu5.add(f16);
-
-        buttonGroup2.add(f20);
-        f20.setText("20");
-        jMenu5.add(f20);
-
-        buttonGroup2.add(f24);
-        f24.setText("24");
-        jMenu5.add(f24);
-
-        buttonGroup2.add(f30);
-        f30.setText("30");
-        jMenu5.add(f30);
-
-        buttonGroup2.add(f36);
-        f36.setText("36");
-        jMenu5.add(f36);
-
-        buttonGroup2.add(f44);
-        f44.setText("44");
-        jMenu5.add(f44);
-
-        jMenu2.add(jMenu5);
+        fontGrammar.setText("Шрыфт граматычнай базы");
+        jMenu2.add(fontGrammar);
 
         jMenuBar1.add(jMenu2);
 
@@ -257,20 +226,17 @@ public class MainWindow extends javax.swing.JFrame {
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    public javax.swing.ButtonGroup bgGrammar;
+    public javax.swing.ButtonGroup bgInfo;
+    public javax.swing.ButtonGroup bgText;
     public javax.swing.ButtonGroup buttonGroup1;
     public javax.swing.ButtonGroup buttonGroup2;
-    public javax.swing.JRadioButtonMenuItem f10;
-    public javax.swing.JRadioButtonMenuItem f12;
-    public javax.swing.JRadioButtonMenuItem f16;
-    public javax.swing.JRadioButtonMenuItem f20;
-    public javax.swing.JRadioButtonMenuItem f24;
-    public javax.swing.JRadioButtonMenuItem f30;
-    public javax.swing.JRadioButtonMenuItem f36;
-    public javax.swing.JRadioButtonMenuItem f44;
+    public javax.swing.JMenu fontGrammar;
+    public javax.swing.JMenu fontInfo;
+    public javax.swing.JMenu fontText;
     public javax.swing.JMenu jMenu1;
     public javax.swing.JMenu jMenu2;
     public javax.swing.JMenu jMenu3;
-    public javax.swing.JMenu jMenu5;
     public javax.swing.JMenuBar jMenuBar1;
     public javax.swing.JPopupMenu.Separator jSeparator1;
     public javax.swing.JPopupMenu.Separator jSeparator2;

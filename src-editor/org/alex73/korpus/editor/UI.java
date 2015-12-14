@@ -64,7 +64,7 @@ public class UI {
 
     public static void init() throws Exception {
         mainWindow = new MainWindow();
-        mainWindow.setTitle("Рэдагаваньне файлаў корпусу, v.1.4");
+        mainWindow.setTitle("Рэдагаваньне файлаў корпусу, v.1.5");
 
         // GrammarDialogController.init(mainWindow);
         mainWindow.setBounds(200, 200, 900, 600);
@@ -99,7 +99,9 @@ public class UI {
 
         wordInfoPane = new WordInfoPane();
         wordInfoPane.setMinimumSize(new Dimension(100, 100));
-        desktop.addDockable(new DockableScrollPane("WORD_INFO", "Зьвесткі пра слова", wordInfoPane, true));
+        pane = new DockableScrollPane("WORD_INFO", "Зьвесткі пра слова", wordInfoPane, true);
+        pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        desktop.addDockable(pane);
         WordInfoPaneController.init();
 
         grammarPane = new GrammarPane();

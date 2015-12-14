@@ -33,7 +33,10 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 
 import javax.swing.AbstractAction;
+import javax.swing.ButtonGroup;
+import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
+import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
@@ -43,7 +46,10 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
+import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 import javax.swing.text.ViewFactory;
 
 import org.alex73.korpus.editor.core.GrammarDB;
@@ -58,6 +64,7 @@ import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.XMLText;
 
 public class MainController {
+    static final int[] FONT_SIZES = new int[] { 10, 12, 16, 20, 24, 30, 36, 44 };
     static String baseFileName;
 
     public static void init() {
@@ -71,11 +78,10 @@ public class MainController {
         UI.mainWindow.mUnk3.addActionListener(aUnderChange);
         UI.mainWindow.mUndo.addActionListener(aUndo);
         UI.mainWindow.mRedo.addActionListener(aRedo);
-        for (JRadioButtonMenuItem rb : new JRadioButtonMenuItem[] { UI.mainWindow.f10, UI.mainWindow.f12,
-                UI.mainWindow.f16, UI.mainWindow.f20, UI.mainWindow.f24, UI.mainWindow.f30, UI.mainWindow.f36,
-                UI.mainWindow.f44 }) {
-            rb.addActionListener(aFontSet);
-        }
+
+        createFontChanger(UI.mainWindow.fontText, UI.mainWindow.bgText, UI.editor);
+        createFontChanger(UI.mainWindow.fontInfo, UI.mainWindow.bgInfo, UI.wordInfoPane);
+        createFontChanger(UI.mainWindow.fontGrammar, UI.mainWindow.bgGrammar, UI.grammarPane);
 
         UI.mainWindow.mGoEditor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -96,33 +102,21 @@ public class MainController {
         UI.editor.getInputMap().put(KeyStroke.getKeyStroke("F6"), "GoGrammar");
         UI.editor.getActionMap().put("GoGrammar", actionGoGrammar);
 
-        Font font = UI.mainWindow.getFont();
-        if (font.getSize() <= 10) {
-            UI.mainWindow.f10.setSelected(true);
-        } else if (font.getSize() <= 12) {
-            UI.mainWindow.f12.setSelected(true);
-        } else if (font.getSize() <= 16) {
-            UI.mainWindow.f16.setSelected(true);
-        } else if (font.getSize() <= 20) {
-            UI.mainWindow.f20.setSelected(true);
-        } else if (font.getSize() <= 24) {
-            UI.mainWindow.f24.setSelected(true);
-        } else if (font.getSize() <= 30) {
-            UI.mainWindow.f30.setSelected(true);
-        } else if (font.getSize() <= 36) {
-            UI.mainWindow.f36.setSelected(true);
-        } else {
-            UI.mainWindow.f44.setSelected(true);
-        }
-
         UI.mainWindow.mSetText.addActionListener(new SetActionListener(null));
-        UI.mainWindow.mSetOtherLanguage.addActionListener(new SetActionListener(KorpusDocument3.ATTRS_OTHER_LANGUAGE));
+        UI.mainWindow.mSetOtherLanguage
+                .addActionListener(new SetActionListener(KorpusDocument3.ATTRS_OTHER_LANGUAGE));
         UI.mainWindow.mSetDigits.addActionListener(new SetActionListener(KorpusDocument3.ATTRS_DIGITS));
         UI.mainWindow.mSetTrasianka.addActionListener(new SetActionListener(KorpusDocument3.ATTRS_TRASIANKA));
         UI.mainWindow.mSetDyjalekt.addActionListener(new SetActionListener(KorpusDocument3.ATTRS_DYJALEKT));
-        
-        UI.mainWindow.f16.setSelected(true);
-        aFontSet.actionPerformed(new ActionEvent(UI.mainWindow.f16,0,null));
+    }
+
+    static void createFontChanger(JMenu menu, ButtonGroup bg, Container container) {
+        for (int sz : FONT_SIZES) {
+            JRadioButtonMenuItem rb = new JRadioButtonMenuItem("" + sz);
+            rb.addActionListener(new FontChanger(container, sz));
+            bg.add(rb);
+            menu.add(rb);
+        }
     }
 
     static AbstractAction actionGoGrammar = new AbstractAction() {
@@ -143,7 +137,7 @@ public class MainController {
     static ActionListener aFileSave = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             try {
-                File bak=new File(getOutFile().getPath()+".bak");
+                File bak = new File(getOutFile().getPath() + ".bak");
                 bak.delete();
                 getOutFile().renameTo(bak);
                 XMLText text = UI.doc.extractText();
@@ -196,9 +190,11 @@ public class MainController {
 
     static class SetActionListener implements ActionListener {
         private final SimpleAttributeSet attrs;
+
         public SetActionListener(SimpleAttributeSet attrs) {
-            this.attrs=attrs;
+            this.attrs = attrs;
         }
+
         @Override
         public void actionPerformed(ActionEvent e) {
             int p0 = UI.editor.getSelectionStart();
@@ -212,20 +208,28 @@ public class MainController {
         }
     };
 
-    static ActionListener aFontSet = new ActionListener() {
+    static class FontChanger implements ActionListener {
+        private final Container c;
+        private final int size;
+
+        public FontChanger(Container c, int size) {
+            this.c = c;
+            this.size = size;
+        }
+
         public void actionPerformed(ActionEvent e) {
-            String size = ((JRadioButtonMenuItem) e.getSource()).getText();
             Font font = UI.mainWindow.getFont();
-            font = new Font(font.getFamily(), font.getStyle(), Integer.parseInt(size));
-            setFont(UI.mainWindow, font);
+            font = new Font(font.getFamily(), font.getStyle(), size);
+            setFont(c, font);
+            GrammarPaneController.applyFont();
         }
     };
-    
+
     static void setFont(Component c, Font font) {
         c.setFont(font);
         if (c instanceof Container) {
-            Container co=(Container)c;
-            for(int i=0;i<co.getComponentCount();i++) {
+            Container co = (Container) c;
+            for (int i = 0; i < co.getComponentCount(); i++) {
                 setFont(co.getComponent(i), font);
             }
         }
@@ -295,7 +299,7 @@ public class MainController {
                 } finally {
                     in.close();
                 }
-                TextIO.saveXML(new File(baseFileName+ ".orig.xml"), kDoc);
+                TextIO.saveXML(new File(baseFileName + ".orig.xml"), kDoc);
             }
 
             UI.doc = new KorpusDocument3(kDoc);

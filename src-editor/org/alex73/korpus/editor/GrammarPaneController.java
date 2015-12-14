@@ -28,11 +28,16 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 
+import javax.swing.JEditorPane;
 import javax.swing.SwingWorker;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.Document;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 import javax.xml.bind.Marshaller;
 
 import org.alex73.korpus.base.BelarusianTags;
@@ -221,11 +226,21 @@ public class GrammarPaneController {
             try {
                 UI.grammarPane.outInfo.setText(get());
                 UI.grammarPane.outInfo.setCaretPosition(0);
+                applyFont();
             } catch (CancellationException ex) {
             } catch (Throwable ex) {
                 ex.printStackTrace();
                 UI.grammarPane.outInfo.setText("Памылка: " + ex.getMessage());
             }
+        }
+    }
+    
+    static void applyFont() {
+        Document doc = UI.grammarPane.outInfo.getDocument();
+        if (doc instanceof StyledDocument) {
+            SimpleAttributeSet attrs = new SimpleAttributeSet();
+            StyleConstants.setFontSize(attrs, UI.grammarPane.outInfo.getFont().getSize());
+            ((StyledDocument) doc).setCharacterAttributes(0, doc.getLength() + 1, attrs, false);
         }
     }
 
