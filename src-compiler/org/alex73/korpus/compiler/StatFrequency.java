@@ -23,13 +23,17 @@
 package org.alex73.korpus.compiler;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -72,8 +76,8 @@ public class StatFrequency {
             }
         });
 
-        List<File> files = new ArrayList<>(FileUtils.listFiles(new File("Korpus-texts/"), new String[] {
-                "xml", "text", "7z", "zip" }, true));
+        List<File> files = new ArrayList<>(FileUtils.listFiles(new File("Korpus-texts/"),
+                new String[] { "xml", "text", "7z", "zip" }, true));
         if (files.isEmpty()) {
             System.out.println("Няма тэкстаў ў Korpus-texts/");
             System.exit(1);
@@ -89,18 +93,31 @@ public class StatFrequency {
             }
         }
 
-        for (int i = 0; i < 50; i++) {
-            System.out.print(i + 1);
-            String most = null;
-            long mostCount = 0;
-            for (Map.Entry<String, Long> en : lemmasCount.entrySet()) {
-                if (en.getValue() > mostCount) {
-                    most = en.getKey();
-                    mostCount = en.getValue();
+        List<Pair> lemmas = new ArrayList<>();
+        for (Map.Entry<String, Long> en : lemmasCount.entrySet()) {
+            Pair p = new Pair();
+            p.lemma = en.getKey();
+            p.count = en.getValue();
+            lemmas.add(p);
+        }
+
+        Collections.sort(lemmas, new Comparator<Pair>() {
+            @Override
+            public int compare(Pair o1, Pair o2) {
+                if (o1.count > o2.count) {
+                    return -1;
+                } else if (o1.count < o2.count) {
+                    return 1;
+                } else {
+                    return o1.lemma.compareToIgnoreCase(o2.lemma);
                 }
             }
-            System.out.println(" " + most + " - " + mostCount);
-            lemmasCount.remove(most);
+        });
+        try (BufferedWriter out = new BufferedWriter(
+                new OutputStreamWriter(new FileOutputStream("/tmp/freq.txt"), "UTF-8"))) {
+            for (Pair p : lemmas) {
+                out.write(p.lemma + "\t" + p.count + "\n");
+            }
         }
     }
 
@@ -161,15 +178,14 @@ public class StatFrequency {
     }
 
     protected static void loadArchiveFileToCorpus(File f) throws Exception {
+        System.out.println("loadFileToCorpus " + f);
         if (f.getName().endsWith(".zip")) {
             ZipFile zip = new ZipFile(f);
-            int c = 0;
             for (Enumeration<? extends ZipEntry> it = zip.entries(); it.hasMoreElements();) {
                 ZipEntry en = it.nextElement();
                 if (en.isDirectory()) {
                     continue;
                 }
-                System.out.println("loadFileToCorpus " + f + "/" + en.getName() + ": " + (++c));
                 XMLText doc;
                 InputStream in = new BufferedInputStream(zip.getInputStream(en));
                 try {
@@ -188,13 +204,11 @@ public class StatFrequency {
             zip.close();
         } else if (f.getName().endsWith(".7z")) {
             SevenZFile sevenZFile = new SevenZFile(f);
-            int c = 0;
             for (SevenZArchiveEntry en = sevenZFile.getNextEntry(); en != null; en = sevenZFile
                     .getNextEntry()) {
                 if (en.isDirectory()) {
                     continue;
                 }
-                System.out.println("loadFileToCorpus " + f + "/" + en.getName() + ": " + (++c));
                 byte[] content = new byte[(int) en.getSize()];
                 for (int p = 0; p < content.length;) {
                     p += sevenZFile.read(content, p, content.length - p);
@@ -230,7 +244,7 @@ public class StatFrequency {
             if (o instanceof P) {
                 P p = (P) o;
                 for (Se se : p.getSe()) {
-                        sentences.add(se);
+                    sentences.add(se);
                 }
             }
         }
@@ -242,13 +256,24 @@ public class StatFrequency {
             for (Object o : se.getWOrSOrZ()) {
                 if (o instanceof W) {
                     W w = (W) o;
-                    Long c = lemmasCount.get(w.getLemma());
-                    if (c == null) {
-                        c = 0L;
+                    if (w.getLemma() == null) {
+                        continue;
                     }
-                    lemmasCount.put(w.getLemma(), c + 1);
+                    String[] ls = w.getLemma().split("_");
+                    for (String l : ls) {
+                        Long c = lemmasCount.get(l);
+                        if (c == null) {
+                            c = 0L;
+                        }
+                        lemmasCount.put(l, c + 1);
+                    }
                 }
             }
         }
+    }
+
+    static class Pair {
+        String lemma;
+        long count;
     }
 }

@@ -55,8 +55,8 @@ public class PrepareCache {
             }
         });
 
-        //KorpusLoading.processKorpus();
-        OtherLoading.processOther();
+        KorpusLoading.processKorpus();
+        //OtherLoading.processOther();
 
         List<String> errorNames = new ArrayList<>(errorsCount.keySet());
         Collections.sort(errorNames, new Comparator<String>() {
