@@ -90,11 +90,43 @@ public class GrammarDB {
         return instance;
     }
 
+    public static synchronized void initializeFromJar(LoaderProgress progress) throws Exception {
+        if (instance != null) {
+            return;
+        }
+        GrammarDB ins = new GrammarDB(progress);
+        if (!ins.allParadigms.isEmpty()) {
+            instance = ins;
+        }
+    }
+
     public static synchronized void initializeFromDir(File dir, LoaderProgress progress) throws Exception {
         if (instance != null) {
             return;
         }
         instance = new GrammarDB(dir, progress);
+    }
+
+    private GrammarDB(LoaderProgress progress) throws Exception {
+        try (InputStream in = GrammarDB.class.getResourceAsStream("/themes.txt")) {
+            if (in == null)
+                return;
+            addThemesFile(in);
+        }
+
+        progress.setFilesCount(25);
+        for (char c = 'A'; c <= 'Z'; c++) {
+            System.out.println(c + ".xml");
+            progress.beforeFileLoading(c + ".xml");
+            InputStream in = GrammarDB.class.getResourceAsStream("/" + c + ".xml");
+            if (in != null) {
+                addXMLFile(in, false);
+                in.close();
+            }
+            progress.afterFileLoading();
+        }
+
+        stat();
     }
 
     private GrammarDB(File dir, LoaderProgress progress) throws Exception {
@@ -118,7 +150,6 @@ public class GrammarDB {
     protected GrammarDB() {
     }
 
-    
     public void stat() {
         int fill = 6;
         DecimalFormat fo = new DecimalFormat("###,###,##0");
@@ -135,10 +166,29 @@ public class GrammarDB {
         int c = 0;
         for (String k : counts.keySet()) {
             String ff = fo.format(counts.get(k).intValue());
-            System.out.println(k + "          ".substring(k.length()) + "           ".substring(ff.length()) + ff);
+            System.out.println(
+                    k + "          ".substring(k.length()) + "           ".substring(ff.length()) + ff);
             c += counts.get(k);
         }
         System.out.println("Total: " + fo.format(c));
+    }
+
+    public synchronized void addXMLFile(InputStream file, boolean docLevel) throws Exception {
+
+        Unmarshaller unm = CONTEXT.createUnmarshaller();
+
+        InputStream in = new BufferedInputStream(file, 65536);
+        try {
+            Wordlist words = (Wordlist) unm.unmarshal(in);
+            for (Paradigm p : words.getParadigm()) {
+                addParadigm(p);
+                if (docLevel) {
+                    docLevelParadigms.add(p);
+                }
+            }
+        } finally {
+            in.close();
+        }
     }
 
     public synchronized void addXMLFile(File file, boolean docLevel) throws Exception {
@@ -166,8 +216,24 @@ public class GrammarDB {
         }
     }
 
+    public synchronized void addThemesFile(InputStream file) throws Exception {
+        BOMBufferedReader rd = new BOMBufferedReader(new InputStreamReader(file, "UTF-8"));
+        String s;
+        String part = "";
+        while ((s = rd.readLine()) != null) {
+            s = s.trim();
+            if (s.length() == 1) {
+                part = s;
+            } else if (s.length() > 1) {
+                addTheme(part, s);
+            }
+        }
+        rd.close();
+    }
+
     public synchronized void addThemesFile(File file) throws Exception {
-        BOMBufferedReader rd = new BOMBufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
+        BOMBufferedReader rd = new BOMBufferedReader(
+                new InputStreamReader(new FileInputStream(file), "UTF-8"));
         String s;
         String part = "";
         while ((s = rd.readLine()) != null) {
@@ -244,7 +310,8 @@ public class GrammarDB {
         if (p.getTag().startsWith("K")) {
             for (Form f : p.getForm()) {
                 if (f.getValue().length() != 1) {
-                    throw new RuntimeException("Незразумелы знак з кодам '" + p.getTag() + "': " + f.getValue());
+                    throw new RuntimeException(
+                            "Незразумелы знак з кодам '" + p.getTag() + "': " + f.getValue());
                 }
                 znaki += f.getValue();
             }
@@ -279,13 +346,13 @@ public class GrammarDB {
     String optimizeString(String s) {
         return s == null ? null : s.intern();
     }
-    
+
     public synchronized List<Paradigm> getAllParadigms() {
         return Collections.unmodifiableList(allParadigms);
     }
 
-    public synchronized Paradigm getLooksLike(String word, String looksLike, boolean checkForms, String tagMask,
-            StringBuilder out) {
+    public synchronized Paradigm getLooksLike(String word, String looksLike, boolean checkForms,
+            String tagMask, StringBuilder out) {
         Paradigm ratedParadigm = null;
         String ratedForm = null;
 
@@ -364,7 +431,7 @@ public class GrammarDB {
     public String getZnaki() {
         return znaki;
     }
-    
+
     public String getLetters() {
         return letters;
     }
@@ -394,9 +461,9 @@ public class GrammarDB {
         int ratedSkip = unstressedRatedForm.length() - eq;
         Paradigm result = new Paradigm();
         result.setTag(p.getTag());
-        
+
         int stressInSource = StressUtils.getStressFromStart(word);
-        
+
         String lemma = constructWord(unstressedWord, eq, WordNormalizer.normalize(p.getLemma()), ratedSkip);
         int st = StressUtils.getUsuallyStressedSyll(lemma);
         if (st < 0) {
@@ -408,13 +475,14 @@ public class GrammarDB {
             st = StressUtils.getStressFromEnd(p.getLemma());
             lemma = StressUtils.setStressFromEnd(lemma, st);
         }
-        
+
         result.setLemma(lemma);
 
         for (Paradigm.Form f : p.getForm()) {
             Paradigm.Form rf = new Paradigm.Form();
             rf.setTag(f.getTag());
-            String fword = constructWord(unstressedWord, eq, WordNormalizer.normalize(f.getValue()), ratedSkip);
+            String fword = constructWord(unstressedWord, eq, WordNormalizer.normalize(f.getValue()),
+                    ratedSkip);
             if (!fword.isEmpty()) {
                 st = StressUtils.getUsuallyStressedSyll(fword);
                 if (st < 0) {
@@ -425,7 +493,7 @@ public class GrammarDB {
                 } else {
                     st = StressUtils.getStressFromEnd(f.getValue());
                     fword = StressUtils.setStressFromEnd(fword, st);
-                }                
+                }
             }
             rf.setValue(fword);
             result.getForm().add(rf);
@@ -452,10 +520,12 @@ public class GrammarDB {
         }
         return eq;
     }
-    
+
     public interface LoaderProgress {
         void setFilesCount(int count);
+
         void beforeFileLoading(String file);
+
         void afterFileLoading();
     }
 }

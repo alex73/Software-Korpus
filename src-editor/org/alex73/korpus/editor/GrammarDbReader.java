@@ -53,7 +53,10 @@ public class GrammarDbReader extends SwingWorker<Void, String> implements Gramma
 
     @Override
     protected Void doInBackground() throws Exception {
-        GrammarDB.initializeFromDir(new File("GrammarDB"), this);
+        GrammarDB.initializeFromJar(this);
+        if (GrammarDB.getInstance() == null) {
+            GrammarDB.initializeFromDir(new File("GrammarDB"), this);
+        }
         publish((String) null);
         return null;
     }

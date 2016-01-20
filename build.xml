@@ -137,6 +137,15 @@
 			</manifest>
 			<zipfileset src="lib-editor/vldocking_2.1.4.jar"/>
 		</jar>
+		<jar jarfile="build/Redahavannie_korpusu_db.jar" basedir="build/classes-editor">
+			<manifest>
+				<attribute name="Main-Class" value="org.alex73.korpus.editor.Editor2" />
+				<!--attribute name="Class-Path" value="lib/iscwt.jar lib/isfreetype.jar lib/isnativec.jar lib/isrt.jar lib/itextpdf-5.1.3.jar lib/jPod.jar lib/jPodFonts.jar lib/jPodRenderer.jar lib/jai_codec.jar lib/jai_core.jar lib/jai_imageio.jar lib/jbig2.jar lib/jna.jar" /-->
+			</manifest>
+			<zipfileset src="lib-editor/vldocking_2.1.4.jar"/>
+			<fileset dir="GrammarDB" includes="?.xml"/>
+			<fileset dir="GrammarDB" includes="themes.txt"/>
+		</jar>
 	</target>
 
 	<target name="all" depends="clean,war,compiler,editor"/>
