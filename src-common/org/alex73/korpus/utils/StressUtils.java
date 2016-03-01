@@ -133,7 +133,7 @@ public class StressUtils {
     }
 
     public static void checkStress(String word) throws Exception {
-        for (String w : word.split("\\-")) {
+        for (String w : word.split("[\\-, \\.]")) {
             int pos = -1;
             int mainStresses = 0;
             while ((pos = w.indexOf(STRESS_CHAR, pos + 1)) >= 0) {

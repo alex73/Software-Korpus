@@ -155,7 +155,7 @@
 </div>
 
 <br/><br/>
-<center>Лексіка-граматычная база даступная на ўмовах ліцэнзіі <a target=_blank" href="http://opendatacommons.org/licenses/odbl/1.0/">ODbL</a>. Рухавік даступны на ўмовах ліцэнзіі <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>.</center>
+<center>Лексіка-граматычная база даступная на ўмовах ліцэнзіі <a target=_blank" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Рухавік даступны на ўмовах ліцэнзіі <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>.</center>
 
 #parse ("ga.velocity")
   </body>
