@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="gwt:property" content="locale=be">
+
+    <link type="text/css" rel="stylesheet" href="Korpus.css">
+
+      <title>Беларускі N-корпус: KWIC корпуса</title>
+      
+    <script type="text/javascript" language="javascript" src="korpus/korpus.nocache.js"></script>
+  </head>
+
+  <body>
+    <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
+    <noscript>
+      <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+        Ваш броўзар павінен падтрымліваць JavaScript.
+      </div>
+    </noscript>
+
+<span class="logo">Беларускі N-корпус</span>
+<div style="clear: both;"></div>
+<div class="tab">
+  <span class="tabPage">Корпус</span>
+  <a class="tabPage" href="otherSearch.html">Неапрацаваныя тэксты</a>
+<a class="tabPage" href="grammarDB.html">Граматычная база</a>
+<a class="tabPage" href="download.html">Спампаваць</a>
+<a class="tabPage" href="about.html">Пра праект</a>
+</div>
+
+<div class="tab">
+  <a class="tabPage" href="korpusSearch.html"><span class="tabPage">Пошук</a>
+  <span class="tabPage">KWIC</span>
+  <a class="tabPage" href="korpusCluster.html">Кластар</a>
+</div>
+
+<hr/>
+
+<div id="mainPart" style="display: none;">
+
+<div>
+&nbsp;<span style="color:red" id="errorMessage"> </span>
+</div>
+
+  <fieldset> <legend>Фільтр тэкстаў</legend>
+    Аўтар: <input type="text" id="text.author"></input> <br/>
+    Стыль/жанр: <a id="text.stylegenre" href="javascript:;" class="gwt-Anchor"></a> <br/>
+    Год напісання: ад <input type="text" id="text.yearWrittenFrom"></input> да <input type="text" id="text.yearWrittenTo"></input> <br/>
+    Год выдання: ад <input type="text" id="text.yearPublishedFrom"></input> да <input type="text" id="text.yearPublishedTo"></input> <br/>
+  </fieldset>
+
+<div id="wordsBlock"></div>
+
+  <button id="btnAddWord" style="float: left;">Дадаць слова</button>
+
+<div style="clear: both"></div>
+
+
+<div class="word" id="templateWord" style="display:none">
+  <fieldset> <legend>Слова</legend>
+    Слова: <input type="text" class="templateReplaceWord"></input>
+    <a href="#" class="templateReplacelnClose"></a>
+  <br/>
+    <input type="checkbox" class="templateReplacecbAllForms">Усе словаформы</input>
+  <br/>
+    Граматыка: <div class="templateReplacelbTypes"></div>
+    <a href="#" class="templateReplacelnDetails"></a>
+  </fieldset>
+</div>
+
+<button id="btnSearch">Пошук</button>
+
+<hr/>
+<br/>
+<div id="resultTable">
+
+<div id="promptMessage" style="text-align: center">
+  Гэты раздзел змяшчае вычытаныя тэксты, якія маюць метаразметку: аўтар тэксту, назва тэксту і г.д.
+  <br/><br/>
+  <center><div id="statKorpus"></div></center>
+<br/>
+<br/>
+<br/>
+<hr/>
+<br/>
+</div>
+
+
+</div>
+
+</div>
+
+<br/><br/>
+<center>Лексіка-граматычная база даступная на ўмовах ліцэнзіі <a target=_blank" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Рухавік даступны на ўмовах ліцэнзіі <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>.</center>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-40650744-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+  </body>
+</html>

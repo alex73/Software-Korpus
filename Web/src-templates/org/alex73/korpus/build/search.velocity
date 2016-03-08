@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="gwt:property" content="locale=be">
+
+    <link type="text/css" rel="stylesheet" href="Korpus.css">
+
+#if ( $mode == 'search')
+  #if ( $db == 'korpus' )
+    <title>Беларускі N-корпус: пошук па корпусе</title>
+  #else
+    <title>Беларускі N-корпус: пошук па неапрацаваных тэкстах</title>
+  #end
+#elseif ( $mode == 'conco')
+  #if ( $db == 'korpus' )
+    <title>Беларускі N-корпус: KWIC корпуса</title>
+  #else
+    <title>Беларускі N-корпус: KWIC неапрацаваных тэкстаў</title>
+  #end
+#elseif ( $mode == 'cluster')
+  #if ( $db == 'korpus' )
+    <title>Беларускі N-корпус: кластар корпуса</title>
+  #else
+    <title>Беларускі N-корпус: кластар неапрацаваных тэкстаў</title>
+  #end
+#end
+    
+    <script type="text/javascript" language="javascript" src="korpus/korpus.nocache.js"></script>
+  </head>
+
+  <body>
+    <iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
+    <noscript>
+      <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+        Ваш броўзар павінен падтрымліваць JavaScript.
+      </div>
+    </noscript>
+
+<span class="logo">Беларускі N-корпус</span>
+<div style="clear: both;"></div>
+<div class="tab">
+#if ( $db == 'korpus' )
+  <span class="tabPage">Корпус</span>
+  <a class="tabPage" href="otherSearch.html">Неапрацаваныя тэксты</a>
+#else
+  <a class="tabPage" href="korpusSearch.html">Корпус</a>
+  <span class="tabPage">Неапрацаваныя тэксты</span>
+#end
+<a class="tabPage" href="grammarDB.html">Граматычная база</a>
+<a class="tabPage" href="download.html">Спампаваць</a>
+<a class="tabPage" href="about.html">Пра праект</a>
+</div>
+
+<div class="tab">
+#if ( $db == 'korpus' )
+  #set ( $prefix = 'korpus' )
+#else
+  #set ( $prefix = 'other' )
+#end
+#if ( $mode == 'search' )
+  <span class="tabPage">Пошук</span>
+  <a class="tabPage" href="${prefix}Concordance.html">KWIC</a>
+  <a class="tabPage" href="${prefix}Cluster.html">Кластар</a>
+#elseif ( $mode == 'conco' )
+  <a class="tabPage" href="${prefix}Search.html"><span class="tabPage">Пошук</a>
+  <span class="tabPage">KWIC</span>
+  <a class="tabPage" href="${prefix}Cluster.html">Кластар</a>
+#elseif ( $mode == 'cluster' )
+  <a class="tabPage" href="${prefix}Search.html"><span class="tabPage">Пошук</a>
+  <a class="tabPage" href="${prefix}Concordance.html">KWIC</a>
+  <span class="tabPage">Кластар</span>
+#end
+</div>
+
+<hr/>
+
+<div id="mainPart" style="display: none;">
+
+<div>
+&nbsp;<span style="color:red" id="errorMessage"> </span>
+</div>
+
+#if ( $db == 'korpus' )
+  <fieldset> <legend>Фільтр тэкстаў</legend>
+    Аўтар: <input type="text" id="text.author"></input> <br/>
+    Стыль/жанр: <a id="text.stylegenre" href="javascript:;" class="gwt-Anchor"></a> <br/>
+    Год напісання: ад <input type="text" id="text.yearWrittenFrom"></input> да <input type="text" id="text.yearWrittenTo"></input> <br/>
+    Год выдання: ад <input type="text" id="text.yearPublishedFrom"></input> да <input type="text" id="text.yearPublishedTo"></input> <br/>
+  </fieldset>
+#else
+  <fieldset> <legend>Фільтр тэкстаў</legend>
+    Частка: <input type="text" id="text.volume"></input> <br/>
+  </fieldset>
+#end
+
+<div id="wordsBlock"></div>
+
+#if ( $mode == 'cluster' )
+  Слоў злева: <input id="txtWordsBefore" type="text" value="1"></input><br/>
+  Слоў справа: <input id="txtWordsAfter" type="text" value="1"></input><br/>
+#else
+  <button id="btnAddWord" style="float: left;">Дадаць слова</button>
+#end
+
+<div style="clear: both"></div>
+
+#if ( $mode == 'search' )
+  <div class="block">
+    <input type="radio" name="order" id="orderPreset" checked="on">Вызначаны парадак</input>
+    <input type="radio" name="order" id="orderAnySentence">Любая адлегласць у межах сказа</input>
+    <input type="radio" name="order" id="orderAnyParagraph">Любая адлегласць у межах абзаца</input>
+  </div>
+#end
+
+<div class="word" id="templateWord" style="display:none">
+  <fieldset> <legend>Слова</legend>
+    Слова: <input type="text" class="templateReplaceWord"></input>
+    <a href="#" class="templateReplacelnClose"></a>
+  <br/>
+    <input type="checkbox" class="templateReplacecbAllForms">Усе словаформы</input>
+  <br/>
+    Граматыка: <div class="templateReplacelbTypes"></div>
+    <a href="#" class="templateReplacelnDetails"></a>
+  </fieldset>
+</div>
+
+<button id="btnSearch">Пошук</button>
+
+<hr/>
+<br/>
+<div id="resultTable">
+
+<div id="promptMessage" style="text-align: center">
+#if ( $db == 'korpus' )
+  Гэты раздзел змяшчае вычытаныя тэксты, якія маюць метаразметку: аўтар тэксту, назва тэксту і г.д.
+  <br/><br/>
+  <center><div id="statKorpus"></div></center>
+#else
+  Падкорпус неапрацаваных тэкстаў уяўляе сабой збор тэкстаў, якія былі распазнаныя ў аўтаматычным рэжыме і не прайшлі вычытку (ёсць праблемы з пераносамі, падзелам на сказы, абзацы і інш.). Падкорпус дазваляе шукаць слова  і словаформы, але не мае паўнавартаснай метаразметкі.
+  <br/><br/>
+  <center><div id="statOther"></div></center>
+#end
+<br/>
+<br/>
+<br/>
+<hr/>
+<br/>
+</div>
+
+
+</div>
+
+</div>
+
+<br/><br/>
+<center>Лексіка-граматычная база даступная на ўмовах ліцэнзіі <a target=_blank" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Рухавік даступны на ўмовах ліцэнзіі <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>.</center>
+
+#parse ("ga.velocity")
+  </body>
+</html>

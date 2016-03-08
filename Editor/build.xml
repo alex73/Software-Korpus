@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="Korpus-Editor" default="all" basedir=".">
+
+	<target name="clean">
+		<delete dir="build" failonerror="false" />
+	</target>
+
+	<target name="build">
+		<mkdir dir="build/classes" />
+		<javac srcdir="src" encoding="utf-8" destdir="build/classes" nowarn="true" debug="true" debuglevel="lines,vars,source">
+			<classpath>
+				<fileset dir="lib" includes="**/*.jar" />
+				<fileset dir="../Common/lib/" includes="**/*.jar" />
+				<fileset dir="../Common/build/" includes="Korpus-Common.jar" />
+			</classpath>
+		</javac>
+		<copy todir="build/classes">
+			<fileset dir="src" />
+		</copy>
+		<jar jarfile="build/Redahavannie_korpusu.jar" basedir="build/classes">
+			<manifest>
+				<attribute name="Main-Class" value="org.alex73.korpus.editor.Editor2" />
+			</manifest>
+			<zipgroupfileset dir="lib" includes="**/*.jar"/>
+			<zipgroupfileset dir="../Common/lib/" includes="**/*.jar" />
+			<zipgroupfileset dir="../Common/build/" includes="Korpus-Common.jar" />
+		</jar>
+	</target>
+
+	<target name="all" depends="clean,build"/>
+</project>

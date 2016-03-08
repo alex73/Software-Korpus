@@ -1,0 +1,12 @@
+/build/
+/gwt-unitCache/
+/war/WEB-INF/classes
+/war/WEB-INF/deploy
+/war/korpus
+*.war
+.gwt
+/GrammarDB/
+/Korpus-texts/
+/Korpus-cache/
+/Other-texts/
+/Other-cache/

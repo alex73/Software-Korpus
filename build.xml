@@ -1,171 +1,19 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<project name="Korpus" default="all" basedir=".">
+<project name="Korpus-Common" default="all" basedir=".">
 
-	<!-- Arguments to gwtc and devmode targets -->
-	<property name="gwt.args" value="" />
-
-	<!-- Configure path to GWT SDK -->
-	<condition property="gwt.sdk" value="C:/opt/gwt-2.7.0">
-		<os family="windows"/>
-	</condition>
-	<condition property="gwt.sdk" value="/opt/gwt-2.7.0">
-		<os family="unix"/>
-	</condition>
-
-	<path id="project.class.path">
-		<pathelement location="war/WEB-INF/classes"/>
-		<pathelement location="${gwt.sdk}/gwt-user.jar"/>
-		<fileset dir="${gwt.sdk}" includes="gwt-dev*.jar"/>
-		<!-- Add any additional non-server libs (such as JUnit) -->
-		<fileset dir="war/WEB-INF/lib" includes="**/*.jar"/>
-	</path>
-
-	<target name="libs" description="Copy libs to WEB-INF/lib">
-		<mkdir dir="war/WEB-INF/lib" />
-		<copy todir="war/WEB-INF/lib" file="${gwt.sdk}/gwt-servlet.jar" />
-		<copy todir="war/WEB-INF/lib" file="${gwt.sdk}/gwt-servlet-deps.jar" />
-		<!-- Add any additional server libs that need to be copied -->
+	<target name="clean">
+		<ant dir="Common" target="clean" />
+		<ant dir="Editor" target="clean" />
+		<ant dir="Web" target="clean" />
+		<ant dir="WebDataPrepare" target="clean" />
 	</target>
 
-	<target name="javac" depends="libs" description="Compile java source to bytecode">
-		<mkdir dir="war/WEB-INF/classes"/>
-		<javac srcdir="src-web:src-common" includes="**" encoding="utf-8" destdir="war/WEB-INF/classes" nowarn="true" debug="true" debuglevel="lines,vars,source">
-			<classpath refid="project.class.path" />
-		</javac>
-		<copy todir="war/WEB-INF/classes">
-			<fileset dir="src-web" excludes="**/*.java"/>
-			<fileset dir="src-common" excludes="**/*.java"/>
-		</copy>
+	<target name="build">
+		<ant dir="Common" />
+		<ant dir="Editor" />
+		<ant dir="Web" />
+		<ant dir="WebDataPrepare" />
 	</target>
 
-	<target name="gwtc" depends="javac" description="GWT compile to JavaScript (production mode)">
-		<java failonerror="true" fork="true" classname="com.google.gwt.dev.Compiler">
-			<classpath>
-				<pathelement location="src-web"/>
-				<pathelement location="src-common"/>
-				<path refid="project.class.path"/>
-				<pathelement location="/opt/gwt-2.6.1/validation-api-1.0.0.GA.jar" />
-				<pathelement location="/opt/gwt-2.6.1/validation-api-1.0.0.GA-sources.jar" />
-			</classpath>
-			<!-- add jvmarg -Xss16M or similar if you see a StackOverflowError -->
-			<jvmarg value="-Xmx256M"/>
-			<arg line="-war"/>
-			<arg value="war"/>
-			<!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
-			<arg line="${gwt.args}"/>
-			<arg value="org.alex73.korpus.Korpus"/>
-		</java>
-	</target>
-
-	<target name="devmode" depends="javac" description="Run development mode">
-		<java failonerror="true" fork="true" classname="com.google.gwt.dev.DevMode">
-			<classpath>
-				<pathelement location="src-web"/>
-				<pathelement location="src-common"/>
-				<path refid="project.class.path"/>
-				<pathelement location="/opt/gwt-2.6.1/validation-api-1.0.0.GA.jar" />
-				<pathelement location="/opt/gwt-2.6.1/validation-api-1.0.0.GA-sources.jar" />
-			</classpath>
-			<jvmarg value="-Xmx256M"/>
-			<arg value="-startupUrl"/>
-			<arg value="korpusSearch.html"/>
-			<arg line="-war"/>
-			<arg value="war"/>
-			<!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
-			<arg line="${gwt.args}"/>
-			<arg value="org.alex73.korpus.Korpus"/>
-		</java>
-	</target>
-
-
-	<target name="hosted" depends="devmode" description="Run development mode (NOTE: the 'hosted' target is deprecated)" />
-
-	<target name="build" depends="gwtc" description="Build this project" />
-
-	<target name="war" depends="build" description="Create a war file">
-		<zip destfile="build/ROOT.war" basedir="war" excludes="logs/**, **/lib/sources/**"/>
-	</target>
-
-	<target name="clean" description="Cleans this project">
-		<delete dir="war/WEB-INF/classes" failonerror="false" />
-		<delete dir="war/korpus" failonerror="false" />
-		<delete dir="build" failonerror="false" />
-		<delete dir="dist" failonerror="false" />
-	</target>
-
-	<target name="compiler" depends="javac">
-		<mkdir dir="build/classes-compiler" />
-		<javac srcdir="src-compiler:src-common" includes="**" encoding="utf-8" destdir="build/classes-compiler" nowarn="true" debug="true" debuglevel="lines,vars,source">
-			<classpath refid="project.class.path" />
-			<classpath>
-				<fileset dir="lib-editor" includes="**/*.jar" />
-			</classpath>
-		</javac>
-		<copy todir="build/classes-compiler">
-			<fileset dir="src-compiler" />
-			<fileset dir="src-common" />
-		</copy>
-		<jar jarfile="build/Korpus-cache.jar" basedir="build/classes-compiler">
-			<manifest>
-				<attribute name="Main-Class" value="org.alex73.korpus.server.engine.KorpusLoading" />
-			</manifest>
-			<zipfileset src="war/WEB-INF/lib/lucene-core-5.1.0.jar"/>
-			<zipfileset src="war/WEB-INF/lib/lucene-analyzers-common-5.1.0.jar"/>
-			<zipfileset src="war/WEB-INF/lib/commons-lang-2.4.jar"/>
-		</jar>
-	</target>
-
-	<target name="editor">
-		<mkdir dir="build/classes-editor" />
-		<javac destdir="build/classes-editor" debug="true" encoding="UTF-8">
-			<src path="src-editor" />
-			<src path="src-common" />
-			<exclude name="**/client/**" />
-			<exclude name="**/server/**" />
-			<classpath>
-				<fileset dir="lib-editor" includes="**/*.jar" />
-			</classpath>
-		</javac>
-		<copy todir="build/classes-editor">
-			<fileset dir="src-editor" />
-			<fileset dir="src-common" />
-		</copy>
-		<jar jarfile="build/Redahavannie_korpusu.jar" basedir="build/classes-editor">
-			<manifest>
-				<attribute name="Main-Class" value="org.alex73.korpus.editor.Editor2" />
-				<!--attribute name="Class-Path" value="lib/iscwt.jar lib/isfreetype.jar lib/isnativec.jar lib/isrt.jar lib/itextpdf-5.1.3.jar lib/jPod.jar lib/jPodFonts.jar lib/jPodRenderer.jar lib/jai_codec.jar lib/jai_core.jar lib/jai_imageio.jar lib/jbig2.jar lib/jna.jar" /-->
-			</manifest>
-			<zipfileset src="lib-editor/vldocking_2.1.4.jar"/>
-		</jar>
-		<jar jarfile="build/Redahavannie_korpusu_db.jar" basedir="build/classes-editor">
-			<manifest>
-				<attribute name="Main-Class" value="org.alex73.korpus.editor.Editor2" />
-				<!--attribute name="Class-Path" value="lib/iscwt.jar lib/isfreetype.jar lib/isnativec.jar lib/isrt.jar lib/itextpdf-5.1.3.jar lib/jPod.jar lib/jPodFonts.jar lib/jPodRenderer.jar lib/jai_codec.jar lib/jai_core.jar lib/jai_imageio.jar lib/jbig2.jar lib/jna.jar" /-->
-			</manifest>
-			<zipfileset src="lib-editor/vldocking_2.1.4.jar"/>
-			<fileset dir="GrammarDB" includes="?.xml"/>
-			<fileset dir="GrammarDB" includes="themes.txt"/>
-		</jar>
-	</target>
-
-	<target name="all" depends="clean,war,compiler,editor"/>
-
-	<target name="cache">
-		<mkdir dir="build/compiler" />
-		<javac srcdir="src-compiler:src-common" includes="**" encoding="utf-8" destdir="build/compiler" nowarn="true" debug="true" debuglevel="lines,vars,source">
-			<classpath>
-				<path refid="project.class.path" />
-				<fileset dir="lib-editor" includes="**/*.jar" />
-			</classpath>
-		</javac>
-		<java failonerror="true" fork="true" classname="org.alex73.korpus.compiler.PrepareCache">
-			<classpath>
-				<pathelement location="build/compiler"/>
-				<path refid="project.class.path"/>
-				<fileset dir="lib-editor" includes="**/*.jar" />
-			</classpath>
-			<jvmarg value="-Xmx4096M"/>
-		</java>
-	</target>
-
+	<target name="all" depends="clean,build"/>
 </project>

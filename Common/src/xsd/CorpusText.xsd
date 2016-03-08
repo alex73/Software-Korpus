@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+    <xs:element name="XMLText">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="Header" />
+                <xs:element ref="Content" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="Header">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="Tag" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="Tag">
+        <xs:complexType>
+            <xs:simpleContent>
+                <xs:extension base="xs:string">
+                    <xs:attribute name="name" type="xs:string" use="required" />
+                </xs:extension>
+            </xs:simpleContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="Content">
+        <xs:complexType>
+            <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                <xs:choice>
+                    <xs:element ref="p" />
+                    <xs:element ref="Tag" />
+                </xs:choice>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="p"> <!-- paragraph -->
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="se" minOccurs="0" maxOccurs="unbounded" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="se"> <!-- sentence -->
+        <xs:complexType>
+            <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                <xs:choice>
+                    <xs:element ref="w" />
+                    <xs:element ref="s" />
+                    <xs:element ref="z" />
+                    <xs:element ref="o" />
+                    <xs:element ref="inlineTag" />
+                </xs:choice>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="w"> <!-- word -->
+        <xs:complexType>
+            <xs:simpleContent>
+                <xs:extension base="xs:string">
+                    <xs:attribute name="cat" type="xs:string" use="required" />
+                    <xs:attribute name="lemma" type="xs:string" use="required" />
+                    <xs:attribute name="manual" type="xs:boolean" use="optional" default="false" />
+                </xs:extension>
+            </xs:simpleContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="z"> <!-- non-letter char, like commas, quotes, etc. -->
+        <xs:complexType>
+            <xs:simpleContent>
+                <xs:extension base="xs:string">
+                    <xs:attribute name="cat" type="xs:string" use="required" />
+                </xs:extension>
+            </xs:simpleContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="o"> <!-- other, like numbers, non-Belarusian words, etc -->
+        <xs:complexType>
+            <xs:simpleContent>
+                <xs:extension base="xs:string" />
+            </xs:simpleContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="s"> <!-- space -->
+        <xs:complexType>
+            <xs:attribute name="char" type="S1" use="optional" default=" " />
+        </xs:complexType>
+    </xs:element>
+
+    <xs:simpleType name="S1">
+        <xs:restriction base="xs:string">
+            <xs:maxLength value="1" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:element name="inlineTag">
+        <xs:complexType>
+            <xs:simpleContent>
+                <xs:extension base="xs:string" />
+            </xs:simpleContent>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>
