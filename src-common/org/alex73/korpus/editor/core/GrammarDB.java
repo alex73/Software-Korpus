@@ -26,6 +26,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
@@ -52,6 +53,10 @@ import javax.xml.validation.Validator;
 import org.alex73.korpus.text.parser.BOMBufferedReader;
 import org.alex73.korpus.utils.StressUtils;
 import org.alex73.korpus.utils.WordNormalizer;
+
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 
 import alex73.corpus.paradigm.Paradigm;
 import alex73.corpus.paradigm.Paradigm.Form;
@@ -130,6 +135,7 @@ public class GrammarDB {
     }
 
     private GrammarDB(File dir, LoaderProgress progress) throws Exception {
+        long be = System.currentTimeMillis();
         addThemesFile(new File(dir, "themes.txt"));
         File[] xmlFiles = dir.listFiles(new FileFilter() {
             public boolean accept(File pathname) {
@@ -145,6 +151,23 @@ public class GrammarDB {
             progress.afterFileLoading();
         }
         stat();
+        long af = System.currentTimeMillis();
+        System.out.println("GrammarDB loading time: " + (af - be) + "ms");
+
+        be = System.currentTimeMillis();
+        Kryo kryo = new Kryo();
+        Output output = new Output(new FileOutputStream("/tmp/file.bin"), 65536);
+        kryo.writeObject(output, allParadigms);
+        output.close();
+        af = System.currentTimeMillis();
+        System.out.println("GrammarDB serialization time: " + (af - be) + "ms");
+        
+//        be = System.currentTimeMillis();
+//        Input input = new Input(new FileInputStream("/tmp/file.bin"), 65536);
+//        List<Paradigm> someObject = kryo.readObject(input, ArrayList.class);
+//        input.close();
+//        af = System.currentTimeMillis();
+//        System.out.println("GrammarDB deserialization time: " + (af - be) + "ms");
     }
 
     protected GrammarDB() {
@@ -277,8 +300,23 @@ public class GrammarDB {
 
     private void addParadigm(Paradigm p) {
         // optimize(p);
+        if (p.getTag()!=null) {
+        p.setTag(p.getTag().intern());
+        }
         allParadigms.add(p);
         for (Form f : p.getForm()) {
+            if (f.getTag()!=null) {
+            f.setTag(f.getTag().intern());
+            }
+            if (f.getSlouniki()!=null) {
+            f.setSlouniki(f.getSlouniki().intern());
+            }
+            if (f.getPravapis()!=null) {
+            f.setPravapis(f.getPravapis().intern());
+            }
+            if (f.getValue()!=null) {
+                f.setValue(f.getValue().intern());
+            }
             String v = WordNormalizer.normalize(f.getValue());
             if (v.isEmpty()) {
                 continue;
