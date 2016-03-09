@@ -34,7 +34,6 @@ import java.io.InputStream;
 
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
-import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -46,10 +45,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
-import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.PlainDocument;
 import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
 import javax.swing.text.ViewFactory;
 
 import org.alex73.korpus.editor.core.GrammarDB;
@@ -151,7 +148,7 @@ public class MainController {
     };
     static ActionListener aFileClose = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-
+            closeFile();
         }
     };
 
@@ -268,6 +265,7 @@ public class MainController {
     };
 
     public static void openFile(File f) {
+        GrammarDB.getInstance().clearDocLevelParadygms();
         try {
             baseFileName = f.getPath().replaceAll("\\.[a-z]+$", "");
 
@@ -318,11 +316,23 @@ public class MainController {
 
             UI.mainWindow.mFileOpen.setEnabled(false);
             UI.mainWindow.mFileSave.setEnabled(true);
-            // UI.mainWindow.mFileClose.setEnabled(true);
+            UI.mainWindow.mFileClose.setEnabled(true);
         } catch (Throwable ex) {
             ex.printStackTrace();
             UI.showError(ex.getClass().getSimpleName() + ": " + ex.getMessage());
         }
+    }
+
+    static void closeFile() {
+        GrammarDB.getInstance().clearDocLevelParadygms();
+        UI.doc = null;
+        UI.editor.removeCaretListener(onWordChanged);
+        UI.editor.setEditorKit(UI.editor.getEditorKitForContentType("text/plain"));
+        UI.editor.setDocument(new PlainDocument());
+        
+        UI.mainWindow.mFileOpen.setEnabled(true);
+        UI.mainWindow.mFileSave.setEnabled(false);
+        UI.mainWindow.mFileClose.setEnabled(false);
     }
 
     static File getGrammarFile() {

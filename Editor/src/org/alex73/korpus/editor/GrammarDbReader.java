@@ -78,7 +78,7 @@ public class GrammarDbReader extends SwingWorker<Void, String> implements Gramma
         try {
             get();
 
-            if (GrammarDB.getInstance().getAllParadigms().isEmpty()) {
+            if (GrammarDB.getInstance().isEmpty()) {
                 UI.showError("Няма граматычнай базы ў GrammarDB/");
                 System.exit(1);
             }

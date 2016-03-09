@@ -17,6 +17,7 @@
 		<copy todir="build/classes">
 			<fileset dir="src" />
 		</copy>
+		<copy file="GrammarDB/db.cache" todir="build/classes" />
 		<jar jarfile="build/Redahavannie_korpusu.jar" basedir="build/classes">
 			<manifest>
 				<attribute name="Main-Class" value="org.alex73.korpus.editor.Editor2" />

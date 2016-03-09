@@ -32,6 +32,12 @@ public class Theme {
     public String name;
     public List<Theme> children = new ArrayList<>();
 
+    /**
+     * Constructor for deserialization only.
+     */
+    public Theme() {
+    }
+
     public Theme(String name) {
         this.name = name;
     }

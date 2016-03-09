@@ -33,7 +33,7 @@ import java.io.StringReader;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -67,19 +67,23 @@ import alex73.corpus.paradigm.Wordlist;
  */
 public class GrammarDB {
     public static final Locale BEL = new Locale("be");
+    public static final String CACHE_FILE = "db.cache";
+    public static final String THEMES_FILE = "themes.txt";
+
+    public static final String letters = "ёйцукенгшўзх'фывапролджэячсмітьбющиЁЙЦУКЕНГШЎЗХ'ФЫВАПРОЛДЖЭЯЧСМІТЬБЮЩИqwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
 
     public static final JAXBContext CONTEXT;
     public static final Schema schema;
 
     private static GrammarDB instance;
 
+    Map<String, Theme> themes;
     List<Paradigm> allParadigms = new ArrayList<>();
-    List<Paradigm> docLevelParadigms = new ArrayList<>();
     Map<String, Paradigm[]> paradigmsByForm = new HashMap<>();
     String znaki = "";
-    String letters = "ёйцукенгшўзх'фывапролджэячсмітьбющиЁЙЦУКЕНГШЎЗХ'ФЫВАПРОЛДЖЭЯЧСМІТЬБЮЩИqwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
 
-    Map<String, Theme> themes = new TreeMap<>();
+    transient List<Paradigm> docLevelParadigms = new ArrayList<>();
+    transient Map<String, Paradigm[]> docLevelParadigmsByForm = new HashMap<>();
 
     static {
         try {
@@ -91,6 +95,9 @@ public class GrammarDB {
         }
     }
 
+    protected GrammarDB() {
+    }
+
     public static synchronized GrammarDB getInstance() {
         return instance;
     }
@@ -99,55 +106,52 @@ public class GrammarDB {
         if (instance != null) {
             return;
         }
-        GrammarDB ins = new GrammarDB(progress);
-        if (!ins.allParadigms.isEmpty()) {
-            instance = ins;
+        try (InputStream in = GrammarDB.class.getResourceAsStream("/" + CACHE_FILE)) {
+            if (in == null)
+                return;
+            long be = System.currentTimeMillis();
+            Input input = new Input(in, 65536);
+            instance = loadFromCache(input);
+            long af = System.currentTimeMillis();
+            System.out.println("GrammarDB deserialization time: " + (af - be) + "ms");
         }
+
+        instance.stat();
     }
 
     public static synchronized void initializeFromDir(File dir, LoaderProgress progress) throws Exception {
         if (instance != null) {
             return;
         }
-        instance = new GrammarDB(dir, progress);
-    }
 
-    private GrammarDB(LoaderProgress progress) throws Exception {
-        try (InputStream in = GrammarDB.class.getResourceAsStream("/themes.txt")) {
-            if (in == null)
-                return;
-            addThemesFile(in);
-        }
-
-        progress.setFilesCount(25);
-        for (char c = 'A'; c <= 'Z'; c++) {
-            System.out.println(c + ".xml");
-            progress.beforeFileLoading(c + ".xml");
-            InputStream in = GrammarDB.class.getResourceAsStream("/" + c + ".xml");
-            if (in != null) {
-                addXMLFile(in, false);
-                in.close();
+        File[] forLoads = getFilesForLoad(dir);
+        File cacheFile = new File(dir, CACHE_FILE);
+        if (cacheExist(dir, cacheFile, forLoads)) {
+            long be = System.currentTimeMillis();
+            try (Input input = new Input(new FileInputStream(cacheFile), 65536)) {
+                instance = loadFromCache(input);
             }
-            progress.afterFileLoading();
+            long af = System.currentTimeMillis();
+            System.out.println("GrammarDB deserialization time: " + (af - be) + "ms");
+            instance.stat();
+        } else {
+            instance = new GrammarDB(dir, forLoads, cacheFile, progress);
         }
-
-        stat();
     }
 
-    private GrammarDB(File dir, LoaderProgress progress) throws Exception {
+    private GrammarDB(File dir, File[] forLoads, File cacheFile, LoaderProgress progress) throws Exception {
         long be = System.currentTimeMillis();
-        addThemesFile(new File(dir, "themes.txt"));
-        File[] xmlFiles = dir.listFiles(new FileFilter() {
-            public boolean accept(File pathname) {
-                return pathname.isFile()
-                        && (pathname.getName().endsWith(".xml") || pathname.getName().endsWith(".xml.gz"));
+        progress.setFilesCount(forLoads.length);
+        long latest = 0;
+        for (int i = 0; i < forLoads.length; i++) {
+            latest = Math.max(latest, forLoads[i].lastModified());
+            System.out.println(forLoads[i].getPath());
+            progress.beforeFileLoading(forLoads[i].getName());
+            if (forLoads[i].getName().equals(THEMES_FILE)) {
+                addThemesFile(forLoads[i]);
+            } else {
+                addXMLFile(forLoads[i], false);
             }
-        });
-        progress.setFilesCount(xmlFiles.length);
-        for (int i = 0; i < xmlFiles.length; i++) {
-            System.out.println(xmlFiles[i].getPath());
-            progress.beforeFileLoading(xmlFiles[i].getName());
-            addXMLFile(xmlFiles[i], false);
             progress.afterFileLoading();
         }
         stat();
@@ -156,21 +160,56 @@ public class GrammarDB {
 
         be = System.currentTimeMillis();
         Kryo kryo = new Kryo();
-        Output output = new Output(new FileOutputStream("/tmp/file.bin"), 65536);
-        kryo.writeObject(output, allParadigms);
-        output.close();
+        try (Output output = new Output(new FileOutputStream(cacheFile), 65536)) {
+            kryo.writeObject(output, this);
+        }
+        cacheFile.setLastModified(latest);
         af = System.currentTimeMillis();
         System.out.println("GrammarDB serialization time: " + (af - be) + "ms");
-        
-//        be = System.currentTimeMillis();
-//        Input input = new Input(new FileInputStream("/tmp/file.bin"), 65536);
-//        List<Paradigm> someObject = kryo.readObject(input, ArrayList.class);
-//        input.close();
-//        af = System.currentTimeMillis();
-//        System.out.println("GrammarDB deserialization time: " + (af - be) + "ms");
     }
 
-    protected GrammarDB() {
+    private static GrammarDB loadFromCache(Input input) throws Exception {
+        Kryo kryo = new Kryo();
+        return kryo.readObject(input, GrammarDB.class);
+    }
+
+    /**
+     * Get files for load(xml and themes.txt)
+     */
+    private static File[] getFilesForLoad(File dir) throws Exception {
+        File[] result = dir.listFiles(new FileFilter() {
+            public boolean accept(File pathname) {
+                return pathname.isFile() && (pathname.getName().endsWith(".xml")
+                        || pathname.getName().endsWith(".xml.gz") || pathname.getName().equals(THEMES_FILE));
+            }
+        });
+        Arrays.sort(result, new Comparator<File>() {
+            @Override
+            public int compare(File o1, File o2) {
+                String n1 = o1.getName();
+                String n2 = o2.getName();
+                if (n1.equals(THEMES_FILE)) {
+                    return -1;
+                } else {
+                    return n1.compareTo(n2);
+                }
+            }
+        });
+        return result;
+    }
+
+    /**
+     * Returns true if cache file exist and last modified equals to latest xml file.
+     */
+    private static boolean cacheExist(File dir, File cacheFile, File[] filesForLoad) throws Exception {
+        if (!cacheFile.exists()) {
+            return false;
+        }
+        long latest = 0;
+        for (File f : filesForLoad) {
+            latest = Math.max(latest, f.lastModified());
+        }
+        return cacheFile.lastModified() == latest;
     }
 
     public void stat() {
@@ -196,28 +235,7 @@ public class GrammarDB {
         System.out.println("Total: " + fo.format(c));
     }
 
-    public synchronized void addXMLFile(InputStream file, boolean docLevel) throws Exception {
-
-        Unmarshaller unm = CONTEXT.createUnmarshaller();
-
-        InputStream in = new BufferedInputStream(file, 65536);
-        try {
-            Wordlist words = (Wordlist) unm.unmarshal(in);
-            for (Paradigm p : words.getParadigm()) {
-                addParadigm(p);
-                if (docLevel) {
-                    docLevelParadigms.add(p);
-                }
-            }
-        } finally {
-            in.close();
-        }
-    }
-
     public synchronized void addXMLFile(File file, boolean docLevel) throws Exception {
-        if (file.getName().equals("clusters.xml")) {
-            return;
-        }
         Unmarshaller unm = CONTEXT.createUnmarshaller();
 
         InputStream in;
@@ -229,9 +247,11 @@ public class GrammarDB {
         try {
             Wordlist words = (Wordlist) unm.unmarshal(in);
             for (Paradigm p : words.getParadigm()) {
-                addParadigm(p);
                 if (docLevel) {
-                    docLevelParadigms.add(p);
+                    addDocLevelParadigm(p);
+                } else {
+                    optimize(p);
+                    addParadigm(p);
                 }
             }
         } finally {
@@ -239,22 +259,8 @@ public class GrammarDB {
         }
     }
 
-    public synchronized void addThemesFile(InputStream file) throws Exception {
-        BOMBufferedReader rd = new BOMBufferedReader(new InputStreamReader(file, "UTF-8"));
-        String s;
-        String part = "";
-        while ((s = rd.readLine()) != null) {
-            s = s.trim();
-            if (s.length() == 1) {
-                part = s;
-            } else if (s.length() > 1) {
-                addTheme(part, s);
-            }
-        }
-        rd.close();
-    }
-
     public synchronized void addThemesFile(File file) throws Exception {
+        themes = new TreeMap<>();
         BOMBufferedReader rd = new BOMBufferedReader(
                 new InputStreamReader(new FileInputStream(file), "UTF-8"));
         String s;
@@ -274,12 +280,17 @@ public class GrammarDB {
         return themes.get(grammar);
     }
 
-    public void saveDocLevelParadygms(File outFile) throws Exception {
+    public synchronized void saveDocLevelParadygms(File outFile) throws Exception {
         Marshaller m = CONTEXT.createMarshaller();
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         Wordlist list = new Wordlist();
         list.getParadigm().addAll(docLevelParadigms);
         m.marshal(list, outFile);
+    }
+
+    public synchronized void clearDocLevelParadygms() {
+        docLevelParadigms.clear();
+        docLevelParadigmsByForm.clear();
     }
 
     void addTheme(String part, String theme) {
@@ -293,34 +304,14 @@ public class GrammarDB {
         }
     }
 
-    public synchronized void addDocLevelParadigm(Paradigm p) {
-        addParadigm(p);
-        docLevelParadigms.add(p);
-    }
-
     private void addParadigm(Paradigm p) {
-        // optimize(p);
-        if (p.getTag()!=null) {
-        p.setTag(p.getTag().intern());
-        }
         allParadigms.add(p);
         for (Form f : p.getForm()) {
-            if (f.getTag()!=null) {
-            f.setTag(f.getTag().intern());
-            }
-            if (f.getSlouniki()!=null) {
-            f.setSlouniki(f.getSlouniki().intern());
-            }
-            if (f.getPravapis()!=null) {
-            f.setPravapis(f.getPravapis().intern());
-            }
-            if (f.getValue()!=null) {
-                f.setValue(f.getValue().intern());
-            }
             String v = WordNormalizer.normalize(f.getValue());
             if (v.isEmpty()) {
                 continue;
             }
+            v = v.intern();
             Paradigm[] byForm = paradigmsByForm.get(v);
             if (byForm == null) {
                 byForm = new Paradigm[1];
@@ -356,6 +347,28 @@ public class GrammarDB {
         }
     }
 
+    public synchronized void addDocLevelParadigm(Paradigm p) {
+        docLevelParadigms.add(p);
+        for (Form f : p.getForm()) {
+            String v = WordNormalizer.normalize(f.getValue());
+            if (v.isEmpty()) {
+                continue;
+            }
+            Paradigm[] byForm = docLevelParadigmsByForm.get(v);
+            if (byForm == null) {
+                byForm = new Paradigm[1];
+            } else {
+                if (byForm[byForm.length - 1] == p) {
+                    // already stored
+                    continue;
+                }
+                byForm = Arrays.copyOf(byForm, byForm.length + 1);
+            }
+            byForm[byForm.length - 1] = p;
+            docLevelParadigmsByForm.put(v, byForm);
+        }
+    }
+
     public Paradigm parseAndValidate(String pText) throws Exception {
         Validator validator = schema.newValidator();
 
@@ -378,6 +391,8 @@ public class GrammarDB {
             Paradigm.Form f = p.getForm().get(i);
             f.setTag(optimizeString(f.getTag()));
             f.setValue(optimizeString(f.getValue()));
+            f.setSlouniki(optimizeString(f.getSlouniki()));
+            f.setPravapis(optimizeString(f.getPravapis()));
         }
     }
 
@@ -385,8 +400,16 @@ public class GrammarDB {
         return s == null ? null : s.intern();
     }
 
-    public synchronized List<Paradigm> getAllParadigms() {
-        return Collections.unmodifiableList(allParadigms);
+    public synchronized boolean isEmpty() {
+        return allParadigms.isEmpty();
+    }
+
+    private static List<Paradigm> plus(List<Paradigm>... lists) {
+        List<Paradigm> result = new ArrayList<>();
+        for (List<Paradigm> o : lists) {
+            result.addAll(o);
+        }
+        return result;
     }
 
     public synchronized Paradigm getLooksLike(String word, String looksLike, boolean checkForms,
@@ -398,7 +421,7 @@ public class GrammarDB {
         if (looksLike.isEmpty()) {
             int rating = 1;
             String find = WordNormalizer.normalize(word);
-            for (Paradigm p : allParadigms) {
+            for (Paradigm p : plus(allParadigms, docLevelParadigms)) {
                 if (!isTagLooksLikeMask(p.getTag(), tagMask)) {
                     continue;
                 }
@@ -421,7 +444,7 @@ public class GrammarDB {
             }
         } else {
             String find = WordNormalizer.normalize(looksLike);
-            for (Paradigm p : allParadigms) {
+            for (Paradigm p : plus(allParadigms, docLevelParadigms)) {
                 if (!isTagLooksLikeMask(p.getTag(), tagMask)) {
                     continue;
                 }
@@ -449,7 +472,7 @@ public class GrammarDB {
     /**
      * Mask can be just start of tag, and can contains '?'.
      */
-    public static boolean isTagLooksLikeMask(String tag, String mask) {
+    private static boolean isTagLooksLikeMask(String tag, String mask) {
         if (mask.isEmpty()) {
             return true;
         }
@@ -478,7 +501,21 @@ public class GrammarDB {
      * Find paradigms by word (unstressed, lower case).
      */
     public synchronized Paradigm[] getParadigmsByForm(String word) {
-        return paradigmsByForm.get(WordNormalizer.normalize(word));
+        Paradigm[] p1 = paradigmsByForm.get(WordNormalizer.normalize(word));
+        Paradigm[] p2 = docLevelParadigmsByForm.get(WordNormalizer.normalize(word));
+        if (p1 == null && p2 == null) {
+            return null;
+        }
+        if (p1 == null) {
+            p1 = new Paradigm[0];
+        }
+        if (p2 == null) {
+            p2 = new Paradigm[0];
+        }
+        Paradigm[] result = new Paradigm[p1.length + p2.length];
+        System.arraycopy(p1, 0, result, 0, p1.length);
+        System.arraycopy(p2, 0, result, p1.length, p2.length);
+        return result;
     }
 
     /**
