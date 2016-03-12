@@ -198,6 +198,10 @@ public class GrammarDB {
         return result;
     }
 
+    public List<Paradigm> getAllParadigms() {
+        return allParadigms;
+    }
+
     /**
      * Returns true if cache file exist and last modified equals to latest xml file.
      */
