@@ -16,8 +16,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
  *     &lt;enumeration value="nonstandard"/>
  *     &lt;enumeration value="potential"/>
- *     &lt;enumeration value="variant"/>
  *     &lt;enumeration value="numeral"/>
+ *     &lt;enumeration value="short"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
@@ -43,18 +43,18 @@ public enum Type {
     POTENTIAL("potential"),
 
     /**
-     * Варыянт
-     * 
-     */
-    @XmlEnumValue("variant")
-    VARIANT("variant"),
-
-    /**
-     * з ліч. 2, 3, 
+     * з ліч. 2, 3, 4 
      * 
      */
     @XmlEnumValue("numeral")
-    NUMERAL("numeral");
+    NUMERAL("numeral"),
+
+    /**
+     * кароткая форма (у прыметніках)
+     * 
+     */
+    @XmlEnumValue("short")
+    SHORT("short");
     private final String value;
 
     Type(String v) {

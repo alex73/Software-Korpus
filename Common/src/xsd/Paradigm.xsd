@@ -29,16 +29,16 @@
 					<xs:documentation>Патэнцыйная</xs:documentation>
 				</xs:annotation>
 			</xs:enumeration>
-			<xs:enumeration value="variant" >
-				<xs:annotation>
-					<xs:documentation>Варыянт</xs:documentation>
-				</xs:annotation>
-			</xs:enumeration>
-			<xs:enumeration value="numeral" >
-				<xs:annotation>
-					<xs:documentation>з ліч. 2, 3, </xs:documentation>
-				</xs:annotation>
-			</xs:enumeration>
+            <xs:enumeration value="numeral" >
+                <xs:annotation>
+                    <xs:documentation>з ліч. 2, 3, 4 </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="short" >
+                <xs:annotation>
+                    <xs:documentation>кароткая форма (у прыметніках)</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
 		</xs:restriction>
 	</xs:simpleType>
 	<xs:simpleType name="ParadigmOptions">
