@@ -190,6 +190,8 @@ public class GrammarDB {
                 String n2 = o2.getName();
                 if (n1.equals(THEMES_FILE)) {
                     return -1;
+                } else if (n2.equals(THEMES_FILE)) {
+                    return 1;
                 } else {
                     return n1.compareTo(n2);
                 }

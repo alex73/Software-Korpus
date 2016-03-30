@@ -93,6 +93,7 @@ public class UI {
         DockableScrollPane pane = new DockableScrollPane("EDITOR", "Тэкст", editor, false);
         pane.setComponentOrientation(ComponentOrientation.getOrientation(Locale.getDefault()));
         pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         pane.setMinimumSize(new Dimension(100, 100));
 
         desktop.addDockable(pane);

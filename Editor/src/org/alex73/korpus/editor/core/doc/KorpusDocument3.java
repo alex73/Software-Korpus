@@ -301,11 +301,6 @@ public class KorpusDocument3 extends AbstractDocument {
         }
 
         @Override
-        public String getName() {
-            return getClass().getSimpleName();
-        }
-
-        @Override
         public boolean isLeaf() {
             return false;
         }
@@ -386,6 +381,11 @@ public class KorpusDocument3 extends AbstractDocument {
                 children.add(new MyLineElement(this, line));
             }
         }
+
+        @Override
+        public String getName() {
+            return "MyRootElement";
+        }
     }
 
     public class MyLineElement extends MyGroupElement<MyWordElement> {
@@ -407,10 +407,16 @@ public class KorpusDocument3 extends AbstractDocument {
             }
             return result;
         }
+
+        @Override
+        public String getName() {
+            return "MyLineElement";
+        }
     }
 
     public class MyWordElement extends AbstractElement {
         public final ITextLineElement item;
+        private transient boolean other;
 
         private transient Position p0;
         private transient Position p1;
@@ -419,6 +425,7 @@ public class KorpusDocument3 extends AbstractDocument {
         public MyWordElement(Element parent, ITextLineElement item) {
             super(parent, null);
             this.item = item;
+            this.other =item instanceof O;
             p0v = text.length();
             text.append(item.getText());
             p1v = text.length();
@@ -427,6 +434,7 @@ public class KorpusDocument3 extends AbstractDocument {
         public MyWordElement(Element parent, int startOffset, ITextLineElement item) {
             super(parent, null);
             this.item = item;
+            this.other =item instanceof O;
             p0v = startOffset;
             p1v = startOffset + item.getText().length();
         }
@@ -436,7 +444,7 @@ public class KorpusDocument3 extends AbstractDocument {
         }
 
         public boolean isOther() {
-            return item instanceof O;
+            return other;
         }
 
         public W getWordInfo() {
@@ -506,7 +514,7 @@ public class KorpusDocument3 extends AbstractDocument {
         }
 
         public String getName() {
-            return getClass().getSimpleName();
+            return "MyWordElement";
         }
 
         public int getElementIndex(int pos) {
