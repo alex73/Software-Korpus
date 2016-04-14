@@ -22,8 +22,6 @@
 
 package org.alex73.korpus.utils;
 
-import java.util.regex.Pattern;
-
 import org.alex73.korpus.base.BelarusianTags;
 
 /**
@@ -33,8 +31,7 @@ import org.alex73.korpus.base.BelarusianTags;
  */
 public class StressUtils {
 
-    public static char STRESS_CHAR = '´';
-    static Pattern RE_STRESS = Pattern.compile("(.)´");
+    public static char STRESS_CHAR = '*';
 
     public static String unstress(String stressedWord) {
         return stressedWord.replace("" + STRESS_CHAR, "");
