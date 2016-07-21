@@ -23,16 +23,29 @@
 package org.alex73.korpus.compiler;
 
 import java.io.File;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.alex73.korpus.editor.core.GrammarDB;
 import org.alex73.korpus.text.parser.IProcess;
+import org.alex73.korpus.text.xml.InlineTag;
+import org.alex73.korpus.text.xml.O;
+import org.alex73.korpus.text.xml.P;
+import org.alex73.korpus.text.xml.S;
+import org.alex73.korpus.text.xml.W;
+import org.alex73.korpus.text.xml.Z;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
+
+import alex73.corpus.paradigm.Paradigm;
 
 /**
  * Class for prepare data for search.
@@ -41,6 +54,10 @@ public class PrepareCache {
     public static void main(String[] args) throws Exception {
         Locale.setDefault(new Locale("be"));
 
+        new PrepareCache().process();
+    }
+    
+    public void process() throws Exception {
         System.out.println("Load GrammarDB...");
 
         GrammarDB.initializeFromDir(new File("GrammarDB"), new GrammarDB.LoaderProgress() {
@@ -55,8 +72,16 @@ public class PrepareCache {
             }
         });
 
-        KorpusLoading.processKorpus();
-        //OtherLoading.processOther();
+        new KorpusLoading(errors, new CallbackP() {
+            public void processP(P p) {
+                doProcessP(p);
+            }
+        }).processKorpus();
+        new OtherLoading(errors, new CallbackP() {
+            public void processP(P p) {
+                doProcessP(p);
+            }
+        }).processOther();
 
         List<String> errorNames = new ArrayList<>(errorsCount.keySet());
         Collections.sort(errorNames, new Comparator<String>() {
@@ -72,11 +97,13 @@ public class PrepareCache {
         }
     }
 
-    static Map<String, Integer> errorsCount = new HashMap<>();
-    static IProcess errors = new IProcess() {
+    public void doProcessP(P p) {}
+
+    Map<String, Integer> errorsCount = new HashMap<>();
+    public IProcess errors = new IProcess() {
         @Override
         public void showStatus(String status) {
-           // System.out.println(status);
+            // System.out.println(status);
         }
 
         @Override
@@ -87,8 +114,12 @@ public class PrepareCache {
             } else {
                 count++;
             }
-          //  errorsCount.put(error, count);
+            // errorsCount.put(error, count);
             System.err.println(error);
         }
     };
+
+    interface CallbackP {
+        public void processP(P p);
+    }
 }

@@ -41,6 +41,7 @@ import java.util.zip.ZipFile;
 
 import org.alex73.korpus.server.engine.LuceneDriverWrite;
 import org.alex73.korpus.server.text.BinaryParagraphWriter;
+import org.alex73.korpus.text.parser.IProcess;
 import org.alex73.korpus.text.parser.Splitter2;
 import org.alex73.korpus.text.xml.P;
 import org.apache.commons.io.FileUtils;
@@ -51,14 +52,22 @@ import org.apache.commons.io.IOUtils;
  */
 public class OtherLoading {
 
-    static LuceneDriverWrite lucene;
+    LuceneDriverWrite lucene;
 
-    static StatInfo total = new StatInfo("");
-    static Set<String> volumes = new TreeSet<>();
+    StatInfo total = new StatInfo("");
+    Set<String> volumes = new TreeSet<>();
 
-    static Pattern RE_ID=Pattern.compile("([0-9]+).+?OCR\\-texts\\.zip");
+    Pattern RE_ID=Pattern.compile("([0-9]+).+?OCR\\-texts\\.zip");
+    
+    IProcess errors;
+    PrepareCache.CallbackP callback;
+    
+    public OtherLoading(IProcess errors, PrepareCache.CallbackP callback) {
+        this.errors = errors;
+        this.callback = callback;
+    }
 
-    static void processOther() throws Exception {
+    void processOther() throws Exception {
         File dir = new File("Other-cache/");
         FileUtils.deleteDirectory(dir);
         dir.mkdirs();
@@ -74,12 +83,12 @@ public class OtherLoading {
         Collections.sort(files);
         int c = 0;
         for (File f : files) {
-            PrepareCache.errors.showStatus("loadFileToOther " + f + ": " + (++c) + "/" + files.size());
+            errors.showStatus("loadFileToOther " + f + ": " + (++c) + "/" + files.size());
             loadZipPagesToOther(f);
         }
         total.write(stat);
 
-        PrepareCache.errors.showStatus("Optimize...");
+        errors.showStatus("Optimize...");
         lucene.shutdown();
 
         String volumesstr = "";
@@ -95,10 +104,10 @@ public class OtherLoading {
         FileOutputStream o = new FileOutputStream("Other-cache/stat.properties");
         stat.store(o, null);
         o.close();
-        PrepareCache.errors.showStatus(total.texts + " files processed");
+        errors.showStatus(total.texts + " files processed");
     }
 
-    protected static void loadZipPagesToOther(File f) throws Exception {
+    protected void loadZipPagesToOther(File f) throws Exception {
         if (f.length()==0) {
             return;
         }
@@ -140,8 +149,9 @@ public class OtherLoading {
         total.addText(wordsCount.get());
     }
 
-    protected static int loadTextToCorpus(String data) throws Exception {
-        P p = new Splitter2(data, false, PrepareCache.errors).getP();
+    protected int loadTextToCorpus(String data) throws Exception {
+        P p = new Splitter2(data, false, errors).getP();
+        callback.processP(p);
         int wordsCount = 0;
         byte[] pa = new BinaryParagraphWriter().write(p);
         int c = lucene.addSentence(p, pa);

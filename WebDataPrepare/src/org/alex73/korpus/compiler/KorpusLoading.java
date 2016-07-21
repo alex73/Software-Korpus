@@ -45,6 +45,7 @@ import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.server.engine.LuceneDriverWrite;
 import org.alex73.korpus.server.text.BinaryParagraphWriter;
 import org.alex73.korpus.text.TextIO;
+import org.alex73.korpus.text.parser.IProcess;
 import org.alex73.korpus.text.parser.TextParser;
 import org.alex73.korpus.text.xml.P;
 import org.alex73.korpus.text.xml.Tag;
@@ -58,14 +59,21 @@ import org.apache.commons.io.FileUtils;
  */
 public class KorpusLoading {
 
-    static LuceneDriverWrite lucene;
+    LuceneDriverWrite lucene;
 
-    static StatInfo total = new StatInfo("");
-    static Map<String, StatInfo> parts = new HashMap<>();
+    StatInfo total = new StatInfo("");
+    Map<String, StatInfo> parts = new HashMap<>();
 
-    static Set<String> authors = new TreeSet<>();
+    Set<String> authors = new TreeSet<>();
+    IProcess errors;
+    PrepareCache.CallbackP callback;
+    
+    public KorpusLoading(IProcess errors, PrepareCache.CallbackP callback) {
+        this.errors = errors;
+        this.callback = callback;
+    }
 
-    static void processKorpus() throws Exception {
+    void processKorpus() throws Exception {
         File dir = new File("Korpus-cache/");
         FileUtils.deleteDirectory(dir);
         dir.mkdirs();
@@ -82,7 +90,7 @@ public class KorpusLoading {
         Collections.sort(files);
         int c = 0;
         for (File f : files) {
-            PrepareCache.errors.showStatus("loadFileToCorpus " + f + ": " + (++c) + "/" + files.size());
+            errors.showStatus("loadFileToCorpus " + f + ": " + (++c) + "/" + files.size());
             if (f.getName().endsWith(".xml") || f.getName().endsWith(".text")) {
                 loadXmlOrTextFileToCorpus(f);
             } else if (f.getName().endsWith(".zip") || f.getName().endsWith(".7z")) {
@@ -94,7 +102,7 @@ public class KorpusLoading {
         }
         total.write(stat);
 
-        PrepareCache.errors.showStatus("Optimize...");
+        errors.showStatus("Optimize...");
         lucene.shutdown();
 
         String authorsstr = "";
@@ -110,10 +118,10 @@ public class KorpusLoading {
         FileOutputStream o = new FileOutputStream("Korpus-cache/stat.properties");
         stat.store(o, null);
         o.close();
-        PrepareCache.errors.showStatus(total.texts + " files processed");
+        errors.showStatus(total.texts + " files processed");
     }
 
-    protected static void loadXmlOrTextFileToCorpus(File f) throws Exception {
+    protected void loadXmlOrTextFileToCorpus(File f) throws Exception {
         if (f.getName().endsWith(".xml")) {
             XMLText doc;
             InputStream in = new BufferedInputStream(new FileInputStream(f));
@@ -127,7 +135,7 @@ public class KorpusLoading {
             XMLText doc;
             InputStream in = new BufferedInputStream(new FileInputStream(f));
             try {
-                doc = TextParser.parseText(in, false, PrepareCache.errors);
+                doc = TextParser.parseText(in, false, errors);
             } finally {
                 in.close();
             }
@@ -137,7 +145,7 @@ public class KorpusLoading {
         }
     }
 
-    protected static void loadArchiveFileToCorpus(File f) throws Exception {
+    protected void loadArchiveFileToCorpus(File f) throws Exception {
         if (f.getName().endsWith(".zip")) {
             try (ZipFile zip = new ZipFile(f)) {
                 int c = 0;
@@ -146,12 +154,12 @@ public class KorpusLoading {
                     if (en.isDirectory()) {
                         continue;
                     }
-                    PrepareCache.errors.showStatus("loadFileToCorpus " + f + "/" + en.getName() + ": " + (++c));
+                    errors.showStatus("loadFileToCorpus " + f + "/" + en.getName() + ": " + (++c));
                     XMLText doc;
                     InputStream in = new BufferedInputStream(zip.getInputStream(en));
                     try {
                         if (en.getName().endsWith(".text")) {
-                            doc = TextParser.parseText(in, false, PrepareCache.errors);
+                            doc = TextParser.parseText(in, false, errors);
                         } else if (en.getName().endsWith(".xml")) {
                             doc = TextIO.parseXML(in);
                         } else {
@@ -171,7 +179,7 @@ public class KorpusLoading {
                 if (en.isDirectory()) {
                     continue;
                 }
-                PrepareCache.errors.showStatus("loadFileToCorpus " + f + "/" + en.getName() + ": " + (++c));
+                errors.showStatus("loadFileToCorpus " + f + "/" + en.getName() + ": " + (++c));
                 byte[] content = new byte[(int) en.getSize()];
                 for (int p = 0; p < content.length;) {
                     p += sevenZFile.read(content, p, content.length - p);
@@ -180,7 +188,7 @@ public class KorpusLoading {
                     XMLText doc;
                     try (InputStream in = new ByteArrayInputStream(content)) {
                         if (en.getName().endsWith(".text")) {
-                            doc = TextParser.parseText(in, false, PrepareCache.errors);
+                            doc = TextParser.parseText(in, false, errors);
                         } else if (en.getName().endsWith(".xml")) {
                             doc = TextIO.parseXML(in);
                         } else {
@@ -198,7 +206,7 @@ public class KorpusLoading {
         }
     }
 
-    protected static void loadTextToCorpus(XMLText doc) throws Exception {
+    protected void loadTextToCorpus(XMLText doc) throws Exception {
         TextInfo textInfo = createTextInfo(doc);
         lucene.setTextInfo(textInfo);
 
@@ -214,6 +222,8 @@ public class KorpusLoading {
         }
         sentences = Utils.randomizeOrder(sentences);
 
+        sentences.parallelStream().forEach(p -> callback.processP(p));
+
         AtomicInteger wordsCount = new AtomicInteger();
         sentences.parallelStream().forEach(p -> wordsCount.addAndGet(processP(p)));
 
@@ -227,7 +237,7 @@ public class KorpusLoading {
         total.addText(wordsCount.get());
     }
     
-    static int processP(P p) {
+    int processP(P p) {
         try {
             byte[] pa = new BinaryParagraphWriter().write(p);
             int c = lucene.addSentence(p, pa);
@@ -237,7 +247,7 @@ public class KorpusLoading {
         }
     }
 
-    static void addStat(String styleGenre, int wordsCount) {
+    void addStat(String styleGenre, int wordsCount) {
         int p = styleGenre.indexOf('/');
         String st = p < 0 ? styleGenre : styleGenre.substring(0, p);
         StatInfo i = parts.get(st);
@@ -248,7 +258,7 @@ public class KorpusLoading {
         i.addText(wordsCount);
     }
 
-    static TextInfo createTextInfo(XMLText text) {
+    TextInfo createTextInfo(XMLText text) {
         TextInfo r = new TextInfo();
         String authors = getTag(text, "Authors");
         if (authors != null) {
@@ -271,7 +281,7 @@ public class KorpusLoading {
         return r;
     }
 
-    static String getTag(XMLText text, String name) {
+     String getTag(XMLText text, String name) {
         for (Tag tag : text.getHeader().getTag()) {
             if (name.equals(tag.getName())) {
                 return tag.getValue();

@@ -183,6 +183,9 @@ public class GrammarDB {
                         || pathname.getName().endsWith(".xml.gz") || pathname.getName().equals(THEMES_FILE));
             }
         });
+        if (result == null) {
+            throw new Exception("There are not files for GrammarDB in the " + dir.getAbsolutePath());
+        }
         Arrays.sort(result, new Comparator<File>() {
             @Override
             public int compare(File o1, File o2) {
