@@ -10,5 +10,7 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-web-2.0.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-analyzers-common-5.1.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-core-5.1.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-servlet-deps.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-servlet.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

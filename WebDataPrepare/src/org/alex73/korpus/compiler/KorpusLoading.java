@@ -98,7 +98,7 @@ public class KorpusLoading {
             }
         }
         for (StatInfo si : parts.values()) {
-            si.write(stat);
+            // si.write(stat); - don't output details yet
         }
         total.write(stat);
 
