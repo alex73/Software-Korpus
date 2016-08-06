@@ -171,4 +171,8 @@ public class StressUtils {
         }
         return 0;
     }
+
+    public static String combineAccute(String word) {
+        return word.replace('*', '\u0301');
+    }
 }

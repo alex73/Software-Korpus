@@ -8,6 +8,7 @@ import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.text.xml.P;
 import org.alex73.korpus.text.xml.Se;
 import org.alex73.korpus.text.xml.W;
+import org.alex73.korpus.utils.WordNormalizer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -111,7 +112,7 @@ public class LuceneDriverWrite extends LuceneFields {
                 W w = (W) o;
                 wordsCount++;
                 if (w.getValue() != null) {
-                    String wc = w.getValue(); //WordNormalizer.normalize(w.getValue());
+                    String wc = WordNormalizer.normalize(w.getValue());
                     values.append(wc).append(' ');
                 }
                 if (StringUtils.isNotEmpty(w.getCat())) {

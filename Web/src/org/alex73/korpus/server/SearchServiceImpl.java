@@ -329,6 +329,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     }
 
     private List<String> findAllLemmas(String word) {
+        word = WordNormalizer.normalize(word);
         Set<String> result = new HashSet<>();
         for (LiteParadigm p : GrammarDBLite.getInstance().getAllParadigms()) {
             for (LiteForm f : p.forms) {

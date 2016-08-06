@@ -23,29 +23,17 @@
 package org.alex73.korpus.compiler;
 
 import java.io.File;
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import org.alex73.korpus.editor.core.GrammarDB;
 import org.alex73.korpus.text.parser.IProcess;
-import org.alex73.korpus.text.xml.InlineTag;
-import org.alex73.korpus.text.xml.O;
 import org.alex73.korpus.text.xml.P;
-import org.alex73.korpus.text.xml.S;
-import org.alex73.korpus.text.xml.W;
-import org.alex73.korpus.text.xml.Z;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
-
-import alex73.corpus.paradigm.Paradigm;
 
 /**
  * Class for prepare data for search.
@@ -54,10 +42,10 @@ public class PrepareCache {
     public static void main(String[] args) throws Exception {
         Locale.setDefault(new Locale("be"));
 
-        new PrepareCache().process();
+        new PrepareCache().process(true);
     }
     
-    public void process() throws Exception {
+    public void process(boolean processOther) throws Exception {
         System.out.println("Load GrammarDB...");
 
         GrammarDB.initializeFromDir(new File("GrammarDB"), new GrammarDB.LoaderProgress() {
@@ -77,11 +65,13 @@ public class PrepareCache {
                 doProcessP(p);
             }
         }).processKorpus();
-        new OtherLoading(errors, new CallbackP() {
-            public void processP(P p) {
-                doProcessP(p);
-            }
-        }).processOther();
+        if (processOther) {
+            new OtherLoading(errors, new CallbackP() {
+                public void processP(P p) {
+                    doProcessP(p);
+                }
+            }).processOther();
+        }
 
         List<String> errorNames = new ArrayList<>(errorsCount.keySet());
         Collections.sort(errorNames, new Comparator<String>() {
