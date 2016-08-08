@@ -88,6 +88,18 @@ public class BelarusianTags {
         }
     }
 
+    public char getValueOfGroup(String code, String group) {
+        TagLetter tags = root;
+        for (char c : code.toCharArray()) {
+            OneLetterInfo li = tags.getLetterInfo(c);
+            if (group.equals(li.groupName)) {
+                return li.letter;
+            }
+            tags = tags.next(c);
+        }
+        return 0;
+    }
+
     /**
      * Ці правільны тэг у парадыгме ? latestInParadigm==true
      */
