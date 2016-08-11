@@ -9,7 +9,6 @@ import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlValue;
 
 
 /**
@@ -24,30 +23,15 @@ import javax.xml.bind.annotation.XmlValue;
  *       &lt;sequence>
  *         &lt;element name="e" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="Note" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="Form" maxOccurs="unbounded" minOccurs="0">
- *           &lt;complexType>
- *             &lt;simpleContent>
- *               &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
- *                 &lt;attribute name="Tag" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                 &lt;attribute name="Type" type="{}Type" />
- *                 &lt;attribute name="Slouniki" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                 &lt;attribute name="pravapis" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                 &lt;attribute name="options" type="{}FormOptions" />
- *                 &lt;attribute name="Govern" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                 &lt;attribute name="todo" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                 &lt;attribute name="comment" type="{http://www.w3.org/2001/XMLSchema}string" />
- *               &lt;/extension>
- *             &lt;/simpleContent>
- *           &lt;/complexType>
- *         &lt;/element>
+ *         &lt;element ref="{}Variant" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="pdgId" use="required" type="{http://www.w3.org/2001/XMLSchema}int" />
- *       &lt;attribute name="Lemma" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="Tag" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="Theme" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="Govern" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="Type" type="{}Type" />
- *       &lt;attribute name="Marked" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="lemma" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="tag" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="theme" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="govern" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="type" type="{}Type" />
+ *       &lt;attribute name="marked" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="options" type="{}ParadigmOptions" />
  *       &lt;attribute name="todo" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="comment" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -63,7 +47,7 @@ import javax.xml.bind.annotation.XmlValue;
 @XmlType(name = "", propOrder = {
     "e",
     "note",
-    "form"
+    "variant"
 })
 @XmlRootElement(name = "Paradigm")
 public class Paradigm {
@@ -71,21 +55,21 @@ public class Paradigm {
     protected String e;
     @XmlElement(name = "Note")
     protected String note;
-    @XmlElement(name = "Form")
-    protected List<Paradigm.Form> form;
+    @XmlElement(name = "Variant")
+    protected List<Variant> variant;
     @XmlAttribute(name = "pdgId", required = true)
     protected int pdgId;
-    @XmlAttribute(name = "Lemma", required = true)
+    @XmlAttribute(name = "lemma", required = true)
     protected String lemma;
-    @XmlAttribute(name = "Tag", required = true)
+    @XmlAttribute(name = "tag", required = true)
     protected String tag;
-    @XmlAttribute(name = "Theme")
+    @XmlAttribute(name = "theme")
     protected String theme;
-    @XmlAttribute(name = "Govern")
+    @XmlAttribute(name = "govern")
     protected String govern;
-    @XmlAttribute(name = "Type")
+    @XmlAttribute(name = "type")
     protected Type type;
-    @XmlAttribute(name = "Marked")
+    @XmlAttribute(name = "marked")
     protected String marked;
     @XmlAttribute(name = "options")
     protected ParadigmOptions options;
@@ -145,32 +129,32 @@ public class Paradigm {
     }
 
     /**
-     * Gets the value of the form property.
+     * Gets the value of the variant property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the form property.
+     * This is why there is not a <CODE>set</CODE> method for the variant property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getForm().add(newItem);
+     *    getVariant().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link Paradigm.Form }
+     * {@link Variant }
      * 
      * 
      */
-    public List<Paradigm.Form> getForm() {
-        if (form == null) {
-            form = new ArrayList<Paradigm.Form>();
+    public List<Variant> getVariant() {
+        if (variant == null) {
+            variant = new ArrayList<Variant>();
         }
-        return this.form;
+        return this.variant;
     }
 
     /**
@@ -427,274 +411,6 @@ public class Paradigm {
      */
     public void setMeaning(String value) {
         this.meaning = value;
-    }
-
-
-    /**
-     * <p>Java class for anonymous complex type.
-     * 
-     * <p>The following schema fragment specifies the expected content contained within this class.
-     * 
-     * <pre>
-     * &lt;complexType>
-     *   &lt;simpleContent>
-     *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
-     *       &lt;attribute name="Tag" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="Type" type="{}Type" />
-     *       &lt;attribute name="Slouniki" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="pravapis" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="options" type="{}FormOptions" />
-     *       &lt;attribute name="Govern" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="todo" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="comment" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *     &lt;/extension>
-     *   &lt;/simpleContent>
-     * &lt;/complexType>
-     * </pre>
-     * 
-     * 
-     */
-    @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "", propOrder = {
-        "value"
-    })
-    public static class Form {
-
-        @XmlValue
-        protected String value;
-        @XmlAttribute(name = "Tag", required = true)
-        protected String tag;
-        @XmlAttribute(name = "Type")
-        protected Type type;
-        @XmlAttribute(name = "Slouniki")
-        protected String slouniki;
-        @XmlAttribute(name = "pravapis")
-        protected String pravapis;
-        @XmlAttribute(name = "options")
-        protected FormOptions options;
-        @XmlAttribute(name = "Govern")
-        protected String govern;
-        @XmlAttribute(name = "todo")
-        protected String todo;
-        @XmlAttribute(name = "comment")
-        protected String comment;
-
-        /**
-         * Gets the value of the value property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getValue() {
-            return value;
-        }
-
-        /**
-         * Sets the value of the value property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setValue(String value) {
-            this.value = value;
-        }
-
-        /**
-         * Gets the value of the tag property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getTag() {
-            return tag;
-        }
-
-        /**
-         * Sets the value of the tag property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setTag(String value) {
-            this.tag = value;
-        }
-
-        /**
-         * Gets the value of the type property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link Type }
-         *     
-         */
-        public Type getType() {
-            return type;
-        }
-
-        /**
-         * Sets the value of the type property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link Type }
-         *     
-         */
-        public void setType(Type value) {
-            this.type = value;
-        }
-
-        /**
-         * Gets the value of the slouniki property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getSlouniki() {
-            return slouniki;
-        }
-
-        /**
-         * Sets the value of the slouniki property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setSlouniki(String value) {
-            this.slouniki = value;
-        }
-
-        /**
-         * Gets the value of the pravapis property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getPravapis() {
-            return pravapis;
-        }
-
-        /**
-         * Sets the value of the pravapis property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setPravapis(String value) {
-            this.pravapis = value;
-        }
-
-        /**
-         * Gets the value of the options property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link FormOptions }
-         *     
-         */
-        public FormOptions getOptions() {
-            return options;
-        }
-
-        /**
-         * Sets the value of the options property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link FormOptions }
-         *     
-         */
-        public void setOptions(FormOptions value) {
-            this.options = value;
-        }
-
-        /**
-         * Gets the value of the govern property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getGovern() {
-            return govern;
-        }
-
-        /**
-         * Sets the value of the govern property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setGovern(String value) {
-            this.govern = value;
-        }
-
-        /**
-         * Gets the value of the todo property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getTodo() {
-            return todo;
-        }
-
-        /**
-         * Sets the value of the todo property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setTodo(String value) {
-            this.todo = value;
-        }
-
-        /**
-         * Gets the value of the comment property.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getComment() {
-            return comment;
-        }
-
-        /**
-         * Sets the value of the comment property.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setComment(String value) {
-            this.comment = value;
-        }
-
     }
 
 }

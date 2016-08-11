@@ -30,19 +30,27 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link Variant }
+     * 
+     */
+    public Variant createVariant() {
+        return new Variant();
+    }
+
+    /**
+     * Create an instance of {@link Form }
+     * 
+     */
+    public Form createForm() {
+        return new Form();
+    }
+
+    /**
      * Create an instance of {@link Paradigm }
      * 
      */
     public Paradigm createParadigm() {
         return new Paradigm();
-    }
-
-    /**
-     * Create an instance of {@link Paradigm.Form }
-     * 
-     */
-    public Paradigm.Form createParadigmForm() {
-        return new Paradigm.Form();
     }
 
     /**

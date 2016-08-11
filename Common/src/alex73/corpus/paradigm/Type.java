@@ -43,7 +43,7 @@ public enum Type {
     POTENTIAL("potential"),
 
     /**
-     * з ліч. 2, 3, 4 
+     * з ліч. 2, 3, 4
      * 
      */
     @XmlEnumValue("numeral")

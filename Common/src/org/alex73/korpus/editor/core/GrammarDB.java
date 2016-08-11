@@ -58,8 +58,9 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
+import alex73.corpus.paradigm.Form;
 import alex73.corpus.paradigm.Paradigm;
-import alex73.corpus.paradigm.Paradigm.Form;
+import alex73.corpus.paradigm.Variant;
 import alex73.corpus.paradigm.Wordlist;
 
 /**
@@ -315,7 +316,8 @@ public class GrammarDB {
 
     private void addParadigm(Paradigm p) {
         allParadigms.add(p);
-        for (Form f : p.getForm()) {
+        for(Variant va:p.getVariant()) {
+        for (Form f : va.getForm()) {
             String v = WordNormalizer.normalize(f.getValue());
             if (v.isEmpty()) {
                 continue;
@@ -333,7 +335,7 @@ public class GrammarDB {
             }
             byForm[byForm.length - 1] = p;
             paradigmsByForm.put(v, byForm);
-        }
+        }}
         if (p.getTheme() != null) {
             if (p.getTag() != null && p.getTag().length() > 0) {
                 String part = p.getTag().substring(0, 1);
@@ -346,19 +348,21 @@ public class GrammarDB {
             }
         }
         if (p.getTag().startsWith("K")) {
-            for (Form f : p.getForm()) {
+            for(Variant v:p.getVariant()) {
+            for (Form f : v.getForm()) {
                 if (f.getValue().length() != 1) {
                     throw new RuntimeException(
                             "Незразумелы знак з кодам '" + p.getTag() + "': " + f.getValue());
                 }
                 znaki += f.getValue();
-            }
+            }}
         }
     }
 
     public synchronized void addDocLevelParadigm(Paradigm p) {
         docLevelParadigms.add(p);
-        for (Form f : p.getForm()) {
+        for(Variant va:p.getVariant()) {
+        for (Form f : va.getForm()) {
             String v = WordNormalizer.normalize(f.getValue());
             if (v.isEmpty()) {
                 continue;
@@ -375,7 +379,7 @@ public class GrammarDB {
             }
             byForm[byForm.length - 1] = p;
             docLevelParadigmsByForm.put(v, byForm);
-        }
+        }}
     }
 
     public Paradigm parseAndValidate(String pText) throws Exception {
@@ -387,22 +391,23 @@ public class GrammarDB {
         Unmarshaller unm = GrammarDB.CONTEXT.createUnmarshaller();
         Paradigm p = (Paradigm) unm.unmarshal(new StringReader(pText));
         // check stress
-        for (Paradigm.Form f : p.getForm()) {
+        for(Variant v:p.getVariant()) {
+        for (Form f : v.getForm()) {
             StressUtils.checkStress(f.getValue());
-        }
+        }}
         return p;
     }
 
     void optimize(Paradigm p) {
         p.setLemma(optimizeString(p.getLemma()));
         p.setTag(optimizeString(p.getTag()));
-        for (int i = 0; i < p.getForm().size(); i++) {
-            Paradigm.Form f = p.getForm().get(i);
+        for(Variant v:p.getVariant()) {
+        for (Form f:v.getForm()) {
             f.setTag(optimizeString(f.getTag()));
             f.setValue(optimizeString(f.getValue()));
             f.setSlouniki(optimizeString(f.getSlouniki()));
             f.setPravapis(optimizeString(f.getPravapis()));
-        }
+        }}
     }
 
     String optimizeString(String s) {
@@ -441,14 +446,15 @@ public class GrammarDB {
                     ratedForm = p.getLemma();
                 }
                 if (checkForms) {
-                    for (Paradigm.Form f : p.getForm()) {
+                    for(Variant v:p.getVariant()) {
+                    for (Form f : v.getForm()) {
                         eq = compareEnds(find, WordNormalizer.normalize(f.getValue()));
                         if (eq > rating) {
                             rating = eq;
                             ratedParadigm = p;
                             ratedForm = f.getValue();
                         }
-                    }
+                    }}
                 }
             }
         } else {
@@ -462,12 +468,13 @@ public class GrammarDB {
                     ratedForm = p.getLemma();
                 }
                 if (checkForms) {
-                    for (Paradigm.Form f : p.getForm()) {
+                    for(Variant v:p.getVariant()) {
+                    for (Form f : v.getForm()) {
                         if (find.equals(WordNormalizer.normalize(f.getValue()))) {
                             ratedParadigm = p;
                             ratedForm = f.getValue();
                         }
-                    }
+                    }}
                 }
             }
         }
@@ -561,9 +568,12 @@ public class GrammarDB {
         }
 
         result.setLemma(lemma);
-
-        for (Paradigm.Form f : p.getForm()) {
-            Paradigm.Form rf = new Paradigm.Form();
+//TODO: only one variant
+        for(Variant v:p.getVariant()) {
+            Variant rv=new Variant();
+            rv.setPravapis(v.getPravapis());
+        for (Form f : v.getForm()) {
+            Form rf = new Form();
             rf.setTag(f.getTag());
             String fword = constructWord(unstressedWord, eq, WordNormalizer.normalize(f.getValue()),
                     ratedSkip);
@@ -580,7 +590,9 @@ public class GrammarDB {
                 }
             }
             rf.setValue(fword);
-            result.getForm().add(rf);
+            rv.getForm().add(rf);
+        }
+        result.getVariant().add(rv);
         }
         return result;
     }
