@@ -37,7 +37,9 @@ import org.alex73.korpus.text.xml.Z;
 import org.alex73.korpus.utils.SetUtils;
 import org.alex73.korpus.utils.WordNormalizer;
 
+import alex73.corpus.paradigm.Form;
 import alex73.corpus.paradigm.Paradigm;
+import alex73.corpus.paradigm.Variant;
 
 /**
  * Гэты код дзеліць радок(ці некалькі радкоў для вершаў) на асобныя элемэнты XMLText.
@@ -330,20 +332,22 @@ public class Splitter2 {
             for (Paradigm p : paradigms) {
                 lemmas.add(p.getLemma());
                 boolean foundForm = false;
-                for (Paradigm.Form f : p.getForm()) {
+                for(Variant v:p.getVariant()) {
+                for (Form f : v.getForm()) {
                     if (word.equals(f.getValue())) {
                         cats.add(p.getTag() + f.getTag());
                         foundForm = true;
                     }
-                }
+                }}
                 if (!foundForm) {
                     // the same find, but without stress and lowercase
                     String uw = WordNormalizer.normalize(word);
-                    for (Paradigm.Form f : p.getForm()) {
+                    for(Variant v:p.getVariant()) {
+                    for (Form f : v.getForm()) {
                         if (uw.equals(WordNormalizer.normalize(f.getValue()))) {
                             cats.add(p.getTag() + f.getTag());
                         }
-                    }
+                    }}
                 }
             }
         }
@@ -354,12 +358,13 @@ public class Splitter2 {
     static void fillZnakInfoParadigms(Z z, Paradigm[] paradigms) {
         Set<String> cats = new TreeSet<>();
         for (Paradigm p : paradigms) {
-            for (Paradigm.Form f : p.getForm()) {
+            for(Variant v:p.getVariant()) {
+            for (Form f : v.getForm()) {
                 if (z.getText().equals(f.getValue())) {
                     cats.add(p.getTag() + f.getTag());
                 }
             }
-        }
+        }}
         z.setCat(SetUtils.set2string(cats));
     }
 }
