@@ -71,8 +71,7 @@ public class BinaryParagraphReader {
 
     private void readZ() throws IOException {
         Z z = new Z();
-        z.setValue(readString());
-        z.setCat(readString());
+        z.setChar(readString());
         se.getWOrSOrZ().add(z);
     }
 

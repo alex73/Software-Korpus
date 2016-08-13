@@ -1,5 +1,5 @@
 
-package alex73.corpus.paradigm;
+package org.alex73.corpus.paradigm;
 
 import java.util.ArrayList;
 import java.util.List;

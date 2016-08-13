@@ -21,6 +21,10 @@ import java.util.zip.GZIPInputStream;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 
+import org.alex73.corpus.paradigm.Form;
+import org.alex73.corpus.paradigm.Paradigm;
+import org.alex73.corpus.paradigm.Variant;
+import org.alex73.corpus.paradigm.Wordlist;
 import org.alex73.korpus.editor.core.GrammarDB;
 import org.alex73.korpus.editor.core.Theme;
 import org.alex73.korpus.text.parser.BOMBufferedReader;
@@ -29,69 +33,58 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
-import alex73.corpus.paradigm.Form;
-import alex73.corpus.paradigm.Paradigm;
-import alex73.corpus.paradigm.Variant;
-import alex73.corpus.paradigm.Wordlist;
-
 public class GrammarDB2 {
     public static final String CACHE_FILE = "db.cache";
     public static final String THEMES_FILE = "themes.txt";
+    private static final String ZNAKI = "-—,:!?/.…\"“”«»()[]";
+    public static final String LETTERS = "ёйцукенгшўзх'фывапролджэячсмітьбющиЁЙЦУКЕНГШЎЗХ'ФЫВАПРОЛДЖЭЯЧСМІТЬБЮЩИqwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
 
-    public static final JAXBContext CONTEXT;
-
-    private static GrammarDB2 instance;
+    private transient JAXBContext CONTEXT;
 
     private Map<String, Theme> themes;
     private List<Paradigm> allParadigms = new ArrayList<>();
-
-    static {
-        try {
-            CONTEXT = JAXBContext.newInstance(Wordlist.class.getPackage().getName());
-        } catch (Exception ex) {
-            throw new ExceptionInInitializerError(ex);
-        }
-    }
-
-    public static GrammarDB2 getInstance() {
-        return instance;
-    }
 
     public List<Paradigm> getAllParadigms() {
         return allParadigms;
     }
 
-    public synchronized static void initializeFromJar() throws Exception {
-        if (instance != null) {
-            return;
-        }
+    public boolean isZnak(char c) {
+        return ZNAKI.indexOf(c) >= 0;
+    }
+
+    public boolean isLetter(char c) {
+        return LETTERS.indexOf(c) >= 0;
+    }
+
+    public synchronized static GrammarDB2 initializeFromJar() throws Exception {
+        GrammarDB2 r;
         try (InputStream in = GrammarDB.class.getResourceAsStream("/" + CACHE_FILE)) {
             if (in == null)
-                return;
+                return null;
             long be = System.currentTimeMillis();
             Input input = new Input(in, 65536);
-            instance = loadFromCache(input);
+            r = loadFromCache(input);
             long af = System.currentTimeMillis();
             System.out.println("GrammarDB deserialization time: " + (af - be) + "ms");
         }
+        return r;
     }
 
-    public synchronized static void initializeFromDir(String dir) throws Exception {
-        if (instance != null) {
-            return;
-        }
+    public synchronized static GrammarDB2 initializeFromDir(String dir) throws Exception {
+        GrammarDB2 r;
         File[] forLoads = getFilesForLoad(new File(dir));
         File cacheFile = new File(dir, CACHE_FILE);
         if (cacheExist(new File(dir), cacheFile, forLoads)) {
             long be = System.currentTimeMillis();
             try (Input input = new Input(new FileInputStream(cacheFile), 65536)) {
-                instance = loadFromCache(input);
+                r = loadFromCache(input);
             }
             long af = System.currentTimeMillis();
             System.out.println("GrammarDB deserialization time: " + (af - be) + "ms");
         } else {
-            instance = new GrammarDB2(new File(dir), forLoads, cacheFile);
+            r = new GrammarDB2(new File(dir), forLoads, cacheFile);
         }
+        return r;
     }
 
     /**
@@ -180,6 +173,9 @@ public class GrammarDB2 {
         rd.close();
     }
 
+    /**
+     * Minimize memory usage.
+     */
     private void optimize(Paradigm p) {
         p.setLemma(optimizeString(p.getLemma()));
         p.setTag(optimizeString(p.getTag()));
@@ -193,7 +189,10 @@ public class GrammarDB2 {
         }
     }
 
-    String optimizeString(String s) {
+    /**
+     * Remove duplicate strings from memory.
+     */
+    private String optimizeString(String s) {
         return s == null ? null : s.intern();
     }
 
@@ -219,11 +218,19 @@ public class GrammarDB2 {
         }
     }
 
+    /**
+     * Only for kryo instantiation.
+     */
     private GrammarDB2() {
     }
 
+    /**
+     * Read xml files for initialize.
+     */
     private GrammarDB2(File dir, File[] forLoads, File cacheFile) throws Exception {
         long be = System.currentTimeMillis();
+
+        CONTEXT = JAXBContext.newInstance(Wordlist.class.getPackage().getName());
 
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(16);
         long latest = 0;

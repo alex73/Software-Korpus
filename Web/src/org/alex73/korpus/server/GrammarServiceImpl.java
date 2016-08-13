@@ -22,7 +22,6 @@
 
 package org.alex73.korpus.server;
 
-import java.io.File;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,6 +32,7 @@ import java.util.regex.Pattern;
 
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.DBTagsGroups;
+import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.client.GrammarService;
 import org.alex73.korpus.shared.LemmaInfo;
 import org.alex73.korpus.utils.WordNormalizer;
@@ -41,6 +41,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+
+import alex73.corpus.paradigm.Form;
+import alex73.corpus.paradigm.Paradigm;
+import alex73.corpus.paradigm.Variant;
 
 /**
  * Service for find by grammar database.
@@ -52,11 +56,13 @@ public class GrammarServiceImpl extends RemoteServiceServlet implements GrammarS
 
     public static Locale BE = new Locale("be");
     public static Collator BEL = Collator.getInstance(BE);
+    
+    private final GrammarDB2 gr;
 
     public GrammarServiceImpl() throws Exception {
         LOGGER.info("startup");
         try {
-            GrammarDBLite.initializeFromDir(new File("GrammarDB"));
+            gr = GrammarDB2.initializeFromDir("GrammarDB-filtered");
         } catch (Throwable ex) {
             LOGGER.error("startup", ex);
             throw new ExceptionInInitializerError(ex);
@@ -89,19 +95,20 @@ public class GrammarServiceImpl extends RemoteServiceServlet implements GrammarS
                     ".*"));
             Pattern reGrammar = StringUtils.isEmpty(grammar) ? null : Pattern.compile(grammar);
 
-            begpar: for (LiteParadigm p : GrammarDBLite.getInstance().getAllParadigms()) {
+            begpar: for (Paradigm p : gr.getAllParadigms()) {
                 if (reLemma != null) {
-                    if (!reLemma.matcher(WordNormalizer.normalize(p.lemma)).matches()) {
+                    if (!reLemma.matcher(WordNormalizer.normalize(p.getLemma())).matches()) {
                         continue;
                     }
                 }
                 boolean found = false;
-                for (LiteForm f : p.forms) {
-                    if (StringUtils.isEmpty(f.value)) {
+                for(Variant v:p.getVariant()) {
+                for (Form f : v.getForm()) {
+                    if (StringUtils.isEmpty(f.getValue())) {
                         continue;
                     }
                     if (reGrammar != null) {
-                        String fTag = p.tag + f.tag;
+                        String fTag = p.getTag() + f.getTag();
                         if (!BelarusianTags.getInstance().isValid(fTag, null)) {
                             continue;
                         }
@@ -110,7 +117,7 @@ public class GrammarServiceImpl extends RemoteServiceServlet implements GrammarS
                         }
                     }
                     if (reWord != null) {
-                        if (!reWord.matcher(WordNormalizer.normalize(f.value)).matches()) {
+                        if (!reWord.matcher(WordNormalizer.normalize(f.getValue())).matches()) {
                             continue;
                         }
                     }
@@ -118,10 +125,11 @@ public class GrammarServiceImpl extends RemoteServiceServlet implements GrammarS
                     found = true;
                     break;
                 }
+                }
                 if (found) {
                     LemmaInfo w = new LemmaInfo();
-                    w.lemma = p.lemma;
-                    w.lemmaGrammar = p.tag;
+                    w.lemma = p.getLemma();
+                    w.lemmaGrammar = p.getTag();
                     result.add(w);
                     if (Settings.GRAMMAR_SEARCH_RESULT_PAGE > 0
                             && result.size() >= Settings.GRAMMAR_SEARCH_RESULT_PAGE + 1) {
@@ -156,20 +164,22 @@ public class GrammarServiceImpl extends RemoteServiceServlet implements GrammarS
         try {
             List<LemmaInfo> result = new ArrayList<>();
 
-            begpar: for (LiteParadigm p : GrammarDBLite.getInstance().getAllParadigms()) {
-                if (lemma.lemma.equals(p.lemma)) {
-                    LemmaInfo li = new LemmaInfo();
-                    li.lemma = p.lemma;
-                    li.lemmaGrammar = p.tag;
-                    result.add(li);
-                    List<LemmaInfo.Word> words = new ArrayList<>();
-                    for (LiteForm f : p.forms) {
-                        LemmaInfo.Word w = new LemmaInfo.Word();
-                        w.value = f.value;
-                        w.cat = p.tag + f.tag;
-                        words.add(w);
+            begpar: for (Paradigm p : gr.getAllParadigms()) {
+                for (Variant v : p.getVariant()) {
+                    if (lemma.lemma.equals(p.getLemma())) {
+                        LemmaInfo li = new LemmaInfo();
+                        li.lemma = p.getLemma();
+                        li.lemmaGrammar = p.getTag();
+                        result.add(li);
+                        List<LemmaInfo.Word> words = new ArrayList<>();
+                        for (Form f : v.getForm()) {
+                            LemmaInfo.Word w = new LemmaInfo.Word();
+                            w.value = f.getValue();
+                            w.cat = p.getTag() + f.getTag();
+                            words.add(w);
+                        }
+                        li.words = words.toArray(new LemmaInfo.Word[words.size()]);
                     }
-                    li.words = words.toArray(new LemmaInfo.Word[words.size()]);
                 }
 
                 if (Settings.GRAMMAR_SEARCH_RESULT_PAGE > 0

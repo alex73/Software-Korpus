@@ -15,7 +15,8 @@ import org.apache.commons.lang.StringUtils;
  * Java class for anonymous complex type.
  * 
  * <p>
- * The following schema fragment specifies the expected content contained within this class.
+ * The following schema fragment specifies the expected content contained within
+ * this class.
  * 
  * <pre>
  * &lt;complexType>
@@ -30,26 +31,23 @@ import org.apache.commons.lang.StringUtils;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = { "value" })
+@XmlType(name = "")
 @XmlRootElement(name = "z")
 public class Z implements ITextLineElement {
 
     public Z() {
     }
 
-    public Z(String v) {
-        value = v;
+    public Z(char s) {
+        _char = Character.toString(s);
     }
 
-    public Z(String v, String c) {
-        value = v;
-        cat = c;
+    public Z(String s) {
+        _char = s;
     }
 
-    @XmlValue
-    protected String value;
-    @XmlAttribute(name = "cat", required = true)
-    protected String cat;
+    @XmlAttribute(name = "char")
+    protected String _char;
 
     /**
      * Gets the value of the value property.
@@ -57,52 +55,24 @@ public class Z implements ITextLineElement {
      * @return possible object is {@link String }
      * 
      */
-    public String getValue() {
-        return value;
+    public String getChar() {
+        return _char;
     }
 
-    /**
-     * Sets the value of the value property.
-     * 
-     * @param value
-     *            allowed object is {@link String }
-     * 
-     */
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    /**
-     * Gets the value of the cat property.
-     * 
-     * @return possible object is {@link String }
-     * 
-     */
-    public String getCat() {
-        return cat;
-    }
-
-    /**
-     * Sets the value of the cat property.
-     * 
-     * @param value
-     *            allowed object is {@link String }
-     * 
-     */
-    public void setCat(String value) {
-        this.cat = value;
+    public void setChar(String c) {
+        this._char = c;
     }
 
     @Override
     public String getText() {
-        return value;
+        return _char;
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Z) {
             Z o = (Z) obj;
-            return StringUtils.equals(o.value, value) && StringUtils.equals(o.cat, cat);
+            return o._char == _char;
         } else {
             return false;
         }
@@ -110,6 +80,6 @@ public class Z implements ITextLineElement {
 
     @Override
     public String toString() {
-        return "Z(" + value + "/" + cat + ")";
+        return "Z(" + _char + ")";
     }
 }

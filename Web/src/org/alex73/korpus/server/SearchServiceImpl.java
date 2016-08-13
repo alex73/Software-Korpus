@@ -22,7 +22,6 @@
 
 package org.alex73.korpus.server;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -35,6 +34,7 @@ import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
 
+import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.client.SearchService;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
 import org.alex73.korpus.server.text.BinaryParagraphReader;
@@ -61,6 +61,10 @@ import org.apache.lucene.search.BooleanQuery;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
+import alex73.corpus.paradigm.Form;
+import alex73.corpus.paradigm.Paradigm;
+import alex73.corpus.paradigm.Variant;
+
 /**
  * Service for search by corpus documents.
  */
@@ -71,6 +75,8 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
     static final Logger LOGGER = LogManager.getLogger(SearchServiceImpl.class);
 
+    private GrammarDB2 gr;
+
     public static String dirPrefix = System.getProperty("KORPUS_DIR");
     LuceneFilter processKorpus;
     LuceneFilter processOther;
@@ -78,7 +84,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     public SearchServiceImpl() {
         LOGGER.info("startup");
         try {
-            GrammarDBLite.initializeFromDir(new File(dirPrefix + "/GrammarDB/"));
+            gr = GrammarDB2.initializeFromDir(dirPrefix + "/GrammarDB/");
             processKorpus = new LuceneFilter(dirPrefix + "/Korpus-cache/");
             processOther = new LuceneFilter(dirPrefix + "/Other-cache/");
         } catch (Throwable ex) {
@@ -331,11 +337,13 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     private List<String> findAllLemmas(String word) {
         word = WordNormalizer.normalize(word);
         Set<String> result = new HashSet<>();
-        for (LiteParadigm p : GrammarDBLite.getInstance().getAllParadigms()) {
-            for (LiteForm f : p.forms) {
-                if (word.equals(WordNormalizer.normalize(f.value))) {
-                    result.add(p.lemma);
-                    break;
+        for (Paradigm p : gr.getAllParadigms()) {
+            for (Variant v : p.getVariant()) {
+                for (Form f : v.getForm()) {
+                    if (word.equals(WordNormalizer.normalize(f.getValue()))) {
+                        result.add(p.getLemma());
+                        break;
+                    }
                 }
             }
         }

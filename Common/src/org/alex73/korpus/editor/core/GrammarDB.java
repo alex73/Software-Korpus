@@ -50,6 +50,10 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 
+import org.alex73.corpus.paradigm.Form;
+import org.alex73.corpus.paradigm.Paradigm;
+import org.alex73.corpus.paradigm.Variant;
+import org.alex73.corpus.paradigm.Wordlist;
 import org.alex73.korpus.text.parser.BOMBufferedReader;
 import org.alex73.korpus.utils.StressUtils;
 import org.alex73.korpus.utils.WordNormalizer;
@@ -58,17 +62,13 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
-import alex73.corpus.paradigm.Form;
-import alex73.corpus.paradigm.Paradigm;
-import alex73.corpus.paradigm.Variant;
-import alex73.corpus.paradigm.Wordlist;
 
 /**
  * Сховішча поўнай граматычнай базы ў памяці, з магчымасьцю рэдагаваньня.
  */
 public class GrammarDB {
     public static final Locale BEL = new Locale("be");
-    public static final String CACHE_FILE = "db.cache";
+    public static final String CACHE_FILE = "db.cache.old";
     public static final String THEMES_FILE = "themes.txt";
 
     public static final String letters = "ёйцукенгшўзх'фывапролджэячсмітьбющиЁЙЦУКЕНГШЎЗХ'ФЫВАПРОЛДЖЭЯЧСМІТЬБЮЩИqwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";

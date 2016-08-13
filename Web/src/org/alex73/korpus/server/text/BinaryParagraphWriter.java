@@ -85,8 +85,7 @@ public class BinaryParagraphWriter {
     }
 
     private void writeZ(Z z) throws IOException {
-        writeString(z.getValue());
-        writeString(z.getCat());
+        writeString(z.getChar());
     }
     private void writeO(O o) throws IOException {
         writeString(o.getValue());

@@ -1,5 +1,5 @@
 
-package alex73.corpus.paradigm;
+package org.alex73.corpus.paradigm;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
@@ -7,41 +7,33 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for FormOptions.
+ * <p>Java class for ParadigmOptions.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * <p>
  * <pre>
- * &lt;simpleType name="FormOptions">
+ * &lt;simpleType name="ParadigmOptions">
  *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
- *     &lt;enumeration value="anim"/>
- *     &lt;enumeration value="inanim"/>
+ *     &lt;enumeration value="usually_plurals"/>
  *   &lt;/restriction>
  * &lt;/simpleType>
  * </pre>
  * 
  */
-@XmlType(name = "FormOptions")
+@XmlType(name = "ParadigmOptions")
 @XmlEnum
-public enum FormOptions {
+public enum ParadigmOptions {
 
 
     /**
-     * Адушаўлёны
+     * Звычайна у множным ліку
      * 
      */
-    @XmlEnumValue("anim")
-    ANIM("anim"),
-
-    /**
-     * Неадушаўлёны
-     * 
-     */
-    @XmlEnumValue("inanim")
-    INANIM("inanim");
+    @XmlEnumValue("usually_plurals")
+    USUALLY_PLURALS("usually_plurals");
     private final String value;
 
-    FormOptions(String v) {
+    ParadigmOptions(String v) {
         value = v;
     }
 
@@ -49,8 +41,8 @@ public enum FormOptions {
         return value;
     }
 
-    public static FormOptions fromValue(String v) {
-        for (FormOptions c: FormOptions.values()) {
+    public static ParadigmOptions fromValue(String v) {
+        for (ParadigmOptions c: ParadigmOptions.values()) {
             if (c.value.equals(v)) {
                 return c;
             }

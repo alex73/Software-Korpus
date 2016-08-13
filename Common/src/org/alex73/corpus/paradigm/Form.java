@@ -1,5 +1,5 @@
 
-package alex73.corpus.paradigm;
+package org.alex73.corpus.paradigm;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

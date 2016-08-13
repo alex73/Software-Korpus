@@ -2,12 +2,11 @@ package org.alex73.korpus.parser;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.alex73.korpus.editor.core.GrammarDB;
+import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.text.parser.IProcess;
 import org.alex73.korpus.text.parser.Splitter2;
 import org.alex73.korpus.text.xml.O;
@@ -35,16 +34,7 @@ public class TestSplitter2 {
 
     @Before
     public void before() throws Exception {
-        GrammarDB.initializeFromDir(new File("GrammarDB"), new GrammarDB.LoaderProgress() {
-            public void setFilesCount(int count) {
-            }
-
-            public void beforeFileLoading(String file) {
-            }
-
-            public void afterFileLoading() {
-            }
-        });
+        Splitter2.init(GrammarDB2.initializeFromDir("GrammarDB"));
     }
 
     @Test
@@ -107,7 +97,7 @@ public class TestSplitter2 {
     private Z nextZ(String value) {
         Object obj = p.getSe().get(se).getWOrSOrZ().get(w);
         Z result = (Z) obj;
-        assertEquals(value, result.getValue());
+        assertEquals(value, result.getChar());
         w++;
         return result;
     }
@@ -134,9 +124,9 @@ public class TestSplitter2 {
     public void testGrammar() {
         p = new Splitter2("Беларусь п'еса", true, errors).getP();
 
-        nextW("Беларусь", "Беларусь", "NPIINF3AS_NPIINF3NS");
+        nextW("Беларусь", "Белару*сь", "NPIINF3AS_NPIINF3NS");
         nextS(" ");
-        nextW("п'еса", "п'е´са", "NCIINF2NS");
+        nextW("п'еса", "п'е*са", "NCIINF2NS");
         endSentence();
 
         endText();

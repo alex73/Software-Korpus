@@ -12,7 +12,8 @@ import javax.xml.bind.annotation.XmlType;
  * Java class for anonymous complex type.
  * 
  * <p>
- * The following schema fragment specifies the expected content contained within this class.
+ * The following schema fragment specifies the expected content contained within
+ * this class.
  * 
  * <pre>
  * &lt;complexType>
@@ -79,7 +80,7 @@ public class S implements ITextLineElement {
     public boolean equals(Object obj) {
         if (obj instanceof S) {
             S o = (S) obj;
-            return o._char.equals(_char);
+            return o._char == _char;
         } else {
             return false;
         }

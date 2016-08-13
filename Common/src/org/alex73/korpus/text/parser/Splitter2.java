@@ -25,7 +25,11 @@ package org.alex73.korpus.text.parser;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.alex73.korpus.editor.core.GrammarDB;
+import org.alex73.corpus.paradigm.Form;
+import org.alex73.corpus.paradigm.Paradigm;
+import org.alex73.corpus.paradigm.Variant;
+import org.alex73.korpus.base.GrammarDB2;
+import org.alex73.korpus.base.GrammarParadigmFinder;
 import org.alex73.korpus.text.xml.ITextLineElement;
 import org.alex73.korpus.text.xml.InlineTag;
 import org.alex73.korpus.text.xml.O;
@@ -37,9 +41,6 @@ import org.alex73.korpus.text.xml.Z;
 import org.alex73.korpus.utils.SetUtils;
 import org.alex73.korpus.utils.WordNormalizer;
 
-import alex73.corpus.paradigm.Form;
-import alex73.corpus.paradigm.Paradigm;
-import alex73.corpus.paradigm.Variant;
 
 /**
  * Гэты код дзеліць радок(ці некалькі радкоў для вершаў) на асобныя элемэнты XMLText.
@@ -51,6 +52,13 @@ public class Splitter2 {
     private char currentChar;
     private final P p = new P();
     private Se se;
+    private static GrammarDB2 gr;
+    private static GrammarParadigmFinder grFinder;
+    
+    public static void init(GrammarDB2 grammar) {
+        gr = grammar;
+        grFinder = new GrammarParadigmFinder(gr);
+    }
 
     public Splitter2(String para, boolean processAmp, IProcess errors) {
         this.errors = errors;
@@ -77,9 +85,9 @@ public class Splitter2 {
             default:
                 if (isSpace()) {
                     parseSpace();
-                } else if (isZnak()) {
+                } else if (gr.isZnak(currentChar)) {
                     parseZnak();
-                } else if (isLetter()) {
+                } else if (gr.isLetter(currentChar)) {
                     parseWord();
                 } else {
                     parseOther(processAmp);
@@ -99,13 +107,10 @@ public class Splitter2 {
                 if (o instanceof W) {
                     W w = (W) o;
                     String word = fixWord(w.getValue());
-                    Paradigm[] paradigms = GrammarDB.getInstance().getParadigmsByForm(word);
+                    Paradigm[] paradigms = grFinder.getParadigmsByForm(word);
                     fillWordInfoParadigms(w, word, paradigms);
                 } else if (o instanceof S) {
                 } else if (o instanceof Z) {
-                    Z z=(Z)o;
-                    Paradigm[] paradigms = GrammarDB.getInstance().getParadigmsByForm(z.getText());
-                    fillZnakInfoParadigms(z, paradigms);
                 } else if (o instanceof O) {
                 } else if (o instanceof InlineTag) {
                 } else {
@@ -241,8 +246,7 @@ public class Splitter2 {
         } else {
             pos++;
         }
-        Z z = new Z();
-        z.setValue(Character.toString(currentChar));
+        Z z = new Z(currentChar);
         addToSentence(z);
     }
 
@@ -265,7 +269,7 @@ public class Splitter2 {
         int end = pos;
         for (; end < para.length(); end++) {
             currentChar = para.charAt(end);
-            if (!isLetter()) {
+            if (!gr.isLetter(currentChar)) {
                 break;
             }
         }
@@ -279,7 +283,7 @@ public class Splitter2 {
         int end = pos;
         for (; end < para.length(); end++) {
             currentChar = para.charAt(end);
-            if (isLetter() || isZnak() || isSpace() || currentChar == '<') {
+            if (gr.isLetter(currentChar) || gr.isZnak(currentChar) || isSpace() || currentChar == '<') {
                 break;
             }
             if (processAmp && currentChar == '&') {
@@ -295,16 +299,6 @@ public class Splitter2 {
 
     private boolean isSpace() {
         return Character.isWhitespace(currentChar);
-    }
-
-    private boolean isZnak() {
-        String znaki = GrammarDB.getInstance().getZnaki();
-        return znaki.indexOf(currentChar) >= 0;
-    }
-
-    private boolean isLetter() {
-        String letters = GrammarDB.getInstance().getLetters();
-        return letters.indexOf(currentChar) >= 0;
     }
 
     private void addToSentence(ITextLineElement obj) {
@@ -353,18 +347,5 @@ public class Splitter2 {
         }
         w.setLemma(SetUtils.set2string(lemmas));
         w.setCat(SetUtils.set2string(cats));
-    }
-
-    static void fillZnakInfoParadigms(Z z, Paradigm[] paradigms) {
-        Set<String> cats = new TreeSet<>();
-        for (Paradigm p : paradigms) {
-            for(Variant v:p.getVariant()) {
-            for (Form f : v.getForm()) {
-                if (z.getText().equals(f.getValue())) {
-                    cats.add(p.getTag() + f.getTag());
-                }
-            }
-        }}
-        z.setCat(SetUtils.set2string(cats));
     }
 }

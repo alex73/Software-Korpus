@@ -76,11 +76,7 @@
 
     <xs:element name="z"> <!-- non-letter char, like commas, quotes, etc. -->
         <xs:complexType>
-            <xs:simpleContent>
-                <xs:extension base="xs:string">
-                    <xs:attribute name="cat" type="xs:string" use="required" />
-                </xs:extension>
-            </xs:simpleContent>
+            <xs:attribute name="char" type="S1" use="required" />
         </xs:complexType>
     </xs:element>
 

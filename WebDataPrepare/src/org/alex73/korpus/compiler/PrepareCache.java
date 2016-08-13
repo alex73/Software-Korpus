@@ -22,7 +22,6 @@
 
 package org.alex73.korpus.compiler;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -31,14 +30,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.alex73.korpus.editor.core.GrammarDB;
+import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.text.parser.IProcess;
+import org.alex73.korpus.text.parser.Splitter2;
 import org.alex73.korpus.text.xml.P;
 
 /**
  * Class for prepare data for search.
  */
 public class PrepareCache {
+    private static GrammarDB2 gr;
     public static void main(String[] args) throws Exception {
         Locale.setDefault(new Locale("be"));
 
@@ -48,17 +49,8 @@ public class PrepareCache {
     public void process(boolean processOther) throws Exception {
         System.out.println("Load GrammarDB...");
 
-        GrammarDB.initializeFromDir(new File("GrammarDB"), new GrammarDB.LoaderProgress() {
-            public void setFilesCount(int count) {
-            }
-
-            public void beforeFileLoading(String file) {
-                System.out.println("Load " + file);
-            }
-
-            public void afterFileLoading() {
-            }
-        });
+        gr = GrammarDB2.initializeFromDir("GrammarDB");
+        Splitter2.init(gr);
 
         new KorpusLoading(errors, new CallbackP() {
             public void processP(P p) {

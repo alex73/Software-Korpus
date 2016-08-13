@@ -1,4 +1,4 @@
 #!/bin/sh
 
-/opt/java/bin/xjc -no-header -d src -p alex73.corpus.paradigm src/xsd/Paradigm.xsd
-#/opt/java8/bin/xjc -no-header -d src -p alex73.corpus.text src/xsd/CorpusText.xsd
+/opt/java/bin/xjc -no-header -d src -p org.alex73.corpus.paradigm src/xsd/Paradigm.xsd
+#/opt/java/bin/xjc -no-header -d src -p org.alex73.korpus.text.xml src/xsd/CorpusText.xsd
