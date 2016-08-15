@@ -16,6 +16,16 @@ public class BelarusianComparators {
             return v;
         }
     };
+    public static final Comparator<String> FULL_REVERSE = new Comparator<String>() {
+        @Override
+        public int compare(String o1, String o2) {
+            StringBuilder s1 = new StringBuilder(o1);
+            StringBuilder s2 = new StringBuilder(o2);
+            s1.reverse();
+            s2.reverse();
+            return FULL.compare(s1.toString(), s2.toString());
+        }
+    };
     public static final Comparator<String> WITHOUT_STRESS = new Comparator<String>() {
         @Override
         public int compare(String o1, String o2) {
