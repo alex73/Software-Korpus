@@ -28,7 +28,6 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 
-import javax.swing.JEditorPane;
 import javax.swing.SwingWorker;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
@@ -40,12 +39,11 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import javax.xml.bind.Marshaller;
 
+import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.TagLetter;
 import org.alex73.korpus.editor.core.GrammarDB;
 import org.alex73.korpus.text.xml.W;
-
-import alex73.corpus.paradigm.Paradigm;
 
 public class GrammarPaneController {
     static W currentWord;

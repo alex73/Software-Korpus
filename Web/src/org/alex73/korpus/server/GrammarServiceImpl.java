@@ -30,6 +30,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
+import org.alex73.corpus.paradigm.Form;
+import org.alex73.corpus.paradigm.Paradigm;
+import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.DBTagsGroups;
 import org.alex73.korpus.base.GrammarDB2;
@@ -41,10 +44,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-
-import alex73.corpus.paradigm.Form;
-import alex73.corpus.paradigm.Paradigm;
-import alex73.corpus.paradigm.Variant;
 
 /**
  * Service for find by grammar database.

@@ -84,11 +84,11 @@ public class BelarusianComparators {
             }
         }
     };
-    static final String LETTERS = "абвгдеёжзіклмнопрстуўфхцчшыьэюя";
+    static final String LETTERS = "абвгдеёжзійклмнопрстуўфхцчшыьэюя";
 
     static int compareChars(char c1, char c2) {
         int p1 = LETTERS.indexOf(c1);
         int p2 = LETTERS.indexOf(c2);
-        return p1 - p2;
+        return p1 == p2 ? Character.compare(c1, c2) : p1 - p2;
     }
 }

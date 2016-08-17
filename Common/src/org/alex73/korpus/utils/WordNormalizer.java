@@ -34,15 +34,22 @@ import java.util.Map;
  */
 public class WordNormalizer {
     public static final Locale BEL = new Locale("be");
-    
+
     static private final Map<String, String> NORMALIZED = Collections.synchronizedMap(new HashMap<String, String>());
-    
+
     public static String normalize(String word) {
         String n = NORMALIZED.get(word);
         if (n == null) {
-            n = StressUtils.unstress(word.trim().toLowerCase(BEL));
+            n = fixApostrophe(word.trim().toLowerCase(BEL));
+            if (n.startsWith("ў")) {
+                n = "у" + n.substring(1);
+            }
             NORMALIZED.put(word, n.equals(word) ? word : n);
         }
         return n;
+    }
+
+    private static String fixApostrophe(String w) {
+        return w;
     }
 }

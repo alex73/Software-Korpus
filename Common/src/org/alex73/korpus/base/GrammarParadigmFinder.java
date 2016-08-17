@@ -4,30 +4,29 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
-import org.alex73.corpus.paradigm.Variant;
+import org.alex73.korpus.utils.StressUtils;
+import org.alex73.korpus.utils.WordNormalizer;
 
 public class GrammarParadigmFinder {
     private Map<String, Paradigm[]> paradigmsByForm = new HashMap<>();
 
     public GrammarParadigmFinder(GrammarDB2 gr) {
-        String s;
-        for (Paradigm p : gr.getAllParadigms()) {
-            for (Variant v : p.getVariant()) {
-                for (Form f : v.getForm()) {
-                    String orig = f.getValue();
+        gr.getAllParadigms().parallelStream().forEach(p -> {
+            p.getVariant().forEach(v -> {
+                v.getForm().forEach(f -> {
+                    String orig = WordNormalizer.normalize(f.getValue());
                     add(orig, p);
-                    s = orig.replace("*", "");
+                    String s = StressUtils.unstress(orig);
                     if (!s.equals(orig)) {
                         add(s, p);
                     }
-                }
-            }
-        }
+                });
+            });
+        });
     }
 
-    private void add(String key, Paradigm p) {
+    private synchronized void add(String key, Paradigm p) {
         Paradigm[] byForm = paradigmsByForm.get(key);
         if (byForm == null) {
             byForm = new Paradigm[1];

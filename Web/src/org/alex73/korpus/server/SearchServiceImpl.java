@@ -34,6 +34,9 @@ import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
 
+import org.alex73.corpus.paradigm.Form;
+import org.alex73.corpus.paradigm.Paradigm;
+import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.client.SearchService;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
@@ -60,10 +63,6 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.search.BooleanQuery;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-
-import alex73.corpus.paradigm.Form;
-import alex73.corpus.paradigm.Paradigm;
-import alex73.corpus.paradigm.Variant;
 
 /**
  * Service for search by corpus documents.
@@ -318,7 +317,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
                 } else if (o instanceof S) {
                     rsw.value = ((S) o).getChar();
                 } else if (o instanceof Z) {
-                    rsw.value = ((Z) o).getValue();
+                    rsw.value = ((Z) o).getChar();
                 } else if (o instanceof O) {
                     rsw.value = ((O) o).getValue();
                 }

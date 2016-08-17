@@ -29,6 +29,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import org.alex73.corpus.paradigm.Form;
+import org.alex73.corpus.paradigm.Paradigm;
+import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.editor.core.GrammarDB;
 import org.alex73.korpus.editor.core.structure.Line;
 import org.alex73.korpus.editor.core.structure.SentenceSeparatorItem;
@@ -37,8 +40,6 @@ import org.alex73.korpus.text.xml.S;
 import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.Z;
 import org.alex73.korpus.utils.WordNormalizer;
-
-import alex73.corpus.paradigm.Paradigm;
 
 /**
  * Гэты код дзеліць радок на асобныя элемэнты.
@@ -290,7 +291,7 @@ public class Splitter {
     public static Z getZnakInfo(String w) {
         String word = fixWord(w);
         Z result = new Z();
-        result.setValue(w); // value must be original text
+        result.setChar(w); // value must be original text
         Paradigm[] paradigms = GrammarDB.getInstance().getParadigmsByForm(word);
         if (paradigms != null) {
             fillZnakInfoParadigms(result, word, paradigms);
@@ -311,7 +312,7 @@ public class Splitter {
                 }
             } else if (item instanceof Z) {
                 Z z = (Z) item;
-                String word = z.getValue(); // TODO : check
+                String word = z.getChar(); // TODO : check
                 Paradigm[] paradigms = GrammarDB.getInstance().getParadigmsByForm(word);
                 if (paradigms != null) {
                     fillZnakInfoParadigms(z, word, paradigms);
@@ -362,20 +363,22 @@ public class Splitter {
         for (Paradigm p : paradigms) {
             lemmas.add(p.getLemma());
             boolean foundForm = false;
-            for (Paradigm.Form f : p.getForm()) {
+            for(Variant v:p.getVariant()) {
+            for (Form f : v.getForm()) {
                 if (word.equals(f.getValue())) {
                     cats.add(p.getTag() + f.getTag());
                     foundForm = true;
                 }
-            }
+            }}
             if (!foundForm) {
                 // the same find, but without stress and lowercase
                 String uw = WordNormalizer.normalize(word);
-                for (Paradigm.Form f : p.getForm()) {
+                for(Variant v:p.getVariant()) {
+                for (Form f : v.getForm()) {
                     if (uw.equals(WordNormalizer.normalize(f.getValue()))) {
                         cats.add(p.getTag() + f.getTag());
                     }
-                }
+                }}
             }
         }
         w.setLemma(set2string(lemmas));
@@ -386,20 +389,22 @@ public class Splitter {
         Set<String> cats = new TreeSet<>();
         for (Paradigm p : paradigms) {
             boolean foundForm = false;
-            for (Paradigm.Form f : p.getForm()) {
+            for(Variant v:p.getVariant()) {
+            for (Form f : v.getForm()) {
                 if (word.equals(f.getValue())) {
                     cats.add(p.getTag() + f.getTag());
                     foundForm = true;
                 }
-            }
+            }}
             if (!foundForm) {
                 // the same find, but without stress and lowercase
                 String uw = WordNormalizer.normalize(word);
-                for (Paradigm.Form f : p.getForm()) {
+                for(Variant v:p.getVariant()) {
+                for (Form f : v.getForm()) {
                     if (uw.equals(WordNormalizer.normalize(f.getValue()))) {
                         cats.add(p.getTag() + f.getTag());
                     }
-                }
+                }}
             }
         }
         z.setCat(set2string(cats));
