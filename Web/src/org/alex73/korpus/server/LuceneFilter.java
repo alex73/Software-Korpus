@@ -27,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.base.OtherInfo;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
@@ -35,7 +36,6 @@ import org.alex73.korpus.shared.dto.LatestMark;
 import org.alex73.korpus.shared.dto.StandardTextRequest;
 import org.alex73.korpus.shared.dto.UnprocessedTextRequest;
 import org.alex73.korpus.shared.dto.WordRequest;
-import org.alex73.korpus.utils.WordNormalizer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -102,7 +102,7 @@ public class LuceneFilter {
     }
 
     public void addWordFilter(BooleanQuery query, WordRequest w) {
-        w.word = WordNormalizer.normalize(w.word);
+        w.word = BelarusianWordNormalizer.normalize(w.word);
         if (w.word.length() > 0) {
             Query wq;
             if (w.allForms) {

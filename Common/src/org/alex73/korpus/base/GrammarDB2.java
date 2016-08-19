@@ -8,8 +8,6 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -25,7 +23,6 @@ import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.corpus.paradigm.Wordlist;
-import org.alex73.korpus.editor.core.GrammarDB;
 import org.alex73.korpus.editor.core.Theme;
 import org.alex73.korpus.text.parser.BOMBufferedReader;
 
@@ -36,10 +33,6 @@ import com.esotericsoftware.kryo.io.Output;
 public class GrammarDB2 {
     public static final String CACHE_FILE = "db.cache";
     public static final String THEMES_FILE = "themes.txt";
-    private static final String ZNAKI = "-—,:!?/.…\"“”«»()[]";
-    public static final String LETTERS = "ёйцукенгшўзх'фывапролджэячсмітьбющиЁЙЦУКЕНГШЎЗХ'ФЫВАПРОЛДЖЭЯЧСМІТЬБЮЩИqwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
-
-    private transient JAXBContext CONTEXT;
 
     private Map<String, Theme> themes;
     private List<Paradigm> allParadigms = new ArrayList<>();
@@ -48,17 +41,9 @@ public class GrammarDB2 {
         return allParadigms;
     }
 
-    public boolean isZnak(char c) {
-        return ZNAKI.indexOf(c) >= 0;
-    }
-
-    public boolean isLetter(char c) {
-        return LETTERS.indexOf(c) >= 0;
-    }
-
-    public synchronized static GrammarDB2 initializeFromJar() throws Exception {
+    public static GrammarDB2 initializeFromJar() throws Exception {
         GrammarDB2 r;
-        try (InputStream in = GrammarDB.class.getResourceAsStream("/" + CACHE_FILE)) {
+        try (InputStream in = GrammarDB2.class.getResourceAsStream("/" + CACHE_FILE)) {
             if (in == null)
                 return null;
             long be = System.currentTimeMillis();
@@ -70,7 +55,7 @@ public class GrammarDB2 {
         return r;
     }
 
-    public synchronized static GrammarDB2 initializeFromDir(String dir) throws Exception {
+    public static GrammarDB2 initializeFromDir(String dir) throws Exception {
         GrammarDB2 r;
         File[] forLoads = getFilesForLoad(new File(dir));
         File cacheFile = new File(dir, CACHE_FILE);
@@ -98,22 +83,16 @@ public class GrammarDB2 {
             }
         });
         if (result == null) {
-            throw new Exception("There are not files for GrammarDB in the " + dir.getAbsolutePath());
+            throw new Exception("There are no files for GrammarDB in the " + dir.getAbsolutePath());
         }
-        Arrays.sort(result, new Comparator<File>() {
-            @Override
-            public int compare(File o1, File o2) {
-                String n1 = o1.getName();
-                String n2 = o2.getName();
-                if (n1.equals(THEMES_FILE)) {
-                    return -1;
-                } else if (n2.equals(THEMES_FILE)) {
-                    return 1;
-                } else {
-                    return n1.compareTo(n2);
-                }
-            }
-        });
+        /*
+         * Arrays.sort(result, new Comparator<File>() {
+         * 
+         * @Override public int compare(File o1, File o2) { String n1 =
+         * o1.getName(); String n2 = o2.getName(); if (n1.equals(THEMES_FILE)) {
+         * return -1; } else if (n2.equals(THEMES_FILE)) { return 1; } else {
+         * return n1.compareTo(n2); } } });
+         */
         return result;
     }
 
@@ -157,7 +136,7 @@ public class GrammarDB2 {
         }
     }
 
-    public synchronized void addThemesFile(File file) throws Exception {
+    public void addThemesFile(File file) throws Exception {
         themes = new TreeMap<>();
         BOMBufferedReader rd = new BOMBufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
         String s;
@@ -196,8 +175,8 @@ public class GrammarDB2 {
         return s == null ? null : s.intern();
     }
 
-    public void addXMLFile(File file) throws Exception {
-        Unmarshaller unm = CONTEXT.createUnmarshaller();
+    private void addXMLFile(File file, JAXBContext ctx) throws Exception {
+        Unmarshaller unm = ctx.createUnmarshaller();
 
         InputStream in;
         if (file.getName().endsWith(".gz")) {
@@ -210,9 +189,7 @@ public class GrammarDB2 {
             for (Paradigm p : words.getParadigm()) {
                 optimize(p);
             }
-            synchronized (allParadigms) {
-                allParadigms.addAll(words.getParadigm());
-            }
+            allParadigms.addAll(words.getParadigm());
         } finally {
             in.close();
         }
@@ -230,7 +207,7 @@ public class GrammarDB2 {
     private GrammarDB2(File dir, File[] forLoads, File cacheFile) throws Exception {
         long be = System.currentTimeMillis();
 
-        CONTEXT = JAXBContext.newInstance(Wordlist.class.getPackage().getName());
+        JAXBContext ctx = JAXBContext.newInstance(Wordlist.class.getPackage().getName());
 
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(16);
         long latest = 0;
@@ -245,7 +222,7 @@ public class GrammarDB2 {
                         if (process.getName().equals(THEMES_FILE)) {
                             addThemesFile(process);
                         } else {
-                            addXMLFile(process);
+                            addXMLFile(process, ctx);
                         }
                     } catch (Exception ex) {
                         throw new RuntimeException(ex);
@@ -268,5 +245,9 @@ public class GrammarDB2 {
         cacheFile.setLastModified(latest);
         af = System.currentTimeMillis();
         System.out.println("GrammarDB serialization time: " + (af - be) + "ms");
+    }
+
+    public Theme getThemes(String grammar) {
+        return themes.get(grammar);
     }
 }

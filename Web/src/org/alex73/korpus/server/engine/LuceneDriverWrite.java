@@ -3,12 +3,11 @@ package org.alex73.korpus.server.engine;
 import java.nio.file.Paths;
 
 import org.alex73.korpus.base.BelarusianTags;
+import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.base.DBTagsGroups;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.text.xml.P;
-import org.alex73.korpus.text.xml.Se;
 import org.alex73.korpus.text.xml.W;
-import org.alex73.korpus.utils.WordNormalizer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,7 +37,7 @@ public class LuceneDriverWrite extends LuceneFields {
     public LuceneDriverWrite(String rootDir) throws Exception {
         IndexWriterConfig config = new IndexWriterConfig(new WhitespaceAnalyzer());
         config.setOpenMode(OpenMode.CREATE);
-        config.setRAMBufferSizeMB(256);
+        config.setRAMBufferSizeMB(512);
 
         dir = new NIOFSDirectory(Paths.get(rootDir));
         indexWriter = new IndexWriter(dir, config);
@@ -66,7 +65,7 @@ public class LuceneDriverWrite extends LuceneFields {
         docText.add(fieldTextYearPublished);
     }
 
-    public void shutdown() throws Exception {
+    public synchronized void shutdown() throws Exception {
 
         indexWriter.forceMerge(1);
         indexWriter.commit();
@@ -77,6 +76,8 @@ public class LuceneDriverWrite extends LuceneFields {
     public synchronized void setTextInfo(TextInfo info) throws Exception {
         textId++;
         currentTextInfo = info;
+        currentVolume = null;
+        currentUrl = null;
 
         fieldTextID.setIntValue(textId);
         fieldTextAuthors.setStringValue(merge(info.authors, ";"));
@@ -89,6 +90,7 @@ public class LuceneDriverWrite extends LuceneFields {
     public synchronized void setOtherInfo(String volume, String textURL) throws Exception {
         currentVolume = volume;
         currentUrl = textURL;
+        textId = -1;
     }
 
     /**
@@ -96,39 +98,34 @@ public class LuceneDriverWrite extends LuceneFields {
      * 
      * @return words count
      */
-    public int addSentence(P paragraph, byte[] xml) throws Exception {
+    public void addSentence(P paragraph, byte[] xml) throws Exception {
         StringBuilder values = new StringBuilder(8192);
         StringBuilder dbGrammarTags = new StringBuilder(8192);
         StringBuilder lemmas = new StringBuilder(8192);
 
-        int wordsCount = 0; // TODO: check performance
-        for (int i = 0; i < paragraph.getSe().size(); i++) {
-            Se op = paragraph.getSe().get(i);
-            for (int j = 0; j < op.getWOrSOrZ().size(); j++) {
-                Object o = op.getWOrSOrZ().get(j);
-                if (!(o instanceof W)) {
-                    continue;
-                }
-                W w = (W) o;
-                wordsCount++;
-                if (w.getValue() != null) {
-                    String wc = WordNormalizer.normalize(w.getValue());
-                    values.append(wc).append(' ');
-                }
-                if (StringUtils.isNotEmpty(w.getCat())) {
-                    for (String t : w.getCat().split("_")) {
-                        if (!BelarusianTags.getInstance().isValid(t, null)) {
-                            // TODO throw new Exception("Няправільны тэг: " + t);
-                        } else {
-                            dbGrammarTags.append(DBTagsGroups.getDBTagString(t)).append(' ');
+        paragraph.getSe().forEach(op -> {
+            op.getWOrSOrZ().forEach(o -> {
+                if (o instanceof W) {
+                    W w = (W) o;
+                    if (w.getValue() != null) {
+                        String wc = BelarusianWordNormalizer.normalize(w.getValue());
+                        values.append(wc).append(' ');
+                    }
+                    if (StringUtils.isNotEmpty(w.getCat())) {
+                        for (String t : w.getCat().split("_")) {
+                            if (!BelarusianTags.getInstance().isValid(t, null)) {
+                                // TODO throw new Exception("Няправільны тэг:
+                            } else {
+                                dbGrammarTags.append(DBTagsGroups.getDBTagString(t)).append(' ');
+                            }
                         }
                     }
+                    if (w.getLemma() != null) {
+                        lemmas.append(w.getLemma().replace('_', ' ')).append(' ');
+                    }
                 }
-                if (w.getLemma() != null) {
-                    lemmas.append(w.getLemma().replace('_', ' ')).append(' ');
-                }
-            }
-        }
+            });
+        });
 
         synchronized (this) {
             if (currentVolume != null && currentUrl != null) {
@@ -144,8 +141,7 @@ public class LuceneDriverWrite extends LuceneFields {
             fieldSentencePBinary.setBytesValue(xml);
 
             if (currentTextInfo != null) {
-                fieldSentenceTextStyleGenre.setTokenStream(new StringArrayTokenStream(
-                        currentTextInfo.styleGenres));
+                fieldSentenceTextStyleGenre.setTokenStream(new StringArrayTokenStream(currentTextInfo.styleGenres));
                 fieldSentenceTextWrittenYear.setIntValue(nvl(currentTextInfo.writtenYear));
                 fieldSentenceTextPublishedYear.setIntValue(nvl(currentTextInfo.publishedYear));
                 fieldSentenceTextAuthor.setTokenStream(new StringArrayTokenStream(currentTextInfo.authors));
@@ -153,8 +149,6 @@ public class LuceneDriverWrite extends LuceneFields {
 
             indexWriter.addDocument(docSentence);
         }
-
-        return wordsCount;
     }
 
     private String merge(String[] strs, String sep) {

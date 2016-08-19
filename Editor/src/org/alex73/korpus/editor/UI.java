@@ -64,7 +64,7 @@ public class UI {
 
     public static void init() throws Exception {
         mainWindow = new MainWindow();
-        mainWindow.setTitle("Рэдагаваньне файлаў корпусу, v.1.6");
+        mainWindow.setTitle("Рэдагаваньне файлаў корпусу, v.2.0");
 
         // GrammarDialogController.init(mainWindow);
         mainWindow.setBounds(200, 200, 900, 600);
@@ -73,6 +73,10 @@ public class UI {
     public static void showProgress() {
         mainProgress = new ProgressPane();
         mainWindow.getContentPane().add(mainProgress);
+    }
+    
+    public static void showProgressMessage(String message) {
+        mainProgress.lblText.setText(message);
     }
 
     public static void showEditor() throws Exception {

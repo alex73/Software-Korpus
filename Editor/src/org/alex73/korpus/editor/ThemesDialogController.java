@@ -38,7 +38,6 @@ import java.util.TreeSet;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 
-import org.alex73.korpus.editor.core.GrammarDB;
 import org.alex73.korpus.editor.core.Theme;
 import org.alex73.korpus.editor.ui.ThemesDialog;
 
@@ -86,7 +85,7 @@ public class ThemesDialogController {
         row = 0;
         column = 0;
         checkboxes.clear();
-        Theme thRoot = GrammarDB.getInstance().getThemes(grammar);
+        Theme thRoot = MainController.gr.getThemes(grammar);
         switch (grammar) {
         case "N":
             themeExact(thRoot, "Прадметныя");

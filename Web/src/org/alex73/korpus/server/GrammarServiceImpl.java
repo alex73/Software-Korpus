@@ -34,11 +34,11 @@ import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.BelarusianTags;
+import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.base.DBTagsGroups;
 import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.client.GrammarService;
 import org.alex73.korpus.shared.LemmaInfo;
-import org.alex73.korpus.utils.WordNormalizer;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -96,7 +96,7 @@ public class GrammarServiceImpl extends RemoteServiceServlet implements GrammarS
 
             begpar: for (Paradigm p : gr.getAllParadigms()) {
                 if (reLemma != null) {
-                    if (!reLemma.matcher(WordNormalizer.normalize(p.getLemma())).matches()) {
+                    if (!reLemma.matcher(BelarusianWordNormalizer.normalize(p.getLemma())).matches()) {
                         continue;
                     }
                 }
@@ -116,7 +116,7 @@ public class GrammarServiceImpl extends RemoteServiceServlet implements GrammarS
                         }
                     }
                     if (reWord != null) {
-                        if (!reWord.matcher(WordNormalizer.normalize(f.getValue())).matches()) {
+                        if (!reWord.matcher(BelarusianWordNormalizer.normalize(f.getValue())).matches()) {
                             continue;
                         }
                     }

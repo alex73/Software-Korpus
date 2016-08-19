@@ -34,7 +34,7 @@ import javax.swing.text.ParagraphView;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 
-import org.alex73.korpus.editor.core.structure.SentenceSeparatorItem;
+import org.alex73.korpus.editor.core.doc.structure.SentenceSeparatorItem;
 
 public class KorpusDocumentViewFactory implements ViewFactory {
     static final Color TAG_BACKGROUND_COLOR = new Color(224, 224, 224);

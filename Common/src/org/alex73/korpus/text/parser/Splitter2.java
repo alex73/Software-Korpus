@@ -22,14 +22,8 @@
 
 package org.alex73.korpus.text.parser;
 
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.alex73.corpus.paradigm.Form;
-import org.alex73.corpus.paradigm.Paradigm;
-import org.alex73.corpus.paradigm.Variant;
-import org.alex73.korpus.base.GrammarDB2;
-import org.alex73.korpus.base.GrammarParadigmFinder;
+import org.alex73.korpus.base.BelarusianWordNormalizer;
+import org.alex73.korpus.base.GrammarFiller;
 import org.alex73.korpus.text.xml.ITextLineElement;
 import org.alex73.korpus.text.xml.InlineTag;
 import org.alex73.korpus.text.xml.O;
@@ -38,8 +32,6 @@ import org.alex73.korpus.text.xml.S;
 import org.alex73.korpus.text.xml.Se;
 import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.Z;
-import org.alex73.korpus.utils.SetUtils;
-import org.alex73.korpus.utils.WordNormalizer;
 
 
 /**
@@ -52,13 +44,6 @@ public class Splitter2 {
     private char currentChar;
     private final P p = new P();
     private Se se;
-    private static GrammarDB2 gr;
-    private static GrammarParadigmFinder grFinder;
-    
-    public static void init(GrammarDB2 grammar) {
-        gr = grammar;
-        grFinder = new GrammarParadigmFinder(gr);
-    }
 
     public Splitter2(String para, boolean processAmp, IProcess errors) {
         this.errors = errors;
@@ -85,37 +70,14 @@ public class Splitter2 {
             default:
                 if (isSpace()) {
                     parseSpace();
-                } else if (gr.isZnak(currentChar)) {
+                } else if (BelarusianWordNormalizer.isZnak(currentChar)) {
                     parseZnak();
-                } else if (gr.isLetter(currentChar)) {
+                } else if (BelarusianWordNormalizer.isLetter(currentChar)) {
                     parseWord();
                 } else {
                     parseOther(processAmp);
                 }
                 break;
-            }
-        }
-
-        fillInfo();
-    }
-
-    private void fillInfo() {
-        for (int i = 0; i < p.getSe().size(); i++) {
-            Se se = p.getSe().get(i);
-            for (int j = 0; j < se.getWOrSOrZ().size(); j++) {
-                Object o = se.getWOrSOrZ().get(j);
-                if (o instanceof W) {
-                    W w = (W) o;
-                    String word = fixWord(w.getValue());
-                    Paradigm[] paradigms = grFinder.getParadigmsByForm(word);
-                    fillWordInfoParadigms(w, word, paradigms);
-                } else if (o instanceof S) {
-                } else if (o instanceof Z) {
-                } else if (o instanceof O) {
-                } else if (o instanceof InlineTag) {
-                } else {
-                    throw new RuntimeException("Unknown type:" + o.getClass());
-                }
             }
         }
     }
@@ -269,7 +231,7 @@ public class Splitter2 {
         int end = pos;
         for (; end < para.length(); end++) {
             currentChar = para.charAt(end);
-            if (!gr.isLetter(currentChar)) {
+            if (!BelarusianWordNormalizer.isLetter(currentChar)) {
                 break;
             }
         }
@@ -283,7 +245,7 @@ public class Splitter2 {
         int end = pos;
         for (; end < para.length(); end++) {
             currentChar = para.charAt(end);
-            if (gr.isLetter(currentChar) || gr.isZnak(currentChar) || isSpace() || currentChar == '<') {
+            if (BelarusianWordNormalizer.isLetter(currentChar) || BelarusianWordNormalizer.isZnak(currentChar) || isSpace() || currentChar == '<') {
                 break;
             }
             if (processAmp && currentChar == '&') {
@@ -307,45 +269,5 @@ public class Splitter2 {
             p.getSe().add(se);
         }
         se.getWOrSOrZ().add(obj);
-    }
-
-    public static String fixWord(String word) {
-        // Ў
-        if (word.startsWith("ў")) {
-            word = "у" + word.substring(1);
-        } else if (word.startsWith("Ў")) {
-            word = "У" + word.substring(1);
-        }
-        return word;
-    }
-
-    static void fillWordInfoParadigms(W w, String word, Paradigm[] paradigms) {
-        Set<String> lemmas = new TreeSet<>();
-        Set<String> cats = new TreeSet<>();
-        if (paradigms != null) {
-            for (Paradigm p : paradigms) {
-                lemmas.add(p.getLemma());
-                boolean foundForm = false;
-                for(Variant v:p.getVariant()) {
-                for (Form f : v.getForm()) {
-                    if (word.equals(f.getValue())) {
-                        cats.add(p.getTag() + f.getTag());
-                        foundForm = true;
-                    }
-                }}
-                if (!foundForm) {
-                    // the same find, but without stress and lowercase
-                    String uw = WordNormalizer.normalize(word);
-                    for(Variant v:p.getVariant()) {
-                    for (Form f : v.getForm()) {
-                        if (uw.equals(WordNormalizer.normalize(f.getValue()))) {
-                            cats.add(p.getTag() + f.getTag());
-                        }
-                    }}
-                }
-            }
-        }
-        w.setLemma(SetUtils.set2string(lemmas));
-        w.setCat(SetUtils.set2string(cats));
     }
 }

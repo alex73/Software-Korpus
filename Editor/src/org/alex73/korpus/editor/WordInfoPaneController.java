@@ -31,6 +31,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 import org.alex73.korpus.base.BelarusianTags;
+import org.alex73.korpus.base.GrammarFiller;
 import org.alex73.korpus.editor.ui.WordInfoPane;
 import org.alex73.korpus.text.xml.W;
 
@@ -125,7 +126,7 @@ public class WordInfoPaneController {
             W w = new W();
             w.setValue(UI.wordInfoPane.txtWord.getText());
             String lemma = ((JRadioButton) e.getSource()).getText();
-            Splitter.fillWordInfoLemma(w, lemma);
+            MainController.filler.fillWordInfoLemma(w, lemma);
             fillLemmas(w);
 
             setSaveEnabled();

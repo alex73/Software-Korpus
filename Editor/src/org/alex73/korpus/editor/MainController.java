@@ -49,20 +49,36 @@ import javax.swing.text.PlainDocument;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.ViewFactory;
 
-import org.alex73.korpus.editor.core.GrammarDB;
+import org.alex73.korpus.base.GrammarDB2;
+import org.alex73.korpus.base.GrammarFiller;
+import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyLineElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyWordElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocumentViewFactory;
+import org.alex73.korpus.editor.grammar.EditorGrammar;
+import org.alex73.korpus.editor.grammar.GrammarConstructor;
+import org.alex73.korpus.text.TextGeneral;
 import org.alex73.korpus.text.TextIO;
+import org.alex73.korpus.text.TextPlain;
 import org.alex73.korpus.text.parser.IProcess;
-import org.alex73.korpus.text.parser.TextParser;
+import org.alex73.korpus.text.parser.Splitter2;
 import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.XMLText;
 
 public class MainController {
     static final int[] FONT_SIZES = new int[] { 10, 12, 16, 20, 24, 30, 36, 44 };
     static String baseFileName;
+
+    private static GrammarDB2 globalGr;
+    private static GrammarFinder globalGrFinder;
+    public static EditorGrammar gr;
+    public static GrammarFiller filler;
+
+    public static void initGrammar(GrammarDB2 gr) {
+        globalGr = gr;
+        globalGrFinder = new GrammarFinder(globalGr);
+    }
 
     public static void init() {
         UI.mainWindow.mFileOpen.addActionListener(aFileOpen);
@@ -100,8 +116,7 @@ public class MainController {
         UI.editor.getActionMap().put("GoGrammar", actionGoGrammar);
 
         UI.mainWindow.mSetText.addActionListener(new SetActionListener(null));
-        UI.mainWindow.mSetOtherLanguage
-                .addActionListener(new SetActionListener(KorpusDocument3.ATTRS_OTHER_LANGUAGE));
+        UI.mainWindow.mSetOtherLanguage.addActionListener(new SetActionListener(KorpusDocument3.ATTRS_OTHER_LANGUAGE));
         UI.mainWindow.mSetDigits.addActionListener(new SetActionListener(KorpusDocument3.ATTRS_DIGITS));
         UI.mainWindow.mSetTrasianka.addActionListener(new SetActionListener(KorpusDocument3.ATTRS_TRASIANKA));
         UI.mainWindow.mSetDyjalekt.addActionListener(new SetActionListener(KorpusDocument3.ATTRS_DYJALEKT));
@@ -153,7 +168,7 @@ public class MainController {
     };
 
     static void saveGrammar() throws Exception {
-        GrammarDB.getInstance().saveDocLevelParadygms(getGrammarFile());
+        gr.save();
     }
 
     static ActionListener aUnderChange = new ActionListener() {
@@ -265,13 +280,13 @@ public class MainController {
     };
 
     public static void openFile(File f) {
-        GrammarDB.getInstance().clearDocLevelParadygms();
         try {
             baseFileName = f.getPath().replaceAll("\\.[a-z]+$", "");
 
-            if (getGrammarFile().exists()) {
-                GrammarDB.getInstance().addXMLFile(getGrammarFile(), true);
-            }
+            gr = new EditorGrammar(globalGr, baseFileName + "-grammar.xml");
+            filler = new GrammarFiller(globalGrFinder, gr);
+            Splitter2.init(filler);
+            GrammarPaneController.grConstr = new GrammarConstructor(gr);
 
             XMLText kDoc;
             if (f.getName().endsWith(".xml")) {
@@ -281,24 +296,30 @@ public class MainController {
                 } finally {
                     in.close();
                 }
-            } else {
-                InputStream in = new BufferedInputStream(new FileInputStream(f));
-                try {
-                    kDoc = TextParser.parseText(in, false, new IProcess() {
-                        @Override
-                        public void showStatus(String status) {
-                        }
+            } else if (f.getName().endsWith(".text")) {
+                kDoc = new TextGeneral(f, new IProcess() {
+                    @Override
+                    public void showStatus(String status) {
+                    }
 
-                        @Override
-                        public void reportError(String error) {
-                            throw new RuntimeException(error);
-                        }
-                    });
-                } finally {
-                    in.close();
-                }
-                TextIO.saveXML(new File(baseFileName + ".orig.xml"), kDoc);
+                    @Override
+                    public void reportError(String error) {
+                        throw new RuntimeException(error);
+                    }
+                }).parse();
+            } else {
+                kDoc = new TextPlain(f, new IProcess() {
+                    @Override
+                    public void showStatus(String status) {
+                    }
+
+                    @Override
+                    public void reportError(String error) {
+                        throw new RuntimeException(error);
+                    }
+                }).parse();
             }
+            TextIO.saveXML(new File(baseFileName + ".orig.xml"), kDoc);
 
             UI.doc = new KorpusDocument3(kDoc);
             final KorpusDocumentViewFactory viewFactory = new KorpusDocumentViewFactory();
@@ -324,19 +345,15 @@ public class MainController {
     }
 
     static void closeFile() {
-        GrammarDB.getInstance().clearDocLevelParadygms();
+        gr = null;
         UI.doc = null;
         UI.editor.removeCaretListener(onWordChanged);
         UI.editor.setEditorKit(UI.editor.getEditorKitForContentType("text/plain"));
         UI.editor.setDocument(new PlainDocument());
-        
+
         UI.mainWindow.mFileOpen.setEnabled(true);
         UI.mainWindow.mFileSave.setEnabled(false);
         UI.mainWindow.mFileClose.setEnabled(false);
-    }
-
-    static File getGrammarFile() {
-        return new File(baseFileName + "-grammar.xml");
     }
 
     static File getOutFile() {

@@ -1,13 +1,13 @@
-package org.alex73.korpus.parser;
+package org.alex73.korpus.text;
 
 import java.io.File;
 import java.io.InputStream;
 
 import org.alex73.korpus.base.GrammarDB2;
-import org.alex73.korpus.text.TextIO;
+import org.alex73.korpus.base.GrammarFiller;
+import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.text.parser.IProcess;
 import org.alex73.korpus.text.parser.Splitter2;
-import org.alex73.korpus.text.parser.TextParser;
 import org.alex73.korpus.text.xml.Content;
 import org.alex73.korpus.text.xml.P;
 import org.alex73.korpus.text.xml.Poetry;
@@ -18,17 +18,17 @@ import org.custommonkey.xmlunit.XMLTestCase;
 import org.junit.Test;
 import org.xml.sax.InputSource;
 
-public class TextParserTest extends XMLTestCase {
+public class TextGeneralTest extends XMLTestCase {
 
-    public TextParserTest() throws Exception {
-        Splitter2.init(GrammarDB2.initializeFromDir("GrammarDB"));
+    public TextGeneralTest() throws Exception {
+        Splitter2.init(new GrammarFiller(new GrammarFinder(GrammarDB2.initializeFromDir("GrammarDB"))));
     }
 
     @Test
     public void testText2XML() throws Exception {
         XMLText xml;
-        try (InputStream in = TextParserTest.class.getResourceAsStream("/org/alex73/korpus/parser/parserTest1.text")) {
-            xml = TextParser.parseText(in, false, new IProcess() {
+        try (InputStream in = TextGeneralTest.class.getResourceAsStream("/org/alex73/korpus/text/parserTest1.text")) {
+            xml = new TextGeneral(in, new IProcess() {
 
                 @Override
                 public void showStatus(String status) {
@@ -38,12 +38,13 @@ public class TextParserTest extends XMLTestCase {
                 public void reportError(String error) {
                     throw new RuntimeException(error);
                 }
-            });
+            }).parse();
         }
         clearCatLemma(xml.getContent());
         TextIO.saveXML(new File("/tmp/xml"), xml);
 
-        assertXMLEqual(new InputSource(TextParserTest.class.getResourceAsStream("/org/alex73/korpus/parser/parserTest1.xml")),
+        assertXMLEqual(
+                new InputSource(TextGeneralTest.class.getResourceAsStream("/org/alex73/korpus/text/parserTest1.xml")),
                 new InputSource("/tmp/xml"));
     }
 
@@ -60,8 +61,8 @@ public class TextParserTest extends XMLTestCase {
                         }
                     }
                 }
-            }else if (obj instanceof Poetry) {
-                Poetry po=(Poetry)obj;
+            } else if (obj instanceof Poetry) {
+                Poetry po = (Poetry) obj;
                 for (Object obj3 : po.getPOrTag()) {
                     if (obj3 instanceof P) {
                         P p = (P) obj3;

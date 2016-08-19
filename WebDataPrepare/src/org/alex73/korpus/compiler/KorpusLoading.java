@@ -44,9 +44,9 @@ import java.util.zip.ZipFile;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.server.engine.LuceneDriverWrite;
 import org.alex73.korpus.server.text.BinaryParagraphWriter;
+import org.alex73.korpus.text.TextGeneral;
 import org.alex73.korpus.text.TextIO;
 import org.alex73.korpus.text.parser.IProcess;
-import org.alex73.korpus.text.parser.TextParser;
 import org.alex73.korpus.text.xml.P;
 import org.alex73.korpus.text.xml.Tag;
 import org.alex73.korpus.text.xml.XMLText;
@@ -62,12 +62,11 @@ public class KorpusLoading {
     LuceneDriverWrite lucene;
 
     StatInfo total = new StatInfo("");
-    Map<String, StatInfo> parts = new HashMap<>();
 
     Set<String> authors = new TreeSet<>();
     IProcess errors;
     PrepareCache.CallbackP callback;
-    
+
     public KorpusLoading(IProcess errors, PrepareCache.CallbackP callback) {
         this.errors = errors;
         this.callback = callback;
@@ -81,13 +80,13 @@ public class KorpusLoading {
 
         Properties stat = new Properties();
 
-        List<File> files = new ArrayList<>(FileUtils.listFiles(new File("Korpus-texts/"), new String[] {
-                "xml", "text", "7z", "zip" }, true));
+        List<File> files = new ArrayList<>(
+                FileUtils.listFiles(new File("Korpus-texts/"), new String[] { "xml", "text", "7z", "zip" }, true));
         if (files.isEmpty()) {
             System.out.println("Няма тэкстаў ў Korpus-texts/");
             System.exit(1);
         }
-        Collections.sort(files);
+        Collections.shuffle(files);
         int c = 0;
         for (File f : files) {
             errors.showStatus("loadFileToCorpus " + f + ": " + (++c) + "/" + files.size());
@@ -132,14 +131,12 @@ public class KorpusLoading {
             }
             loadTextToCorpus(doc);
         } else if (f.getName().endsWith(".text")) {
-            XMLText doc;
-            InputStream in = new BufferedInputStream(new FileInputStream(f));
             try {
-                doc = TextParser.parseText(in, false, errors);
-            } finally {
-                in.close();
+                XMLText doc = new TextGeneral(f, errors).parse();
+                loadTextToCorpus(doc);
+            } catch (Exception ex) {
+                throw new RuntimeException("Памылка ў " + f + ": " + ex.getMessage(), ex);
             }
-            loadTextToCorpus(doc);
         } else {
             throw new RuntimeException("Unknown file: " + f);
         }
@@ -159,7 +156,7 @@ public class KorpusLoading {
                     InputStream in = new BufferedInputStream(zip.getInputStream(en));
                     try {
                         if (en.getName().endsWith(".text")) {
-                            doc = TextParser.parseText(in, false, errors);
+                            doc = new TextGeneral(in, errors).parse();
                         } else if (en.getName().endsWith(".xml")) {
                             doc = TextIO.parseXML(in);
                         } else {
@@ -174,8 +171,7 @@ public class KorpusLoading {
         } else if (f.getName().endsWith(".7z")) {
             SevenZFile sevenZFile = new SevenZFile(f);
             int c = 0;
-            for (SevenZArchiveEntry en = sevenZFile.getNextEntry(); en != null; en = sevenZFile
-                    .getNextEntry()) {
+            for (SevenZArchiveEntry en = sevenZFile.getNextEntry(); en != null; en = sevenZFile.getNextEntry()) {
                 if (en.isDirectory()) {
                     continue;
                 }
@@ -188,7 +184,7 @@ public class KorpusLoading {
                     XMLText doc;
                     try (InputStream in = new ByteArrayInputStream(content)) {
                         if (en.getName().endsWith(".text")) {
-                            doc = TextParser.parseText(in, false, errors);
+                            doc = new TextGeneral(in, errors).parse();
                         } else if (en.getName().endsWith(".xml")) {
                             doc = TextIO.parseXML(in);
                         } else {
@@ -207,12 +203,6 @@ public class KorpusLoading {
     }
 
     protected void loadTextToCorpus(XMLText doc) throws Exception {
-        TextInfo textInfo = createTextInfo(doc);
-        lucene.setTextInfo(textInfo);
-
-        for (String a : textInfo.authors) {
-            authors.add(a);
-        }
 
         List<P> sentences = new ArrayList<>();
         for (Object o : doc.getContent().getPOrTagOrPoetry()) {
@@ -227,16 +217,9 @@ public class KorpusLoading {
         AtomicInteger wordsCount = new AtomicInteger();
         sentences.parallelStream().forEach(p -> wordsCount.addAndGet(processP(p)));
 
-        if (textInfo.styleGenres.length > 0) {
-            for (String s : textInfo.styleGenres) {
-                addStat(s, wordsCount.get());
-            }
-        } else {
-            addStat("_", wordsCount.get());
-        }
         total.addText(wordsCount.get());
     }
-    
+
     int processP(P p) {
         try {
             byte[] pa = new BinaryParagraphWriter().write(p);
@@ -247,46 +230,4 @@ public class KorpusLoading {
         }
     }
 
-    void addStat(String styleGenre, int wordsCount) {
-        int p = styleGenre.indexOf('/');
-        String st = p < 0 ? styleGenre : styleGenre.substring(0, p);
-        StatInfo i = parts.get(st);
-        if (i == null) {
-            i = new StatInfo(st);
-            parts.put(st, i);
-        }
-        i.addText(wordsCount);
-    }
-
-    TextInfo createTextInfo(XMLText text) {
-        TextInfo r = new TextInfo();
-        String authors = getTag(text, "Authors");
-        if (authors != null) {
-            r.authors = authors.split(",");
-        } else {
-            r.authors = new String[0];
-        }
-        String publishedYear = getTag(text, "PublishedYear");
-        r.publishedYear = publishedYear != null ? Integer.parseInt(publishedYear) : 0;
-        String writtenYear = getTag(text, "WrittenYear");
-        r.writtenYear = writtenYear != null ? Integer.parseInt(writtenYear) : 0;
-        String styleGenres = getTag(text, "StyleGenre");
-        if (styleGenres != null) {
-            r.styleGenres = styleGenres.split(",");
-        } else {
-            r.styleGenres = new String[0];
-        }
-        r.title = getTag(text, "Title");
-
-        return r;
-    }
-
-     String getTag(XMLText text, String name) {
-        for (Tag tag : text.getHeader().getTag()) {
-            if (name.equals(tag.getName())) {
-                return tag.getValue();
-            }
-        }
-        return null;
-    }
 }

@@ -37,6 +37,10 @@ public class StressUtils {
         return stressedWord.replace("" + STRESS_CHAR, "");
     }
 
+    public static boolean hasStress(String word) {
+        return word.indexOf('*') >= 0;
+    }
+
     /**
      * Find stress syll by ё, о
      */

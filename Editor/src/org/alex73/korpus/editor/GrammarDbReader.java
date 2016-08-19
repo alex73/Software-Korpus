@@ -22,55 +22,26 @@
 
 package org.alex73.korpus.editor;
 
-import java.io.File;
-import java.util.List;
-
 import javax.swing.SwingWorker;
 
-import org.alex73.korpus.editor.core.GrammarDB;
+import org.alex73.korpus.base.GrammarDB2;
 
 /**
  * Чытае граматычную базу з файлаў.
  */
-public class GrammarDbReader extends SwingWorker<Void, String> implements GrammarDB.LoaderProgress {
-    File themesFile;
-    File[] xmlFiles;
+public class GrammarDbReader extends SwingWorker<Void, String> {
 
-    @Override
-    public void setFilesCount(int count) {
-        UI.mainProgress.progressBar.setMaximum(count * 2);
-    }
+    GrammarDB2 result;
 
-    @Override
-    public void beforeFileLoading(String file) {
-        publish(file);
-    }
-
-    @Override
-    public void afterFileLoading() {
-        publish("");
+    public GrammarDbReader() {
+        UI.showProgressMessage("Чытаем граматычную базу...");
     }
 
     @Override
     protected Void doInBackground() throws Exception {
-        GrammarDB.initializeFromJar(this);
-        if (GrammarDB.getInstance() == null) {
-            GrammarDB.initializeFromDir(new File("GrammarDB"), this);
-        }
-        publish((String) null);
+        result = GrammarDB2.initializeFromJar();
+        MainController.initGrammar(result);
         return null;
-    }
-
-    @Override
-    protected void process(List<String> chunks) {
-        for (String f : chunks) {
-            if (f == null) {
-                UI.mainProgress.setVisible(false);
-            } else {
-                UI.mainProgress.progressBar.setValue(UI.mainProgress.progressBar.getValue() + 1);
-                UI.mainProgress.lblText.setText(f);
-            }
-        }
     }
 
     @Override
@@ -78,11 +49,12 @@ public class GrammarDbReader extends SwingWorker<Void, String> implements Gramma
         try {
             get();
 
-            if (GrammarDB.getInstance().isEmpty()) {
+            if (result == null) {
                 UI.showError("Няма граматычнай базы ў GrammarDB/");
                 System.exit(1);
             }
 
+            UI.showProgressMessage("Граматычная база прачытаная");
             UI.showEditor();
         } catch (Throwable ex) {
             ex.printStackTrace();

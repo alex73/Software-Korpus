@@ -31,6 +31,8 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.alex73.korpus.base.GrammarDB2;
+import org.alex73.korpus.base.GrammarFiller;
+import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.text.parser.IProcess;
 import org.alex73.korpus.text.parser.Splitter2;
 import org.alex73.korpus.text.xml.P;
@@ -50,7 +52,7 @@ public class PrepareCache {
         System.out.println("Load GrammarDB...");
 
         gr = GrammarDB2.initializeFromDir("GrammarDB");
-        Splitter2.init(gr);
+        Splitter2.init(new GrammarFiller(new GrammarFinder(gr)));
 
         new KorpusLoading(errors, new CallbackP() {
             public void processP(P p) {

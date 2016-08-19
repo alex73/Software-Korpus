@@ -20,18 +20,19 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
 
-package org.alex73.korpus.editor.core.structure;
+package org.alex73.korpus.editor.core.doc.structure;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.alex73.korpus.editor.Splitter;
+import org.alex73.korpus.editor.MainController;
 import org.alex73.korpus.text.xml.ITextLineElement;
 import org.alex73.korpus.text.xml.InlineTag;
 import org.alex73.korpus.text.xml.O;
 import org.alex73.korpus.text.xml.OtherType;
 import org.alex73.korpus.text.xml.W;
+import org.alex73.korpus.text.xml.Z;
 import org.alex73.korpus.utils.ItemHelper;
 
 /**
@@ -39,7 +40,17 @@ import org.alex73.korpus.utils.ItemHelper;
  */
 @SuppressWarnings("serial")
 public class Line extends ArrayList<ITextLineElement> {
-
+    public static void fillWordsInfo(Line line) {
+        for (Object item : line) {
+            if (item instanceof W) {
+                W w = (W) item;
+                if (w.getLemma() == null) {
+                    MainController.filler.fill(w);
+                }
+            }
+        }
+    }
+    
     void splitAt(int offset) {
         int pos = 0;
         for (int i = 0; i < size(); i++) {
@@ -133,7 +144,7 @@ public class Line extends ArrayList<ITextLineElement> {
     public void normalize() {
         while (mergeAndSplitItems(this))
             ;
-        Splitter.fillWordsInfo(this);
+        fillWordsInfo(this);
     }
 
     @Override
@@ -207,14 +218,14 @@ public class Line extends ArrayList<ITextLineElement> {
                 ITextLineElement newItem = null;
                 W w = (W) currentItem;
                 if (w.getValue().startsWith("'")) {
-                    newItem = Splitter.getZnakInfo("'");
+                    newItem = new Z("'");
                     w = (W) ItemHelper.splitRight(w, 1);
                     line.set(i, w);
                     line.add(i, newItem);
                     modified = true;
                 }
                 if (w.getValue().endsWith("'")) {
-                    newItem = Splitter.getZnakInfo("'");
+                    newItem = new Z("'");
                     w = (W) ItemHelper.splitLeft(w, w.getValue().length() - 1);
                     line.set(i, w);
                     line.add(i + 1, newItem);
@@ -267,7 +278,7 @@ public class Line extends ArrayList<ITextLineElement> {
         int currentPos;
         for (currentPos = 0; currentPos < line.length(); currentPos++) {
             char ch = line.charAt(currentPos);
-            if (ch == Splitter.CH_SENT_SEPARATOR) {
+            if (ch == LineSplitter.CH_SENT_SEPARATOR) {
                 String part = line.substring(partStart, currentPos);
                 result.add(new O(type, part));
                 result.add(new SentenceSeparatorItem());
@@ -280,5 +291,4 @@ public class Line extends ArrayList<ITextLineElement> {
         result.normalize();
         return result;
     }
-
 }

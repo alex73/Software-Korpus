@@ -1,4 +1,4 @@
-package org.alex73.korpus.editor.core.structure;
+package org.alex73.korpus.editor.core.doc.structure;
 
 import java.util.ArrayList;
 import java.util.List;

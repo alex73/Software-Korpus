@@ -39,11 +39,11 @@ import javax.swing.text.Position;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleContext;
 
-import org.alex73.korpus.editor.Splitter;
 import org.alex73.korpus.editor.UI;
-import org.alex73.korpus.editor.core.structure.Line;
-import org.alex73.korpus.editor.core.structure.LongTagItem;
-import org.alex73.korpus.editor.core.structure.XML2Lines;
+import org.alex73.korpus.editor.core.doc.structure.Line;
+import org.alex73.korpus.editor.core.doc.structure.LongTagItem;
+import org.alex73.korpus.editor.core.doc.structure.LineSplitter;
+import org.alex73.korpus.editor.core.doc.structure.XML2Lines;
 import org.alex73.korpus.text.xml.Header;
 import org.alex73.korpus.text.xml.ITextLineElement;
 import org.alex73.korpus.text.xml.InlineTag;
@@ -158,7 +158,7 @@ public class KorpusDocument3 extends AbstractDocument {
                 Line line;
                 OtherType type = a == null ? null : (OtherType) a.getAttribute("OtherType");
                 if (a==null) {
-                    line = new Splitter(newStrs[i]).splitParagraph();
+                    line = new LineSplitter(newStrs[i]).splitParagraph();
                 }else {
                     line = Line.splitOther(newStrs[i], type);
                 }

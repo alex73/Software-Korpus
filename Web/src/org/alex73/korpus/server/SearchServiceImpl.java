@@ -37,6 +37,7 @@ import javax.xml.bind.JAXBContext;
 import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
+import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.client.SearchService;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
@@ -56,7 +57,6 @@ import org.alex73.korpus.text.xml.S;
 import org.alex73.korpus.text.xml.Se;
 import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.Z;
-import org.alex73.korpus.utils.WordNormalizer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.document.Document;
@@ -334,12 +334,12 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     }
 
     private List<String> findAllLemmas(String word) {
-        word = WordNormalizer.normalize(word);
+        word = BelarusianWordNormalizer.normalize(word);
         Set<String> result = new HashSet<>();
         for (Paradigm p : gr.getAllParadigms()) {
             for (Variant v : p.getVariant()) {
                 for (Form f : v.getForm()) {
-                    if (word.equals(WordNormalizer.normalize(f.getValue()))) {
+                    if (word.equals(BelarusianWordNormalizer.normalize(f.getValue()))) {
                         result.add(p.getLemma());
                         break;
                     }

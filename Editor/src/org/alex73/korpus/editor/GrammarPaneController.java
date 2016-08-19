@@ -24,7 +24,6 @@ package org.alex73.korpus.editor;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.StringWriter;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 
@@ -37,15 +36,15 @@ import javax.swing.text.Document;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
-import javax.xml.bind.Marshaller;
 
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.TagLetter;
-import org.alex73.korpus.editor.core.GrammarDB;
+import org.alex73.korpus.editor.grammar.GrammarConstructor;
 import org.alex73.korpus.text.xml.W;
 
 public class GrammarPaneController {
+    public static GrammarConstructor grConstr;
     static W currentWord;
 
     public static void show(W word) {
@@ -123,9 +122,9 @@ public class GrammarPaneController {
                 UI.grammarPane.labelError.setVisible(false);
                 try {
                     Paradigm p = parseXML();
-                    GrammarDB.getInstance().addDocLevelParadigm(p);
+                    MainController.gr.addDocLevelParadigm(p);
                     MainController.saveGrammar();
-                    Splitter.fillWordInfoPagadigm(currentWord, p);
+                    MainController.filler.fillWordInfoPagadigm(currentWord, p);
                     UI.editor.repaint();
                     UI.grammarPane.outXML.setText("Захавана");
                 } catch (Exception ex) {
@@ -157,7 +156,7 @@ public class GrammarPaneController {
     static Paradigm parseXML() throws Exception {
         String xml = UI.grammarPane.outXML.getText();
         xml = xml.substring(xml.indexOf('<'));
-        return GrammarDB.getInstance().parseAndValidate(xml);
+        return grConstr.parseAndValidate(xml);
     }
 
     static UpdaterInfo updaterInfo;
@@ -259,16 +258,11 @@ public class GrammarPaneController {
         protected String doInBackground() throws Exception {
             String out;
             StringBuilder like = new StringBuilder();
-            Paradigm p = GrammarDB.getInstance().getLooksLike(word, looksLike, true, grammar, like);
+            Paradigm p = grConstr.getLooksLike(word, looksLike, true, grammar, like);
             if (p != null) {
                 p.setTheme(theme);
                 try {
-                    Marshaller m = GrammarDB.CONTEXT.createMarshaller();
-                    m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-                    m.setProperty(Marshaller.JAXB_FRAGMENT, true);
-                    StringWriter writer = new StringWriter();
-                    m.marshal(p, writer);
-                    out = "Таксама як " + like + " :\n" + writer.toString();
+                    out = "Таксама як " + like + " :\n" + grConstr.toText(p);
                 } catch (Throwable ex) {
                     out = "Error: " + ex.getMessage();
                 }
