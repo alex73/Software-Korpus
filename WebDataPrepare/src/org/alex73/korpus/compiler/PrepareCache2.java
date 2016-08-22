@@ -11,11 +11,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.alex73.korpus.base.GrammarDB2;
@@ -31,84 +26,32 @@ import org.alex73.korpus.text.xml.XMLText;
 import org.apache.commons.io.FileUtils;
 
 public class PrepareCache2 {
+    static final Object WRITER_LOCK = new Object();
     static GrammarFiller grFiller;
     static LuceneDriverWrite lucene;
 
+    static TextQueueProcessor textQueueProcessor;
     static Set<String> korpusAuthors = new TreeSet<>();
     static Properties korpusStat = new Properties();
     static Map<String, StatInfo> korpusParts = new HashMap<>();
     static StatInfo korpusTotal = new StatInfo("");
 
+    static OtherQueueProcessor otherQueueProcessor;
     static Properties otherStat = new Properties();
     static StatInfo otherTotal = new StatInfo("");
     static Set<String> otherVolumes = new TreeSet<>();
+    static volatile Exception exception;
 
     public static void main(String[] args) throws Exception {
         System.out.println("Load GrammarDB...");
         GrammarDB2 gr = GrammarDB2.initializeFromDir("GrammarDB");
         grFiller = new GrammarFiller(new GrammarFinder(gr));
 
-        final ExecutorService readers = Executors.newFixedThreadPool(1);
-        final BlockingQueue<XMLText> readers2preprocessors = new ArrayBlockingQueue<>(1);
-        final ExecutorService preprocessors = Executors.newFixedThreadPool(1);
-        final BlockingQueue<XMLText> preprocessors2writers = new ArrayBlockingQueue<>(1);
-
         // main texts corpus
         luceneOpen("Korpus-cache/");
-        System.out.println("rstart");
-        new KorpusFilesIterator(errors, readers2preprocessors, "Korpus-texts/").process(readers);
-        System.out.println("rstop");
-
-        AtomicInteger work = new AtomicInteger(8);
-        for (int i = 0; i < 8; i++) {
-            preprocessors.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        while (true) {
-                            XMLText doc = readers2preprocessors.take();
-                            if (doc == null) {
-                                readers2preprocessors.add(null);
-                                work.decrementAndGet();
-                                break;
-                            }
-                            System.out.println("fill "+readers2preprocessors.size());
-                            grFiller.fill(doc);
-                            preprocessors2writers.put(doc);
-                        }
-                    } catch (InterruptedException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                }
-            });
-        }
-
-        while (true) {
-            XMLText doc = preprocessors2writers.poll(1, TimeUnit.SECONDS);
-            if (doc == null && work.get() == 0) {
-                break;
-            }
-            System.out.println("save "+preprocessors2writers.size());
-            TextInfo textInfo = KorpusFilesIterator.createTextInfo(doc);
-            lucene.setTextInfo(textInfo);
-
-            for (String a : textInfo.authors) {
-                korpusAuthors.add(a);
-            }
-
-            int wc = wordsCount(doc);
-            korpusTotal.addText(wc);
-            if (textInfo.styleGenres.length > 0) {
-                for (String s : textInfo.styleGenres) {
-                    addKorpusStat(s, wc);
-                }
-            } else {
-                addKorpusStat("_", wc);
-            }
-
-            writeDoc(doc);
-        }
-
+        textQueueProcessor = new TextQueueProcessor();
+        new KorpusFilesIterator(errors, processTextKorpus).iterate("Korpus-texts/");
+        textQueueProcessor.fin();
         luceneClose();
 
         for (StatInfo si : korpusParts.values()) {
@@ -125,11 +68,14 @@ public class PrepareCache2 {
             korpusStat.setProperty("authors", "");
         }
         writeStat("Korpus-cache/", korpusStat);
-if (true) return;
+
         // other trash corpus
         luceneOpen("Other-cache/");
+        otherQueueProcessor = new OtherQueueProcessor();
         new OtherFilesIterator(errors, processOtherKorpus).iterate("Other-texts/");
+        otherQueueProcessor.fin();
         luceneClose();
+
         otherTotal.write(otherStat);
         String volumesstr = "";
         for (String s : otherVolumes) {
@@ -154,6 +100,9 @@ if (true) return;
         for (String e : errorNames) {
             System.err.println("ERROR: " + e + ": " + errorsCount.get(e));
         }
+        if (exception != null) {
+            exception.printStackTrace();
+        }
     }
 
     static void luceneOpen(String dir) throws Exception {
@@ -168,19 +117,64 @@ if (true) return;
         lucene = null;
     }
 
+    static IFilesIterator processTextKorpus = new IFilesIterator() {
+        @Override
+        public void onText(XMLText doc) throws Exception {
+            textQueueProcessor.put(doc);
+        }
+    };
+
+    static class TextQueueProcessor extends QueueProcessor<XMLText> {
+
+        @Override
+        public void process(XMLText doc) throws Exception {
+            grFiller.fill(doc);
+            int wc = wordsCount(doc);
+
+            TextInfo textInfo = KorpusFilesIterator.createTextInfo(doc);
+
+            for (String a : textInfo.authors) {
+                korpusAuthors.add(a);
+            }
+
+            korpusTotal.addText(wc);
+            if (textInfo.styleGenres.length > 0) {
+                for (String s : textInfo.styleGenres) {
+                    addKorpusStat(s, wc);
+                }
+            } else {
+                addKorpusStat("_", wc);
+            }
+
+            synchronized (WRITER_LOCK) {
+                lucene.setTextInfo(textInfo);
+                writeDoc(doc);
+            }
+        }
+    };
+
+    static class OtherQueueProcessor extends QueueProcessor<XMLText> {
+
+        @Override
+        public void process(XMLText doc) throws Exception {
+            grFiller.fill(doc);
+            int wc = wordsCount(doc);
+
+            otherTotal.addText(wc);
+            otherVolumes.add("kamunikat.org");
+            String id = OtherFilesIterator.getId(doc);
+
+            synchronized (WRITER_LOCK) {
+                lucene.setOtherInfo("kamunikat.org", "http://kamunikat.org/halounaja.html?pubid=" + id);
+                writeDoc(doc);
+            }
+        }
+    };
+
     static IFilesIterator processOtherKorpus = new IFilesIterator() {
         @Override
         public void onText(XMLText doc) throws Exception {
-            grFiller.fill(doc);
-
-            otherVolumes.add("kamunikat.org");
-            String id = OtherFilesIterator.getId(doc);
-            lucene.setOtherInfo("kamunikat.org", "http://kamunikat.org/halounaja.html?pubid=" + id);
-
-            int wc = wordsCount(doc);
-            otherTotal.addText(wc);
-
-            writeDoc(doc);
+            otherQueueProcessor.put(doc);
         }
     };
 
@@ -204,7 +198,7 @@ if (true) return;
 
     static int wordsCount(XMLText doc) {
         AtomicInteger r = new AtomicInteger();
-        doc.getContent().getPOrTagOrPoetry().parallelStream().forEach(op -> {
+        doc.getContent().getPOrTagOrPoetry().forEach(op -> {
             if (op instanceof P) {
                 ((P) op).getSe().forEach(s -> {
                     s.getWOrSOrZ().forEach(ow -> {

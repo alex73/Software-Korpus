@@ -55,13 +55,18 @@ public class GrammarServiceImpl extends RemoteServiceServlet implements GrammarS
 
     public static Locale BE = new Locale("be");
     public static Collator BEL = Collator.getInstance(BE);
-    
-    private final GrammarDB2 gr;
+
+    public static String dirPrefix = System.getProperty("KORPUS_DIR");
+    private GrammarDB2 gr;
 
     public GrammarServiceImpl() throws Exception {
+        if (dirPrefix == null) {
+            LOGGER.fatal("KORPUS_DIR is not defined");
+            return;
+        }
         LOGGER.info("startup");
         try {
-            gr = GrammarDB2.initializeFromDir("GrammarDB-filtered");
+            gr = GrammarDB2.initializeFromDir(dirPrefix + "/GrammarDB-filtered");
         } catch (Throwable ex) {
             LOGGER.error("startup", ex);
             throw new ExceptionInInitializerError(ex);
@@ -88,10 +93,8 @@ public class GrammarServiceImpl extends RemoteServiceServlet implements GrammarS
                 + " orderReverse=" + orderReverse);
         try {
             List<LemmaInfo> result = new ArrayList<>();
-            Pattern reLemma = StringUtils.isEmpty(lemmaMask) ? null : Pattern.compile(lemmaMask.replace("*",
-                    ".*"));
-            Pattern reWord = StringUtils.isEmpty(wordMask) ? null : Pattern.compile(wordMask.replace("*",
-                    ".*"));
+            Pattern reLemma = StringUtils.isEmpty(lemmaMask) ? null : Pattern.compile(lemmaMask.replace("*", ".*"));
+            Pattern reWord = StringUtils.isEmpty(wordMask) ? null : Pattern.compile(wordMask.replace("*", ".*"));
             Pattern reGrammar = StringUtils.isEmpty(grammar) ? null : Pattern.compile(grammar);
 
             begpar: for (Paradigm p : gr.getAllParadigms()) {
@@ -101,29 +104,29 @@ public class GrammarServiceImpl extends RemoteServiceServlet implements GrammarS
                     }
                 }
                 boolean found = false;
-                for(Variant v:p.getVariant()) {
-                for (Form f : v.getForm()) {
-                    if (StringUtils.isEmpty(f.getValue())) {
-                        continue;
-                    }
-                    if (reGrammar != null) {
-                        String fTag = p.getTag() + f.getTag();
-                        if (!BelarusianTags.getInstance().isValid(fTag, null)) {
+                for (Variant v : p.getVariant()) {
+                    for (Form f : v.getForm()) {
+                        if (StringUtils.isEmpty(f.getValue())) {
                             continue;
                         }
-                        if (!reGrammar.matcher(DBTagsGroups.getDBTagString(fTag)).matches()) {
-                            continue;
+                        if (reGrammar != null) {
+                            String fTag = p.getTag() + f.getTag();
+                            if (!BelarusianTags.getInstance().isValid(fTag, null)) {
+                                continue;
+                            }
+                            if (!reGrammar.matcher(DBTagsGroups.getDBTagString(fTag)).matches()) {
+                                continue;
+                            }
                         }
-                    }
-                    if (reWord != null) {
-                        if (!reWord.matcher(BelarusianWordNormalizer.normalize(f.getValue())).matches()) {
-                            continue;
+                        if (reWord != null) {
+                            if (!reWord.matcher(BelarusianWordNormalizer.normalize(f.getValue())).matches()) {
+                                continue;
+                            }
                         }
-                    }
 
-                    found = true;
-                    break;
-                }
+                        found = true;
+                        break;
+                    }
                 }
                 if (found) {
                     LemmaInfo w = new LemmaInfo();

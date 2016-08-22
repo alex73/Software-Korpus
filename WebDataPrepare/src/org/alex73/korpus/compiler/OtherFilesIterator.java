@@ -64,8 +64,8 @@ public class OtherFilesIterator {
         doc.getHeader().getTag().add(new Tag("id", m.group(1)));
         doc.setContent(new Content());
 
-        AtomicInteger wordsCount = new AtomicInteger();
         try (ZipFile zip = new ZipFile(f)) {
+            String prevtext = null;
             for (Enumeration<? extends ZipEntry> it = zip.entries(); it.hasMoreElements();) {
                 ZipEntry en = it.nextElement();
                 if (en.isDirectory() || en.getSize() == 0) {
@@ -75,12 +75,17 @@ public class OtherFilesIterator {
                 try (InputStream in = new BufferedInputStream(zip.getInputStream(en))) {
                     text = IOUtils.toString(in, "UTF-8");
                 }
-                P p = new Splitter2(text, false, errors).getP();
-                doc.getContent().getPOrTagOrPoetry().add(p);
+                if (!text.isEmpty() && !text.equals(prevtext)) {
+                    prevtext = text;
+                    P p = new Splitter2(text, false, errors).getP();
+                    doc.getContent().getPOrTagOrPoetry().add(p);
+                }
             }
         }
 
-        callback.onText(doc);
+        if (!doc.getContent().getPOrTagOrPoetry().isEmpty()) {
+            callback.onText(doc);
+        }
     }
 
     public static String getId(XMLText doc) {

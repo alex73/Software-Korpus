@@ -8,9 +8,10 @@ import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.korpus.utils.StressUtils;
 
 public class GrammarFinder implements IGrammarFinder {
-    private Map<String, Paradigm[]> paradigmsByForm = new HashMap<>();
+    private Map<String, Paradigm[]> paradigmsByForm;
 
     public GrammarFinder(GrammarDB2 gr) {
+        paradigmsByForm = new HashMap<>(gr.getAllParadigms().size());
         long be = System.currentTimeMillis();
         gr.getAllParadigms().parallelStream().forEach(p -> {
             p.getVariant().forEach(v -> {

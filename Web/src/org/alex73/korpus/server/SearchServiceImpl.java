@@ -34,11 +34,10 @@ import java.util.Set;
 
 import javax.xml.bind.JAXBContext;
 
-import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
-import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.base.GrammarDB2;
+import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.client.SearchService;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
 import org.alex73.korpus.server.text.BinaryParagraphReader;
@@ -75,15 +74,21 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     static final Logger LOGGER = LogManager.getLogger(SearchServiceImpl.class);
 
     private GrammarDB2 gr;
+    private GrammarFinder grFinder;
 
     public static String dirPrefix = System.getProperty("KORPUS_DIR");
     LuceneFilter processKorpus;
     LuceneFilter processOther;
 
     public SearchServiceImpl() {
+        if (dirPrefix == null) {
+            LOGGER.fatal("KORPUS_DIR is not defined");
+            return;
+        }
         LOGGER.info("startup");
         try {
             gr = GrammarDB2.initializeFromDir(dirPrefix + "/GrammarDB/");
+            grFinder = new GrammarFinder(gr);
             processKorpus = new LuceneFilter(dirPrefix + "/Korpus-cache/");
             processOther = new LuceneFilter(dirPrefix + "/Other-cache/");
         } catch (Throwable ex) {
@@ -336,15 +341,8 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     private List<String> findAllLemmas(String word) {
         word = BelarusianWordNormalizer.normalize(word);
         Set<String> result = new HashSet<>();
-        for (Paradigm p : gr.getAllParadigms()) {
-            for (Variant v : p.getVariant()) {
-                for (Form f : v.getForm()) {
-                    if (word.equals(BelarusianWordNormalizer.normalize(f.getValue()))) {
-                        result.add(p.getLemma());
-                        break;
-                    }
-                }
-            }
+        for (Paradigm p : grFinder.getParadigmsByForm(word)) {
+            result.add(p.getLemma());
         }
         return new ArrayList<>(result);
     }

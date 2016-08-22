@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -27,52 +25,32 @@ import org.apache.commons.io.FileUtils;
 public class KorpusFilesIterator {
     static final int BUFFER = 256 * 1024;
 
-    BlockingQueue<XMLText> queue;
+    IFilesIterator callback;
     IProcess errors;
     List<File> files;
 
-    public KorpusFilesIterator(IProcess errors, BlockingQueue<XMLText> queue, String filesDir) throws Exception {
+    public KorpusFilesIterator(IProcess errors, IFilesIterator callback) throws Exception {
         this.errors = errors;
-        this.queue = queue;
+        this.callback = callback;
+    }
 
+    public void iterate(String filesDir) throws Exception {
         files = new ArrayList<>(
                 FileUtils.listFiles(new File(filesDir), new String[] { "xml", "text", "7z", "zip" }, true));
         if (files.isEmpty()) {
             throw new Exception("Няма тэкстаў ў " + filesDir);
         }
         Collections.shuffle(files);
-    }
 
-    public void process(ExecutorService executor) {
         for (File f : files) {
-            // errors.showStatus("loadFileToCorpus " + f + ": " + (++c) + "/" +
-            // files.size());
-            executor.execute(new Runnable() {
-                @Override
-                public void run() {
-                    System.out.println("read " + f);
-                    try {
-                        if (f.getName().endsWith(".xml") || f.getName().endsWith(".text")) {
-                            loadXmlOrTextFileToCorpus(f);
-                        } else if (f.getName().endsWith(".zip") || f.getName().endsWith(".7z")) {
-                            loadArchiveFileToCorpus(f);
-                        }
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
-                    }
-                }
-            });
-        }
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    queue.put(null);
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
+            System.out.println("read " + f);
+
+            if (f.getName().endsWith(".xml") || f.getName().endsWith(".text")) {
+                loadXmlOrTextFileToCorpus(f);
+            } else if (f.getName().endsWith(".zip") || f.getName().endsWith(".7z")) {
+                loadArchiveFileToCorpus(f);
             }
-        });
+        }
     }
 
     protected void loadXmlOrTextFileToCorpus(File f) throws Exception {
@@ -84,11 +62,11 @@ public class KorpusFilesIterator {
             } finally {
                 in.close();
             }
-            queue.put(doc);
+            callback.onText(doc);
         } else if (f.getName().endsWith(".text")) {
             try {
                 XMLText doc = new TextGeneral(f, errors).parse();
-                queue.put(doc);
+                callback.onText(doc);
             } catch (Exception ex) {
                 throw new RuntimeException("Памылка ў " + f + ": " + ex.getMessage(), ex);
             }
@@ -120,7 +98,7 @@ public class KorpusFilesIterator {
                     } finally {
                         in.close();
                     }
-                    queue.put(doc);
+                    callback.onText(doc);
                 }
             }
         } else if (f.getName().endsWith(".7z")) {
@@ -146,7 +124,7 @@ public class KorpusFilesIterator {
                             throw new RuntimeException("Unknown entry '" + en.getName() + "' in " + f);
                         }
                     }
-                    queue.put(doc);
+                    callback.onText(doc);
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }

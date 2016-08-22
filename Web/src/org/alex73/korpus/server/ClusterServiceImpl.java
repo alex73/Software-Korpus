@@ -73,8 +73,6 @@ public class ClusterServiceImpl {
             if (prevResult == null) {
                 prevResult = r;
                 results.put(key, r);
-            } else if (!prevResult.equals(r)) {
-                prevResult.toLowerCase = true;
             }
             prevResult.counts++;
         }
@@ -102,7 +100,6 @@ public class ClusterServiceImpl {
         String[] wordsBefore;
         String word;
         String[] wordsAfter;
-        boolean toLowerCase;
 
         public Result(WordResult[] w, int pos, int beforeCount, int afterCount) {
             word = w[pos].value;
@@ -131,7 +128,7 @@ public class ClusterServiceImpl {
                 }
                 str.append('\t');
             }
-            str.append(word);
+            str.append(word.toLowerCase());
             for (String w : wordsAfter) {
                 str.append('\t');
                 if (w != null) {
@@ -158,19 +155,6 @@ public class ClusterServiceImpl {
 
         public ClusterResults.Row toRow() {
             ClusterResults.Row r = new ClusterResults.Row();
-            if (toLowerCase) {
-                for (int i = 0; i < wordsBefore.length; i++) {
-                    if (wordsBefore[i] != null) {
-                        wordsBefore[i] = wordsBefore[i].toLowerCase();
-                    }
-                }
-                word = word.toLowerCase();
-                for (int i = 0; i < wordsAfter.length; i++) {
-                    if (wordsAfter[i] != null) {
-                        wordsAfter[i] = wordsAfter[i].toLowerCase();
-                    }
-                }
-            }
             r.wordsBefore = wordsBefore;
             r.word = word;
             r.wordsAfter = wordsAfter;
