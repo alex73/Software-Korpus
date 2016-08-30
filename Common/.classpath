@@ -9,7 +9,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/kryo-serialization/reflectasm-1.10.1-shaded.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib-test/junit-4.10.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib-test/xmlunit-1.6.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-io-1.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-lang-2.4.jar"/>
+	<classpathentry kind="lib" path="lib/commons-io-2.4.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

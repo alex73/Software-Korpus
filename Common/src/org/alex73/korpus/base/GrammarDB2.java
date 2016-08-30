@@ -37,6 +37,15 @@ public class GrammarDB2 {
     private Map<String, Theme> themes;
     private List<Paradigm> allParadigms = new ArrayList<>();
 
+    private static JAXBContext CONTEXT;
+
+    protected static synchronized JAXBContext getContext() throws Exception {
+        if (CONTEXT == null) {
+            CONTEXT = JAXBContext.newInstance(Wordlist.class.getPackage().getName());
+        }
+        return CONTEXT;
+    }
+
     public List<Paradigm> getAllParadigms() {
         return allParadigms;
     }
@@ -175,8 +184,8 @@ public class GrammarDB2 {
         return s == null ? null : s.intern();
     }
 
-    private void addXMLFile(File file, JAXBContext ctx) throws Exception {
-        Unmarshaller unm = ctx.createUnmarshaller();
+    private void addXMLFile(File file) throws Exception {
+        Unmarshaller unm = getContext().createUnmarshaller();
 
         InputStream in;
         if (file.getName().endsWith(".gz")) {
@@ -207,8 +216,6 @@ public class GrammarDB2 {
     private GrammarDB2(File dir, File[] forLoads, File cacheFile) throws Exception {
         long be = System.currentTimeMillis();
 
-        JAXBContext ctx = JAXBContext.newInstance(Wordlist.class.getPackage().getName());
-
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(16);
         long latest = 0;
         for (int i = 0; i < forLoads.length; i++) {
@@ -222,7 +229,7 @@ public class GrammarDB2 {
                         if (process.getName().equals(THEMES_FILE)) {
                             addThemesFile(process);
                         } else {
-                            addXMLFile(process, ctx);
+                            addXMLFile(process);
                         }
                     } catch (Exception ex) {
                         throw new RuntimeException(ex);
