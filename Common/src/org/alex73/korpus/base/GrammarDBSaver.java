@@ -3,6 +3,7 @@ package org.alex73.korpus.base;
 import java.io.File;
 import java.io.OutputStream;
 import java.text.Collator;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -40,6 +41,10 @@ public class GrammarDBSaver {
         m.marshal(w, out);
     }
 
+    public static void sortAndStore(GrammarDB2 db, String dir) throws Exception {
+        sortAndStore(db.getAllParadigms(), new File(dir));
+    }
+
     public static void sortAndStore(List<Paradigm> ps, File dir) throws Exception {
         Map<String, Wordlist> es = new TreeMap<>();
         for (Paradigm p : ps) {
@@ -55,7 +60,9 @@ public class GrammarDBSaver {
         Marshaller m = GrammarDB2.getContext().createMarshaller();
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         for (String fn : es.keySet()) {
-            m.marshal(es.get(fn), new File(dir, fn));
+            Wordlist wl=es.get(fn);
+            Collections.sort(wl.getParadigm(), COMPARATOR);
+            m.marshal(wl, new File(dir, fn));
         }
     }
 
