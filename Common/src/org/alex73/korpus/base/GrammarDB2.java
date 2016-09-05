@@ -64,6 +64,10 @@ public class GrammarDB2 {
         return r;
     }
 
+    public static GrammarDB2 empty() {
+        return new GrammarDB2();
+    }
+
     public static GrammarDB2 initializeFromDir(String dir) throws Exception {
         GrammarDB2 r;
         File[] forLoads = getFilesForLoad(new File(dir));

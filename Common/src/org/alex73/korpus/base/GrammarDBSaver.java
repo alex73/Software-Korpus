@@ -13,6 +13,7 @@ import java.util.TreeMap;
 import javax.xml.bind.Marshaller;
 
 import org.alex73.corpus.paradigm.Form;
+import org.alex73.corpus.paradigm.FormOptions;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Wordlist;
 import org.alex73.korpus.utils.StressUtils;
@@ -93,9 +94,23 @@ public class GrammarDBSaver {
                     p1 = "NGDAIL".indexOf(o1.getTag().charAt(1));
                     p2 = "NGDAIL".indexOf(o2.getTag().charAt(1));
                 }
+                if (p1 == p2) {
+                    p1=formOptionIndex(o1.getOptions());
+                    p2=formOptionIndex(o2.getOptions());
+                }
                 return p1 - p2;
             } catch (StringIndexOutOfBoundsException ex) {
                 return 0;
+            }
+        }
+
+        int formOptionIndex(FormOptions opt) {
+            if (opt == null) {
+                return 0;
+            } else if (opt == FormOptions.ANIM) {
+                return 1;
+            } else {
+                return 2;
             }
         }
     };

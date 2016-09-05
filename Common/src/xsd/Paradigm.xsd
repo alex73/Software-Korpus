@@ -74,6 +74,7 @@
       <xs:sequence>
         <xs:element name="e" minOccurs="0" type="xs:string" />
         <xs:element name="Note" minOccurs="0" type="xs:string" />
+        <xs:element ref="Slounik" minOccurs="0" maxOccurs="unbounded" />
         <xs:element ref="Variant" maxOccurs="unbounded" minOccurs="0" />
       </xs:sequence>
       <xs:attribute name="pdgId" type="xs:int" use="required">
@@ -153,6 +154,19 @@
           <xs:attribute name="comment" type="xs:string" use="optional">
             <xs:annotation>
               <xs:documentation>Камэнтар</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Slounik">
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="name" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>Код слоўніка</xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>

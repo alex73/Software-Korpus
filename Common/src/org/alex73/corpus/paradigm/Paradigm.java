@@ -23,6 +23,7 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;sequence>
  *         &lt;element name="e" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="Note" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element ref="{}Slounik" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element ref="{}Variant" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="pdgId" use="required" type="{http://www.w3.org/2001/XMLSchema}int" />
@@ -47,6 +48,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "", propOrder = {
     "e",
     "note",
+    "slounik",
     "variant"
 })
 @XmlRootElement(name = "Paradigm")
@@ -55,6 +57,8 @@ public class Paradigm {
     protected String e;
     @XmlElement(name = "Note")
     protected String note;
+    @XmlElement(name = "Slounik")
+    protected List<Slounik> slounik;
     @XmlElement(name = "Variant")
     protected List<Variant> variant;
     @XmlAttribute(name = "pdgId", required = true)
@@ -126,6 +130,35 @@ public class Paradigm {
      */
     public void setNote(String value) {
         this.note = value;
+    }
+
+    /**
+     * Gets the value of the slounik property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the slounik property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getSlounik().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link Slounik }
+     * 
+     * 
+     */
+    public List<Slounik> getSlounik() {
+        if (slounik == null) {
+            slounik = new ArrayList<Slounik>();
+        }
+        return this.slounik;
     }
 
     /**
