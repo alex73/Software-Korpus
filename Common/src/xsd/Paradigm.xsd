@@ -138,6 +138,7 @@
           <xs:documentation>Правапіс: A1933,A1957,A2008,T1929,K2005,NIEST</xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="lemma" type="xs:string" use="required" />
       <xs:attribute name="type" type="VariantType" use="optional" />
     </xs:complexType>
   </xs:element>

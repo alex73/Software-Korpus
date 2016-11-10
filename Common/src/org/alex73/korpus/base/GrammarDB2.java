@@ -39,7 +39,7 @@ public class GrammarDB2 {
 
     private static JAXBContext CONTEXT;
 
-    protected static synchronized JAXBContext getContext() throws Exception {
+    public static synchronized JAXBContext getContext() throws Exception {
         if (CONTEXT == null) {
             CONTEXT = JAXBContext.newInstance(Wordlist.class.getPackage().getName());
         }
@@ -236,7 +236,7 @@ public class GrammarDB2 {
                             addXMLFile(process);
                         }
                     } catch (Exception ex) {
-                        throw new RuntimeException(ex);
+                        throw new RuntimeException("Error in " + process, ex);
                     }
                 }
             });

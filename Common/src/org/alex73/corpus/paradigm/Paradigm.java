@@ -31,7 +31,7 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;attribute name="tag" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="theme" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="govern" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="type" type="{}Type" />
+ *       &lt;attribute name="type" type="{}VariantType" />
  *       &lt;attribute name="marked" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="options" type="{}ParadigmOptions" />
  *       &lt;attribute name="todo" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -72,7 +72,7 @@ public class Paradigm {
     @XmlAttribute(name = "govern")
     protected String govern;
     @XmlAttribute(name = "type")
-    protected Type type;
+    protected VariantType type;
     @XmlAttribute(name = "marked")
     protected String marked;
     @XmlAttribute(name = "options")
@@ -307,10 +307,10 @@ public class Paradigm {
      * 
      * @return
      *     possible object is
-     *     {@link Type }
+     *     {@link VariantType }
      *     
      */
-    public Type getType() {
+    public VariantType getType() {
         return type;
     }
 
@@ -319,10 +319,10 @@ public class Paradigm {
      * 
      * @param value
      *     allowed object is
-     *     {@link Type }
+     *     {@link VariantType }
      *     
      */
-    public void setType(Type value) {
+    public void setType(VariantType value) {
         this.type = value;
     }
 

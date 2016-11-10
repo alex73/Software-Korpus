@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlValue;
  *   &lt;simpleContent>
  *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
  *       &lt;attribute name="tag" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="type" type="{}Type" />
+ *       &lt;attribute name="type" type="{}FormType" />
  *       &lt;attribute name="slouniki" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="pravapis" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="options" type="{}FormOptions" />
@@ -45,7 +45,7 @@ public class Form {
     @XmlAttribute(name = "tag", required = true)
     protected String tag;
     @XmlAttribute(name = "type")
-    protected Type type;
+    protected FormType type;
     @XmlAttribute(name = "slouniki")
     protected String slouniki;
     @XmlAttribute(name = "pravapis")
@@ -112,10 +112,10 @@ public class Form {
      * 
      * @return
      *     possible object is
-     *     {@link Type }
+     *     {@link FormType }
      *     
      */
-    public Type getType() {
+    public FormType getType() {
         return type;
     }
 
@@ -124,10 +124,10 @@ public class Form {
      * 
      * @param value
      *     allowed object is
-     *     {@link Type }
+     *     {@link FormType }
      *     
      */
-    public void setType(Type value) {
+    public void setType(FormType value) {
         this.type = value;
     }
 

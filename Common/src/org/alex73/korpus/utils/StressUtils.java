@@ -31,14 +31,14 @@ import org.alex73.korpus.base.BelarusianTags;
  */
 public class StressUtils {
 
-    public static char STRESS_CHAR = '*';
+    public static char STRESS_CHAR = '+';
 
     public static String unstress(String stressedWord) {
         return stressedWord.replace("" + STRESS_CHAR, "");
     }
 
     public static boolean hasStress(String word) {
-        return word.indexOf('*') >= 0;
+        return word.indexOf(STRESS_CHAR) >= 0;
     }
 
     /**
@@ -56,6 +56,20 @@ public class StressUtils {
             }
         }
         return -1;
+    }
+
+    public static String setUsuallyStress(String word) {
+        if (hasStress(word)) {
+            return word;
+        }
+        if (syllCount(word) == 1) {
+            return setStressFromStart(word, 0);
+        }
+        int u = getUsuallyStressedSyll(word);
+        if (u >= 0) {
+            return setStressFromStart(word, u);
+        }
+        return word;
     }
 
     public static int getStressFromStart(String word) {
@@ -177,6 +191,6 @@ public class StressUtils {
     }
 
     public static String combineAccute(String word) {
-        return word.replace('*', '\u0301');
+        return word.replace(STRESS_CHAR, '\u0301');
     }
 }

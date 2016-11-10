@@ -24,6 +24,8 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element ref="{}Form" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="pravapis" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="lemma" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="type" type="{}VariantType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -42,6 +44,10 @@ public class Variant {
     protected List<Form> form;
     @XmlAttribute(name = "pravapis")
     protected String pravapis;
+    @XmlAttribute(name = "lemma", required = true)
+    protected String lemma;
+    @XmlAttribute(name = "type")
+    protected VariantType type;
 
     /**
      * Gets the value of the form property.
@@ -94,6 +100,54 @@ public class Variant {
      */
     public void setPravapis(String value) {
         this.pravapis = value;
+    }
+
+    /**
+     * Gets the value of the lemma property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getLemma() {
+        return lemma;
+    }
+
+    /**
+     * Sets the value of the lemma property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setLemma(String value) {
+        this.lemma = value;
+    }
+
+    /**
+     * Gets the value of the type property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link VariantType }
+     *     
+     */
+    public VariantType getType() {
+        return type;
+    }
+
+    /**
+     * Sets the value of the type property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link VariantType }
+     *     
+     */
+    public void setType(VariantType value) {
+        this.type = value;
     }
 
 }
