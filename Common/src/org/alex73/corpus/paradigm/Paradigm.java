@@ -22,8 +22,7 @@ import javax.xml.bind.annotation.XmlType;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="e" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="Note" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element ref="{}Slounik" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="Note" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element ref="{}Variant" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="pdgId" use="required" type="{http://www.w3.org/2001/XMLSchema}int" />
@@ -48,7 +47,6 @@ import javax.xml.bind.annotation.XmlType;
 @XmlType(name = "", propOrder = {
     "e",
     "note",
-    "slounik",
     "variant"
 })
 @XmlRootElement(name = "Paradigm")
@@ -56,9 +54,7 @@ public class Paradigm {
 
     protected String e;
     @XmlElement(name = "Note")
-    protected String note;
-    @XmlElement(name = "Slounik")
-    protected List<Slounik> slounik;
+    protected List<String> note;
     @XmlElement(name = "Variant")
     protected List<Variant> variant;
     @XmlAttribute(name = "pdgId", required = true)
@@ -111,54 +107,30 @@ public class Paradigm {
     /**
      * Gets the value of the note property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getNote() {
-        return note;
-    }
-
-    /**
-     * Sets the value of the note property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setNote(String value) {
-        this.note = value;
-    }
-
-    /**
-     * Gets the value of the slounik property.
-     * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the slounik property.
+     * This is why there is not a <CODE>set</CODE> method for the note property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getSlounik().add(newItem);
+     *    getNote().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link Slounik }
+     * {@link String }
      * 
      * 
      */
-    public List<Slounik> getSlounik() {
-        if (slounik == null) {
-            slounik = new ArrayList<Slounik>();
+    public List<String> getNote() {
+        if (note == null) {
+            note = new ArrayList<String>();
         }
-        return this.slounik;
+        return this.note;
     }
 
     /**

@@ -21,6 +21,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
+ *         &lt;element name="Note" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element ref="{}Slounik" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element ref="{}Form" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="pravapis" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -35,11 +37,17 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
+    "note",
+    "slounik",
     "form"
 })
 @XmlRootElement(name = "Variant")
 public class Variant {
 
+    @XmlElement(name = "Note")
+    protected List<String> note;
+    @XmlElement(name = "Slounik")
+    protected List<Slounik> slounik;
     @XmlElement(name = "Form")
     protected List<Form> form;
     @XmlAttribute(name = "pravapis")
@@ -48,6 +56,64 @@ public class Variant {
     protected String lemma;
     @XmlAttribute(name = "type")
     protected VariantType type;
+
+    /**
+     * Gets the value of the note property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the note property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getNote().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link String }
+     * 
+     * 
+     */
+    public List<String> getNote() {
+        if (note == null) {
+            note = new ArrayList<String>();
+        }
+        return this.note;
+    }
+
+    /**
+     * Gets the value of the slounik property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the slounik property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getSlounik().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link Slounik }
+     * 
+     * 
+     */
+    public List<Slounik> getSlounik() {
+        if (slounik == null) {
+            slounik = new ArrayList<Slounik>();
+        }
+        return this.slounik;
+    }
 
     /**
      * Gets the value of the form property.

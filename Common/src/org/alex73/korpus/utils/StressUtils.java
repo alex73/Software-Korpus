@@ -42,10 +42,23 @@ public class StressUtils {
     }
 
     /**
-     * Find stress syll by ё, о
+     * Find stress syll by ё, о using possible value. If possible < 0 - find
+     * first.
      */
-    public static int getUsuallyStressedSyll(String word) {
+    public static int getUsuallyStressedSyll(String word, int possible) {
         int r = 0;
+        if (possible >= 0) {
+            for (int i = 0; i < word.length(); i++) {
+                char c = word.charAt(i);
+                if (possible == r && BelarusianTags.USUALLY_STRESSED.indexOf(c) >= 0) {
+                    return r;
+                }
+                if (BelarusianTags.HALOSNYJA.indexOf(c) >= 0) {
+                    r++;
+                }
+            }
+        }
+        r = 0;
         for (int i = 0; i < word.length(); i++) {
             char c = word.charAt(i);
             if (BelarusianTags.USUALLY_STRESSED.indexOf(c) >= 0) {
@@ -65,7 +78,7 @@ public class StressUtils {
         if (syllCount(word) == 1) {
             return setStressFromStart(word, 0);
         }
-        int u = getUsuallyStressedSyll(word);
+        int u = getUsuallyStressedSyll(word, -1);
         if (u >= 0) {
             return setStressFromStart(word, u);
         }

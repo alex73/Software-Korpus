@@ -38,19 +38,19 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Form }
-     * 
-     */
-    public Form createForm() {
-        return new Form();
-    }
-
-    /**
      * Create an instance of {@link Slounik }
      * 
      */
     public Slounik createSlounik() {
         return new Slounik();
+    }
+
+    /**
+     * Create an instance of {@link Form }
+     * 
+     */
+    public Form createForm() {
+        return new Form();
     }
 
     /**
