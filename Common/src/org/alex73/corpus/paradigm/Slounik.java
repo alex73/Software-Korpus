@@ -18,7 +18,8 @@ import javax.xml.bind.annotation.XmlValue;
  * &lt;complexType>
  *   &lt;simpleContent>
  *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
- *       &lt;attribute name="name" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="idx" use="required" type="{http://www.w3.org/2001/XMLSchema}int" />
  *     &lt;/extension>
  *   &lt;/simpleContent>
  * &lt;/complexType>
@@ -35,8 +36,10 @@ public class Slounik {
 
     @XmlValue
     protected String value;
-    @XmlAttribute(name = "name")
+    @XmlAttribute(name = "name", required = true)
     protected String name;
+    @XmlAttribute(name = "idx", required = true)
+    protected int idx;
 
     /**
      * Gets the value of the value property.
@@ -84,6 +87,22 @@ public class Slounik {
      */
     public void setName(String value) {
         this.name = value;
+    }
+
+    /**
+     * Gets the value of the idx property.
+     * 
+     */
+    public int getIdx() {
+        return idx;
+    }
+
+    /**
+     * Sets the value of the idx property.
+     * 
+     */
+    public void setIdx(int value) {
+        this.idx = value;
     }
 
 }

@@ -184,9 +184,14 @@
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="name" type="xs:string">
+          <xs:attribute name="name" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation>Код слоўніка</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="idx" type="xs:int" use="required">
+            <xs:annotation>
+              <xs:documentation>Індэкс артыкула ў слоўніке, ад 1</xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>
