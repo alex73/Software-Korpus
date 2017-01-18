@@ -23,6 +23,8 @@ public class GrammarDBSaver {
     private static String getFileForParadigm(Paradigm p) {
         if (p.getTag().startsWith("NP")) {
             return "NP.xml";
+        } else if (p.getTag().length() > 1 && p.getTag().charAt(1) == '+') {
+            return p.getTag().substring(0, 1) + "_.xml";
         } else {
             return p.getTag().substring(0, 1) + ".xml";
         }

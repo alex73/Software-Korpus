@@ -76,7 +76,7 @@ public class ResultsConcordance extends VerticalPanel {
         line.setStyleName("text-right");
         List<InlineLabel> back = new ArrayList<>();
         for (int i = wordsFrom - 1, count = 0; i >= 0 && count < 8; i--) {
-            InlineLabel w = new InlineLabel(sentence[i].value);
+            InlineLabel w = new InlineLabel(sentence[i].orig);
             if (sentence[i].isWord) {
                 korpus.widgetsInfoWord.put(w, sentence[i]);
                 w.addMouseDownHandler(korpus.handlerShowInfoWord);
@@ -93,7 +93,7 @@ public class ResultsConcordance extends VerticalPanel {
         line = new HTMLPanel("");
         line.setStyleName("text-center");
         for (int i = wordsFrom, count = 0; i < sentence.length && count < wordsCount; i++) {
-            InlineLabel w = new InlineLabel(sentence[i].value);
+            InlineLabel w = new InlineLabel(sentence[i].orig);
             if (sentence[i].isWord) {
                 korpus.widgetsInfoWord.put(w, sentence[i]);
                 w.addMouseDownHandler(korpus.handlerShowInfoWord);
@@ -108,7 +108,7 @@ public class ResultsConcordance extends VerticalPanel {
         line = new HTMLPanel("");
         line.setStyleName("text-left");
         for (int i = wordsTo + 1, count = 0; i < sentence.length && count < 8; i++) {
-            InlineLabel w = new InlineLabel(sentence[i].value);
+            InlineLabel w = new InlineLabel(sentence[i].orig);
             if (sentence[i].isWord) {
                 korpus.widgetsInfoWord.put(w, sentence[i]);
                 w.addMouseDownHandler(korpus.handlerShowInfoWord);

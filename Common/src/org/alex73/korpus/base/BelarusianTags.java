@@ -196,6 +196,7 @@ public class BelarusianTags {
 
     private void nazounik(TagLetter t) {
         t = t.add("Часціна => N:Назоўнік");
+        t.add("Новы=>+:новы").latestInParadigm();
         t = t.add("Уласнасць => C:агульны;P:уласны");
         t = t.add("Адушаўлёнасць => A:адушаўлёны;I:неадушаўлёны;X:???????");
         t = t.add("Асабовасць => P:асабовы;I:неасабовы;X:???????");
@@ -222,6 +223,7 @@ public class BelarusianTags {
 
     private void licebnik(TagLetter t) {
         TagLetter t0 = t.add("Часціна => M:Лічэбнік");
+        t0.add("Новы=>+:новы").latestInParadigm();
         t = t0.add("Словазмяненне => N:як у назоўніка;A:як у прыметніка;X:???????");
         TagLetter t2=t0.add("Словазмяненне => 0:няма");
         t = t.add("Значэнне => C:колькасны;O:парадкавы;K:зборны;F:дробавы");
@@ -237,6 +239,7 @@ public class BelarusianTags {
 
     private void zajmiennik(TagLetter t) {
         t = t.add("Часціна => S:Займеннік");
+        t.add("Новы=>+:новы").latestInParadigm();
         t = t.add("Словазмяненне => N:як у назоўніка;A:як у прыметніка;M:як у займенніка");
         t = t.add(
                 "Разрад => P:асабовы;R:зваротны;S:прыналежны;D:указальны;E:азначальны;L:пытальна–адносны;N:адмоўны;F:няпэўны");
@@ -250,6 +253,7 @@ public class BelarusianTags {
 
     private void prymietnik(TagLetter t) {
         t = t.add("Часціна => A:Прыметнік");
+        t.add("Новы=>+:новы").latestInParadigm();
         t.add("Тып => 0:нескланяльны").latestInParadigm();
         t = t.add("Тып => Q:якасны;R:адносны;P:прыналежны;X:???????");
         TagLetter a = t.add("Ступень параўнання => P:станоўчая;C:вышэйшая;S:найвышэйшая").latestInParadigm();
@@ -262,6 +266,7 @@ public class BelarusianTags {
 
     private void dziejaslou(TagLetter t) {
         t = t.add("Часціна => V:Дзеяслоў");
+        t.add("Новы=>+:новы").latestInParadigm();
         t = t.add("Пераходнасць => T:пераходны;I:непераходны;D:пераходны/непераходны;X:???????");
         t = t.add("Трыванне => P:закончанае;M:незакончанае");
         t = t.add("Зваротнасць => R:зваротны;N:незваротны");
@@ -293,6 +298,7 @@ public class BelarusianTags {
 
     private void dziejeprymietnik(TagLetter t) {
         t = t.add("Часціна => P:Дзеепрыметнік");
+        t.add("Новы=>+:новы").latestInParadigm();
         t = t.add("Стан => A:незалежны;P:залежны");
         t = t.add("Час => R:цяперашні;P:мінулы");
         TagLetter pt = t.add("Трыванне => P:закончанае;M:незакончанае;D:закончанае/незакончанае;X:???????")
@@ -306,6 +312,7 @@ public class BelarusianTags {
 
     private void pryslouje(TagLetter t) {
         t = t.add("Часціна => R:Прыслоўе");
+        t.add("Новы=>+:новы").latestInParadigm();
         t = t.add(
                 "Утварэнне => N:ад назоўнікаў;A:прыметнікаў;M:лічэбнікаў;S:займеннікаў;G:дзеепрыслоўяў;V:дзеясловаў;E:часціц;I:прыназоўнікаў;X:???????")
                 .latestInParadigm();
@@ -315,6 +322,7 @@ public class BelarusianTags {
 
     private void zlucnik(TagLetter t) {
         t = t.add("Часціна => C:Злучнік");
+        t.add("Новы=>+:новы").latestInParadigm();
         TagLetter s = t.add("Тып => S:падпарадкавальны");
         TagLetter k = t.add("Тып => K:злучальны");
         t.add("Тып => P:паясняльны").latestInParadigm();

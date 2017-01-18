@@ -102,7 +102,6 @@ public class LuceneFilter {
     }
 
     public void addWordFilter(BooleanQuery query, WordRequest w) {
-        w.word = BelarusianWordNormalizer.normalize(w.word);
         if (w.word.length() > 0) {
             Query wq;
             if (w.allForms) {

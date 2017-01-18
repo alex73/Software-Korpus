@@ -146,10 +146,10 @@ public class ResultsSearch extends VerticalPanel {
         TextPos curr = from;
         while (true) {
             WordResult w = text.words[curr.getSentence()][curr.getWord()];
-            if (!w.isWord && !w.value.isEmpty() && w.value.charAt(0) == '\n') {
+            if (!w.isWord && !w.orig.isEmpty() && w.orig.charAt(0) == '\n') {
                 p.add(new InlineHTML("<br/>"));
             } else {
-                InlineLabel wlabel = new InlineLabel(w.value);
+                InlineLabel wlabel = new InlineLabel(w.orig);
                 if (w.requestedWord) {
                     wlabel.setStyleName("wordFound");
                 }

@@ -103,6 +103,7 @@ public class PrepareCache2 {
         if (exception != null) {
             exception.printStackTrace();
         }
+        System.out.println("Finished");
     }
 
     static void luceneOpen(String dir) throws Exception {

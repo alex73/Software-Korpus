@@ -29,18 +29,18 @@
 
 	<target name="javac" depends="libs" description="Compile java source to bytecode">
 		<mkdir dir="build/classes" />
-		<javac srcdir="src" includes="**" encoding="utf-8" destdir="build/classes" nowarn="true" debug="true" debuglevel="lines,vars,source">
+		<javac srcdir="src:../Common/src" includes="**" encoding="utf-8" destdir="build/classes" nowarn="true" debug="true" debuglevel="lines,vars,source">
 			<classpath>
 				<fileset dir="war/WEB-INF/lib" includes="**/*.jar"/>
 				<fileset dir="../Common/lib/" includes="*.jar" />
 				<fileset dir="../Common/lib/kryo-serialization/" includes="*.jar" />
-				<fileset dir="../Common/build/" includes="Korpus-Common.jar" />
 				<fileset dir="${gwt.sdk}" includes="gwt-*.jar"/>
 			</classpath>
 		</javac>
 		<copy todir="build/classes">
 			<fileset dir="src" />
 		</copy>
+		<copy file="../GrammarDB/db.cache" todir="build/classes" />
 	</target>
 
 	<target name="gwtc" depends="javac" description="GWT compile to JavaScript (production mode)">
@@ -57,7 +57,7 @@
 			<arg line="-war"/>
 			<arg value="war"/>
 			<!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
-			<arg line="${gwt.args}"/>
+			<arg line="${gwt.args} -style PRETTY"/>
 			<arg value="org.alex73.korpus.Korpus"/>
 		</java>
 	</target>
@@ -92,7 +92,6 @@
 			<zipfileset dir="build/classes/" prefix="WEB-INF/classes/" />
 			<zipfileset dir="../Common/lib/" prefix="WEB-INF/lib/" includes="*.jar" />
 			<zipfileset dir="../Common/lib/kryo-serialization/" prefix="WEB-INF/lib/" includes="*.jar" />
-			<zipfileset dir="../Common/build/" prefix="WEB-INF/lib/" includes="Korpus-Common.jar" />
 		</zip>
 	</target>
 

@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
 import org.alex73.korpus.shared.dto.ClusterParams;
 import org.alex73.korpus.shared.dto.ClusterResults;
@@ -37,6 +38,7 @@ public class ClusterServiceImpl {
         }
 
         WordRequest w = params.word;
+        w.word = BelarusianWordNormalizer.normalize(w.word);
         process.addWordFilter(query, w);
 
         process.search(query, SEARCH_BLOCK, new LuceneDriverRead.DocFilter<Void>() {
@@ -102,19 +104,19 @@ public class ClusterServiceImpl {
         String[] wordsAfter;
 
         public Result(WordResult[] w, int pos, int beforeCount, int afterCount) {
-            word = w[pos].value;
+            word = w[pos].orig;
             wordsBefore = new String[beforeCount];
             wordsAfter = new String[afterCount];
 
             for (int i = pos - 1, count = 0; i >= 0 && count < beforeCount; i--) {
                 if (w[i].isWord) {
-                    wordsBefore[beforeCount - count - 1] = w[i].value;
+                    wordsBefore[beforeCount - count - 1] = w[i].orig;
                     count++;
                 }
             }
             for (int i = pos + 1, count = 0; i < w.length && count < afterCount; i++) {
                 if (w[i].isWord) {
-                    wordsAfter[count] = w[i].value;
+                    wordsAfter[count] = w[i].orig;
                     count++;
                 }
             }

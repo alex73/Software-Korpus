@@ -189,7 +189,7 @@ public class BelarusianWordNormalizer {
             case '\u0301':
                 // Націск: асобны знак - 00B4, спалучэньне з папярэдняй літарай
                 // - 0301
-                c = '*';
+                c = '+';
                 break;
             }
             chars[i] = c;

@@ -164,6 +164,9 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     @Override
     public SearchResult search(final SearchParams params, LatestMark latest) throws Exception {
         LOGGER.info(">> Request from " + getThreadLocalRequest().getRemoteAddr());
+        for (WordRequest w : params.words) {
+            w.word = BelarusianWordNormalizer.normalize(w.word);
+        }
         try {
             WordsDetailsChecks.reset();
             boolean enoughComplex = false;
@@ -235,9 +238,9 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     @Override
     public ClusterResults calculateClusters(ClusterParams params) throws Exception {
         LOGGER.info(">> Request clusters from " + getThreadLocalRequest().getRemoteAddr());
+        params.word.word = BelarusianWordNormalizer.normalize(params.word.word);
         try {
             WordsDetailsChecks.reset();
-
             if (WordsDetailsChecks.isTooSimpleWord(params.word)) {
                 LOGGER.info("<< Request too simple");
                 throw new RuntimeException(ServerError.REQUIEST_TOO_SIMPLE);
@@ -260,6 +263,9 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
     @Override
     public SearchResults[] getSentences(SearchParams params, int[] list) throws Exception {
+        for (WordRequest w : params.words) {
+            w.word = BelarusianWordNormalizer.normalize(w.word);
+        }
         for (WordRequest w : params.words) {
             if (w.allForms) {
                 w.lemmas = findAllLemmas(w.word);
@@ -315,16 +321,17 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
                 Object o = sentence.getWOrSOrZ().get(j);
                 WordResult rsw = new WordResult();
                 if (o instanceof W) {
-                    rsw.value = ((W) o).getValue();
+                    rsw.orig = ((W) o).getValue();
+                    rsw.normalized =  BelarusianWordNormalizer.normalize(rsw.orig); // TODO may be store instead convert each time ?
                     rsw.lemma = ((W) o).getLemma();
                     rsw.cat = ((W) o).getCat();
                     rsw.isWord = true;
                 } else if (o instanceof S) {
-                    rsw.value = ((S) o).getChar();
+                    rsw.orig = ((S) o).getChar();
                 } else if (o instanceof Z) {
-                    rsw.value = ((Z) o).getChar();
+                    rsw.orig = ((Z) o).getChar();
                 } else if (o instanceof O) {
-                    rsw.value = ((O) o).getValue();
+                    rsw.orig = ((O) o).getValue();
                 }
                 words.add(rsw);
             }

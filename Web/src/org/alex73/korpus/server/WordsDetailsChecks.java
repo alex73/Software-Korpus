@@ -148,11 +148,11 @@ public class WordsDetailsChecks {
             } else {
                 // concrete form
                 if (wordParam.isWildcardWord()) {
-                    if (!getWildcardRegexp(wordParam.word).matcher(wordResult.value).matches()) {
+                    if (!getWildcardRegexp(wordParam.word).matcher(wordResult.normalized).matches()) {
                         return false;
                     }
                 } else {
-                    if (!wordParam.word.equalsIgnoreCase(wordResult.value)) {
+                    if (!wordParam.word.equals(wordResult.normalized)) {
                         return false;
                     }
                 }

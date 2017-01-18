@@ -50,7 +50,7 @@ public class TagLetter {
         TagLetter c = new TagLetter();
         for (String v : values.split(";")) {
             char code = v.charAt(0);
-            if (!(code >= 'A' && code <= 'Z') && !(code >= '0' && code <= '9')) {
+            if (!(code >= 'A' && code <= 'Z') && !(code >= '0' && code <= '9') && !(code == '+')) {
                 throw new RuntimeException("Error in letters: " + values);
             }
             if (v.charAt(1) != ':') {
