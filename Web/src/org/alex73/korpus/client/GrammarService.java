@@ -24,11 +24,8 @@ package org.alex73.korpus.client;
 
 import org.alex73.korpus.shared.LemmaInfo;
 
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
-@RemoteServiceRelativePath("grammar")
-public interface GrammarService extends RemoteService {
+public interface GrammarService  {
     LemmaInfo[] search(String lemmaMask, String wordMask, String grammar, boolean orderReverse) throws Exception;
 
     LemmaInfo[] getLemmaDetails(LemmaInfo lemma) throws Exception;

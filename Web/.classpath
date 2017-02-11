@@ -1,17 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/commons-lang-2.4.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/Korpus-Common"/>
+	<classpathentry kind="src" path="src-templates"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/javax.ws.rs-api-2.0.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-common.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-container-servlet-core.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-container-servlet.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-guava-2.25.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-lang-2.4.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/hk2-api-2.5.0-b32.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/hk2-locator-2.5.0-b32.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/hk2-utils-2.5.0-b32.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-annotations-2.8.6.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-core-2.8.6.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-databind-2.8.6.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-jaxrs-base-2.8.6.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-jaxrs-json-provider-2.8.6.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-module-jaxb-annotations-2.8.6.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/javax.inject-2.5.0-b32.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-client.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-media-json-jackson-2.25.1.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-server.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-api-2.0.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-core-2.0.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-web-2.0.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-analyzers-common-5.1.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-core-5.1.0.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-servlet-deps.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/gwt-servlet.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/validation-api-1.1.0.Final.jar"/>
 	<classpathentry kind="lib" path="lib-compile/servlet-api.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/GWT"/>
-	<classpathentry kind="output" path="war/WEB-INF/classes"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Korpus-Common"/>
+	<classpathentry kind="lib" path="lib-compile/freemarker.jar"/>
+	<classpathentry kind="output" path="classes"/>
 </classpath>

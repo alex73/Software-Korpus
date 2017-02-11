@@ -43,6 +43,9 @@ public class BelarusianWordNormalizer {
     }
 
     public static String normalize(String word) {
+        if (word == null) {
+            return null;
+        }
         char[] chars = word.toCharArray();
         for (int i = 0; i < chars.length; i++) {
             char c = chars[i];

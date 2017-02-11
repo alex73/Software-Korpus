@@ -22,20 +22,16 @@
 
 package org.alex73.korpus.server;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.base.OtherInfo;
 import org.alex73.korpus.base.TextInfo;
+import org.alex73.korpus.server.data.LatestMark;
+import org.alex73.korpus.server.data.StandardTextRequest;
+import org.alex73.korpus.server.data.UnprocessedTextRequest;
+import org.alex73.korpus.server.data.WordRequest;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
 import org.alex73.korpus.server.engine.LuceneDriverRead.DocFilter;
-import org.alex73.korpus.shared.dto.LatestMark;
-import org.alex73.korpus.shared.dto.StandardTextRequest;
-import org.alex73.korpus.shared.dto.UnprocessedTextRequest;
-import org.alex73.korpus.shared.dto.WordRequest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;

@@ -1,0 +1,36 @@
+<div class="row" *ngFor="let r of serviceGrammar.results">
+  <a href="#" (click)="showDetails(r)">{{r.lemma}}</a>
+</div>
+
+<div class="modal fade" bsModal #lemmaModal="bs-modal" [config]="{backdrop: 'static'}"
+     tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" *ngIf="details">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">{{details.lemma}} [{{details.catText}}]</h4>
+         <button type="button" class="close pull-right" aria-label="Close" (click)="lemmaModal.hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="panel panel-default" *ngFor="let v of details.variants">
+          <!-- div class="panel-heading"></div-->
+          <div class="panel-body">
+            <table class="table-borders hspacing">
+              <tr>
+                <th *ngFor="let d of v.catnames">{{d}}</th>
+                <th></th>
+              </tr>
+              <tr *ngFor="let f of v.forms">
+                <ng-container *ngFor="let d of f.data; let i=index">
+                  <td *ngIf="f.colspan[i] > 0" [rowSpan]="f.colspan[i]">{{d}}</td>
+                </ng-container>
+                <td>{{f.value}}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,42 +1,36 @@
 package org.alex73.korpus.build;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
-import java.util.Properties;
+import java.util.Map;
+import java.util.TreeMap;
 
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.Velocity;
-import org.apache.velocity.runtime.resource.loader.URLResourceLoader;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateExceptionHandler;
 
 public class MakeHTML {
-    static Template template;
+
+    static Configuration cfg;
 
     public static void main(String[] args) throws Exception {
-        Properties props = new Properties();
-        props.setProperty("resource.loader", "class");
-        props.setProperty("class.resource.loader.description", "Velocity Classpath Resource Loader");
-        props.setProperty("class.resource.loader.class", URLResourceLoader.class.getName());
-        props.setProperty("class.resource.loader.root", MakeHTML.class.getResource("").toExternalForm());
-        Velocity.init(props);
+        cfg = new Configuration(Configuration.VERSION_2_3_23);
+        cfg.setDirectoryForTemplateLoading(new File("src-templates/org/alex73/korpus/build/"));
+        cfg.setDefaultEncoding("UTF-8");
+        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
 
-        template = Velocity.getTemplate("search.velocity", "UTF-8");
-        out("search", "korpus", "war/korpusSearch.html");
-        out("search", "other", "war/otherSearch.html");
-
-        out("conco", "korpus", "war/korpusConcordance.html");
-        out("conco", "other", "war/otherConcordance.html");
-
-        out("cluster", "korpus", "war/korpusCluster.html");
-        out("cluster", "other", "war/otherCluster.html");
+        out("index.fm", "web-angular/src/index.html");
+        out("korpus.fm", "web-angular/src/korpus.html");
+        out("grammar.fm", "web-angular/src/grammar.html");
+        out("download.fm", "web-angular/src/download.html");
     }
 
-    static void out(String mode, String db, String outFile) throws Exception {
-        VelocityContext context = new VelocityContext();
-        context.put("mode", mode);
-        context.put("db", db);
+    static void out(String templateFile, String outFile) throws Exception {
+        Template t = cfg.getTemplate(templateFile);
+        Map<String, Object> context = new TreeMap<>();
         try (OutputStreamWriter wr = new OutputStreamWriter(new FileOutputStream(outFile), "UTF-8")) {
-            template.merge(context, wr);
+            t.process(context, wr);
         }
     }
 }

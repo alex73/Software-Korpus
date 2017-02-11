@@ -1,0 +1,88 @@
+<div class="panel panel-default">
+	<div class="panel-heading">Фільтр тэкстаў</div>
+    <div class="panel-body" *ngIf="serviceSearch.inputCorpusType == 'MAIN'">
+        <div class="form-horizontal">
+            <div class="form-group">
+                <label for="inputFilterAuthor" class="col-sm-2 control-label">Аўтар</label>
+                <div class="col-sm-10">
+                    <input id="inputFilterAuthor"
+                           *ngIf="serviceSearch.initial"
+                           [(ngModel)]="serviceSearch.inputTextStandard.author"
+                           [typeahead]="serviceSearch.initial.authors"
+                           typeaheadMinLength="2"
+                           class="form-control">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inputFilterStyle" class="col-sm-2 control-label">Стыль/жанр</label>
+                <div class="col-sm-10">
+                    <a class="form-control" id="inputFilterStyle" (click)="styleModalOpen()">{{displayStylegenres}}</a>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inputFilterYearWrittenFrom" class="col-sm-2 control-label">Год напісання</label>
+                <div class="col-sm-10">
+                    <div class="form-inline">
+                        <label for="inputFilterYearWrittenFrom">ад</label>
+                        <input id="inputFilterYearWrittenFrom" type="text" class="form-control" [(ngModel)]="serviceSearch.inputTextStandard.yearWrittenFrom">
+                        <label for="inputFilterYearWrittenTo">да</label>
+                        <input id="inputFilterYearWrittenTo" type="text" class="form-control" [(ngModel)]="serviceSearch.inputTextStandard.yearWrittenTo">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inputFilterYearPublishedFrom" class="col-sm-2 control-label">Год выдання</label>
+                <div class="col-sm-10">
+                    <div class="form-inline">
+                        <label for="inputFilterYearPublishedFrom">ад</label>
+                        <input id="inputFilterYearPublishedFrom" type="text" class="form-control" [(ngModel)]="serviceSearch.inputTextStandard.yearPublishedFrom">
+                        <label for="inputFilterYearPublishedTo">да</label>
+                        <input id="inputFilterYearPublishedTo" type="text" class="form-control" [(ngModel)]="serviceSearch.inputTextStandard.yearPublishedTo">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel-body" *ngIf="serviceSearch.inputCorpusType == 'UNSORTED'">
+        <div class="form-horizontal">
+            <div class="form-group">
+                <label for="inputFilterOther" class="col-sm-2 control-label">Частка</label>
+                <div class="col-sm-10">
+                    <input id="inputFilterOther"
+                           *ngIf="serviceSearch.initial"
+                           [(ngModel)]="serviceSearch.inputTextUnprocessed.volume"
+                           class="form-control">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" bsModal #styleModal="bs-modal" [config]="{backdrop: 'static'}"
+     tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">Стыль/жанр</h4>
+        <button type="button" class="btn btn-primary pull-right hspacing" (click)="styleModalOk()">Абраць</button>
+        <button type="button" class="btn btn-default pull-right hspacing" (click)="styleModalCancel()">Скасаваць</button>
+      </div>
+      <div class="modal-header">
+        <button type="button" class="btn btn-default hspacing" (click)="all(true)">Пазначыць усе</button>
+        <button type="button" class="btn btn-default hspacing" (click)="all(false)">Зняць усе</button>
+      </div>
+      <div class="modal-body" *ngIf="serviceSearch.initial">
+          <div *ngFor="let p of serviceSearch.initial.styleGenresParts">
+            <div class="panel panel-default">
+              <div class="panel-heading"><label><input type="checkbox" [(ngModel)]="selectedGroups[p]" (ngModelChange)="groupChange(p)"> {{p}}</label></div>
+              <div class="panel-body">
+                <span *ngFor="let k of serviceSearch.initial.styleGenres[p]" style="padding-right: 1em">
+                  <label><input type="checkbox" [(ngModel)]="selectedItems[p+'/'+k]" > {{k}}</label>
+                </span>
+              </div>
+            </div>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>

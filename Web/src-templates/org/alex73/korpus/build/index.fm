@@ -1,0 +1,37 @@
+<#assign active = "index">
+<#assign title = "Беларускі N-корпус">
+<#include "header.fm">
+
+    <div class="container">
+
+        &nbsp;&nbsp;&nbsp;<span style="color: #0C8349">09.02.2017</span> - зменены інтэрфейс корпусу <br/>
+        &nbsp;&nbsp;&nbsp;<span style="color: #0C8349">10.08.2016</span> - абноўлена праверка арфаграфіі для LibreOffice і Firefox/Thunderbird (глядзі старонку <a href="download.html">Спампаваць</a>) <br/>
+        &nbsp;&nbsp;&nbsp;<span style="color: #0C8349">09.08.2016</span> - абноўлена граматычная база <br/>
+        &nbsp;&nbsp;&nbsp;<span style="color: #0C8349">05.08.2016</span> - корпус папоўнены публіцыстычнымі тэкстамі ~20 млн. словаўжыванняў. Агульны аб'ём корпусу - ~80 млн. словаўжыванняў.
+        <hr/>
+
+		<p><b>Беларускі N-корпус</b> - першая спроба стварэння публічнага агульнага корпусу беларускай мовы.</p> 
+		<p>Лексіка-граматычная база даступная на ўмовах ліцэнзіі <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> (таксама можа быць скарыстаная на ўмовах ліцэнзіі <a target="_blank" href="http://www.gnu.org/licenses/lgpl-3.0.html">LGPLv3</a>).</p>
+		<p>Рухавік даступны на ўмовах ліцэнзіі <a target="_blank" href="http://www.gnu.org/licenses/gpl-3.0.html">GNU General Public License, Version 3</a>.</p>
+		<p></p>
+		<p>Вітаецца любая дапамога: прапановы і крытычныя заўвагі, вычытаныя тэксты (з выходнымі звесткамі), дапамога ў зняцці аманіміі і інш.</p>
+		<p>Дасылайце лісты на <a href="mailto:bnkorpus@gmail.com">bnkorpus@gmail.com</a></p>
+		<p></p>
+		<p>Іншыя корпусы беларускай мовы: 
+				<a target="_blank" href="http://grid.bntu.by/corpus/">корпус навуковых тэкстаў Corpus Albaruthenicum</a>,
+				<a target="_blank" href="http://ruscorpora.ru/search-para-be.html">паралельны беларуска-руска-беларускі корпус на сайце Нацыянальнага корпусу рускай мовы</a></p>
+		
+		<br/>
+		<br/>
+		<p><b>Belarusian N-korpus</b> is the first publicly available general Belarusian language corpus.</p>
+		<p>The grammar database is available under <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> (also can be used under <a target="_blank" href="http://www.gnu.org/licenses/lgpl-3.0.html">LGPLv3</a>).</p>
+		<p>The corpus engine is available under <a target="_blank" href="http://www.gnu.org/licenses/gpl-3.0.html">GNU General Public License, Version 3</a>.</p>
+		<p>Contacts: <a href="mailto:bnkorpus@gmail.com">bnkorpus@gmail.com</a></p>
+		<p>Other available Belarusian language corpora: 
+				<a target="_blank" href="http://grid.bntu.by/corpus/">Corpus Albaruthenicum - Corpus of the academic Belarusian language</a>,
+				<a target="_blank" href="http://ruscorpora.ru/search-para-be.html">Parallel Belarusian-Russian-Belarusian Corpus on the website of the Russian National Corpus</a></p>
+
+    </div>
+
+
+<#include "footer.fm">

@@ -22,18 +22,28 @@
 
 package org.alex73.korpus.shared;
 
-import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * DTO for grammar database search results.
  */
-public class LemmaInfo implements Serializable {
+public class LemmaInfo {
+    public long pdgId;
     public String lemma, lemmaGrammar;
-    public Word[] words;
 
-    public static class Word implements Serializable {
+    public static class LemmaParadigm {
+        public String lemma;
+        public String tag;
+        public List<LemmaVariant> variants = new ArrayList<>();
+    }
+
+    public static class LemmaVariant {
+        public List<LemmaForm> forms = new ArrayList<>();
+    }
+
+    public static class LemmaForm {
+        public String tag;
         public String value;
-        public String cat;
-        public String lemma, lemmaGrammar;
     }
 }

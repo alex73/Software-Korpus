@@ -30,26 +30,35 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+
 import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.base.DBTagsGroups;
-import org.alex73.korpus.base.GrammarDB2;
-import org.alex73.korpus.client.GrammarService;
+import org.alex73.korpus.server.data.GrammarInitial;
+import org.alex73.korpus.server.data.WordRequest;
 import org.alex73.korpus.shared.LemmaInfo;
+import org.alex73.korpus.utils.StressUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-
 /**
  * Service for find by grammar database.
  */
-@SuppressWarnings("serial")
-public class GrammarServiceImpl extends RemoteServiceServlet implements GrammarService {
+@Path("/grammar")
+public class GrammarServiceImpl {
 
     static final Logger LOGGER = LogManager.getLogger(GrammarServiceImpl.class);
 
@@ -57,49 +66,59 @@ public class GrammarServiceImpl extends RemoteServiceServlet implements GrammarS
     public static Collator BEL = Collator.getInstance(BE);
 
     public static String dirPrefix = System.getProperty("KORPUS_DIR");
-    private GrammarDB2 gr;
 
-    public GrammarServiceImpl() throws Exception {
-        if (dirPrefix == null) {
-            LOGGER.fatal("KORPUS_DIR is not defined");
-            return;
-        }
-        LOGGER.info("startup");
+    @Context
+    HttpServletRequest request;
+
+    private KorpusApplication getApp() {
+        return KorpusApplication.instance;
+    }
+
+    @Path("initial")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public GrammarInitial getInitialData() throws Exception {
+        LOGGER.info("getInitialData from " + request.getRemoteAddr());
         try {
-            gr = GrammarDB2.initializeFromDir(dirPrefix + "/GrammarDB-filtered");
-        } catch (Throwable ex) {
-            LOGGER.error("startup", ex);
-            throw new ExceptionInInitializerError(ex);
+            return getApp().grammarInitial;
+        } catch (Exception ex) {
+            LOGGER.error("getInitialData", ex);
+            throw ex;
         }
     }
 
-    @Override
-    public void destroy() {
-        LOGGER.info("shutdown");
-        super.destroy();
+    public static class GrammarRequest {
+        public WordRequest word;
+        public boolean orderReverse;
     }
 
-    @Override
-    protected void doUnexpectedFailure(Throwable e) {
-        LOGGER.error("UnexpectedFailure", e);
-        super.doUnexpectedFailure(e);
-    }
-
-    @Override
-    public LemmaInfo[] search(String lemmaMask, String wordMask, String grammar, boolean orderReverse)
-            throws Exception {
-        LOGGER.info(">> Request from " + getThreadLocalRequest().getRemoteAddr());
-        LOGGER.info(">> Request: lemmaMask=" + lemmaMask + " wordMask=" + wordMask + " grammar=" + grammar
-                + " orderReverse=" + orderReverse);
+    @Path("search")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public LemmaInfo[] search(GrammarRequest rq) throws Exception {
+        LOGGER.info(">> Request from " + request.getRemoteAddr());
+        LOGGER.info(">> Request: word=" + rq.word + " orderReverse=" + rq.orderReverse);
         try {
             List<LemmaInfo> result = new ArrayList<>();
-            Pattern reLemma = StringUtils.isEmpty(lemmaMask) ? null : Pattern.compile(lemmaMask.replace("*", ".*"));
-            Pattern reWord = StringUtils.isEmpty(wordMask) ? null : Pattern.compile(wordMask.replace("*", ".*"));
-            Pattern reGrammar = StringUtils.isEmpty(grammar) ? null : Pattern.compile(grammar);
+            Pattern reLemma = null;
+            Pattern reWord = null;
+            if (rq.word.allForms) {
+                if (StringUtils.isNotBlank(rq.word.word)) {
+                    reWord = Pattern.compile(rq.word.word.replace("*", ".*"));
+                }
+            } else {
+                if (StringUtils.isNotBlank(rq.word.word)) {
+                    reLemma = Pattern.compile(rq.word.word.replace("*", ".*"));
+                }
+            }
 
-            begpar: for (Paradigm p : gr.getAllParadigms()) {
+            Pattern reGrammar = StringUtils.isEmpty(rq.word.grammar) ? null : Pattern.compile(rq.word.grammar);
+
+            begpar: for (Paradigm p : getApp().gr.getAllParadigms()) {
                 if (reLemma != null) {
-                    if (!reLemma.matcher(BelarusianWordNormalizer.normalize(p.getLemma())).matches()) {
+                    if (!reLemma.matcher(StressUtils.unstress(BelarusianWordNormalizer.normalize(p.getLemma())))
+                            .matches()) {
                         continue;
                     }
                 }
@@ -119,7 +138,8 @@ public class GrammarServiceImpl extends RemoteServiceServlet implements GrammarS
                             }
                         }
                         if (reWord != null) {
-                            if (!reWord.matcher(BelarusianWordNormalizer.normalize(f.getValue())).matches()) {
+                            if (!reWord.matcher(StressUtils.unstress(BelarusianWordNormalizer.normalize(f.getValue())))
+                                    .matches()) {
                                 continue;
                             }
                         }
@@ -130,7 +150,8 @@ public class GrammarServiceImpl extends RemoteServiceServlet implements GrammarS
                 }
                 if (found) {
                     LemmaInfo w = new LemmaInfo();
-                    w.lemma = p.getLemma();
+                    w.pdgId = p.getPdgId();
+                    w.lemma = StressUtils.combineAccute(p.getLemma());
                     w.lemmaGrammar = p.getTag();
                     result.add(w);
                     if (Settings.GRAMMAR_SEARCH_RESULT_PAGE > 0
@@ -139,7 +160,7 @@ public class GrammarServiceImpl extends RemoteServiceServlet implements GrammarS
                     }
                 }
             }
-            if (orderReverse) {
+            if (rq.orderReverse) {
                 Collections.sort(result, new Comparator<LemmaInfo>() {
                     @Override
                     public int compare(LemmaInfo o1, LemmaInfo o2) {
@@ -162,38 +183,38 @@ public class GrammarServiceImpl extends RemoteServiceServlet implements GrammarS
         }
     }
 
-    public LemmaInfo[] getLemmaDetails(LemmaInfo lemma) throws Exception {
+    @Path("details/{id}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public LemmaInfo.LemmaParadigm getLemmaDetails(@PathParam("id") long pdgId) throws Exception {
         try {
-            List<LemmaInfo> result = new ArrayList<>();
-
-            begpar: for (Paradigm p : gr.getAllParadigms()) {
-                for (Variant v : p.getVariant()) {
-                    if (lemma.lemma.equals(p.getLemma())) {
-                        LemmaInfo li = new LemmaInfo();
-                        li.lemma = p.getLemma();
-                        li.lemmaGrammar = p.getTag();
-                        result.add(li);
-                        List<LemmaInfo.Word> words = new ArrayList<>();
-                        for (Form f : v.getForm()) {
-                            LemmaInfo.Word w = new LemmaInfo.Word();
-                            w.value = f.getValue();
-                            w.cat = p.getTag() + f.getTag();
-                            words.add(w);
-                        }
-                        li.words = words.toArray(new LemmaInfo.Word[words.size()]);
-                    }
-                }
-
-                if (Settings.GRAMMAR_SEARCH_RESULT_PAGE > 0
-                        && result.size() >= Settings.GRAMMAR_SEARCH_RESULT_PAGE + 1) {
-                    break begpar;
+            for (Paradigm p : getApp().gr.getAllParadigms()) {
+                if (p.getPdgId() == pdgId) {
+                    return conv(p);
                 }
             }
-            return result.toArray(new LemmaInfo[result.size()]);
         } catch (Exception ex) {
             ex.printStackTrace();
             throw ex;
         }
+        return null;
+    }
+
+    LemmaInfo.LemmaParadigm conv(Paradigm p) {
+        LemmaInfo.LemmaParadigm r = new LemmaInfo.LemmaParadigm();
+        for (Variant v : p.getVariant()) {
+            r.lemma = StressUtils.combineAccute(p.getLemma());
+            r.tag = p.getTag();
+            LemmaInfo.LemmaVariant rv = new LemmaInfo.LemmaVariant();
+            r.variants.add(rv);
+            for (Form f : v.getForm()) {
+                LemmaInfo.LemmaForm rf = new LemmaInfo.LemmaForm();
+                rf.value = StressUtils.combineAccute(f.getValue());
+                rf.tag = f.getTag();
+                rv.forms.add(rf);
+            }
+        }
+        return r;
     }
 
     String revert(String s) {

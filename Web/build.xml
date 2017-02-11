@@ -14,16 +14,16 @@
 
 	<path id="project.class.path">
 		<pathelement location="war/WEB-INF/classes"/>
-		<pathelement location="${gwt.sdk}/gwt-user.jar"/>
-		<fileset dir="${gwt.sdk}" includes="gwt-dev*.jar"/>
+		<!--pathelement location="${gwt.sdk}/gwt-user.jar"/>
+		<fileset dir="${gwt.sdk}" includes="gwt-dev*.jar"/-->
 		<!-- Add any additional non-server libs (such as JUnit) -->
 		<fileset dir="war/WEB-INF/lib" includes="**/*.jar"/>
 	</path>
 
 	<target name="libs" description="Copy libs to WEB-INF/lib">
 		<mkdir dir="war/WEB-INF/lib" />
-		<copy todir="war/WEB-INF/lib" file="${gwt.sdk}/gwt-servlet.jar" />
-		<copy todir="war/WEB-INF/lib" file="${gwt.sdk}/gwt-servlet-deps.jar" />
+		<!--copy todir="war/WEB-INF/lib" file="${gwt.sdk}/gwt-servlet.jar" />
+		<copy todir="war/WEB-INF/lib" file="${gwt.sdk}/gwt-servlet-deps.jar" /-->
 		<!-- Add any additional server libs that need to be copied -->
 	</target>
 
@@ -32,34 +32,30 @@
 		<javac srcdir="src:../Common/src" includes="**" encoding="utf-8" destdir="build/classes" nowarn="true" debug="true" debuglevel="lines,vars,source">
 			<classpath>
 				<fileset dir="war/WEB-INF/lib" includes="**/*.jar"/>
+				<fileset dir="lib-compile" includes="**/*.jar"/>
 				<fileset dir="../Common/lib/" includes="*.jar" />
 				<fileset dir="../Common/lib/kryo-serialization/" includes="*.jar" />
-				<fileset dir="${gwt.sdk}" includes="gwt-*.jar"/>
 			</classpath>
 		</javac>
 		<copy todir="build/classes">
 			<fileset dir="src" />
 		</copy>
-		<copy file="../GrammarDB/db.cache" todir="build/classes" />
+		<!--copy file="../GrammarDB/db.cache" todir="build/classes" /-->
 	</target>
 
 	<target name="gwtc" depends="javac" description="GWT compile to JavaScript (production mode)">
-		<java failonerror="true" fork="true" classname="com.google.gwt.dev.Compiler">
+		<!--java failonerror="true" fork="true" classname="com.google.gwt.dev.Compiler">
 			<classpath>
 				<pathelement location="src"/>
 				<pathelement location="../Common/src"/>
 				<path refid="project.class.path"/>
-				<!--pathelement location="/opt/gwt-2.6.1/validation-api-1.0.0.GA.jar" />
-				<pathelement location="/opt/gwt-2.6.1/validation-api-1.0.0.GA-sources.jar" /-->
 			</classpath>
-			<!-- add jvmarg -Xss16M or similar if you see a StackOverflowError -->
 			<jvmarg value="-Xmx512M"/>
 			<arg line="-war"/>
 			<arg value="war"/>
-			<!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
 			<arg line="${gwt.args} -style PRETTY"/>
 			<arg value="org.alex73.korpus.Korpus"/>
-		</java>
+		</java-->
 	</target>
 
 	<target name="devmode" depends="javac" description="Run development mode">

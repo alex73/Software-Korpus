@@ -10,3 +10,7 @@
 /Korpus-cache/
 /Other-texts/
 /Other-cache/
+/classes/
+/war/*.html
+/war/*.js
+/war/*.js.map

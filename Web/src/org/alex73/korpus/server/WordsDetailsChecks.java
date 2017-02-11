@@ -29,10 +29,10 @@ import java.util.regex.Pattern;
 
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.DBTagsGroups;
-import org.alex73.korpus.shared.dto.ResultText;
-import org.alex73.korpus.shared.dto.SearchParams;
-import org.alex73.korpus.shared.dto.WordRequest;
-import org.alex73.korpus.shared.dto.WordResult;
+import org.alex73.korpus.server.data.ResultText;
+import org.alex73.korpus.server.data.SearchParams;
+import org.alex73.korpus.server.data.WordRequest;
+import org.alex73.korpus.server.data.WordResult;
 
 /**
  * Some methods for final checks.

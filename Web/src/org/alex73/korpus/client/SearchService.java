@@ -26,17 +26,14 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import org.alex73.korpus.shared.dto.ClusterParams;
-import org.alex73.korpus.shared.dto.ClusterResults;
-import org.alex73.korpus.shared.dto.LatestMark;
-import org.alex73.korpus.shared.dto.SearchParams;
-import org.alex73.korpus.shared.dto.SearchResults;
+import org.alex73.korpus.server.data.ClusterParams;
+import org.alex73.korpus.server.data.ClusterResults;
+import org.alex73.korpus.server.data.LatestMark;
+import org.alex73.korpus.server.data.SearchParams;
+import org.alex73.korpus.server.data.SearchResults;
 
-import com.google.gwt.user.client.rpc.RemoteService;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
-@RemoteServiceRelativePath("search")
-public interface SearchService extends RemoteService {
+public interface SearchService  {
     SearchResult search(SearchParams params, LatestMark latest) throws Exception;
 
     SearchResults[] getSentences(SearchParams params, int[] list) throws Exception;

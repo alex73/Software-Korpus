@@ -6,18 +6,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.alex73.korpus.base.BelarusianWordNormalizer;
+import org.alex73.korpus.server.data.ClusterParams;
+import org.alex73.korpus.server.data.ClusterResults;
+import org.alex73.korpus.server.data.CorpusType;
+import org.alex73.korpus.server.data.ResultText;
+import org.alex73.korpus.server.data.WordRequest;
+import org.alex73.korpus.server.data.WordResult;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
-import org.alex73.korpus.shared.dto.ClusterParams;
-import org.alex73.korpus.shared.dto.ClusterResults;
-import org.alex73.korpus.shared.dto.CorpusType;
-import org.alex73.korpus.shared.dto.ResultText;
-import org.alex73.korpus.shared.dto.WordRequest;
-import org.alex73.korpus.shared.dto.WordResult;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.BooleanQuery;
 
 public class ClusterServiceImpl {
-    private final static int SEARCH_BLOCK = 10000;
+   private final static int SEARCH_BLOCK = 10000;
     private final SearchServiceImpl parent;
     private ClusterParams params;
     private final Map<String, Result> results = new HashMap<>();
@@ -26,12 +26,11 @@ public class ClusterServiceImpl {
         this.parent = parent;
     }
 
-    public ClusterResults calc(ClusterParams params) throws Exception {
+    public ClusterResults calc(ClusterParams params, LuceneFilter process) throws Exception {
         this.params = params;
 
         BooleanQuery query = new BooleanQuery();
-        LuceneFilter process = parent.getProcess(params.corpusType);
-        if (params.corpusType == CorpusType.STANDARD) {
+        if (params.corpusType == CorpusType.MAIN) {
             process.addKorpusTextFilter(query, params.textStandard);
         } else {
             process.addOtherTextFilter(query, params.textUnprocessed);
@@ -44,7 +43,7 @@ public class ClusterServiceImpl {
         process.search(query, SEARCH_BLOCK, new LuceneDriverRead.DocFilter<Void>() {
             @Override
             public Void processDoc(int docID) throws Exception {
-                process(docID);
+                process(docID, process);
                 return null;
             }
         });
@@ -52,8 +51,8 @@ public class ClusterServiceImpl {
         return createResults();
     }
 
-    private void process(int docID) throws Exception {
-        Document doc = parent.getProcess(params.corpusType).getSentence(docID);
+    private void process(int docID, LuceneFilter process) throws Exception {
+        Document doc = process.getSentence(docID);
 
         ResultText text = parent.restoreText(params.corpusType, doc);
 
@@ -105,6 +104,9 @@ public class ClusterServiceImpl {
 
         public Result(WordResult[] w, int pos, int beforeCount, int afterCount) {
             word = w[pos].orig;
+            if (word == null) {
+                word = "";
+            }
             wordsBefore = new String[beforeCount];
             wordsAfter = new String[afterCount];
 

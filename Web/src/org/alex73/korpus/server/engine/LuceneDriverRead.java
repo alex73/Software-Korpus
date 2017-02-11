@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.alex73.korpus.base.TextInfo;
-import org.alex73.korpus.shared.dto.LatestMark;
+import org.alex73.korpus.server.data.LatestMark;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.document.Document;

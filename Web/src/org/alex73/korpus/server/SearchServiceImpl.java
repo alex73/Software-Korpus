@@ -1,55 +1,34 @@
-/**************************************************************************
- Korpus - Corpus Linguistics Software.
-
- Copyright (C) 2013 Aleś Bułojčyk (alex73mail@gmail.com)
-               Home page: https://sourceforge.net/projects/korpus/
-
- This file is part of Korpus.
-
- Korpus is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
-
- Korpus is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
- **************************************************************************/
-
 package org.alex73.korpus.server;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
-import javax.xml.bind.JAXBContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.korpus.base.BelarusianWordNormalizer;
-import org.alex73.korpus.base.GrammarDB2;
-import org.alex73.korpus.base.GrammarFinder;
-import org.alex73.korpus.client.SearchService;
+import org.alex73.korpus.server.data.ClusterParams;
+import org.alex73.korpus.server.data.ClusterResults;
+import org.alex73.korpus.server.data.CorpusType;
+import org.alex73.korpus.server.data.InitialData;
+import org.alex73.korpus.server.data.LatestMark;
+import org.alex73.korpus.server.data.ResultText;
+import org.alex73.korpus.server.data.SearchParams;
+import org.alex73.korpus.server.data.SearchResult;
+import org.alex73.korpus.server.data.SearchResults;
+import org.alex73.korpus.server.data.WordRequest;
+import org.alex73.korpus.server.data.WordResult;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
 import org.alex73.korpus.server.text.BinaryParagraphReader;
-import org.alex73.korpus.shared.dto.ClusterParams;
-import org.alex73.korpus.shared.dto.ClusterResults;
-import org.alex73.korpus.shared.dto.CorpusType;
-import org.alex73.korpus.shared.dto.LatestMark;
-import org.alex73.korpus.shared.dto.ResultText;
-import org.alex73.korpus.shared.dto.SearchParams;
-import org.alex73.korpus.shared.dto.SearchResults;
-import org.alex73.korpus.shared.dto.WordRequest;
-import org.alex73.korpus.shared.dto.WordResult;
 import org.alex73.korpus.text.xml.O;
 import org.alex73.korpus.text.xml.P;
 import org.alex73.korpus.text.xml.S;
@@ -61,109 +40,43 @@ import org.apache.logging.log4j.Logger;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.BooleanQuery;
 
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-
-/**
- * Service for search by corpus documents.
- */
-@SuppressWarnings("serial")
-public class SearchServiceImpl extends RemoteServiceServlet implements SearchService {
-
-    protected static JAXBContext CONTEXT;
-
+@Path("/korpus")
+public class SearchServiceImpl {
     static final Logger LOGGER = LogManager.getLogger(SearchServiceImpl.class);
 
-    private GrammarDB2 gr;
-    private GrammarFinder grFinder;
-
-    public static String dirPrefix = System.getProperty("KORPUS_DIR");
-    LuceneFilter processKorpus;
-    LuceneFilter processOther;
-
-    public SearchServiceImpl() {
-        if (dirPrefix == null) {
-            LOGGER.fatal("KORPUS_DIR is not defined");
-            return;
-        }
-        LOGGER.info("startup");
-        try {
-            gr = GrammarDB2.initializeFromDir(dirPrefix + "/GrammarDB/");
-            grFinder = new GrammarFinder(gr);
-            processKorpus = new LuceneFilter(dirPrefix + "/Korpus-cache/");
-            processOther = new LuceneFilter(dirPrefix + "/Other-cache/");
-        } catch (Throwable ex) {
-            LOGGER.error("startup", ex);
-            throw new ExceptionInInitializerError(ex);
-        }
+    @Context
+    HttpServletRequest request;
+    
+    private KorpusApplication getApp() {
+        return KorpusApplication.instance;
     }
 
-    @Override
-    public void destroy() {
-        LOGGER.info("shutdown");
-        try {
-            processKorpus.close();
-            processOther.close();
-        } catch (Exception ex) {
-            LOGGER.error("shutdown", ex);
-        }
-        super.destroy();
-    }
-
-    protected LuceneFilter getProcess(CorpusType corpusType) {
-        if (corpusType == CorpusType.STANDARD) {
-            return processKorpus;
-        } else {
-            return processOther;
-        }
-    }
-
-    @Override
-    protected void doUnexpectedFailure(Throwable e) {
-        LOGGER.error("UnexpectedFailure", e);
-        super.doUnexpectedFailure(e);
-    }
-
-    @Override
+    @Path("initial")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     public InitialData getInitialData() throws Exception {
-        LOGGER.info(">> getInitialData");
+        LOGGER.info("getInitialData from " + request.getRemoteAddr());
         try {
-            InitialData result = new InitialData();
-
-            Properties props = new Properties();
-            try (InputStream in = new FileInputStream(dirPrefix + "/Korpus-cache/stat.properties")) {
-                props.load(in);
-            }
-            result.authors = Arrays.asList(props.getProperty("authors").split(";"));
-            result.statKorpus = new HashMap<>();
-            for (String k : (Set<String>) (Set) props.keySet()) {
-                if (k.startsWith("texts") || k.startsWith("words")) {
-                    result.statKorpus.put(k, Integer.parseInt(props.getProperty(k)));
-                }
-            }
-
-            props = new Properties();
-            try (InputStream in = new FileInputStream(dirPrefix + "/Other-cache/stat.properties")) {
-                props.load(in);
-            }
-            result.volumes = Arrays.asList(props.getProperty("volumes").split(";"));
-            result.statOther = new HashMap<>();
-            for (String k : (Set<String>) (Set) props.keySet()) {
-                if (k.startsWith("texts") || k.startsWith("words")) {
-                    result.statOther.put(k, Integer.parseInt(props.getProperty(k)));
-                }
-            }
-
-            LOGGER.info("<< getInitialData");
-            return result;
+            return getApp().searchInitial;
         } catch (Exception ex) {
             LOGGER.error("getInitialData", ex);
             throw ex;
         }
     }
 
-    @Override
-    public SearchResult search(final SearchParams params, LatestMark latest) throws Exception {
-        LOGGER.info(">> Request from " + getThreadLocalRequest().getRemoteAddr());
+    public static class SearchRequest {
+        public SearchParams params;
+        public LatestMark latest;
+    }
+
+    @Path("search")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public SearchResult search(SearchRequest rq) throws Exception {
+        LOGGER.info(">> Request from " + request.getRemoteAddr());
+        SearchParams params = rq.params;
+        LatestMark latest = rq.latest;
         for (WordRequest w : params.words) {
             w.word = BelarusianWordNormalizer.normalize(w.word);
         }
@@ -191,7 +104,7 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
 
             BooleanQuery query = new BooleanQuery();
             LuceneFilter process = getProcess(params.corpusType);
-            if (params.corpusType == CorpusType.STANDARD) {
+            if (params.corpusType == CorpusType.MAIN) {
                 process.addKorpusTextFilter(query, params.textStandard);
             } else {
                 process.addOtherTextFilter(query, params.textUnprocessed);
@@ -234,10 +147,13 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
             throw ex;
         }
     }
-
-    @Override
+    
+    @Path("cluster")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public ClusterResults calculateClusters(ClusterParams params) throws Exception {
-        LOGGER.info(">> Request clusters from " + getThreadLocalRequest().getRemoteAddr());
+        LOGGER.info(">> Request clusters from " + request.getRemoteAddr());
         params.word.word = BelarusianWordNormalizer.normalize(params.word.word);
         try {
             WordsDetailsChecks.reset();
@@ -252,7 +168,8 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
                 }
             }
 
-            ClusterResults res = new ClusterServiceImpl(this).calc(params);
+            LuceneFilter corpusFilter = getProcess(params.corpusType);
+            ClusterResults res = new ClusterServiceImpl(this).calc(params, corpusFilter);
             LOGGER.info("<< Result clusters");
             return res;
         } catch (Throwable ex) {
@@ -261,8 +178,18 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         }
     }
 
-    @Override
-    public SearchResults[] getSentences(SearchParams params, int[] list) throws Exception {
+    public static class SentencesRequest {
+        public SearchParams params;
+        public int[] list;
+    }
+
+    @Path("sentences")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public SearchResults[] getSentences(SentencesRequest rq) throws Exception {
+        SearchParams params = rq.params;
+        int[] list = rq.list;
         for (WordRequest w : params.words) {
             w.word = BelarusianWordNormalizer.normalize(w.word);
         }
@@ -292,21 +219,18 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
         }
     }
 
+   
+
     protected void restoreTextInfo(SearchParams params, Document doc, SearchResults result) throws Exception {
-        if (params.corpusType == CorpusType.STANDARD) {
-            result.doc = processKorpus.getKorpusTextInfo(doc);
+        if (params.corpusType == CorpusType.MAIN) {
+            result.doc = getApp().processKorpus.getKorpusTextInfo(doc);
         } else {
-            result.docOther = processOther.getOtherInfo(doc);
+            result.docOther = getApp().processOther.getOtherInfo(doc);
         }
     }
 
     protected ResultText restoreText(CorpusType corpusType, Document doc) throws Exception {
-        LuceneFilter process;
-        if (corpusType == CorpusType.STANDARD) {
-            process = processKorpus;
-        } else {
-            process = processOther;
-        }
+        LuceneFilter process=getProcess(corpusType);
 
         byte[] xml = process.getXML(doc);
 
@@ -322,7 +246,8 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
                 WordResult rsw = new WordResult();
                 if (o instanceof W) {
                     rsw.orig = ((W) o).getValue();
-                    rsw.normalized =  BelarusianWordNormalizer.normalize(rsw.orig); // TODO may be store instead convert each time ?
+                    rsw.normalized = BelarusianWordNormalizer.normalize(rsw.orig); // TODO may be store instead convert
+                                                                                   // each time ?
                     rsw.lemma = ((W) o).getLemma();
                     rsw.cat = ((W) o).getCat();
                     rsw.isWord = true;
@@ -348,9 +273,17 @@ public class SearchServiceImpl extends RemoteServiceServlet implements SearchSer
     private List<String> findAllLemmas(String word) {
         word = BelarusianWordNormalizer.normalize(word);
         Set<String> result = new HashSet<>();
-        for (Paradigm p : grFinder.getParadigmsByForm(word)) {
+        for (Paradigm p : getApp().grFinder.getParadigmsByForm(word)) {
             result.add(p.getLemma());
         }
         return new ArrayList<>(result);
+    }
+
+    private LuceneFilter getProcess(CorpusType corpusType) {
+        if (corpusType == CorpusType.MAIN) {
+            return getApp().processKorpus;
+        } else {
+            return getApp().processOther;
+        }
     }
 }

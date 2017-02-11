@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<svg xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:svg="http://www.w3.org/2000/svg" id="svg2" viewBox="0 0 230 300" version="1.1">
+  <title id="title3861">Exercise Book</title>
+  <g id="layer1" transform="translate(0 -752.36)">
+    <g id="g4076">
+      <rect id="rect2993" stroke-linejoin="round" transform="matrix(.99963 -.027080 .027080 .99963 0 0)" height="266.04" width="198.03" stroke="#000" stroke-linecap="round" y="767.92" x="-7.5172" stroke-width="3.5433" fill="#8e1818"/>
+      <path id="rect2993-3-8-1" stroke-linejoin="round" d="m13.281 768.1 193.96 0.13812 7.2045 265.94-193.96-0.1381z" stroke="#c3c3c3" stroke-linecap="round" fill="#fff"/>
+      <path id="rect2993-3-8-0" stroke-linejoin="round" d="m12.281 769.6 192.46 0.20939 7.5616 265.94-192.81-0.2093z" stroke="#c3c3c3" stroke-linecap="round" fill="#fff"/>
+      <path id="rect2993-3-8" stroke-linejoin="round" d="m11.281 770.1 190.96 1.1383 7.2045 265.94-190.96-1.1383z" stroke="#c3c3c3" stroke-linecap="round" fill="#fff"/>
+      <path id="rect2993-3" stroke-linejoin="round" d="m12.179 767.37 186.88 2.6385 7.2045 269.87-189.03-4.5668z" stroke="#000" stroke-linecap="round" stroke-width="3.543" fill="#c62020"/>
+      <path id="rect3825" stroke-linejoin="round" d="m77.624 803.51c17.753 0.1667 34.791 0.33338 53.258-0.21422 21.798-0.14273 26.517-3.6667 27.004 17.949l0.75011 33.255c1.4603 19.352-6.9598 16.489-26.129 16.127-18.859-0.26357-36.645-0.42775-53.365-0.28586-21.544-0.0488-25.996 0.52216-26.647-17.592-0.33339-10.918-0.66677-21.837-1.0002-32.755-0.94649-19.179 7.1698-16.663 26.129-16.485z" stroke="#696969" stroke-linecap="round" stroke-width="2" fill="#fff"/>
+      <path id="path3830" stroke="#000" stroke-width="1px" fill="none" d="m64.711 824.98 80.656 0.64301"/>
+      <path id="path3832" stroke="#000" stroke-width="1px" fill="none" d="m64.068 840.06 80.798 0.57173"/>
+      <path id="path3834" stroke="#000" stroke-width="1px" fill="none" d="m64.64 853.91 80.726 0.71467"/>
+    </g>
+  </g>
+  <metadata>
+    <rdf:RDF>
+      <cc:Work>
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+        <cc:license rdf:resource="http://creativecommons.org/licenses/publicdomain/"/>
+        <dc:publisher>
+          <cc:Agent rdf:about="http://openclipart.org/">
+            <dc:title>Openclipart</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:title>Exercise Book</dc:title>
+        <dc:date>2013-03-10T05:18:47</dc:date>
+        <dc:description>A exercise book</dc:description>
+        <dc:source>http://openclipart.org/detail/175643/exercise-book-by-frankes-175643</dc:source>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>frankes</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>Heft</rdf:li>
+            <rdf:li>Schule</rdf:li>
+            <rdf:li>boolets</rdf:li>
+            <rdf:li>clip art</rdf:li>
+            <rdf:li>clipart</rdf:li>
+            <rdf:li>education</rdf:li>
+            <rdf:li>exercise book</rdf:li>
+            <rdf:li>school</rdf:li>
+            <rdf:li>unterricht</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+      </cc:Work>
+      <cc:License rdf:about="http://creativecommons.org/licenses/publicdomain/">
+        <cc:permits rdf:resource="http://creativecommons.org/ns#Reproduction"/>
+        <cc:permits rdf:resource="http://creativecommons.org/ns#Distribution"/>
+        <cc:permits rdf:resource="http://creativecommons.org/ns#DerivativeWorks"/>
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+</svg>

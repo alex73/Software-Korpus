@@ -50,7 +50,8 @@ public class PrepareCache2 {
         // main texts corpus
         luceneOpen("Korpus-cache/");
         textQueueProcessor = new TextQueueProcessor();
-        new KorpusFilesIterator(errors, processTextKorpus).iterate("Korpus-texts/");
+        new KorpusFilesIterator(errors, processTextKorpus).iterate("Korpus-texts/A/");
+        new KorpusFilesIterator(errors, processTextKorpus).iterate("Korpus-texts/B/");
         textQueueProcessor.fin();
         luceneClose();
 
