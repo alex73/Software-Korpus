@@ -6,6 +6,11 @@ body {
   padding-top: 70px;
   font-family: 'Roboto';
 }
+@media (min-width: 768px) and (max-width: 991px) {
+  body {
+    padding-top: 121px;
+  }
+}
 
 .navbar-default .navbar-brand {
   font-family: 'Lobster', cursive;
@@ -20,7 +25,7 @@ body {
 .text-left {
 	text-align: left;
 }
-.text-venter {
+.text-center {
 	text-align: center;
 }
 .text-right {
@@ -52,4 +57,7 @@ body {
 table.center {
 	margin-left:auto; 
 	margin-right:auto;
+}
+table th {
+    text-align: center;
 }
