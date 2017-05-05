@@ -52,6 +52,7 @@ export class OutputSearch {
     this.popoverBiblioRef.nativeElement.style.left = (spanPlace.left+spanPlace.width/2-popoverSize.width/2)+'px';
     this.popoverBiblioRef.nativeElement.style.visibility = 'visible';
     this.popoverBiblioRef.nativeElement.focus();
+    return false;
   }
   leave() {
     this.popoverWordRef.nativeElement.style.visibility = 'hidden';

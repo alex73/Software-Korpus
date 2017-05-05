@@ -139,7 +139,7 @@ public class GrammarDBSaver {
     public static Locale BE = new Locale("be");
     public static Collator BEL = Collator.getInstance(BE);
 
-    static Comparator<Paradigm> COMPARATOR = new Comparator<Paradigm>() {
+    public static Comparator<Paradigm> COMPARATOR = new Comparator<Paradigm>() {
         @Override
         public int compare(Paradigm p1, Paradigm p2) {
             String w1 = StressUtils.unstress(p1.getLemma().toLowerCase(BE));
