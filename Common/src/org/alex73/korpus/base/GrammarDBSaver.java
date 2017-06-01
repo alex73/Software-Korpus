@@ -1,5 +1,7 @@
 package org.alex73.korpus.base;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.OutputStream;
 import java.text.Collator;
@@ -11,6 +13,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 
 import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.FormOptions;
@@ -73,6 +76,15 @@ public class GrammarDBSaver {
         Marshaller m = GrammarDB2.getContext().createMarshaller();
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         m.marshal(list, out);
+    }
+
+    public static Paradigm cloneParadigm(Paradigm p) throws Exception {
+        Marshaller m = GrammarDB2.getContext().createMarshaller();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        m.marshal(p, out);
+        Unmarshaller unm = GrammarDB2.getContext().createUnmarshaller();
+        Paradigm r = (Paradigm) unm.unmarshal(new ByteArrayInputStream(out.toByteArray()));
+        return r;
     }
 
     /**
