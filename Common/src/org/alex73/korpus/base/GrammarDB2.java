@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -69,20 +70,21 @@ public class GrammarDB2 {
     }
 
     public static GrammarDB2 initializeFromDir(String dir) throws Exception {
-        GrammarDB2 r;
         File[] forLoads = getFilesForLoad(new File(dir));
-        File cacheFile = new File(dir, CACHE_FILE);
-        if (cacheExist(new File(dir), cacheFile, forLoads)) {
-            long be = System.currentTimeMillis();
-            try (Input input = new Input(new FileInputStream(cacheFile), 65536)) {
-                r = loadFromCache(input);
-            }
-            long af = System.currentTimeMillis();
-            System.out.println("GrammarDB deserialization time: " + (af - be) + "ms");
-        } else {
-            r = new GrammarDB2(new File(dir), forLoads, cacheFile);
-        }
+        GrammarDB2 r = new GrammarDB2(new File(dir), forLoads);
         return r;
+    }
+
+    public void makeCache(String dir) throws IOException {
+        File cacheFile = new File(dir, CACHE_FILE);
+
+        long be = System.currentTimeMillis();
+        Kryo kryo = new Kryo();
+        try (Output output = new Output(new FileOutputStream(cacheFile), 65536)) {
+            kryo.writeObject(output, this);
+        }
+        long af = System.currentTimeMillis();
+        System.out.println("GrammarDB serialization time: " + (af - be) + "ms");
     }
 
     /**
@@ -107,30 +109,6 @@ public class GrammarDB2 {
          * return n1.compareTo(n2); } } });
          */
         return result;
-    }
-
-    public static void removeCache(File dir) throws Exception {
-        File cacheFile = new File(dir, CACHE_FILE);
-        if (cacheFile.exists()) {
-            if (!cacheFile.delete()) {
-                throw new Exception("Can't remove cache file");
-            }
-        }
-    }
-
-    /**
-     * Returns true if cache file exist and last modified equals to latest xml
-     * file.
-     */
-    private static boolean cacheExist(File dir, File cacheFile, File[] filesForLoad) throws Exception {
-        if (!cacheFile.exists()) {
-            return false;
-        }
-        long latest = 0;
-        for (File f : filesForLoad) {
-            latest = Math.max(latest, f.lastModified());
-        }
-        return cacheFile.lastModified() == latest;
     }
 
     private static GrammarDB2 loadFromCache(Input input) throws Exception {
@@ -217,7 +195,7 @@ public class GrammarDB2 {
     /**
      * Read xml files for initialize.
      */
-    private GrammarDB2(File dir, File[] forLoads, File cacheFile) throws Exception {
+    private GrammarDB2(File dir, File[] forLoads) throws Exception {
         long be = System.currentTimeMillis();
 
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(16);
@@ -247,15 +225,6 @@ public class GrammarDB2 {
         }
         long af = System.currentTimeMillis();
         System.out.println("GrammarDB loading time: " + (af - be) + "ms");
-
-        be = System.currentTimeMillis();
-        Kryo kryo = new Kryo();
-        try (Output output = new Output(new FileOutputStream(cacheFile), 65536)) {
-            kryo.writeObject(output, this);
-        }
-        cacheFile.setLastModified(latest);
-        af = System.currentTimeMillis();
-        System.out.println("GrammarDB serialization time: " + (af - be) + "ms");
     }
 
     public Theme getThemes(String grammar) {

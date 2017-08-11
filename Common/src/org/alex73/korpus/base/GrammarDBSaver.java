@@ -72,6 +72,10 @@ public class GrammarDBSaver {
         }
     }
 
+    public static void sortList(List<Paradigm> ps) {
+        Collections.sort(ps, COMPARATOR);
+    }
+
     public static void store(OutputStream out, Wordlist list) throws Exception {
         Marshaller m = GrammarDB2.getContext().createMarshaller();
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
@@ -154,6 +158,9 @@ public class GrammarDBSaver {
     public static Comparator<Paradigm> COMPARATOR = new Comparator<Paradigm>() {
         @Override
         public int compare(Paradigm p1, Paradigm p2) {
+            if (p1.getLemma().equals("абго+ртвальны")&&p2.getLemma().equals("абго+ртвальны")) {
+                System.out.println();
+            }
             String w1 = StressUtils.unstress(p1.getLemma().toLowerCase(BE));
             String w2 = StressUtils.unstress(p2.getLemma().toLowerCase(BE));
             int r = BEL.compare(w1.toLowerCase(), w2.toLowerCase());
