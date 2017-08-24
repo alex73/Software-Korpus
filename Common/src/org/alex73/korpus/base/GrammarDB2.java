@@ -127,7 +127,7 @@ public class GrammarDB2 {
         }
     }
 
-    public void addThemesFile(File file) throws Exception {
+    public synchronized void addThemesFile(File file) throws Exception {
         themes = new TreeMap<>();
         BOMBufferedReader rd = new BOMBufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
         String s;
@@ -150,6 +150,8 @@ public class GrammarDB2 {
         p.setLemma(optimizeString(p.getLemma()));
         p.setTag(optimizeString(p.getTag()));
         for (Variant v : p.getVariant()) {
+            v.setLemma(optimizeString(v.getLemma()));
+            v.setPravapis(optimizeString(v.getPravapis()));
             for (Form f : v.getForm()) {
                 f.setTag(optimizeString(f.getTag()));
                 f.setValue(optimizeString(f.getValue()));
@@ -180,7 +182,9 @@ public class GrammarDB2 {
             for (Paradigm p : words.getParadigm()) {
                 optimize(p);
             }
-            allParadigms.addAll(words.getParadigm());
+            synchronized (this) {
+                allParadigms.addAll(words.getParadigm());
+            }
         } finally {
             in.close();
         }
