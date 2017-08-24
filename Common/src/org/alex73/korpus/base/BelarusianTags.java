@@ -61,7 +61,7 @@ public class BelarusianTags {
         vyklicnik(root);
         pabocnaje(root);
         predykatyu(root);
-        znaki(root);
+        abrev(root);
 
         checkParadigmMarks();
     }
@@ -352,16 +352,7 @@ public class BelarusianTags {
         t.add("Часціна => W:Прэдыкатыў").latestInParadigm();
     }
 
-    private void znaki(TagLetter t) {
-        t = t.add("Часціна => K:Знак прыпынку");
-        t.add("Знак => K:,;R:.;E:!;T:...;2:двухкроп'е;3:трохкроп'е;A:пытальнік;O:іншае").latestInParadigm();
-        TagLetter q = t.add("Знак => Q:двукоссе");
-        q.add("Двукоссе => L:Левае;R:Правае;O:адчыняе;C:зачыняе;Q:простае").latestInParadigm();
-        TagLetter v = t.add("Знак => V:квадратныя дужкі");
-        v.add("Двукоссе => O:адчыняе;C:зачыняе").latestInParadigm();
-        TagLetter m = t.add("Знак => M:мінус");
-        m.add("Мінус => 1:1;2:2").latestInParadigm();
-        TagLetter s = t.add("Знак => D:дужкі");
-        s.add("Дужкі => O:Левая;C:Правая").latestInParadigm();
+    private void abrev(TagLetter t) {
+        t = t.add("Часціна => K:Абрэвіятуры").latestInParadigm();
     }
 }
