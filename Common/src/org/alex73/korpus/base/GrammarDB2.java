@@ -168,7 +168,7 @@ public class GrammarDB2 {
         return s == null ? null : s.intern();
     }
 
-    private void addXMLFile(File file) throws Exception {
+    public void addXMLFile(File file) throws Exception {
         Unmarshaller unm = getContext().createUnmarshaller();
 
         InputStream in;

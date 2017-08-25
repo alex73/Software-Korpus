@@ -18,6 +18,7 @@ import javax.xml.bind.Unmarshaller;
 import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.FormOptions;
 import org.alex73.corpus.paradigm.Paradigm;
+import org.alex73.corpus.paradigm.Variant;
 import org.alex73.corpus.paradigm.Wordlist;
 import org.alex73.korpus.utils.StressUtils;
 
@@ -88,6 +89,14 @@ public class GrammarDBSaver {
         m.marshal(p, out);
         Unmarshaller unm = GrammarDB2.getContext().createUnmarshaller();
         Paradigm r = (Paradigm) unm.unmarshal(new ByteArrayInputStream(out.toByteArray()));
+        return r;
+    }
+    public static Variant cloneVariant(Variant v) throws Exception {
+        Marshaller m = GrammarDB2.getContext().createMarshaller();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        m.marshal(v, out);
+        Unmarshaller unm = GrammarDB2.getContext().createUnmarshaller();
+        Variant r = (Variant) unm.unmarshal(new ByteArrayInputStream(out.toByteArray()));
         return r;
     }
 
