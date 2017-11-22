@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,13 +48,16 @@ public class PrepareCache2 {
         GrammarDB2 gr = GrammarDB2.initializeFromDir("GrammarDB");
         grFiller = new GrammarFiller(new GrammarFinder(gr));
 
+        FileUtils.writeStringToFile(new File("1"), new Date().toString());
         // main texts corpus
         luceneOpen("Korpus-cache/");
         textQueueProcessor = new TextQueueProcessor();
         new KorpusFilesIterator(errors, processTextKorpus).iterate("Korpus-texts/A/");
+        FileUtils.writeStringToFile(new File("2"), new Date().toString());
         new KorpusFilesIterator(errors, processTextKorpus).iterate("Korpus-texts/B/");
         textQueueProcessor.fin();
         luceneClose();
+        FileUtils.writeStringToFile(new File("3"), new Date().toString());
 
         for (StatInfo si : korpusParts.values()) {
             si.write(korpusStat); // - don't output details yet
@@ -69,6 +73,7 @@ public class PrepareCache2 {
             korpusStat.setProperty("authors", "");
         }
         writeStat("Korpus-cache/", korpusStat);
+        FileUtils.writeStringToFile(new File("4"), new Date().toString());
 
         // other trash corpus
         luceneOpen("Other-cache/");
@@ -88,6 +93,7 @@ public class PrepareCache2 {
             otherStat.setProperty("volumes", "");
         }
         writeStat("Other-cache/", otherStat);
+        FileUtils.writeStringToFile(new File("5"), new Date().toString());
 
         List<String> errorNames = new ArrayList<>(errorsCount.keySet());
         Collections.sort(errorNames, new Comparator<String>() {

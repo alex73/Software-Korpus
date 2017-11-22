@@ -4,7 +4,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Korpus-Common"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Korpus-Web"/>
-	<classpathentry exported="true" kind="lib" path="lib/xz-1.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-compress-1.6-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/commons-compress-1.15.jar"/>
+	<classpathentry kind="lib" path="lib/xz-1.6.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
