@@ -26,8 +26,6 @@ import java.util.Locale;
 
 /**
  * Class for word normalization, i.e. remove stress and upper case.
- * 
- * This class caches responses for better performance.
  */
 public class BelarusianWordNormalizer {
     public static final Locale BEL = new Locale("be");

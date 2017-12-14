@@ -15,8 +15,7 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.alex73.korpus.base.GrammarDB2;
-import org.alex73.korpus.base.GrammarFiller;
-import org.alex73.korpus.base.GrammarFinder;
+import org.alex73.korpus.base.GrammarFiller2;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.server.engine.LuceneDriverWrite;
 import org.alex73.korpus.server.text.BinaryParagraphWriter;
@@ -28,7 +27,7 @@ import org.apache.commons.io.FileUtils;
 
 public class PrepareCache2 {
     static final Object WRITER_LOCK = new Object();
-    static GrammarFiller grFiller;
+    static GrammarFiller2 grFiller;
     static LuceneDriverWrite lucene;
 
     static TextQueueProcessor textQueueProcessor;
@@ -46,7 +45,7 @@ public class PrepareCache2 {
     public static void main(String[] args) throws Exception {
         System.out.println("Load GrammarDB...");
         GrammarDB2 gr = GrammarDB2.initializeFromDir("GrammarDB");
-        grFiller = new GrammarFiller(new GrammarFinder(gr));
+        grFiller = new GrammarFiller2(gr);
 
         FileUtils.writeStringToFile(new File("1"), new Date().toString());
         // main texts corpus

@@ -9,14 +9,9 @@ import java.util.TreeSet;
 import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
-import org.alex73.korpus.text.xml.InlineTag;
-import org.alex73.korpus.text.xml.O;
 import org.alex73.korpus.text.xml.P;
-import org.alex73.korpus.text.xml.S;
-import org.alex73.korpus.text.xml.Se;
 import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.XMLText;
-import org.alex73.korpus.text.xml.Z;
 import org.alex73.korpus.utils.StressUtils;
 
 public class GrammarFiller {
@@ -28,8 +23,7 @@ public class GrammarFiller {
         this.fi = fi;
     }
 
-    private Paradigm[][] getParadigmsByWord(String w) {
-        String word = BelarusianWordNormalizer.normalize(w);
+    private Paradigm[][] getParadigmsByWord(String word) {
         Paradigm[][] ps = new Paradigm[fi.length][];
         for (int i = 0; i < fi.length; i++) {
             ps[i] = fi[i].getParadigmsByForm(word);
