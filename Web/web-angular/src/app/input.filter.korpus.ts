@@ -21,7 +21,6 @@ export class InputFilterKorpus {
   }
 
   groupChange(p) {
-    console.log(p);
     for (let k of this.serviceSearch.initial.styleGenres[p]) {
       this.selectedItems[p+'/'+k] = this.selectedGroups[p];
     }
@@ -49,8 +48,12 @@ export class InputFilterKorpus {
   styleModalOpen() {
     this.selectedGroups = {};
     this.selectedItems = {};
-    for (let v of this.serviceSearch.inputTextStandard.stylegenres) {
-      this.selectedItems[v] = true;
+    if (this.serviceSearch.inputTextStandard.stylegenres.length > 0) {
+      for (let v of this.serviceSearch.inputTextStandard.stylegenres) {
+        this.selectedItems[v] = true;
+      }
+    } else {
+      this.all(true);
     }
     this.styleModal.show();
   }

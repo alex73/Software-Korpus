@@ -23,20 +23,12 @@ public class GrammarFiller2 {
                 v.getForm().forEach(f -> {
                     String formTag = p.getTag() + f.getTag();
                     String orig = BelarusianWordNormalizer.normalize(f.getValue());
-                    synchronized (lemmas) {
-                        add(lemmas, orig, p.getLemma());
-                    }
-                    synchronized (tags) {
-                        add(tags, orig, formTag);
-                    }
+                    add(lemmas, orig, p.getLemma());
+                    add(tags, orig, formTag);
                     String s = StressUtils.unstress(orig);
                     if (!s.equals(orig)) {
-                        synchronized (lemmas) {
-                            add(lemmas, s, p.getLemma());
-                        }
-                        synchronized (tags) {
-                            add(tags, s, formTag);
-                        }
+                        add(lemmas, s, p.getLemma());
+                        add(tags, s, formTag);
                     }
                 });
             });
@@ -48,23 +40,25 @@ public class GrammarFiller2 {
     static Pattern SEP = Pattern.compile("_");
 
     private void add(Map<String, String> map, String key, String value) {
-        String old = map.get(key);
-        if (old == null) {
-            map.put(key, value);
-        } else {
-            String[] oldvs = SEP.split(old);
-            for (String o : oldvs) {
-                if (o.equals(value)) {
-                    return;
+        synchronized (map) {
+            String old = map.get(key);
+            if (old == null) {
+                map.put(key, value);
+            } else {
+                String[] oldvs = SEP.split(old);
+                for (String o : oldvs) {
+                    if (o.equals(value)) {
+                        return;
+                    }
                 }
+                old += '_' + value;
+                map.put(key, old);
             }
-            old += '_' + value;
-            map.put(key, old);
         }
     }
 
     public void fill(XMLText doc) {
-        doc.getContent().getPOrTagOrPoetry().parallelStream().forEach(op -> {
+        doc.getContent().getPOrTagOrPoetry().forEach(op -> {
             if (op instanceof P) {
                 ((P) op).getSe().forEach(s -> {
                     s.getWOrSOrZ().forEach(ow -> {

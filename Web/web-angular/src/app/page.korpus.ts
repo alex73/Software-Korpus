@@ -17,12 +17,8 @@ export class PageKorpus {
   @ViewChild('divInputSearch')  divInputSearchRef:ElementRef;
   @ViewChild('divInputKwic')    divInputKwicRef:ElementRef;
   @ViewChild('divInputCluster') divInputClusterRef:ElementRef;
-  
+
     public isCollapsed: boolean = true;
-  public c() {
-    console.log('zzzz');
-  }
-  
 
   constructor (private serviceSearch: ServiceSearch) {
     this.serviceSearch.minimizeSearch = () => {

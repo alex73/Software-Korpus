@@ -43,6 +43,7 @@ public class PrepareCache2 {
     static volatile Exception exception;
 
     public static void main(String[] args) throws Exception {
+        Thread.currentThread().setName("Main parsing thread");
         System.out.println("Load GrammarDB...");
         GrammarDB2 gr = GrammarDB2.initializeFromDir("GrammarDB");
         grFiller = new GrammarFiller2(gr);
