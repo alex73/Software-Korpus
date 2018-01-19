@@ -88,18 +88,6 @@ public class BelarusianTags {
         }
     }
 
-    public char getValueOfGroup(String code, String group) {
-        TagLetter tags = root;
-        for (char c : code.toCharArray()) {
-            OneLetterInfo li = tags.getLetterInfo(c);
-            if (group.equals(li.groupName)) {
-                return li.letter;
-            }
-            tags = tags.next(c);
-        }
-        return 0;
-    }
-
     /**
      * Ці правільны тэг у парадыгме ? latestInParadigm==true
      */
@@ -183,15 +171,33 @@ public class BelarusianTags {
         for (char c : codeBegin.toCharArray()) {
             String descr = tags.getLetterDescription(c);
             if (descr == null) {
-                throw new RuntimeException("Error code: " + codeBegin);
+                throw new RuntimeException("Wrong tag: " + codeBegin);
             }
             tags = tags.next(c);
             if (tags == null) {
-                throw new RuntimeException("Error code: " + codeBegin);
+                throw new RuntimeException("Wrong tag: " + codeBegin);
             }
             result.add(descr);
         }
         return result;
+    }
+
+    public char getValueOfGroup(String code, String group) {
+        TagLetter tags = root;
+        for (char c : code.toCharArray()) {
+            OneLetterInfo li = tags.getLetterInfo(c);
+            if (li == null) {
+                throw new RuntimeException("Wrong tag: " + code);
+            }
+            if (group.equals(li.groupName)) {
+                return li.letter;
+            }
+            tags = tags.next(c);
+            if (tags == null) {
+                throw new RuntimeException("Wrong tag: " + code);
+            }
+        }
+        return 0;
     }
 
     private void nazounik(TagLetter t) {
