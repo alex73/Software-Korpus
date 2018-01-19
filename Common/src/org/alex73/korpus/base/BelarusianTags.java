@@ -282,7 +282,6 @@ public class BelarusianTags {
 
         TagLetter casRL = casR.add("Асоба => 1:першая;2:другая;3:трэцяя;0:безасабовы");
         casR.add("Дзеепрыслоўе => G:дзеепрыслоўе");
-        TagLetter casML = casM.add("Асоба => 1:першая;2:другая;3:трэцяя;0:безасабовы;X:???????");
         casM.add("Дзеепрыслоўе => G:дзеепрыслоўе");
         TagLetter casOL = casO.add("Асоба => 1:першая;2:другая;3:трэцяя;0:безасабовы");
         casO.add("Дзеепрыслоўе => G:дзеепрыслоўе");
@@ -290,10 +289,11 @@ public class BelarusianTags {
         zah.add("Дзеепрыслоўе => G:дзеепрыслоўе");
 
         casRL = casRL.add("Лік => S:адзіночны;P:множны");
-        casML = casML.add("Лік => S:адзіночны;P:множны");
         casOL = casOL.add("Лік => S:адзіночны;P:множны");
         zah = zah.add("Лік => S:адзіночны;P:множны");
-        casML = casML.add("Род => M:мужчынскі;F:жаночы;N:ніякі;X:???????");
+
+        casM = casM.add("Род => M:мужчынскі;F:жаночы;N:ніякі;X:???????");
+        casM = casM.add("Лік => S:адзіночны;P:множны");
     }
 
     private void dziejeprymietnik(TagLetter t) {
