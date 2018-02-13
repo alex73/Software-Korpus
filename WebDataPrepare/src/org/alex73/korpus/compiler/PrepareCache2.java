@@ -74,6 +74,8 @@ public class PrepareCache2 {
         }
         writeStat("Korpus-cache/", korpusStat);
         FileUtils.writeStringToFile(new File("4"), new Date().toString());
+        
+        StatProcessing.write("Korpus-cache/");
 
         // other trash corpus
         luceneOpen("Other-cache/");
@@ -153,6 +155,7 @@ public class PrepareCache2 {
             } else {
                 addKorpusStat("_", wc);
             }
+            StatProcessing.add(doc);
 
             synchronized (WRITER_LOCK) {
                 lucene.setTextInfo(textInfo);
@@ -167,6 +170,7 @@ public class PrepareCache2 {
         public void process(XMLText doc) throws Exception {
             grFiller.fill(doc);
             int wc = wordsCount(doc);
+            StatProcessing.add(doc);
 
             otherTotal.addText(wc);
             otherVolumes.add("kamunikat.org");
