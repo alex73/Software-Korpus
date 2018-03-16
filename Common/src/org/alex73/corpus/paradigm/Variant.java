@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element ref="{}Form" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="pravapis" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="id" type="{}latin_char" />
  *       &lt;attribute name="lemma" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="type" type="{}VariantType" />
  *     &lt;/restriction>
@@ -52,6 +53,8 @@ public class Variant {
     protected List<Form> form;
     @XmlAttribute(name = "pravapis")
     protected String pravapis;
+    @XmlAttribute(name = "id")
+    protected String id;
     @XmlAttribute(name = "lemma", required = true)
     protected String lemma;
     @XmlAttribute(name = "type")
@@ -166,6 +169,30 @@ public class Variant {
      */
     public void setPravapis(String value) {
         this.pravapis = value;
+    }
+
+    /**
+     * Gets the value of the id property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Sets the value of the id property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setId(String value) {
+        this.id = value;
     }
 
     /**

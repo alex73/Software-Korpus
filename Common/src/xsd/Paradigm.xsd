@@ -139,6 +139,7 @@
           <xs:documentation>Правапіс: A1933,A1957,A2008,T1929,K2005,NIEST</xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="id" type="latin_char" use="optional"/>
       <xs:attribute name="lemma" type="xs:string" use="required" />
       <xs:attribute name="type" type="VariantType" use="optional" />
     </xs:complexType>
@@ -198,4 +199,9 @@
       </xs:simpleContent>
     </xs:complexType>
   </xs:element>
+  <xs:simpleType name="latin_char">
+      <xs:restriction base="xs:string">
+        <xs:pattern value="[a-z]"/>
+      </xs:restriction>
+  </xs:simpleType>
 </xs:schema>
