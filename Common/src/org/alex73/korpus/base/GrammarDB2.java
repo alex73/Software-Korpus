@@ -71,7 +71,12 @@ public class GrammarDB2 {
 
     public static GrammarDB2 initializeFromDir(String dir) throws Exception {
         File[] forLoads = getFilesForLoad(new File(dir));
-        GrammarDB2 r = new GrammarDB2(new File(dir), forLoads);
+        GrammarDB2 r = new GrammarDB2(forLoads);
+        return r;
+    }
+
+    public static GrammarDB2 initializeFromFile(File file) throws Exception {
+        GrammarDB2 r = new GrammarDB2(file);
         return r;
     }
 
@@ -199,7 +204,7 @@ public class GrammarDB2 {
     /**
      * Read xml files for initialize.
      */
-    private GrammarDB2(File dir, File[] forLoads) throws Exception {
+    private GrammarDB2(File... forLoads) throws Exception {
         long be = System.currentTimeMillis();
 
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(16);
