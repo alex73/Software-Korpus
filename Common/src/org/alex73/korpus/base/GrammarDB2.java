@@ -229,7 +229,7 @@ public class GrammarDB2 {
             });
         }
         executor.shutdown();
-        if (!executor.awaitTermination(2, TimeUnit.MINUTES)) {
+        if (!executor.awaitTermination(10, TimeUnit.MINUTES)) {
             throw new Exception("Load GrammarDB2 timeout");
         }
         long af = System.currentTimeMillis();
