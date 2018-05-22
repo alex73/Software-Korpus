@@ -10,9 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.base.GrammarFiller2;
@@ -21,7 +18,6 @@ import org.alex73.korpus.server.engine.LuceneDriverWrite;
 import org.alex73.korpus.server.text.BinaryParagraphWriter;
 import org.alex73.korpus.text.parser.IProcess;
 import org.alex73.korpus.text.xml.P;
-import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.XMLText;
 import org.apache.commons.io.FileUtils;
 
@@ -31,15 +27,9 @@ public class PrepareCache2 {
     static LuceneDriverWrite lucene;
 
     static TextQueueProcessor textQueueProcessor;
-    static Set<String> korpusAuthors = new TreeSet<>();
-    static Properties korpusStat = new Properties();
-    static Map<String, StatInfo> korpusParts = new HashMap<>();
-    static StatInfo korpusTotal = new StatInfo("");
-
     static OtherQueueProcessor otherQueueProcessor;
-    static Properties otherStat = new Properties();
-    static StatInfo otherTotal = new StatInfo("");
-    static Set<String> otherVolumes = new TreeSet<>();
+    static StatProcessing textStat = new StatProcessing();
+    static StatProcessing otherStat = new StatProcessing();
     static volatile Exception exception;
 
     public static void main(String[] args) throws Exception {
@@ -57,25 +47,8 @@ public class PrepareCache2 {
         new KorpusFilesIterator(errors, processTextKorpus).iterate("Korpus-texts/B/");
         textQueueProcessor.fin();
         luceneClose();
+        textStat.write("Korpus-cache/");
         FileUtils.writeStringToFile(new File("3"), new Date().toString());
-
-        for (StatInfo si : korpusParts.values()) {
-            si.write(korpusStat); // - don't output details yet
-        }
-        korpusTotal.write(korpusStat);
-        String authorsstr = "";
-        for (String s : korpusAuthors) {
-            authorsstr += ";" + s;
-        }
-        if (!korpusAuthors.isEmpty()) {
-            korpusStat.setProperty("authors", authorsstr.substring(1));
-        } else {
-            korpusStat.setProperty("authors", "");
-        }
-        writeStat("Korpus-cache/", korpusStat);
-        FileUtils.writeStringToFile(new File("4"), new Date().toString());
-        
-        StatProcessing.write("Korpus-cache/");
 
         // other trash corpus
         luceneOpen("Other-cache/");
@@ -83,19 +56,8 @@ public class PrepareCache2 {
         new OtherFilesIterator(errors, processOtherKorpus).iterate("Other-texts/");
         otherQueueProcessor.fin();
         luceneClose();
-
-        otherTotal.write(otherStat);
-        String volumesstr = "";
-        for (String s : otherVolumes) {
-            volumesstr += ";" + s;
-        }
-        if (!volumesstr.isEmpty()) {
-            otherStat.setProperty("volumes", volumesstr.substring(1));
-        } else {
-            otherStat.setProperty("volumes", "");
-        }
-        writeStat("Other-cache/", otherStat);
-        FileUtils.writeStringToFile(new File("5"), new Date().toString());
+        otherStat.write("Other-cache/");
+        FileUtils.writeStringToFile(new File("4"), new Date().toString());
 
         List<String> errorNames = new ArrayList<>(errorsCount.keySet());
         Collections.sort(errorNames, new Comparator<String>() {
@@ -139,23 +101,8 @@ public class PrepareCache2 {
         @Override
         public void process(XMLText doc) throws Exception {
             grFiller.fill(doc);
-            int wc = wordsCount(doc);
-
             TextInfo textInfo = KorpusFilesIterator.createTextInfo(doc);
-
-            for (String a : textInfo.authors) {
-                korpusAuthors.add(a);
-            }
-
-            korpusTotal.addText(wc);
-            if (textInfo.styleGenres.length > 0) {
-                for (String s : textInfo.styleGenres) {
-                    addKorpusStat(s, wc);
-                }
-            } else {
-                addKorpusStat("_", wc);
-            }
-            StatProcessing.add(doc);
+            textStat.add(textInfo, doc);
 
             synchronized (WRITER_LOCK) {
                 lucene.setTextInfo(textInfo);
@@ -169,11 +116,10 @@ public class PrepareCache2 {
         @Override
         public void process(XMLText doc) throws Exception {
             grFiller.fill(doc);
-            int wc = wordsCount(doc);
-            StatProcessing.add(doc);
+            TextInfo textInfo = KorpusFilesIterator.createTextInfo(doc);
+            otherStat.add(textInfo, doc);
+            otherStat.addVolume("kamunikat.org");
 
-            otherTotal.addText(wc);
-            otherVolumes.add("kamunikat.org");
             String id = OtherFilesIterator.getId(doc);
 
             synchronized (WRITER_LOCK) {
@@ -208,37 +154,10 @@ public class PrepareCache2 {
         });
     }
 
-    static int wordsCount(XMLText doc) {
-        AtomicInteger r = new AtomicInteger();
-        doc.getContent().getPOrTagOrPoetry().forEach(op -> {
-            if (op instanceof P) {
-                ((P) op).getSe().forEach(s -> {
-                    s.getWOrSOrZ().forEach(ow -> {
-                        if (ow instanceof W) {
-                            r.incrementAndGet();
-                        }
-                    });
-                });
-            }
-        });
-        return r.get();
-    }
-
     static void writeStat(String dir, Properties stat) throws Exception {
         FileOutputStream o = new FileOutputStream(dir + "/stat.properties");
         stat.store(o, null);
         o.close();
-    }
-
-    static void addKorpusStat(String styleGenre, int wordsCount) {
-        int p = styleGenre.indexOf('/');
-        String st = p < 0 ? styleGenre : styleGenre.substring(0, p);
-        StatInfo i = korpusParts.get(st);
-        if (i == null) {
-            i = new StatInfo(st);
-            korpusParts.put(st, i);
-        }
-        i.addText(wordsCount);
     }
 
     private static Map<String, Integer> errorsCount = new HashMap<>();
