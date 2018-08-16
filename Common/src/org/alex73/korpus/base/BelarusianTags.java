@@ -62,6 +62,7 @@ public class BelarusianTags {
         pabocnaje(root);
         predykatyu(root);
         abrev(root);
+        castki(root);
 
         checkParadigmMarks();
     }
@@ -333,9 +334,9 @@ public class BelarusianTags {
         TagLetter k = t.add("Тып => K:злучальны");
         t.add("Тып => P:паясняльны").latestInParadigm();
         s.add("Падпарадкавальны => B:прычынны;C:часавы;D:умоўны;F:мэтавы;G:уступальны;H:параўнальны;K:следства;X:???????")
-                .latestInParadigm().latestInParadigm();
+                .latestInParadigm();
         k.add("Злучальны => A:спалучальны;E:супастаўляльны;O:пералічальна-размеркавальны;L:далучальны;U:градацыйны;X:???????")
-                .latestInParadigm().latestInParadigm();
+                .latestInParadigm();
     }
 
     private void prynazounik(TagLetter t) {
@@ -360,5 +361,11 @@ public class BelarusianTags {
 
     private void abrev(TagLetter t) {
         t = t.add("Часціна => K:Абрэвіятуры").latestInParadigm();
+    }
+
+    private void castki(TagLetter t) {
+        t = t.add("Часціна => Часткі слоў");
+        t.add("Тып => P:прыстаўка;F:першая састаўная частка складаных слоў;S:другая састаўная частка складаных слоў")
+                .latestInParadigm();
     }
 }
