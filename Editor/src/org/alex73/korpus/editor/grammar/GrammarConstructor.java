@@ -167,7 +167,7 @@ public class GrammarConstructor {
         int stressInSource = StressUtils.getStressFromStart(word);
 
         String lemma = constructWord(unstressedWord, eq, BelarusianWordNormalizer.normalize(p.getLemma()), ratedSkip);
-        int st = StressUtils.getUsuallyStressedSyll(lemma);
+        int st = StressUtils.getUsuallyStressedSyll(lemma, -1);
         if (st < 0) {
             st = stressInSource;
         }
@@ -187,7 +187,7 @@ public class GrammarConstructor {
             String fword = constructWord(unstressedWord, eq, BelarusianWordNormalizer.normalize(f.getValue()),
                     ratedSkip);
             if (!fword.isEmpty()) {
-                st = StressUtils.getUsuallyStressedSyll(fword);
+                st = StressUtils.getUsuallyStressedSyll(fword, -1);
                 if (st < 0) {
                     st = stressInSource;
                 }

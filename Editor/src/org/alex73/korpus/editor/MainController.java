@@ -285,7 +285,6 @@ public class MainController {
 
             gr = new EditorGrammar(globalGr, baseFileName + "-grammar.xml");
             filler = new GrammarFiller(globalGrFinder, gr);
-            Splitter2.init(filler);
             GrammarPaneController.grConstr = new GrammarConstructor(gr);
 
             XMLText kDoc;
