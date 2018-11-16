@@ -39,6 +39,7 @@ import javax.swing.text.StyledDocument;
 
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.korpus.base.BelarusianTags;
+import org.alex73.korpus.base.GrammarDBSaver;
 import org.alex73.korpus.base.TagLetter;
 import org.alex73.korpus.editor.grammar.GrammarConstructor;
 import org.alex73.korpus.text.xml.W;
@@ -46,9 +47,11 @@ import org.alex73.korpus.text.xml.W;
 public class GrammarPaneController {
     public static GrammarConstructor grConstr;
     static W currentWord;
+    static Integer intoParadigmId;
 
-    public static void show(W word) {
+    public static void show(W word, Integer pdgId) {
         currentWord = word;
+        intoParadigmId = pdgId;
         UI.grammarPane.txtWord.setText(word != null && word.getValue() != null ? word.getValue() : "");
         UI.grammarPane.txtLooksLike.setText("");
         updateInfo();
@@ -258,7 +261,16 @@ public class GrammarPaneController {
         protected String doInBackground() throws Exception {
             String out;
             StringBuilder like = new StringBuilder();
-            Paradigm p = grConstr.getLooksLike(word, looksLike, true, grammar, like);
+            Paradigm p = grConstr.getLooksLike(word, looksLike, true, grammar, like, intoParadigmId);
+            if (intoParadigmId != null) {
+                Paradigm pInto = grConstr.ed.gr.getAllParadigms().stream()
+                        .filter(pa -> pa.getPdgId() == intoParadigmId.intValue()).findFirst().get();
+
+                pInto = GrammarDBSaver.cloneParadigm(pInto);
+                pInto.getVariant().get(0).getForm().clear();
+                pInto.getVariant().get(0).getForm().addAll(p.getVariant().get(0).getForm());
+                p = pInto;
+            }
             if (p != null) {
                 p.setTheme(theme);
                 try {

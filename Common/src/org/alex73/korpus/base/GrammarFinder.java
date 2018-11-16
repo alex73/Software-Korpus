@@ -8,7 +8,7 @@ import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.korpus.utils.StressUtils;
 
 public class GrammarFinder implements IGrammarFinder {
-    private Map<String, Paradigm[]> paradigmsByForm;
+    private final Map<String, Paradigm[]> paradigmsByForm;
 
     public GrammarFinder(GrammarDB2 gr) {
         paradigmsByForm = new HashMap<>(gr.getAllParadigms().size());
@@ -16,12 +16,8 @@ public class GrammarFinder implements IGrammarFinder {
         gr.getAllParadigms().parallelStream().forEach(p -> {
             p.getVariant().forEach(v -> {
                 v.getForm().forEach(f -> {
-                    String orig = BelarusianWordNormalizer.normalize(f.getValue());
+                    String orig = StressUtils.unstress(BelarusianWordNormalizer.normalize(f.getValue()));
                     add(orig, p);
-                    String s = StressUtils.unstress(orig);
-                    if (!s.equals(orig)) {
-                        add(s, p);
-                    }
                 });
             });
         });
@@ -52,14 +48,8 @@ public class GrammarFinder implements IGrammarFinder {
      * Find paradigms by word (lower case).
      */
     public Paradigm[] getParadigmsByForm(String word) {
-        word = BelarusianWordNormalizer.normalize(word);
+        word = StressUtils.unstress(BelarusianWordNormalizer.normalize(word));
         Paradigm[] r = paradigmsByForm.get(word);
-        if (r == null) {
-            String uns = StressUtils.unstress(word);
-            if (!uns.equals(word)) {
-                r = paradigmsByForm.get(word.replace("*", ""));
-            }
-        }
         return r;
     }
 }

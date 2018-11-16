@@ -62,7 +62,6 @@ import org.alex73.korpus.text.TextGeneral;
 import org.alex73.korpus.text.TextIO;
 import org.alex73.korpus.text.TextPlain;
 import org.alex73.korpus.text.parser.IProcess;
-import org.alex73.korpus.text.parser.Splitter2;
 import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.XMLText;
 
@@ -318,6 +317,7 @@ public class MainController {
                     }
                 }).parse();
             }
+            filler.fill(kDoc);
             TextIO.saveXML(new File(baseFileName + ".orig.xml"), kDoc);
 
             UI.doc = new KorpusDocument3(kDoc);
@@ -372,8 +372,17 @@ public class MainController {
         KorpusDocument3.MyLineElement par = (KorpusDocument3.MyLineElement) UI.doc.getParagraphElement(pos);
         int idxWord = par.getElementIndex(pos);
         KorpusDocument3.MyWordElement word = (KorpusDocument3.MyWordElement) par.getElement(idxWord);
+        Integer pdgId = null;
+        try {
+            KorpusDocument3.MyWordElement wordNext = (KorpusDocument3.MyWordElement) par.getElement(idxWord + 1);
+            String textNext = wordNext.getElementText();
+            if (textNext.startsWith("~")) {
+                pdgId = Integer.parseInt(textNext.substring(1));
+            }
+        } catch (Exception ex) {
+        }
         WordInfoPaneController.show(word.getWordInfo());
-        GrammarPaneController.show(word.getWordInfo());
+        GrammarPaneController.show(word.getWordInfo(), pdgId);
     }
 
     static void setWordInfo(W w) {

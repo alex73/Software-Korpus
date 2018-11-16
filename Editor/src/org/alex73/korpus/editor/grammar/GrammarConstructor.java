@@ -16,14 +16,14 @@ import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.utils.StressUtils;
 
 public class GrammarConstructor {
-    private final EditorGrammar ed;
+    public final EditorGrammar ed;
 
     public GrammarConstructor(EditorGrammar ed) {
         this.ed = ed;
     }
 
     public synchronized Paradigm getLooksLike(String word, String looksLike, boolean checkForms, String tagMask,
-            StringBuilder out) {
+            StringBuilder out, Integer skipParadigmId) {
         Paradigm ratedParadigm = null;
         Variant ratedVariant = null;
         String ratedForm = null;
@@ -33,20 +33,19 @@ public class GrammarConstructor {
             int rating = 1;
             String find = BelarusianWordNormalizer.normalize(word);
             for (Paradigm p : ed.getAllParadigms()) {
+                if (skipParadigmId != null && skipParadigmId.intValue() == p.getPdgId()) {
+                    continue;
+                }
                 if (!isTagLooksLikeMask(p.getTag(), tagMask)) {
                     continue;
                 }
-                int eq = compareEnds(find, BelarusianWordNormalizer.normalize(p.getLemma()));
-                if (eq > rating) {
-                    rating = eq;
-                    ratedParadigm = p;
-                    ratedVariant = p.getVariant().get(0);
-                    ratedForm = p.getLemma();
-                }
                 if (checkForms) {
                     for (Variant v : p.getVariant()) {
+                        if (v.getForm().isEmpty()) {
+                            continue;
+                        }
                         for (Form f : v.getForm()) {
-                            eq = compareEnds(find, BelarusianWordNormalizer.normalize(f.getValue()));
+                            int eq = compareEnds(find, BelarusianWordNormalizer.normalize(f.getValue()));
                             if (eq > rating) {
                                 rating = eq;
                                 ratedParadigm = p;
@@ -55,11 +54,25 @@ public class GrammarConstructor {
                             }
                         }
                     }
+                } else {
+                    if (p.getVariant().get(0).getForm().isEmpty()) {
+                        continue;
+                    }
+                    int eq = compareEnds(find, BelarusianWordNormalizer.normalize(p.getLemma()));
+                    if (eq > rating) {
+                        rating = eq;
+                        ratedParadigm = p;
+                        ratedVariant = p.getVariant().get(0);
+                        ratedForm = p.getLemma();
+                    }
                 }
             }
         } else {
             String find = BelarusianWordNormalizer.normalize(looksLike);
             for (Paradigm p : ed.getAllParadigms()) {
+                if (skipParadigmId != null && skipParadigmId.intValue() == p.getPdgId()) {
+                    continue;
+                }
                 if (!isTagLooksLikeMask(p.getTag(), tagMask)) {
                     continue;
                 }
@@ -70,6 +83,9 @@ public class GrammarConstructor {
                 }
                 if (checkForms) {
                     for (Variant v : p.getVariant()) {
+                        if (v.getForm().isEmpty()) {
+                            continue;
+                        }
                         for (Form f : v.getForm()) {
                             if (find.equals(BelarusianWordNormalizer.normalize(f.getValue()))) {
                                 ratedParadigm = p;
@@ -166,7 +182,7 @@ public class GrammarConstructor {
 
         int stressInSource = StressUtils.getStressFromStart(word);
 
-        String lemma = constructWord(unstressedWord, eq, BelarusianWordNormalizer.normalize(p.getLemma()), ratedSkip);
+        String lemma = constructWord(unstressedWord, eq, BelarusianWordNormalizer.normalize(v.getLemma()), ratedSkip);
         int st = StressUtils.getUsuallyStressedSyll(lemma, -1);
         if (st < 0) {
             st = stressInSource;
@@ -180,6 +196,8 @@ public class GrammarConstructor {
 
         result.setLemma(lemma);
         Variant rv = new Variant();
+        rv.setId("a");
+        rv.setLemma(lemma);
         rv.setPravapis(v.getPravapis());
         for (Form f : v.getForm()) {
             Form rf = new Form();

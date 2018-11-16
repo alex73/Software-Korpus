@@ -496,6 +496,10 @@ public class KorpusDocument3 extends AbstractDocument {
             }
         }
 
+        public String getElementText() throws BadLocationException {
+            return getText(p0.getOffset(), p1.getOffset() - p0.getOffset());
+        }
+
         public String toString() {
             try {
                 return getClass().getSimpleName() + "(" + getName() + ") " + p0 + "-" + p1 + ": "

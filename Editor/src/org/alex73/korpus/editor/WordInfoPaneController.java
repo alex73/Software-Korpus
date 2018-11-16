@@ -25,44 +25,59 @@ package org.alex73.korpus.editor;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
+import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.korpus.base.BelarusianTags;
-import org.alex73.korpus.base.GrammarFiller;
+import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.editor.ui.WordInfoPane;
 import org.alex73.korpus.text.xml.W;
+import org.alex73.korpus.utils.StressUtils;
 
 public class WordInfoPaneController {
     public static void init() {
         UI.wordInfoPane.btnSave.addActionListener(btnSave);
     }
 
+    static Map<JRadioButton, Paradigm> paradigmsOnLemmas = new HashMap<>();
+
     public static void show(W word) {
         WordInfoPane p = UI.wordInfoPane;
 
         p.pLemma.removeAll();
         p.pGrammar.removeAll();
+        paradigmsOnLemmas.clear();
         if (word == null) {
             p.txtWord.setText("");
         } else {
             p.txtWord.setText(word.getValue());
 
+            String wuns = StressUtils.unstress(BelarusianWordNormalizer.normalize(word.getValue()));
+            Paradigm[][] pa2 = MainController.filler.getParadigmsByWord(wuns);
+
             ButtonGroup rbGroupLemma = new ButtonGroup();
-            if (word.getLemma() != null) {
-                for (String t : word.getLemma().split("_")) {
-                    JRadioButton rb = new JRadioButton(t);
-                    rb.setToolTipText(t);
+            for (Paradigm[] pa1 : pa2) {
+                if (pa1 == null) {
+                    continue;
+                }
+                for (Paradigm pa : pa1) {
+                    JRadioButton rb = new JRadioButton(pa.getLemma());
+                    rb.setToolTipText("TODO");
                     rb.setFont(p.pLemma.getFont());
                     rbGroupLemma.add(rb);
                     p.pLemma.add(rb);
                     rb.addActionListener(lemmaClick);
+                    paradigmsOnLemmas.put(rb, pa);
                 }
-                if (p.pLemma.getComponentCount() == 1) {
-                    ((JRadioButton) p.pLemma.getComponent(0)).setSelected(true);
-                }
+            }
+            if (p.pLemma.getComponentCount() == 1) {
+                ((JRadioButton) p.pLemma.getComponent(0)).setSelected(true);
+                lemmaClick.actionPerformed(new ActionEvent(p.pLemma.getComponent(0), 0, null));
             }
 
             fillLemmas(word);
@@ -87,12 +102,12 @@ public class WordInfoPaneController {
                     for (String d : BelarusianTags.getInstance().describe(c)) {
                         outText += d + ", ";
                     }
-                    outText = outText.substring(0, outText.length() - 1);
+                    outText = outText.substring(0, outText.length() - 2);
                 } catch (Exception ex) {
                     // unknown code
                     outText = c + ":няправільны код";
                 }
-                JRadioButton rb = new JRadioButton("<html>"+outText+"</html>");
+                JRadioButton rb = new JRadioButton("<html>" + outText + "</html>");
                 rb.setToolTipText(c);
                 rb.setFont(p.pGrammar.getFont());
                 rbGroupGrammar.add(rb);
@@ -125,8 +140,8 @@ public class WordInfoPaneController {
         public void actionPerformed(ActionEvent e) {
             W w = new W();
             w.setValue(UI.wordInfoPane.txtWord.getText());
-            String lemma = ((JRadioButton) e.getSource()).getText();
-            MainController.filler.fillWordInfoLemma(w, lemma);
+            Paradigm p = paradigmsOnLemmas.get(e.getSource());
+            MainController.filler.fillWordInfoPagadigm(w, p);
             fillLemmas(w);
 
             setSaveEnabled();

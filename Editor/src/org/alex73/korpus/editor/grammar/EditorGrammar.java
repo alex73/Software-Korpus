@@ -39,7 +39,7 @@ public class EditorGrammar implements IGrammarFinder {
         }
     }
 
-    private GrammarDB2 gr;
+    public GrammarDB2 gr;
     private String localGrammarFile;
 
     private List<Paradigm> docLevelParadigms = new ArrayList<>();
@@ -68,14 +68,8 @@ public class EditorGrammar implements IGrammarFinder {
 
     @Override
     public synchronized Paradigm[] getParadigmsByForm(String word) {
-        word = BelarusianWordNormalizer.normalize(word);
+        word = StressUtils.unstress(BelarusianWordNormalizer.normalize(word));
         Paradigm[] r = docLevelParadigmsByForm.get(word);
-        if (r == null) {
-            String uns = StressUtils.unstress(word);
-            if (!uns.equals(word)) {
-                r = docLevelParadigmsByForm.get(word.replace("*", ""));
-            }
-        }
         return r;
     }
 
@@ -83,7 +77,7 @@ public class EditorGrammar implements IGrammarFinder {
         docLevelParadigms.add(p);
         for (Variant va : p.getVariant()) {
             for (Form f : va.getForm()) {
-                String v = BelarusianWordNormalizer.normalize(f.getValue());
+                String v = StressUtils.unstress(BelarusianWordNormalizer.normalize(f.getValue()));
                 if (v.isEmpty()) {
                     continue;
                 }

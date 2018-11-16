@@ -25,11 +25,12 @@ package org.alex73.korpus.base;
 import java.util.Locale;
 
 /**
- * Class for word normalization, i.e. remove stress and upper case.
+ * Class for word normalization, i.e. remove upper case, fix apostrophe, replace
+ * stress char to '+', change first 'ў' to 'у'.
  */
 public class BelarusianWordNormalizer {
     public static final Locale BEL = new Locale("be");
-    public static final String letters = "ёйцукенгшўзх'фывапролджэячсмітьбющиЁЙЦУКЕНГШЎЗХ'ФЫВАПРОЛДЖЭЯЧСМІТЬБЮЩИqwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
+    public static final String letters = "´ёйцукенгшўзх'фывапролджэячсмітьбющиЁЙЦУКЕНГШЎЗХ'ФЫВАПРОЛДЖЭЯЧСМІТЬБЮЩИqwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
     private static final String ZNAKI = "-—,:!?/.…\"“”«»()[]";
 
     public static boolean isLetter(char c) {

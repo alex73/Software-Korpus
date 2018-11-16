@@ -64,7 +64,7 @@ public class UI {
 
     public static void init() throws Exception {
         mainWindow = new MainWindow();
-        mainWindow.setTitle("Рэдагаваньне файлаў корпусу, v.2.1");
+        mainWindow.setTitle("Рэдагаваньне файлаў корпусу, v.3.0");
 
         // GrammarDialogController.init(mainWindow);
         mainWindow.setBounds(200, 200, 900, 600);
