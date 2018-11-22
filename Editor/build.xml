@@ -7,7 +7,7 @@
 
 	<target name="build">
 		<mkdir dir="build/classes" />
-		<javac srcdir="src" encoding="utf-8" destdir="build/classes" nowarn="true" debug="true" debuglevel="lines,vars,source">
+		<javac srcdir="src:../Common/src/" encoding="utf-8" destdir="build/classes" nowarn="true" debug="true" debuglevel="lines,vars,source">
 			<classpath>
 				<fileset dir="lib" includes="**/*.jar" />
 				<fileset dir="../Common/lib/" includes="**/*.jar" />
@@ -16,6 +16,7 @@
 		</javac>
 		<copy todir="build/classes">
 			<fileset dir="src" />
+			<fileset dir="../Common/src/" />
 		</copy>
 		<copy file="GrammarDB/db.cache" todir="build/classes" />
 		<jar jarfile="build/Redahavannie_korpusu.jar" basedir="build/classes">

@@ -45,7 +45,6 @@ import org.alex73.korpus.editor.grammar.GrammarConstructor;
 import org.alex73.korpus.text.xml.W;
 
 public class GrammarPaneController {
-    public static GrammarConstructor grConstr;
     static W currentWord;
     static Integer intoParadigmId;
 
@@ -159,7 +158,7 @@ public class GrammarPaneController {
     static Paradigm parseXML() throws Exception {
         String xml = UI.grammarPane.outXML.getText();
         xml = xml.substring(xml.indexOf('<'));
-        return grConstr.parseAndValidate(xml);
+        return GrammarConstructor.parseAndValidate(xml);
     }
 
     static UpdaterInfo updaterInfo;
@@ -251,7 +250,7 @@ public class GrammarPaneController {
             word = UI.grammarPane.txtWord.getText();
             grammar = UI.grammarPane.txtGrammar.getText().toUpperCase();
             theme = UI.grammarPane.txtTheme.getText();
-            looksLike = UI.grammarPane.txtLooksLike.getText();
+            looksLike = UI.grammarPane.txtLooksLike.getText().trim();
             if (theme.trim().length() == 0) {
                 theme = null;
             }
@@ -259,9 +258,12 @@ public class GrammarPaneController {
 
         @Override
         protected String doInBackground() throws Exception {
+            GrammarConstructor grConstr = new GrammarConstructor(MainController.gr);
+
             String out;
             StringBuilder like = new StringBuilder();
-            Paradigm p = grConstr.getLooksLike(word, looksLike, true, grammar, like, intoParadigmId);
+            boolean checkForms = intoParadigmId == null && looksLike.isEmpty();
+            Paradigm p = grConstr.getLooksLike(word, looksLike, checkForms, grammar, like, intoParadigmId);
             if (intoParadigmId != null) {
                 Paradigm pInto = grConstr.ed.gr.getAllParadigms().stream()
                         .filter(pa -> pa.getPdgId() == intoParadigmId.intValue()).findFirst().get();

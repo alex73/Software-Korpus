@@ -57,7 +57,6 @@ import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyLineElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyWordElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocumentViewFactory;
 import org.alex73.korpus.editor.grammar.EditorGrammar;
-import org.alex73.korpus.editor.grammar.GrammarConstructor;
 import org.alex73.korpus.text.TextGeneral;
 import org.alex73.korpus.text.TextIO;
 import org.alex73.korpus.text.TextPlain;
@@ -284,7 +283,6 @@ public class MainController {
 
             gr = new EditorGrammar(globalGr, baseFileName + "-grammar.xml");
             filler = new GrammarFiller(globalGrFinder, gr);
-            GrammarPaneController.grConstr = new GrammarConstructor(gr);
 
             XMLText kDoc;
             if (f.getName().endsWith(".xml")) {
