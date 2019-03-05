@@ -105,7 +105,7 @@ public class GrammarDBSaver {
      * (склон): NGDAIL 3 (лік): SP файл N: (ад прыметнікаў - як прыметнікі)
      * формы MNS - мужчынскі сартуем: па 1 літары(склон): NGDAIL 2 (лік): SP
      */
-    static Comparator<Form> COMPARATOR_FORM_PRYM = new Comparator<Form>() {
+    static public Comparator<Form> COMPARATOR_FORM_PRYM = new Comparator<Form>() {
         public int compare(Form o1, Form o2) {
             try {
                 if (o1.getTag().isEmpty() || o2.getTag().isEmpty()) {
@@ -134,7 +134,7 @@ public class GrammarDBSaver {
         int formOptionIndex(FormOptions opt) {
             if (opt == null) {
                 return 0;
-            } else if (opt == FormOptions.ANIM) {
+            } else if (opt == FormOptions.INANIM) {
                 return 1;
             } else {
                 return 2;
@@ -142,7 +142,7 @@ public class GrammarDBSaver {
         }
     };
 
-    static Comparator<Form> COMPARATOR_FORM_NAZ = new Comparator<Form>() {
+    static public Comparator<Form> COMPARATOR_FORM_NAZ = new Comparator<Form>() {
         public int compare(Form o1, Form o2) {
             try {
                 if (o1.getTag().isEmpty() || o2.getTag().isEmpty()) {
