@@ -111,8 +111,8 @@ public class GrammarDBSaver {
                 if (o1.getTag().isEmpty() || o2.getTag().isEmpty()) {
                     return o1.getTag().length() - o2.getTag().length();
                 }
-                int p1 = "MNFPX".indexOf(o1.getTag().charAt(0));
-                int p2 = "MNFPX".indexOf(o2.getTag().charAt(0));
+                int p1 = "MNFPXR".indexOf(o1.getTag().charAt(0));
+                int p2 = "MNFPXR".indexOf(o2.getTag().charAt(0));
                 if (p1 == p2) {
                     p1 = "SPX".indexOf(o1.getTag().charAt(2));
                     p2 = "SPX".indexOf(o2.getTag().charAt(2));
