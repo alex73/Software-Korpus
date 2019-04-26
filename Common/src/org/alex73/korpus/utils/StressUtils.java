@@ -203,6 +203,23 @@ public class StressUtils {
         return 0;
     }
 
+    public static String setSyllHal(String word, int pos, char cr) {
+        int r = 0;
+        StringBuilder s=new StringBuilder(word);
+        for (int i = 0; i < word.length(); i++) {
+            char c = word.charAt(i);
+            boolean halosnaja = BelarusianTags.HALOSNYJA.indexOf(c) >= 0;
+            if (halosnaja) {
+                if (pos == r) {
+                    s.setCharAt(i, cr);
+                    return s.toString();
+                }
+                r++;
+            }
+        }
+        throw new RuntimeException("No syll #" + pos + " in the " + word);
+    }
+
     public static String combineAccute(String word) {
         return word.replace(STRESS_CHAR, '\u0301');
     }

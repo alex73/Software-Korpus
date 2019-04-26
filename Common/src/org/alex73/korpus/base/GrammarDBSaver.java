@@ -161,6 +161,56 @@ public class GrammarDBSaver {
         }
     };
 
+    /**
+     * Сартуем дзеясловы: 0; F/R 1S, F/R 2S, F/R R3S; F/R 1P, F/R 2P, F/R R3P; PMS,PFS,PNS,PXP; I2S, I2P; PG/RG  
+     */
+    static public Comparator<Form> COMPARATOR_FORM_DZSL = new Comparator<Form>() {
+        public int compare(Form o1, Form o2) {
+            String t1 = o1.getTag();
+            String t2 = o2.getTag();
+            int len1 = t1.length();
+            int len2 = t2.length();
+            if (len1 != len2) {
+                int p1 = "132".indexOf(Integer.toString(len1));
+                int p2 = "132".indexOf(Integer.toString(len2));
+                return p1 - p2;
+            }
+            int v;
+            switch (len1) {
+            case 2:
+                v = t1.compareTo(t2);
+                if (v == 0) {
+                    v = compareNull(o1.getType(), o2.getType());
+                }
+                return v;
+            case 3:
+                int p1 = "FRPI".indexOf(t1.charAt(0));
+                int p2 = "FRPI".indexOf(t1.charAt(0));
+                if (p1 == p2) {
+                    p1 = "SP".indexOf(t1.charAt(2));
+                    p2 = "SP".indexOf(t1.charAt(2));
+                }
+                if (p1 == p2) {
+                    p1 = "123MFNX".indexOf(t1.charAt(1));
+                    p2 = "123MFNX".indexOf(t1.charAt(1));
+                }
+                return p1 != p2 ? p1 - p2 : compareNull(o1.getType(), o2.getType());
+            default:
+                return 0;
+            }
+        }
+
+        int compareNull(Object s1, Object s2) {
+            if (s1 == null && s2 == null) {
+                return 0;
+            } else if (s1 != null && s2 != null) {
+                return 0;
+            } else {
+                return s1 == null ? -1 : 1;
+            }
+        }
+    };
+
     public static Locale BE = new Locale("be");
     public static Collator BEL = Collator.getInstance(BE);
 
