@@ -169,7 +169,7 @@ public class GrammarDB2 {
     /**
      * Remove duplicate strings from memory.
      */
-    private String optimizeString(String s) {
+    public static String optimizeString(String s) {
         return s == null ? null : s.intern();
     }
 
