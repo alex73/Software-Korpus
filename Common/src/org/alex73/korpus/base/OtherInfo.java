@@ -25,5 +25,7 @@ package org.alex73.korpus.base;
 import java.io.Serializable;
 
 public class OtherInfo implements Serializable {
-    public String textURL;
+    public String name;
+    public String url;
+    public String details;
 }

@@ -32,7 +32,9 @@ public class LuceneDriverWrite extends LuceneFields {
     protected int textId;
     protected TextInfo currentTextInfo;
     protected String currentVolume;
+    protected String currentName;
     protected String currentUrl;
+    protected String currentDetails;
 
     public LuceneDriverWrite(String rootDir) throws Exception {
         IndexWriterConfig config = new IndexWriterConfig(new WhitespaceAnalyzer());
@@ -54,19 +56,24 @@ public class LuceneDriverWrite extends LuceneFields {
         docSentence.add(fieldSentenceTextWrittenYear);
         docSentence.add(fieldSentenceTextPublishedYear);
 
-        docSentence.add(fieldSentenceTextVolume);
-        docSentence.add(fieldSentenceTextURL);
+        docSentence.add(fieldSentenceOtherVolume);
+        docSentence.add(fieldSentenceOtherName);
+        docSentence.add(fieldSentenceOtherURL);
+        docSentence.add(fieldSentenceOtherDetails);
 
         docText = new Document();
         docText.add(fieldTextID);
         docText.add(fieldTextAuthors);
         docText.add(fieldTextTitle);
-        docText.add(fieldTextYearWritten);
-        docText.add(fieldTextYearPublished);
+        docText.add(fieldTextTranslators);
+        docText.add(fieldTextLangOrig);
+        docText.add(fieldTextStyleGenre);
+        docText.add(fieldTextEdition);
+        docText.add(fieldTextWrittenTime);
+        docText.add(fieldTextPublicationTime);
     }
 
     public synchronized void shutdown() throws Exception {
-
         indexWriter.forceMerge(1);
         indexWriter.commit();
         indexWriter.close();
@@ -81,15 +88,22 @@ public class LuceneDriverWrite extends LuceneFields {
 
         fieldTextID.setIntValue(textId);
         fieldTextAuthors.setStringValue(merge(info.authors, ";"));
-        fieldTextTitle.setStringValue(info.title);
-        fieldTextYearWritten.setIntValue(info.writtenYear != null ? info.writtenYear : 0);
-        fieldTextYearPublished.setIntValue(info.publishedYear != null ? info.publishedYear : 0);
+        fieldTextTitle.setStringValue(nvl(info.title));
+        fieldTextTranslators.setStringValue(merge(info.translators, ";"));
+        fieldTextLangOrig.setStringValue(nvl(info.langOrig));
+        fieldTextStyleGenre.setStringValue(merge(info.styleGenres, ";"));
+        fieldTextEdition.setStringValue(nvl(info.edition));
+        fieldTextWrittenTime.setStringValue(nvl(info.writtenTime));
+        fieldTextPublicationTime.setStringValue(nvl(info.publicationTime));
+
         indexWriter.addDocument(docText);
     }
 
-    public synchronized void setOtherInfo(String volume, String textURL) throws Exception {
+    public synchronized void setOtherInfo(String volume, String name, String textURL, String details) throws Exception {
         currentVolume = volume;
+        currentName = name;
         currentUrl = textURL;
+        currentDetails = details;
         textId = -1;
     }
 
@@ -129,8 +143,10 @@ public class LuceneDriverWrite extends LuceneFields {
 
         synchronized (this) {
             if (currentVolume != null && currentUrl != null) {
-                fieldSentenceTextVolume.setStringValue(currentVolume);
-                fieldSentenceTextURL.setStringValue(currentUrl);
+                fieldSentenceOtherVolume.setStringValue(currentVolume);
+                fieldSentenceOtherName.setStringValue(currentName);
+                fieldSentenceOtherURL.setStringValue(currentUrl);
+                fieldSentenceOtherDetails.setStringValue(currentDetails);
             } else {
                 fieldSentenceTextID.setIntValue(textId);
             }
@@ -142,8 +158,8 @@ public class LuceneDriverWrite extends LuceneFields {
 
             if (currentTextInfo != null) {
                 fieldSentenceTextStyleGenre.setTokenStream(new StringArrayTokenStream(currentTextInfo.styleGenres));
-                fieldSentenceTextWrittenYear.setIntValue(nvl(currentTextInfo.writtenYear));
-                fieldSentenceTextPublishedYear.setIntValue(nvl(currentTextInfo.publishedYear));
+                //TODO fieldSentenceTextWrittenYear.setIntValue(nvl(currentTextInfo.writtenYear));
+                //TODO fieldSentenceTextPublishedYear.setIntValue(nvl(currentTextInfo.publishedYear));
                 fieldSentenceTextAuthor.setTokenStream(new StringArrayTokenStream(currentTextInfo.authors));
             }
 
@@ -164,5 +180,9 @@ public class LuceneDriverWrite extends LuceneFields {
 
     private int nvl(Integer n) {
         return n != null ? n : 0;
+    }
+
+    private String nvl(String n) {
+        return n != null ? n : "";
     }
 }

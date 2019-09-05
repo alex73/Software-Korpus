@@ -185,14 +185,14 @@ public class GrammarDBSaver {
                 return v;
             case 3:
                 int p1 = "FRPI".indexOf(t1.charAt(0));
-                int p2 = "FRPI".indexOf(t1.charAt(0));
+                int p2 = "FRPI".indexOf(t2.charAt(0));
                 if (p1 == p2) {
                     p1 = "SP".indexOf(t1.charAt(2));
-                    p2 = "SP".indexOf(t1.charAt(2));
+                    p2 = "SP".indexOf(t2.charAt(2));
                 }
                 if (p1 == p2) {
                     p1 = "123MFNX".indexOf(t1.charAt(1));
-                    p2 = "123MFNX".indexOf(t1.charAt(1));
+                    p2 = "123MFNX".indexOf(t2.charAt(1));
                 }
                 return p1 != p2 ? p1 - p2 : compareNull(o1.getType(), o2.getType());
             default:

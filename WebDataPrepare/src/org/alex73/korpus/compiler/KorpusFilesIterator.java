@@ -143,17 +143,26 @@ public class KorpusFilesIterator {
         } else {
             r.authors = new String[0];
         }
-        String publishedYear = getTag(text, "PublishedYear");
-        r.publishedYear = publishedYear != null ? Integer.parseInt(publishedYear) : 0;
-        String writtenYear = getTag(text, "WrittenYear");
-        r.writtenYear = writtenYear != null ? Integer.parseInt(writtenYear) : 0;
+        r.title = getTag(text, "Title");
+        String translation = getTag(text, "Translation");
+        if (translation != null) {
+            r.translators = translation.split(",");
+        } else {
+            r.translators = new String[0];
+        }
+        r.langOrig = getTag(text, "LangOrig");
+        r.publicationTime = getTag(text, "FirstPublicationYear");
+        r.writtenTime = getTag(text, "CreationYear");
+        r.edition = getTag(text, "Edition");
+        if (r.edition == null) {
+            r.edition = getTag(text, "HiddenEdition");
+        }
         String styleGenres = getTag(text, "StyleGenre");
         if (styleGenres != null) {
             r.styleGenres = styleGenres.split(",");
         } else {
             r.styleGenres = new String[0];
         }
-        r.title = getTag(text, "Title");
 
         return r;
     }
@@ -161,7 +170,7 @@ public class KorpusFilesIterator {
     private static String getTag(XMLText text, String name) {
         for (Tag tag : text.getHeader().getTag()) {
             if (name.equals(tag.getName())) {
-                return tag.getValue();
+                return tag.getValue().isEmpty() ? null : tag.getValue();
             }
         }
         return null;

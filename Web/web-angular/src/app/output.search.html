@@ -1,3 +1,4 @@
+<span id="searchTop" style="position: relative; top: -50px"></span>
 <nav aria-label="Page navigation">
   <ul class="pagination">
     <li *ngFor="let pg of serviceSearch.pages; let p=index" 
@@ -21,8 +22,8 @@
   <tr *ngFor="let r of serviceSearch.resultSearch.rows">
     <td style="color: #337ab7; white-space: nowrap;">
         <a href="#" (click)="showBiblio($event, r.doc, r.docOther)">
-          <span *ngIf="r.doc">{{r.doc.authors}}</span>
-          <span *ngIf="r.docOther">{{r.docOther.textURL}}</span>
+          <span *ngIf="r.doc">{{getShortTitle(r.doc.authors)}}</span>
+          <span *ngIf="r.docOther">{{getShortTitle(r.docOther.name)}}</span>
         </a>
     </td>
     <td>
@@ -30,7 +31,7 @@
               korpusWord [korpusWordValue] = "w"
               >{{w.orig}}</span>
     </td>
-    <td class="text-center"><a href="#" (click)="fullText(r.origText, r.doc, r.docOther)">[...]</a></td>
+    <td class="text-center"><a href="#" (click)="fullText(r.origText, r.doc, r.docOther, $event)">[...]</a></td>
   </tr>
 </table>
 
@@ -44,7 +45,7 @@
       <td style="color: #337ab7; white-space: nowrap;">
         <a href="#" (click)="showBiblio($event, r.doc, r.docOther)">
           <span *ngIf="r.doc">{{r.doc.authors}}</span>
-          <span *ngIf="r.docOther">{{r.docOther.textURL}}</span>
+          <span *ngIf="r.docOther">{{r.docOther.name}}</span>
         </a>
       </td>
       <td class="text-right">
@@ -62,18 +63,62 @@
               korpusWord [korpusWordValue] = "w"
               >{{w.orig}}</span>
       </td>
-      <td class="text-center"><a href="#" (click)="fullText(r.origText, r.doc, r.docOther)">[...]</a></td>
+      <td class="text-center"><a href="#" (click)="fullText(r.origText, r.doc, r.docOther, $event)">[...]</a></td>
     </tr>
 </table>
 
+<nav aria-label="Page navigation">
+  <ul class="pagination">
+    <li *ngFor="let pg of serviceSearch.pages; let p=index" 
+        [ngClass]="p==serviceSearch.currentPage ? 'active' : ''" 
+        (click)="serviceSearch.requestPage(p); $event.preventDefault();">
+      <a href="#">{{p+1}}</a>
+    </li>
+    <li *ngIf="serviceSearch.hasMore"
+        (click)="serviceSearch.requestPage(-1); $event.preventDefault();">
+      <a href="#"><span aria-hidden="true">Далей &raquo;</span></a>
+    </li>
+  </ul>
+</nav>
+
 <div #popoverBiblio style="visibility: hidden; display: block; position: absolute;" class="popover in popover-top top" tabindex="0" (blur)="leave()">
   <div class="popover-arrow arrow"></div>
-  <div *ngIf="biblio">
-    Аўтары: {{biblio.authors}}<br/>
-    Назва: {{biblio.title}}
+  <div *ngIf="biblio" style="margin: 1em">
+    <div>
+      <b>Аўтары:</b> {{biblio.authors}}
+    </div>
+    <div *ngIf="biblio.translation">
+      <b>Перакладчык:</b> {{biblio.translators}}
+    </div>
+    <div *ngIf="biblio.langOrig">
+      <b>Пераклад з:</b> {{biblio.langOrig}}
+    </div>
+    <div>
+      <b>Назва:</b> {{biblio.title}}
+    </div>
+    <div>
+      <b>Стыль/жанр:</b> {{biblio.styleGenres}}
+    </div>
+    <div>
+      <b>Выданне:</b> {{biblio.edition}}
+    </div>
+    <div>
+      <b>Час стварэння:</b> {{biblio.writtenTime}}
+    </div>
+    <div>
+      <b>Час першай публікацыі:</b> {{biblio.publicationTime}}
+    </div>
   </div>
-  <div *ngIf="biblioOther">
-    URL: {{biblioOther.textURL}}
+  <div *ngIf="biblioOther" style="margin: 1em">
+    <div>
+      Назва: {{biblioOther.name}}
+    </div>
+    <div>
+      Спасылка: <a href="{{biblioOther.url}}" target="_blank" onmousedown="event.preventDefault()">{{biblioOther.url}}</a>
+    </div>
+    <div>
+      Дэталі: {{biblioOther.details}}
+    </div>
   </div>
 </div>
 
@@ -95,9 +140,12 @@
       </div>
       <div class="modal-body">
           <span *ngFor="let row of detailsText">
-                <span *ngFor="let w of row"
+              <span *ngFor="let w of row">
+                  <span *ngIf="w.orig != '\n'"
                       korpusWord [korpusWordValue] = "w"
                       >{{w.orig}}</span>
+                  <br *ngIf="w.orig == '\n'"/>
+              </span>
           </span>
       </div>
     </div>

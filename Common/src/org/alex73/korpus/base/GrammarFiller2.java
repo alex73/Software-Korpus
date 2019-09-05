@@ -3,9 +3,11 @@ package org.alex73.korpus.base;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import org.alex73.korpus.text.xml.P;
+import org.alex73.korpus.text.xml.Poetry;
 import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.XMLText;
 import org.alex73.korpus.utils.StressUtils;
@@ -58,9 +60,10 @@ public class GrammarFiller2 {
     }
 
     public void fill(XMLText doc) {
-        doc.getContent().getPOrTagOrPoetry().forEach(op -> {
-            if (op instanceof P) {
-                ((P) op).getSe().forEach(s -> {
+        Consumer<P> processP = new Consumer<P>() {
+            @Override
+            public void accept(P op) {
+                op.getSe().forEach(s -> {
                     s.getWOrSOrZ().forEach(ow -> {
                         if (ow instanceof W) {
                             W w = (W) ow;
@@ -69,6 +72,17 @@ public class GrammarFiller2 {
                             }
                         }
                     });
+                });
+            }
+        };
+        doc.getContent().getPOrTagOrPoetry().forEach(op -> {
+            if (op instanceof P) {
+                processP.accept((P) op);
+            } else if (op instanceof Poetry) {
+                ((Poetry) op).getPOrTag().forEach(op2 -> {
+                    if (op2 instanceof P) {
+                        processP.accept((P) op2);
+                    }
                 });
             }
         });

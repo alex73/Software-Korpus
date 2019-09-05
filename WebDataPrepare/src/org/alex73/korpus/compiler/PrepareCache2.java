@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +17,7 @@ import org.alex73.korpus.server.engine.LuceneDriverWrite;
 import org.alex73.korpus.server.text.BinaryParagraphWriter;
 import org.alex73.korpus.text.parser.IProcess;
 import org.alex73.korpus.text.xml.P;
+import org.alex73.korpus.text.xml.Poetry;
 import org.alex73.korpus.text.xml.XMLText;
 import org.apache.commons.io.FileUtils;
 
@@ -38,17 +38,14 @@ public class PrepareCache2 {
         GrammarDB2 gr = GrammarDB2.initializeFromDir("GrammarDB");
         grFiller = new GrammarFiller2(gr);
 
-        FileUtils.writeStringToFile(new File("1"), new Date().toString());
         // main texts corpus
         luceneOpen("Korpus-cache/");
         textQueueProcessor = new TextQueueProcessor();
         new KorpusFilesIterator(errors, processTextKorpus).iterate("Korpus-texts/A/");
-        FileUtils.writeStringToFile(new File("2"), new Date().toString());
         new KorpusFilesIterator(errors, processTextKorpus).iterate("Korpus-texts/B/");
         textQueueProcessor.fin();
         luceneClose();
         textStat.write("Korpus-cache/");
-        FileUtils.writeStringToFile(new File("3"), new Date().toString());
 
         // other trash corpus
         luceneOpen("Other-cache/");
@@ -57,7 +54,6 @@ public class PrepareCache2 {
         otherQueueProcessor.fin();
         luceneClose();
         otherStat.write("Other-cache/");
-        FileUtils.writeStringToFile(new File("4"), new Date().toString());
 
         List<String> errorNames = new ArrayList<>(errorsCount.keySet());
         Collections.sort(errorNames, new Comparator<String>() {
@@ -120,10 +116,11 @@ public class PrepareCache2 {
             otherStat.add(textInfo, doc);
             otherStat.addVolume("kamunikat.org");
 
-            String id = OtherFilesIterator.getId(doc);
+            String id = OtherFilesIterator.getTagValue(doc, "id");
+            String details = OtherFilesIterator.getTagValue(doc, "details");
 
             synchronized (WRITER_LOCK) {
-                lucene.setOtherInfo("kamunikat.org", "http://kamunikat.org/halounaja.html?pubid=" + id);
+                lucene.setOtherInfo("kamunikat.org", "kamunikat.org", "http://kamunikat.org/halounaja.html?pubid=" + id, details);
                 writeDoc(doc);
             }
         }
@@ -141,6 +138,12 @@ public class PrepareCache2 {
         doc.getContent().getPOrTagOrPoetry().forEach(op -> {
             if (op instanceof P) {
                 ps.add((P) op);
+            } else if (op instanceof Poetry) {
+                ((Poetry) op).getPOrTag().forEach(op2 -> {
+                    if (op2 instanceof P) {
+                        ps.add((P) op2);
+                    }
+                });
             }
         });
         Collections.shuffle(ps);

@@ -48,18 +48,30 @@ public class KorpusApplication extends Application {
             LOGGER.fatal("KORPUS_DIR is not defined");
             return;
         }
-        LOGGER.info("startup");
+        LOGGER.info("Starting...");
         try {
             gr = GrammarDB2.initializeFromDir(dirPrefix + "/GrammarDB/");
+            LOGGER.info("GrammarDB loaded with " + gr.getAllParadigms().size() + " paradigms. Used memory: " + getUsedMemory());
             grFinder = new GrammarFinder(gr);
+            LOGGER.info("GrammarDB indexed with " + grFinder.size() + " forms. Used memory: " + getUsedMemory());
             processKorpus = new LuceneFilter(dirPrefix + "/Korpus-cache/");
             processOther = new LuceneFilter(dirPrefix + "/Other-cache/");
+            LOGGER.info("Lucene initialized");
 
             prepareInitial();
+            LOGGER.info("Initialization finished. Used memory: " + getUsedMemory());
         } catch (Throwable ex) {
             LOGGER.error("startup", ex);
             throw new ExceptionInInitializerError(ex);
         }
+    }
+
+    private String getUsedMemory() {
+        Runtime runtime = Runtime.getRuntime();
+        runtime.gc();
+        runtime.gc();
+        runtime.gc();
+        return Math.round((runtime.totalMemory() - runtime.freeMemory()) / 1024.0 / 1024.0) + "mb";
     }
 
     void prepareInitial() throws Exception {

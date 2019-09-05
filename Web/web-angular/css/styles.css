@@ -40,6 +40,9 @@ body {
 .popover {
 	max-width: 90%;
 }
+.visited {
+    color: black;
+}
 
 .table-borders td, .table-borders th {
 	border: 1px solid black;

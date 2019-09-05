@@ -120,7 +120,7 @@ public class TextGeneral implements IText {
                     if (first) {
                         first = false;
                     } else {
-                        se = new Se();
+                        se = null;
                     }
                     for (ITextLineElement it2 : se2.getWOrSOrZ()) {
                         if (p == null) {
@@ -180,12 +180,10 @@ public class TextGeneral implements IText {
             if ((m = RE_TAG_BEGIN.matcher(s)).matches()) {
                 result.put(m.group(1), readMultilineTag(m.group(1), rd));
             } else if ((m = RE_TAG.matcher(s)).matches()) {
-                if (!m.group(1).startsWith("Hidden")) {
-                    if (result.containsKey(m.group(1))) {
-                        throw new ParseException("Загаловак '##" + m.group(1) + "' вызначаны двойчы", -1);
-                    }
-                    result.put(m.group(1), m.group(2).trim());
+                if (result.containsKey(m.group(1))) {
+                    throw new ParseException("Загаловак '##" + m.group(1) + "' вызначаны двойчы", -1);
                 }
+                result.put(m.group(1), m.group(2).trim());
             } else {
                 throw new RuntimeException("Няправільны загаловак '" + s + "'");
             }

@@ -5,3 +5,14 @@ Prepare data for online search:
 3. Other-texts/ - link to unprocessed texts
 4. ant all - build/ROOT.war -> opt/tomcat/webappsBNKorpus/ROOT.war
 5. ant cache - Korpus-cache/ -> opt/tomcat/Korpus-cache/, Other-cache/ -> opt/tomcat/Other-cache/
+
+
+== Вялікія літары ==
+Не ўлічваюцца.
+
+== Апострафы ==
+Разбор тэкстаў: Улічваем розныя, калі напрыканцы ці напачатку слова - гэта двукоссі. Прыводзім да стандартнага.
+Пошук: Набраныя апострафы таксама прыводзім да стандартнага.
+
+== Націскі ==
+Ігнараваць

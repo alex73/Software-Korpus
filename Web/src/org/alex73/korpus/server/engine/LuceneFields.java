@@ -1,6 +1,5 @@
 package org.alex73.korpus.server.engine;
 
-import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.IntField;
@@ -54,15 +53,29 @@ public class LuceneFields {
     public Field fieldSentenceLemmas;
     public Field fieldSentencePBinary;
 
-    public Field fieldSentenceTextURL;
-    public Field fieldSentenceTextVolume;
+    public Field fieldSentenceOtherVolume;
+    public Field fieldSentenceOtherName;
+    public Field fieldSentenceOtherURL;
+    public Field fieldSentenceOtherDetails;
 
     public Field fieldTextID;
     public Field fieldTextAuthors;
     public Field fieldTextTitle;
-    public Field fieldTextYearWritten;
-    public Field fieldTextYearPublished;
+    public Field fieldTextTranslators;
+    public Field fieldTextLangOrig;
+    public Field fieldTextStyleGenre;
+    public Field fieldTextEdition;
+    public Field fieldTextWrittenTime;
+    public Field fieldTextPublicationTime;
 
+    public String[] authors;
+    public String title;
+    public String[] translators;
+    public String langOrig;
+    public String[] styleGenres;
+    public String edition;
+    public String writtenTime, publicationTime;
+    
     public LuceneFields() {
         // words fields
         fieldSentenceValues = new Field("value", "", TYPE_NOTSTORED_INDEXED);
@@ -81,11 +94,17 @@ public class LuceneFields {
         fieldTextID = new IntField("id", 0, TYPE_NOTSTORED_INDEXED_INT);
         fieldTextAuthors = new Field("authors", "", TYPE_STORED_NOTINDEXED);
         fieldTextTitle = new Field("title", "", TYPE_STORED_NOTINDEXED);
-        fieldTextYearWritten = new IntField("textYearWritten", 0, TYPE_STORED_NOTINDEXED_INT);
-        fieldTextYearPublished = new IntField("textYearPublished", 0, TYPE_STORED_NOTINDEXED_INT);
+        fieldTextTranslators = new Field("translators", "", TYPE_STORED_NOTINDEXED);
+        fieldTextLangOrig = new Field("langOrig", "", TYPE_STORED_NOTINDEXED);
+        fieldTextStyleGenre = new Field("styleGenre", "", TYPE_STORED_NOTINDEXED);
+        fieldTextEdition = new Field("edition", "", TYPE_STORED_NOTINDEXED);
+        fieldTextWrittenTime = new Field("writtenTime", "", TYPE_STORED_NOTINDEXED);
+        fieldTextPublicationTime = new Field("publicationTime", "", TYPE_STORED_NOTINDEXED);
 
-        // other text fields
-        fieldSentenceTextVolume = new Field("textVolume", "", TYPE_NOTSTORED_INDEXED);
-        fieldSentenceTextURL = new Field("textURL", "", TYPE_STORED_NOTINDEXED);
+        // other text info fields
+        fieldSentenceOtherVolume = new Field("otherVolume", "", TYPE_NOTSTORED_INDEXED);
+        fieldSentenceOtherName = new Field("otherName", "", TYPE_STORED_NOTINDEXED);
+        fieldSentenceOtherURL = new Field("otherURL", "", TYPE_STORED_NOTINDEXED);
+        fieldSentenceOtherDetails = new Field("otherDetails", "", TYPE_STORED_NOTINDEXED);
     }
 }

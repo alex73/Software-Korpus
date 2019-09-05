@@ -190,6 +190,11 @@ export class ServiceSearch {
     rq.latest = this.latestMark;
     this.http.post("/rest/korpus/search", rq, headers).subscribe((res: Response) => {
       let rs: SearchResult = res.json();
+      if (rs.error != null) {
+        this.errorSearch = "Памылка: "+rs.error;
+        this.statusSearch = null;
+        return
+      }
       this.latestMark = rs.latest;
       this.hasMore = rs.hasMore;
       if (rs.foundIDs.length > 0) {
@@ -213,6 +218,12 @@ export class ServiceSearch {
       this.searchMore(null);
     } else {
       this.requestPageDetails(page);
+    }
+
+    // scroll to beginning of list
+    let pos = document.getElementById('searchTop');
+    if (pos != null) {
+      pos.scrollIntoView();
     }
   }
   requestPageDetails(page: number) {
@@ -256,6 +267,7 @@ export class SearchRequest {
 }
 
 export class SearchResult {
+    public error: string;
     public foundIDs: number[];
     public latest: LatestMark;
     public hasMore: boolean;

@@ -28,6 +28,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
@@ -115,6 +117,7 @@ public class GrammarServiceImpl {
 
             Pattern reGrammar = StringUtils.isEmpty(rq.word.grammar) ? null : Pattern.compile(rq.word.grammar);
 
+         // TODO change to finder
             begpar: for (Paradigm p : getApp().gr.getAllParadigms()) {
                 if (reLemma != null) {
                     if (!reLemma.matcher(StressUtils.unstress(BelarusianWordNormalizer.normalize(p.getLemma())))
@@ -198,6 +201,31 @@ public class GrammarServiceImpl {
             throw ex;
         }
         return null;
+    }
+
+    @Path("lemmas/{form}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public String[] getLemmasByForm(@PathParam("form") String form) throws Exception {
+        LOGGER.info(">> Find lemmas by form " + form);
+        Set<String> result = Collections.synchronizedSet(new TreeSet<>());
+        try {
+            // TODO change to finder
+            getApp().gr.getAllParadigms().stream().parallel().forEach(p -> {
+                p.getVariant().forEach(v -> v.getForm().forEach(f -> {
+                    if (form.equals(f.getValue())) {
+                        result.add(p.getLemma());
+                    }
+                }));
+            });
+            LOGGER.info("<< Find lemmas by form result: " + result);
+            List<String> resultList = new ArrayList<>(result);
+            Collections.sort(resultList, BEL);
+            return resultList.toArray(new String[result.size()]);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw ex;
+        }
     }
 
     LemmaInfo.LemmaParadigm conv(Paradigm p) {

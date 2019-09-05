@@ -26,7 +26,7 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-core-2.0.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-web-2.0.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-analyzers-common-5.1.0.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-core-5.1.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-core-5.1.0.jar" sourcepath="/data/src/lucene-5.1.0-src.zip"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/validation-api-1.1.0.Final.jar"/>
 	<classpathentry kind="lib" path="lib-compile/servlet-api.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Korpus-Common"/>

@@ -1,8 +1,10 @@
 rm node_modules
 npm install
 
-run: 
-npm start
+run:
+1. build and place application to tomcat ROOT
+2. run tomcat by: "JAVA_OPTS=-DKORPUS_DIR=/data/gits/korpus-code sh bin/catalina.sh run"
+3. cd web/Web-angular; npm start
 
 build:
 npm run build

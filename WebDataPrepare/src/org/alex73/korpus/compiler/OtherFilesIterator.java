@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -24,7 +23,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
 public class OtherFilesIterator {
-    Pattern RE_ID = Pattern.compile("([0-9]+).+?OCR\\-texts\\.zip");
+    Pattern RE_ID = Pattern.compile("(([0-9]+).+?)\\-OCR\\-texts\\.zip");
 
     IProcess errors;
     IFilesIterator callback;
@@ -59,11 +58,7 @@ public class OtherFilesIterator {
 
         System.out.println("loadFileToOther " + f);
 
-        XMLText doc = new XMLText();
-        doc.setHeader(new Header());
-        doc.getHeader().getTag().add(new Tag("id", m.group(1)));
-        doc.setContent(new Content());
-
+        
         try (ZipFile zip = new ZipFile(f)) {
             String prevtext = null;
             for (Enumeration<? extends ZipEntry> it = zip.entries(); it.hasMoreElements();) {
@@ -71,26 +66,33 @@ public class OtherFilesIterator {
                 if (en.isDirectory() || en.getSize() == 0) {
                     continue;
                 }
+
                 String text;
                 try (InputStream in = new BufferedInputStream(zip.getInputStream(en))) {
                     text = IOUtils.toString(in, "UTF-8");
                 }
                 if (!text.isEmpty() && !text.equals(prevtext)) {
+                    XMLText doc = new XMLText();
+                    doc.setHeader(new Header());
+                    doc.getHeader().getTag().add(new Tag("id", m.group(2)));
+                    doc.getHeader().getTag().add(new Tag("details", m.group(1) + " / "+en.getName()));
+                    doc.setContent(new Content());
+
                     prevtext = text;
                     P p = new Splitter2(text, false, errors).getP();
                     doc.getContent().getPOrTagOrPoetry().add(p);
+
+                    if (!doc.getContent().getPOrTagOrPoetry().isEmpty()) {
+                        callback.onText(doc);
+                    }
                 }
             }
         }
-
-        if (!doc.getContent().getPOrTagOrPoetry().isEmpty()) {
-            callback.onText(doc);
-        }
     }
 
-    public static String getId(XMLText doc) {
+    public static String getTagValue(XMLText doc, String tag) {
         for (Tag t : doc.getHeader().getTag()) {
-            if ("id".equals(t.getName())) {
+            if (tag.equals(t.getName())) {
                 return t.getValue();
             }
         }

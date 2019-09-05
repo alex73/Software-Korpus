@@ -157,15 +157,16 @@ public class LuceneDriverRead extends LuceneFields {
         if (rs.totalHits < 1) {
             return null;
         }
-        int v;
         Document doc = directoryReader.document(rs.scoreDocs[0].doc);
         TextInfo result = new TextInfo();
         result.authors = doc.getField(fieldTextAuthors.name()).stringValue().split(";");
         result.title = doc.getField(fieldTextTitle.name()).stringValue();
-        v = doc.getField(fieldTextYearWritten.name()).numericValue().intValue();
-        result.writtenYear = v > 0 ? v : null;
-        v = doc.getField(fieldTextYearPublished.name()).numericValue().intValue();
-        result.publishedYear = v > 0 ? v : null;
+        result.translators = doc.getField(fieldTextTranslators.name()).stringValue().split(";");
+        result.langOrig = doc.getField(fieldTextLangOrig.name()).stringValue();
+        result.styleGenres = doc.getField(fieldTextStyleGenre.name()).stringValue().split(";");
+        result.edition = doc.getField(fieldTextEdition.name()).stringValue();
+        result.writtenTime = doc.getField(fieldTextWrittenTime.name()).stringValue();
+        result.publicationTime = doc.getField(fieldTextPublicationTime.name()).stringValue();
         return result;
     }
 

@@ -92,7 +92,7 @@ public class LuceneFilter {
     public void addOtherTextFilter(BooleanQuery query, UnprocessedTextRequest filter) {
         // volume
         if (StringUtils.isNotEmpty(filter.volume)) {
-            Query q = new TermQuery(new Term(lucene.fieldSentenceTextVolume.name(), filter.volume));
+            Query q = new TermQuery(new Term(lucene.fieldSentenceOtherVolume.name(), filter.volume));
             query.add(q, BooleanClause.Occur.MUST);
         }
     }
@@ -160,7 +160,9 @@ public class LuceneFilter {
 
     public OtherInfo getOtherInfo(Document doc) throws Exception {
         OtherInfo info = new OtherInfo();
-        info.textURL = doc.getField(lucene.fieldSentenceTextURL.name()).stringValue();
+        info.name = doc.getField(lucene.fieldSentenceOtherName.name()).stringValue();
+        info.url = doc.getField(lucene.fieldSentenceOtherURL.name()).stringValue();
+        info.details = doc.getField(lucene.fieldSentenceOtherDetails.name()).stringValue();
         return info;
     }
 }

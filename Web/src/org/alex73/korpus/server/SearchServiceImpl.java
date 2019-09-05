@@ -143,8 +143,10 @@ public class SearchServiceImpl {
             LOGGER.info("<< Result: found: " + result.foundIDs.length + " hasMore:" + result.hasMore);
             return result;
         } catch (Throwable ex) {
-            LOGGER.error("search", ex);
-            throw ex;
+            LOGGER.info("<< Result error: " + ex.getMessage());
+            SearchResult result = new SearchResult();
+            result.error = ex.getMessage();
+            return result;
         }
     }
     
@@ -173,8 +175,8 @@ public class SearchServiceImpl {
             LOGGER.info("<< Result clusters");
             return res;
         } catch (Throwable ex) {
-            LOGGER.error("clusters", ex);
-            throw ex;
+            LOGGER.info("<< Result error: " + ex.getMessage());
+            throw new RuntimeException(ex);
         }
     }
 
@@ -214,8 +216,8 @@ public class SearchServiceImpl {
             }
             return result;
         } catch (Exception ex) {
-            LOGGER.error("getSentences", ex);
-            throw ex;
+            LOGGER.info("<< Result error: " + ex.getMessage());
+            throw new RuntimeException(ex);
         }
     }
 
@@ -273,8 +275,11 @@ public class SearchServiceImpl {
     private List<String> findAllLemmas(String word) {
         word = BelarusianWordNormalizer.normalize(word);
         Set<String> result = new HashSet<>();
-        for (Paradigm p : getApp().grFinder.getParadigmsByForm(word)) {
-            result.add(p.getLemma());
+        Paradigm[] ps = getApp().grFinder.getParadigmsByForm(word);
+        if (ps != null) {
+            for (Paradigm p : ps) {
+                result.add(p.getLemma());
+            }
         }
         return new ArrayList<>(result);
     }

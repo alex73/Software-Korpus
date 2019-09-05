@@ -49,24 +49,35 @@ export class OutputSearch {
     let spanPlace = this.getOffsetRect(event.target);
     let popoverSize = this.popoverBiblioRef.nativeElement.getBoundingClientRect();
     this.popoverBiblioRef.nativeElement.style.top = (spanPlace.top-popoverSize.height)+'px';
-    this.popoverBiblioRef.nativeElement.style.left = (spanPlace.left+spanPlace.width/2-popoverSize.width/2)+'px';
+    this.popoverBiblioRef.nativeElement.style.left = spanPlace.left+'px'; //(spanPlace.left+spanPlace.width/2-popoverSize.width/2)+'px';
     this.popoverBiblioRef.nativeElement.style.visibility = 'visible';
     this.popoverBiblioRef.nativeElement.focus();
     return false;
+  }
+  getShortTitle(str) {
+    let s = str.toString();
+    if (s.length == 0) {
+      return "<...>";
+    } else if (s.length > 40) {
+      return s.substring(0,37)+"...";
+    } else {
+      return s;
+    }
   }
   leave() {
     this.popoverWordRef.nativeElement.style.visibility = 'hidden';
     this.popoverBiblioRef.nativeElement.style.visibility = 'hidden';
   }
   
-  fullText( origText: SearchResultsText, doc: TextInfo, docOther: OtherInfo ) {
+  fullText( origText: SearchResultsText, doc: TextInfo, docOther: OtherInfo, event) {
     this.biblio = doc;
     this.biblioOther = docOther;
     this.detailsText = origText.words;
     this.textDetailsModal.show();
+    event.target.className = "visited";
     return false;
   }
-  
+
   html(lemma: string, cat: string): string {
     let o: string = "";
     if (lemma) {
