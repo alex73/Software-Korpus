@@ -41,7 +41,7 @@ body {
 	max-width: 90%;
 }
 .visited {
-    color: black;
+    color: red;
 }
 
 .table-borders td, .table-borders th {

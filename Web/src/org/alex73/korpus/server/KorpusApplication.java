@@ -1,7 +1,11 @@
 package org.alex73.korpus.server;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,7 +26,6 @@ import org.alex73.korpus.base.TagLetter;
 import org.alex73.korpus.server.data.GrammarInitial;
 import org.alex73.korpus.server.data.GrammarInitial.GrammarLetter;
 import org.alex73.korpus.server.data.InitialData;
-import org.alex73.korpus.shared.StyleGenres;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -53,7 +56,7 @@ public class KorpusApplication extends Application {
             gr = GrammarDB2.initializeFromDir(dirPrefix + "/GrammarDB/");
             LOGGER.info("GrammarDB loaded with " + gr.getAllParadigms().size() + " paradigms. Used memory: " + getUsedMemory());
             grFinder = new GrammarFinder(gr);
-            LOGGER.info("GrammarDB indexed with " + grFinder.size() + " forms. Used memory: " + getUsedMemory());
+            LOGGER.info("GrammarDB indexed. Used memory: " + getUsedMemory());
             processKorpus = new LuceneFilter(dirPrefix + "/Korpus-cache/");
             processOther = new LuceneFilter(dirPrefix + "/Other-cache/");
             LOGGER.info("Lucene initialized");
@@ -89,17 +92,7 @@ public class KorpusApplication extends Application {
         }
         searchInitial.authors = Arrays.asList(props.getProperty("authors").split(";"));
         searchInitial.statKorpus = stat(props);
-        searchInitial.styleGenresParts = StyleGenres.KNOWN_GROUPS;
-        searchInitial.styleGenres = new TreeMap<>();
-        for (String p : StyleGenres.KNOWN_GROUPS) {
-            searchInitial.styleGenres.put(p, new ArrayList<>());
-        }
-        for (String k : StyleGenres.KNOWN) {
-            String[] p = k.split("/");
-            if (p.length == 2) {
-                searchInitial.styleGenres.get(p[0]).add(p[1]);
-            }
-        }
+        loadStyleGenres();
         searchInitial.grammar = grammarInitial;
 
         props = new Properties();
@@ -165,5 +158,25 @@ public class KorpusApplication extends Application {
             result.put(lt.letter, g);
         }
         return result;
+    }
+
+    private void loadStyleGenres() throws IOException {
+        searchInitial.styleGenresParts = new ArrayList<>();
+        searchInitial.styleGenres = new TreeMap<>();
+        try (BufferedReader rd = new BufferedReader(
+                new InputStreamReader(getClass().getClassLoader().getResourceAsStream("/styleGenres.txt"), StandardCharsets.UTF_8))) {
+            String s;
+            while ((s = rd.readLine()) != null) {
+                s = s.trim();
+                int p = s.indexOf('/');
+                String gr = p < 0 ? s : s.substring(0, p);
+                if (!searchInitial.styleGenresParts.contains(gr)) {
+                    searchInitial.styleGenresParts.add(gr);
+                    searchInitial.styleGenres.put(gr, new ArrayList<>());
+                }
+                String n = p < 0 ? s : s.substring(p + 1);
+                searchInitial.styleGenres.get(gr).add(n);
+            }
+        }
     }
 }

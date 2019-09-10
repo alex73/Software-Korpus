@@ -1,58 +1,42 @@
-/**************************************************************************
- Korpus - Corpus Linguistics Software.
-
- Copyright (C) 2013 Aleś Bułojčyk (alex73mail@gmail.com)
-               Home page: https://sourceforge.net/projects/korpus/
-
- This file is part of Korpus.
-
- Korpus is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
-
- Korpus is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
- **************************************************************************/
-
 package org.alex73.korpus.base;
 
-import java.util.Locale;
-
 /**
- * Class for word normalization, i.e. remove upper case, fix apostrophe, replace
- * stress char to '+', change first 'ў' to 'у'.
+ * Разлічвае хэш слова:
+ * 
+ * - не ўлічвае вялікія/малыя літары
+ * 
+ * - апостраф улічвае толькі ўсярэдзіне слова
+ * 
+ * - націск неўлічваецца
+ * 
+ * - першая 'ў' мяняецца на 'у'
+ * 
+ * - 'г-выбуховае' ўлічваецца як звычайнае 'г'
  */
-public class BelarusianWordNormalizer {
-    public static final Locale BEL = new Locale("be");
-    public static final String apostrafy = "\'\u02BC\u2019";
-    public static final String letters = apostrafy
-            + "ёйцукенгшўзхфывапролджэячсмітьбющиЁЙЦУКЕНГШЎЗХФЫВАПРОЛДЖЭЯЧСМІТЬБЮЩИqwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
-    private static final String ZNAKI = "-—,:!?/.…\"“”«»()[]";
-
-    public static boolean isLetter(char c) {
-        return letters.indexOf(c) >= 0;
-    }
-
-    public static boolean isZnak(char c) {
-        return ZNAKI.indexOf(c) >= 0;
-    }
-
-    public static String normalize(String word) {
+public class BelarusianWordHash {
+    public static int hash(String word) {
         if (word == null) {
-            return null;
+            return 0;
         }
-        char[] chars = word.toCharArray();
-        int outStart = 0;
-        int outEnd = 0;
-        for (int i = 0; i < chars.length; i++) {
-            char c = chars[i];
-            switch (c) {
+        boolean isFirst = true;
+        boolean wasApostraf = false;
+        int result = 0;
+        for (int i = 0; i < word.length(); i++) {
+            char c = 0;
+            switch (word.charAt(i)) {
+            case '\'':
+            case '\u02BC':
+            case '\u2019':
+                // Правільны апостраф - 02BC, але паўсюль ужываем лацінкавы
+                if (!isFirst) {
+                    wasApostraf = true;
+                }
+                continue;
+            case '\u00B4':
+            case '\u0301':
+            case '+':
+                // Націск: асобны знак - 00B4, спалучэньне з папярэдняй літарай - 0301
+                continue;
             case 'а':
             case 'А':
                 c = 'а';
@@ -143,7 +127,7 @@ public class BelarusianWordNormalizer {
                 break;
             case 'ў':
             case 'Ў':
-                c = i == 0 ? 'у' : 'ў';
+                c = isFirst ? 'у' : 'ў';
                 break;
             case 'ф':
             case 'Ф':
@@ -185,32 +169,14 @@ public class BelarusianWordNormalizer {
             case 'Я':
                 c = 'я';
                 break;
-            case '\'':
-            case '\u02BC':
-            case '\u2019':
-                // Правільны апостраф - 02BC, але паўсюль ужываем лацінкавы
-                c = '\'';
-                break;
-            case '\u00B4':
-            case '\u0301':
-            case '+':
-                // Націск: асобны знак - 00B4, спалучэньне з папярэдняй літарай
-                // - 0301
-                // адкідаем націскі
+            default:
                 continue;
             }
-            chars[outEnd] = c;
-            outEnd++;
+            if (wasApostraf) {
+                result = 31 * result + '\'';
+            }
+            result = 31 * result + c;
         }
-        if (outStart < outEnd && apostrafy.indexOf(chars[outStart]) >= 0) {
-            outStart++;
-        }
-        if (outEnd > 0 && apostrafy.indexOf(chars[outEnd - 1]) >= 0) {
-            outEnd--;
-        }
-        if (outEnd == 0) {
-            return "";
-        }
-        return new String(chars, outStart, outEnd - outStart);
+        return result;
     }
 }

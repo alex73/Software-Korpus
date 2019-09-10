@@ -27,16 +27,17 @@ import org.alex73.korpus.utils.StressUtils;
 public class GrammarFiller {
     public static final Locale BEL = new Locale("be");
 
-    private IGrammarFinder[] fi;
+    private GrammarFinder[] fi;
 
-    public GrammarFiller(IGrammarFinder... fi) {
+    public GrammarFiller(GrammarFinder... fi) {
         this.fi = fi;
     }
 
     public Paradigm[][] getParadigmsByWord(String word) {
         Paradigm[][] ps = new Paradigm[fi.length][];
         for (int i = 0; i < fi.length; i++) {
-            ps[i] = fi[i].getParadigmsByForm(word);
+            ps[i] = fi[i].getParadigmsLikeForm(word);
+            // TODO filter only really required
         }
         return ps;
     }

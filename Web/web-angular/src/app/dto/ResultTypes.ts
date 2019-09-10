@@ -183,7 +183,7 @@ export class ResultSearchOut {
         while (true) {
             let w: WordResult = words[curr.sentence][curr.word];
             if (!w.isWord && w.orig && w.orig.charAt(0) == '\n') {
-                row.words.push(new WordResult("<br/>")); // TODO
+                row.words.push(new WordResult(" \\\\ ")); // TODO
             } else {
                 row.words.push(w); 
             }

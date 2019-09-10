@@ -14,7 +14,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
+import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.server.data.ClusterParams;
 import org.alex73.korpus.server.data.ClusterResults;
@@ -275,10 +277,15 @@ public class SearchServiceImpl {
     private List<String> findAllLemmas(String word) {
         word = BelarusianWordNormalizer.normalize(word);
         Set<String> result = new HashSet<>();
-        Paradigm[] ps = getApp().grFinder.getParadigmsByForm(word);
-        if (ps != null) {
-            for (Paradigm p : ps) {
-                result.add(p.getLemma());
+        Paradigm[] ps = getApp().grFinder.getParadigmsLikeForm(word);
+        nextp: for (Paradigm p : ps) {
+            for (Variant v : p.getVariant()) {
+                for (Form f : v.getForm()) {
+                    if (BelarusianWordNormalizer.normalize(f.getValue()).equals(word)) {
+                        result.add(p.getLemma());
+                        continue nextp;
+                    }
+                }
             }
         }
         return new ArrayList<>(result);

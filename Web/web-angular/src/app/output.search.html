@@ -140,13 +140,12 @@
       </div>
       <div class="modal-body">
           <span *ngFor="let row of detailsText">
-              <span *ngFor="let w of row">
-                  <span *ngIf="w.orig != '\n'"
+              <span *ngFor="let w of row"
+                 ><span *ngIf="w.orig != '\n'"
                       korpusWord [korpusWordValue] = "w"
-                      >{{w.orig}}</span>
-                  <br *ngIf="w.orig == '\n'"/>
-              </span>
-          </span>
+                      >{{w.orig}}</span><br *ngIf="w.orig == '\n'"
+              /></span
+          ></span>
       </div>
     </div>
   </div>

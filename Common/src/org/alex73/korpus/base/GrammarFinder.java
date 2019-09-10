@@ -1,61 +1,60 @@
 package org.alex73.korpus.base;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.alex73.corpus.paradigm.Paradigm;
-import org.alex73.korpus.utils.StressUtils;
 
-public class GrammarFinder implements IGrammarFinder {
-    private final Map<String, Paradigm[]> paradigmsByForm;
+public class GrammarFinder {
+    private static final int HASHTABLE_SIZE = 256 * 1024;
+    private static final Paradigm[] EMPTY = new Paradigm[0];
+    private final Paradigm[][] table;
 
     public GrammarFinder(GrammarDB2 gr) {
-        paradigmsByForm = new HashMap<>(gr.getAllParadigms().size());
+        final List<List<Paradigm>> prepare = new ArrayList<>(HASHTABLE_SIZE);
+        for (int i = 0; i < HASHTABLE_SIZE; i++) {
+            prepare.add(new ArrayList<>());
+        }
         long be = System.currentTimeMillis();
         gr.getAllParadigms().parallelStream().forEach(p -> {
             p.getVariant().forEach(v -> {
                 v.getForm().forEach(f -> {
-                    String orig = StressUtils.unstress(BelarusianWordNormalizer.normalize(f.getValue()));
-                    if (!orig.isEmpty()) {
-                        add(orig, p);
+                    if (f.getValue() != null && !f.getValue().isEmpty()) {
+                        int hash = BelarusianWordHash.hash(f.getValue());
+                        int indexByHash = Math.abs(hash) % HASHTABLE_SIZE;
+                        List<Paradigm> list = prepare.get(indexByHash);
+                        synchronized (list) {
+                            for (int i = 0; i < list.size(); i++) {
+                                if (list.get(i) == p) {
+                                    return;
+                                }
+                            }
+                            list.add(p);
+                        }
                     }
                 });
             });
         });
-        long af = System.currentTimeMillis();
-        System.out.println("GrammarFinder prepare time: " + (af - be) + "ms, forms indexed: " + paradigmsByForm.size());
-    }
-
-    /**
-     * Must be synchronized because executed in the many thread by constructor.
-     */
-    private synchronized void add(String key, Paradigm p) {
-        key = GrammarDB2.optimizeString(key);
-        Paradigm[] byForm = paradigmsByForm.get(key);
-        if (byForm == null) {
-            byForm = new Paradigm[1];
-        } else {
-            for (int i = byForm.length - 1; i >= 0; i--) {
-                if (byForm[i] == p) {
-                    return;
-                }
+        table = new Paradigm[HASHTABLE_SIZE][];
+        int maxLen = 0;
+        for (int i = 0; i < table.length; i++) {
+            List<Paradigm> list = prepare.get(i);
+            if (!list.isEmpty()) {
+                table[i] = list.toArray(new Paradigm[list.size()]);
+                maxLen = Math.max(maxLen, table[i].length);
             }
-            byForm = Arrays.copyOf(byForm, byForm.length + 1);
         }
-        byForm[byForm.length - 1] = p;
-        paradigmsByForm.put(key, byForm);
+        long af = System.currentTimeMillis();
+        System.out.println("GrammarFinder prepare time: " + (af - be) + "ms, with max table tail=" + maxLen);
     }
 
     /**
      * Find paradigms by word (lower case).
      */
-    public Paradigm[] getParadigmsByForm(String word) {
-        word = StressUtils.unstress(BelarusianWordNormalizer.normalize(word));
-        return paradigmsByForm.get(word);
-    }
-
-    public int size() {
-        return paradigmsByForm.size();
+    public Paradigm[] getParadigmsLikeForm(String word) {
+        int hash = BelarusianWordHash.hash(word);
+        int indexByHash = Math.abs(hash) % HASHTABLE_SIZE;
+        Paradigm[] result = table[indexByHash];
+        return result != null ? result : EMPTY;
     }
 }
