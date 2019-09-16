@@ -13,4 +13,9 @@ public class WordRequest implements Serializable {
     public boolean isWildcardWord() {
         return word.indexOf('*') >= 0 || word.indexOf('?') >= 0;
     }
+
+    @Override
+    public String toString() {
+        return "word=" + word + "/allForms=" + allForms + "/grammar=" + grammar;
+    }
 }

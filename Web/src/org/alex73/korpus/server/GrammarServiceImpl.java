@@ -210,14 +210,17 @@ public class GrammarServiceImpl {
         LOGGER.info(">> Find lemmas by form " + form);
         Set<String> result = Collections.synchronizedSet(new TreeSet<>());
         try {
-            // TODO change to finder
-            getApp().gr.getAllParadigms().stream().parallel().forEach(p -> {
-                p.getVariant().forEach(v -> v.getForm().forEach(f -> {
-                    if (form.equals(f.getValue())) {
-                        result.add(p.getLemma());
+            form = BelarusianWordNormalizer.normalize(form);
+            for (Paradigm p : getApp().grFinder.getParadigmsLikeForm(form)) {
+                for (Variant v : p.getVariant()) {
+                    for (Form f : v.getForm()) {
+                        if (form.equals(BelarusianWordNormalizer.normalize(f.getValue()))) {
+                            result.add(BelarusianWordNormalizer.normalize(v.getLemma()));
+                            break;
+                        }
                     }
-                }));
-            });
+                }
+            }
             LOGGER.info("<< Find lemmas by form result: " + result);
             List<String> resultList = new ArrayList<>(result);
             Collections.sort(resultList, BEL);
