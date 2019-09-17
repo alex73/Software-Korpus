@@ -33,16 +33,13 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
 import org.alex73.corpus.paradigm.Form;
@@ -209,10 +206,8 @@ public class GrammarServiceImpl {
     @Path("lemmas/{form}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public String[] getLemmasByForm(@PathParam("form") String form,
-            @HeaderParam("Referer") String referer,
-            @Context HttpServletResponse response) throws Exception {
-        LOGGER.info(">> Find lemmas by form '" + form + "' from " + referer);
+    public String[] getLemmasByForm(@PathParam("form") String form) throws Exception {
+        LOGGER.info(">> Find lemmas by form " + form);
         Set<String> result = Collections.synchronizedSet(new TreeSet<>());
         try {
             form = BelarusianWordNormalizer.normalize(form);
@@ -229,7 +224,6 @@ public class GrammarServiceImpl {
             LOGGER.info("<< Find lemmas by form result: " + result);
             List<String> resultList = new ArrayList<>(result);
             Collections.sort(resultList, BEL);
-            response.setHeader("Access-Control-Allow-Origin", "*");
             return resultList.toArray(new String[result.size()]);
         } catch (Exception ex) {
             ex.printStackTrace();
