@@ -11,25 +11,25 @@ Additional thing for processing is language-specific *Grammar database*. It cont
 Texts should be prepared for use they in Search UI.
 
 The best, but most slowly, process of preparing text will looks like:
-!(readme2.png)
+![readme2.png](readme2.png)
 
 Texts for corpus should be prepared as simple text files with some passport info at the beginning of file. After that, somebody should use *Editor* for mark texts: choose specific word for each homonym in text, add new words into Grammar database, etc. Each word of text will contain link to Grammar database at the end of editing. Text after editing stored in XML.
 *Compiler* should process all marked texts for create *Corpus database*. *Search UI* will use *Corpus database* for display info.
 Choosing right word for homonyms via *Editor* increases quality of corpus, but requires much time since each text should be processed manually.
 
 Not so best, but faster process of texts preparing can looks like:
-!(readme5.png)
+![readme5.png](readme5.png)
 
 Since user don’t need to process each text manually, it dramatically decreases time of corpus preparing. Drawbacks: user will see all homonyms in texts even if he will choose some grammar marks.
 But creating grammar database for you language will also require enough big time.
 
 Most faster process of texts preparing can looks like:
-!(readme1.png)
+![readme1.png](readme1.png)
 
 This variant of preparation doesn’t require grammar database at all. Drawbacks: user will not be able to find all forms of word, but corpus will still be useful since search with ‘\*’ will work. For example, user can find ‘animal\*’ for view ‘animal’ and ‘animals’ forms. It will be useful especially  for languages without declension.
 
 Actually, *Korpus* can combine all these 3 variants of text processing. Compiler can process all kind of words together: marked words without homonyms, non-marked words with automatic processing via grammar database, and unknown words that not exists in grammar database. Thereby, real process of prepare texts can looks like:
-!(readme3.png)
+![readme3.png](readme3.png)
 
 With this combined process, text corpus can be improved step-by-step. You can add new texts, create grammar database and mark texts for removing homonyms independently.
 
@@ -44,7 +44,7 @@ Compiler is Java program that only administrator will use. Goal of compiler is t
 
 Search UI
 ---------
-!(readme4.png)
+![readme4.png](readme4.png)
 Requirements for *Search UI* are different -- it should be accessible via Internet. Search UI is standard Java Web application with Angular+Bootstrap libraries. Search UI requires Grammar database and precompiled corpus database that created by *Compiler*.
 Requests from users can be much complex that simple search of specific word, i.e. complex that Lucene database can support. That’s why “two-pass” search is required: first pass is just search by specific words or grammar marks, then second pass checks more complex rules in found paragraphs.
 
