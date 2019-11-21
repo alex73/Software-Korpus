@@ -11,7 +11,7 @@ Additional thing for processing is language-specific *Grammar database*. It cont
 Texts should be prepared for use they in Search UI.
 
 The best, but most slowly, process of preparing text will looks like:
-![readme2.png](readme2.png)
+![readme2.png](./readme2.png?format=raw)
 
 Texts for corpus should be prepared as simple text files with some passport info at the beginning of file. After that, somebody should use *Editor* for mark texts: choose specific word for each homonym in text, add new words into Grammar database, etc. Each word of text will contain link to Grammar database at the end of editing. Text after editing stored in XML.
 *Compiler* should process all marked texts for create *Corpus database*. *Search UI* will use *Corpus database* for display info.
