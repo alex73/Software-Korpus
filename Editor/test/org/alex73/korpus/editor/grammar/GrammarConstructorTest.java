@@ -7,9 +7,9 @@ import org.junit.Test;
 public class GrammarConstructorTest {
     @Test
     public void testCompareEnds() {
-        assertEquals(11, GrammarConstructor.compareEnds("абаку+львацца", "пераку+львацца"));
-        assertEquals(10, GrammarConstructor.compareEnds("абакульвацца", "пераку+львацца"));
-        assertEquals(3, GrammarConstructor.compareEnds("абакульва+цца", "пераку+львацца"));
+        assertEquals(11, GrammarConstructor.eqEnds.getScore("абаку+львацца", "пераку+львацца"));
+        assertEquals(10, GrammarConstructor.eqEnds.getScore("абакульвацца", "пераку+львацца"));
+        assertEquals(3, GrammarConstructor.eqEnds.getScore("абакульва+цца", "пераку+львацца"));
     }
 
     @Test

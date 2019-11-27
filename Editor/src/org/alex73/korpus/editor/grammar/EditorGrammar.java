@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,11 +18,10 @@ import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.corpus.paradigm.Wordlist;
-import org.alex73.korpus.base.BelarusianWordNormalizer;
+import org.alex73.korpus.base.BelarusianWordHash;
 import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.base.IGrammarFinder;
 import org.alex73.korpus.editor.core.Theme;
-import org.alex73.korpus.utils.StressUtils;
 
 public class EditorGrammar implements IGrammarFinder {
 
@@ -43,7 +41,7 @@ public class EditorGrammar implements IGrammarFinder {
     private String localGrammarFile;
 
     private List<Paradigm> docLevelParadigms = new ArrayList<>();
-    private Map<String, Paradigm[]> docLevelParadigmsByForm = new HashMap<>();
+    private Map<Integer, List<Paradigm>> docLevelParadigmsByForm = new HashMap<>();
 
     public EditorGrammar(GrammarDB2 gr, String localGrammarFile) throws Exception {
         this.gr = gr;
@@ -67,32 +65,31 @@ public class EditorGrammar implements IGrammarFinder {
     }
 
     @Override
-    public synchronized Paradigm[] getParadigmsByForm(String word) {
-        word = StressUtils.unstress(BelarusianWordNormalizer.normalize(word));
-        Paradigm[] r = docLevelParadigmsByForm.get(word);
-        return r;
+    public synchronized Paradigm[] getParadigmsLikeForm(String word) {
+        int hash = BelarusianWordHash.hash(word);
+        List<Paradigm> r = docLevelParadigmsByForm.get(hash);
+        return r.toArray(new Paradigm[r.size()]);
     }
 
     public synchronized void addDocLevelParadigm(Paradigm p) {
         docLevelParadigms.add(p);
         for (Variant va : p.getVariant()) {
             for (Form f : va.getForm()) {
-                String v = StressUtils.unstress(BelarusianWordNormalizer.normalize(f.getValue()));
-                if (v.isEmpty()) {
+                if (f.getValue().isEmpty()) {
                     continue;
                 }
-                Paradigm[] byForm = docLevelParadigmsByForm.get(v);
+                int hash = BelarusianWordHash.hash(f.getValue());
+                List<Paradigm> byForm = docLevelParadigmsByForm.get(hash);
                 if (byForm == null) {
-                    byForm = new Paradigm[1];
+                    byForm = new ArrayList<>();
+                    docLevelParadigmsByForm.put(hash, byForm);
                 } else {
-                    if (byForm[byForm.length - 1] == p) {
+                    if (byForm.get(byForm.size() - 1) == p) {
                         // already stored
                         continue;
                     }
-                    byForm = Arrays.copyOf(byForm, byForm.length + 1);
                 }
-                byForm[byForm.length - 1] = p;
-                docLevelParadigmsByForm.put(v, byForm);
+                byForm.add(p);
             }
         }
     }

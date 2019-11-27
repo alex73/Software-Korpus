@@ -38,13 +38,13 @@ public class GrammarConstructor {
         this.ed = ed;
     }
 
-    Comparer eqEqual = new Comparer() {
+    static Comparer eqEqual = new Comparer() {
         @Override
         public int getScore(String target, String comparable) {
             return target.equals(comparable) ? 1 : 0;
         }
     };
-    Comparer eqEnds = new Comparer() {
+    static Comparer eqEnds = new Comparer() {
         @Override
         public int getScore(String target, String comparable) {
             if (!StressUtils.hasStress(target)) {

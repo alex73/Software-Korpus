@@ -1,4 +1,4 @@
-package org.alex73.korpus.editor.core.structure;
+package org.alex73.korpus.editor.core.doc.structure;
 
 import java.io.File;
 import java.io.FileInputStream;

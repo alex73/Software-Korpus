@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.alex73.corpus.paradigm.Paradigm;
 
-public class GrammarFinder {
+public class GrammarFinder implements IGrammarFinder {
     private static final int HASHTABLE_SIZE = 256 * 1024;
     private static final Paradigm[] EMPTY = new Paradigm[0];
     private final Paradigm[][] table;

@@ -20,13 +20,14 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
 
-package org.alex73.korpus.editor.core.structure;
+package org.alex73.korpus.editor.core.doc.structure;
 
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 
-import org.alex73.korpus.editor.core.GrammarDB;
+import org.alex73.korpus.base.GrammarDB2;
+import org.alex73.korpus.editor.core.doc.structure.Line;
 import org.alex73.korpus.text.xml.S;
 import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.Z;
@@ -38,16 +39,7 @@ public class ItemsHelperTest {
 
     @Before
     public void before() throws Exception {
-        GrammarDB.initializeFromDir(new File("GrammarDB"), new GrammarDB.LoaderProgress() {
-            public void setFilesCount(int count) {
-            }
-
-            public void beforeFileLoading(String file) {
-            }
-
-            public void afterFileLoading() {
-            }
-        });
+        GrammarDB2.initializeFromDir("GrammarDB");
 
         line = new Line();
         line.add(new S(" "));
@@ -56,7 +48,7 @@ public class ItemsHelperTest {
         w1.setValue("word");
         line.add(new W("word"));
         Z wz = new Z();
-        wz.setValue(".");
+        wz.setChar(".");
         line.add(new Z("."));
     }
 

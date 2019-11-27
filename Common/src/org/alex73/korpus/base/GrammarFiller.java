@@ -27,9 +27,9 @@ import org.alex73.korpus.utils.StressUtils;
 public class GrammarFiller {
     public static final Locale BEL = new Locale("be");
 
-    private GrammarFinder[] fi;
+    private IGrammarFinder[] fi;
 
-    public GrammarFiller(GrammarFinder... fi) {
+    public GrammarFiller(IGrammarFinder... fi) {
         this.fi = fi;
     }
 
