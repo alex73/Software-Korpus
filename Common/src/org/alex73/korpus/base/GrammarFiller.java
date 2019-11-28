@@ -1,5 +1,6 @@
 package org.alex73.korpus.base;
 
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
@@ -34,16 +35,37 @@ public class GrammarFiller {
     }
 
     public Paradigm[][] getParadigmsByWord(String word) {
+        String normalizedWord = BelarusianWordNormalizer.normalize(word);
         Paradigm[][] ps = new Paradigm[fi.length][];
         for (int i = 0; i < fi.length; i++) {
-            ps[i] = fi[i].getParadigmsLikeForm(word);
-            // TODO filter only really required
+            Paradigm[] list = fi[i].getParadigmsLikeForm(word);
+            Paradigm[] outList = new Paradigm[list.length];
+            int p2 = 0;
+            for (int p1 = 0; p1 < list.length; p1++) {
+                if (isAllowedForWord(normalizedWord, list[p1])) {
+                    outList[p2] = list[p1];
+                    p2++;
+                }
+            }
+            ps[i] = Arrays.copyOf(outList, p2);
         }
         return ps;
     }
 
+    boolean isAllowedForWord(String normalizedWord, Paradigm p) {
+        for (Variant v : p.getVariant()) {
+            for (Form f : v.getForm()) {
+                String normalizedForm = BelarusianWordNormalizer.normalize(f.getValue());
+                if (normalizedForm.equals(normalizedWord)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public W getWordInfo(String w) {
-        String word = StressUtils.unstress(BelarusianWordNormalizer.normalize(w));
+        String word = BelarusianWordNormalizer.normalize(w);
         W result = new W(w); // value must be original text
         Paradigm[][] ps = getParadigmsByWord(word);
         fillWordInfoParadigms(result, ps);
@@ -68,7 +90,7 @@ public class GrammarFiller {
     }
 
     public void fill(W w) {
-        String word = StressUtils.unstress(BelarusianWordNormalizer.normalize(w.getValue()));
+        String word = BelarusianWordNormalizer.normalize(w.getValue());
         Paradigm[][] ps = getParadigmsByWord(word);
         fillWordInfoParadigms(w, ps);
     }
@@ -95,7 +117,7 @@ public class GrammarFiller {
                     for (Form f : v.getForm()) {
                         String form = BelarusianWordNormalizer.normalize(f.getValue());
                         if (hasStress) {
-                            if (word.equals(form) || StressUtils.unstress(word).equals(form)) {
+                            if (word.equals(form)) {
                                 lemmas.add(p.getLemma());
                                 cats.add(p.getTag() + f.getTag());
                             }

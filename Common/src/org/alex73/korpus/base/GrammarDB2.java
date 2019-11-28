@@ -52,16 +52,19 @@ public class GrammarDB2 {
     }
 
     public static GrammarDB2 initializeFromJar() throws Exception {
-        GrammarDB2 r;
+        long be = System.currentTimeMillis();
+        GrammarDB2 r = null;
         try (InputStream in = GrammarDB2.class.getResourceAsStream("/" + CACHE_FILE)) {
-            if (in == null)
-                return null;
-            long be = System.currentTimeMillis();
-            Input input = new Input(in, 65536);
-            r = loadFromCache(input);
-            long af = System.currentTimeMillis();
-            System.out.println("GrammarDB deserialization time: " + (af - be) + "ms");
+            if (in != null) {
+                Input input = new Input(in, 65536);
+                r = loadFromCache(input);
+            }
         }
+        if (r == null) {
+            r = initializeFromDir("GrammarDB");
+        }
+        long af = System.currentTimeMillis();
+        System.out.println("GrammarDB deserialization time: " + (af - be) + "ms");
         return r;
     }
 

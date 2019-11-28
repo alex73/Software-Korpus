@@ -68,7 +68,7 @@ public class EditorGrammar implements IGrammarFinder {
     public synchronized Paradigm[] getParadigmsLikeForm(String word) {
         int hash = BelarusianWordHash.hash(word);
         List<Paradigm> r = docLevelParadigmsByForm.get(hash);
-        return r.toArray(new Paradigm[r.size()]);
+        return r != null ? r.toArray(new Paradigm[r.size()]) : new Paradigm[0];
     }
 
     public synchronized void addDocLevelParadigm(Paradigm p) {

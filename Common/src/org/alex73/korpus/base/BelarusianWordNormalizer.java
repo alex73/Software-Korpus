@@ -25,8 +25,8 @@ package org.alex73.korpus.base;
 import java.util.Locale;
 
 /**
- * Class for word normalization, i.e. remove upper case, fix apostrophe, replace
- * stress char to '+', change first 'ў' to 'у'.
+ * Class for word normalization, i.e. remove upper case, fix apostrophe, replace stress char to '+', change first 'ў' to
+ * 'у'.
  */
 public class BelarusianWordNormalizer {
     public static final Locale BEL = new Locale("be");
@@ -198,6 +198,53 @@ public class BelarusianWordNormalizer {
                 // - 0301
                 // адкідаем націскі
                 continue;
+            }
+            chars[outEnd] = c;
+            outEnd++;
+        }
+        if (outStart < outEnd && apostrafy.indexOf(chars[outStart]) >= 0) {
+            outStart++;
+        }
+        if (outEnd > 0 && apostrafy.indexOf(chars[outEnd - 1]) >= 0) {
+            outEnd--;
+        }
+        if (outEnd == 0) {
+            return "";
+        }
+        return new String(chars, outStart, outEnd - outStart);
+    }
+
+    public static final String NORMALIZE_PRESERVE_CASE_ALLOWED = "ёйцукенгшўзхфывапролджэячсмітьбюЁЙЦУКЕНГШЎЗХФЫВАПРОЛДЖЭЯЧСМІТЬБЮ";
+
+    public static String normalizePreserveCase(String word) {
+        if (word == null) {
+            return null;
+        }
+        char[] chars = word.toCharArray();
+        int outStart = 0;
+        int outEnd = 0;
+        for (int i = 0; i < chars.length; i++) {
+            char c = chars[i];
+            if (NORMALIZE_PRESERVE_CASE_ALLOWED.indexOf(c) < 0) {
+                switch (c) {
+                case 'ґ':
+                case 'Ґ':
+                    c = 'г';
+                    break;
+                case '\'':
+                case '\u02BC':
+                case '\u2019':
+                    // Правільны апостраф - 02BC, але паўсюль ужываем лацінкавы
+                    c = '\'';
+                    break;
+                case '\u00B4':
+                case '\u0301':
+                case '+':
+                    // Націск: асобны знак - 00B4, спалучэньне з папярэдняй літарай
+                    // - 0301
+                    // адкідаем націскі
+                    continue;
+                }
             }
             chars[outEnd] = c;
             outEnd++;

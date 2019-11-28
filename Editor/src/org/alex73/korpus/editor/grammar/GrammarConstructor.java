@@ -61,12 +61,14 @@ public class GrammarConstructor {
         }
     };
 
-    public Paradigm getLooksLike(String word, String looksLike, boolean checkForms, String tagMask, StringBuilder out,
+    public Paradigm getLooksLike(String word, String looksLike, boolean preserveCase, boolean checkForms, String tagMask, StringBuilder out,
             Integer skipParadigmId) {
         final Comparer comparer;
         String target;
+        String wordNormalized = preserveCase ? BelarusianWordNormalizer.normalizePreserveCase(word)
+                : BelarusianWordNormalizer.normalize(word);
         if (looksLike.isEmpty()) {
-            target = BelarusianWordNormalizer.normalize(word);
+            target = wordNormalized;
             comparer = eqEnds;
         } else {
             target = BelarusianWordNormalizer.normalize(looksLike);
@@ -113,7 +115,7 @@ public class GrammarConstructor {
         // get best
         PVW best = scores.get(scores.size() - 1).get(0);
         out.append(best.p.getLemma() + "/" + best.p.getTag());
-        return constructParadigm(BelarusianWordNormalizer.normalize(word), best.p, best.v, best.w);
+        return constructParadigm(wordNormalized, best.p, best.v, best.w);
     }
 
     public void addToScores(int score, Paradigm p, Variant v, String w) {

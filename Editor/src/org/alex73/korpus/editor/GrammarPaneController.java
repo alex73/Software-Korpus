@@ -30,6 +30,8 @@ import java.util.concurrent.CancellationException;
 import javax.swing.SwingWorker;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
@@ -82,6 +84,11 @@ public class GrammarPaneController {
             }
 
             public void removeUpdate(DocumentEvent e) {
+                updateXML();
+            }
+        });
+        UI.grammarPane.cbPreserveCase.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
                 updateXML();
             }
         });
@@ -245,12 +252,14 @@ public class GrammarPaneController {
 
     static class UpdaterXML extends SwingWorker<String, Void> {
         String word, grammar, theme, looksLike;
+        boolean preserveCase;
 
         public UpdaterXML() {
             word = UI.grammarPane.txtWord.getText();
             grammar = UI.grammarPane.txtGrammar.getText().toUpperCase();
             theme = UI.grammarPane.txtTheme.getText();
             looksLike = UI.grammarPane.txtLooksLike.getText().trim();
+            preserveCase = UI.grammarPane.cbPreserveCase.isSelected();
             if (theme.trim().length() == 0) {
                 theme = null;
             }
@@ -263,7 +272,7 @@ public class GrammarPaneController {
             String out;
             StringBuilder like = new StringBuilder();
             boolean checkForms = intoParadigmId == null && looksLike.isEmpty();
-            Paradigm p = grConstr.getLooksLike(word, looksLike, checkForms, grammar, like, intoParadigmId);
+            Paradigm p = grConstr.getLooksLike(word, looksLike, preserveCase, checkForms, grammar, like, intoParadigmId);
             if (intoParadigmId != null) {
                 Paradigm pInto = grConstr.ed.gr.getAllParadigms().stream()
                         .filter(pa -> pa.getPdgId() == intoParadigmId.intValue()).findFirst().get();

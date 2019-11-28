@@ -57,7 +57,7 @@ public class WordInfoPaneController {
         } else {
             p.txtWord.setText(word.getValue());
 
-            String wuns = StressUtils.unstress(BelarusianWordNormalizer.normalize(word.getValue()));
+            String wuns = BelarusianWordNormalizer.normalize(word.getValue());
             Paradigm[][] pa2 = MainController.filler.getParadigmsByWord(wuns);
 
             ButtonGroup rbGroupLemma = new ButtonGroup();
