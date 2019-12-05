@@ -26,8 +26,8 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element ref="{}Form" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="id" type="{}latin_char" />
- *       &lt;attribute name="pravapis" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="lemma" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="pravapis" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="type" type="{}VariantType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -53,10 +53,10 @@ public class Variant {
     protected List<Form> form;
     @XmlAttribute(name = "id")
     protected String id;
-    @XmlAttribute(name = "pravapis")
-    protected String pravapis;
     @XmlAttribute(name = "lemma", required = true)
     protected String lemma;
+    @XmlAttribute(name = "pravapis")
+    protected String pravapis;
     @XmlAttribute(name = "type")
     protected VariantType type;
 
@@ -172,30 +172,6 @@ public class Variant {
     }
 
     /**
-     * Gets the value of the pravapis property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getPravapis() {
-        return pravapis;
-    }
-
-    /**
-     * Sets the value of the pravapis property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setPravapis(String value) {
-        this.pravapis = value;
-    }
-
-    /**
      * Gets the value of the lemma property.
      * 
      * @return
@@ -217,6 +193,30 @@ public class Variant {
      */
     public void setLemma(String value) {
         this.lemma = value;
+    }
+
+    /**
+     * Gets the value of the pravapis property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getPravapis() {
+        return pravapis;
+    }
+
+    /**
+     * Sets the value of the pravapis property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setPravapis(String value) {
+        this.pravapis = value;
     }
 
     /**

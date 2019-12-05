@@ -1,22 +1,33 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <project name="Korpus-Common" default="all" basedir=".">
 
-	<target name="clean">
-		<delete dir="build" failonerror="false" />
-	</target>
+    <target name="clean">
+        <delete dir="build" failonerror="false" />
+    </target>
 
-	<target name="build">
-		<mkdir dir="build/classes" />
-		<javac srcdir="src" encoding="utf-8" destdir="build/classes" nowarn="true" debug="true" debuglevel="lines,vars,source">
-			<classpath>
-				<fileset dir="lib" includes="**/*.jar" />
-			</classpath>
-		</javac>
-		<copy todir="build/classes">
-			<fileset dir="src" />
-		</copy>
-		<jar jarfile="build/Korpus-Common.jar" basedir="build/classes"/>
-	</target>
+    <target name="xjc">
+        <exec executable="xjc">
+            <arg value="-no-header" />
+            <arg value="-d" />
+            <arg value="src/" />
+            <arg value="-p" />
+            <arg value="org.alex73.corpus.paradigm" />
+            <arg value="src/xsd/Paradigm.xsd" />
+        </exec>
+    </target>
 
-	<target name="all" depends="clean,build"/>
+    <target name="build">
+        <mkdir dir="build/classes" />
+        <javac srcdir="src" encoding="utf-8" destdir="build/classes" nowarn="true" debug="true" debuglevel="lines,vars,source">
+            <classpath>
+                <fileset dir="lib" includes="**/*.jar" />
+            </classpath>
+        </javac>
+        <copy todir="build/classes">
+            <fileset dir="src" />
+        </copy>
+        <jar jarfile="build/Korpus-Common.jar" basedir="build/classes" />
+    </target>
+
+    <target name="all" depends="clean,build" />
 </project>
