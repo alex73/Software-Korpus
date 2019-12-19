@@ -1,5 +1,7 @@
 package org.alex73.korpus.utils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.alex73.corpus.paradigm.Form;
@@ -44,12 +46,29 @@ public class SetUtils {
         return false;
     }
 
+    public static String removeTag(String orig, String tag) {
+        if (orig == null || orig.trim().isEmpty()) {
+            return null;
+        }
+        List<String> out = new ArrayList<>();
+        for (String v : orig.split(",")) {
+            if (!v.trim().equals(tag)) {
+                out.add(v);
+            }
+        }
+        return out.isEmpty() ? null : String.join(",", out);
+    }
+
     public static boolean hasSlounik(Form f, String slounik) {
         return hasTag(f.getSlouniki(), slounik);
     }
 
     public static void addSlounik(Form f, String slounik) {
         f.setSlouniki(addTag(f.getSlouniki(), slounik));
+    }
+
+    public static void removeSlounik(Form f, String slounik) {
+        f.setSlouniki(removeTag(f.getSlouniki(), slounik));
     }
 
     public static boolean hasPravapis(Form f, String pravapis) {
