@@ -171,7 +171,7 @@ public class StressUtils {
                 mainStresses++;
             }
             if (mainStresses > 1) {
-                throw new Exception("Зашмат асноўных націскаў");
+                throw new Exception("Зашмат асноўных націскаў у " + word);
             }
         }
     }
