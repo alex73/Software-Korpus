@@ -21,7 +21,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="e" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="e" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="Note" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element ref="{}Variant" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
@@ -52,7 +52,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "Paradigm")
 public class Paradigm {
 
-    protected String e;
+    protected List<String> e;
     @XmlElement(name = "Note")
     protected List<String> note;
     @XmlElement(name = "Variant")
@@ -83,25 +83,30 @@ public class Paradigm {
     /**
      * Gets the value of the e property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getE() {
-        return e;
-    }
-
-    /**
-     * Sets the value of the e property.
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the e property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getE().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link String }
+     * 
+     * 
      */
-    public void setE(String value) {
-        this.e = value;
+    public List<String> getE() {
+        if (e == null) {
+            e = new ArrayList<String>();
+        }
+        return this.e;
     }
 
     /**

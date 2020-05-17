@@ -201,6 +201,25 @@ public class BelarusianTags {
         return 0;
     }
 
+    public String setValueOfGroup(String code, String group, char newValue) {
+        TagLetter tags = root;
+        for (int i=0;i<code.length();i++) {
+            char c= code.charAt(i);
+            OneLetterInfo li = tags.getLetterInfo(c);
+            if (li == null) {
+                throw new RuntimeException("Wrong tag: " + code);
+            }
+            if (group.equals(li.groupName)) {
+                return code.substring(0, i) + newValue + code.substring(i + 1);
+            }
+            tags = tags.next(c);
+            if (tags == null) {
+                throw new RuntimeException("Wrong tag: " + code);
+            }
+        }
+        return null;
+    }
+
     private void nazounik(TagLetter t) {
         t = t.add("Часціна => N:Назоўнік");
         t.add("Новы=>+:новы").latestInParadigm();

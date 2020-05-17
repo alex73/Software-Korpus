@@ -89,7 +89,7 @@
     <!-- Усярэдзіне парадыгмы - тэг Variant -->
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="e" minOccurs="0" type="xs:string" />
+        <xs:element name="e" minOccurs="0" maxOccurs="unbounded" type="xs:string" />
         <xs:element name="Note" minOccurs="0" maxOccurs="unbounded" type="xs:string" />
         <xs:element ref="Variant" maxOccurs="unbounded" minOccurs="0" />
       </xs:sequence>
