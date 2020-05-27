@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
@@ -212,11 +213,12 @@ public class GrammarDB2 {
 
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(16);
         long latest = 0;
+        Future<?>[] results = new Future<?>[forLoads.length];
         for (int i = 0; i < forLoads.length; i++) {
             latest = Math.max(latest, forLoads[i].lastModified());
             System.out.println(forLoads[i].getPath());
             final File process = forLoads[i];
-            executor.execute(new Runnable() {
+            results[i] = executor.submit(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -234,6 +236,9 @@ public class GrammarDB2 {
         executor.shutdown();
         if (!executor.awaitTermination(10, TimeUnit.MINUTES)) {
             throw new Exception("Load GrammarDB2 timeout");
+        }
+        for (Future<?> f : results) {
+            f.get();
         }
         long af = System.currentTimeMillis();
         System.out.println("GrammarDB loading time: " + (af - be) + "ms");

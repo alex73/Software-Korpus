@@ -58,17 +58,23 @@ public class StressUtils {
                 }
             }
         }
+        int count = 0;
+        int result = -1;
         r = 0;
         for (int i = 0; i < word.length(); i++) {
             char c = word.charAt(i);
             if (BelarusianTags.USUALLY_STRESSED.indexOf(c) >= 0) {
-                return r;
+                result = r;
+                count++;
             }
             if (BelarusianTags.HALOSNYJA.indexOf(c) >= 0) {
                 r++;
             }
+            if (c == '-') {
+                return -1;
+            }
         }
-        return -1;
+        return count == 1 ? result : -1;
     }
 
     public static String setUsuallyStress(String word) {
