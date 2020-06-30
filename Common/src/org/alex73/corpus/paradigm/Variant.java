@@ -27,6 +27,7 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;/sequence>
  *       &lt;attribute name="id" type="{}latin_char" />
  *       &lt;attribute name="lemma" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="tag" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="pravapis" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="type" type="{}VariantType" />
  *     &lt;/restriction>
@@ -55,6 +56,8 @@ public class Variant {
     protected String id;
     @XmlAttribute(name = "lemma", required = true)
     protected String lemma;
+    @XmlAttribute(name = "tag")
+    protected String tag;
     @XmlAttribute(name = "pravapis")
     protected String pravapis;
     @XmlAttribute(name = "type")
@@ -193,6 +196,30 @@ public class Variant {
      */
     public void setLemma(String value) {
         this.lemma = value;
+    }
+
+    /**
+     * Gets the value of the tag property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getTag() {
+        return tag;
+    }
+
+    /**
+     * Sets the value of the tag property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setTag(String value) {
+        this.tag = value;
     }
 
     /**

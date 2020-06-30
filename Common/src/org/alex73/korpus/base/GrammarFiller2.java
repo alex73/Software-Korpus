@@ -10,6 +10,7 @@ import org.alex73.korpus.text.xml.P;
 import org.alex73.korpus.text.xml.Poetry;
 import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.XMLText;
+import org.alex73.korpus.utils.SetUtils;
 import org.alex73.korpus.utils.StressUtils;
 
 public class GrammarFiller2 {
@@ -23,7 +24,7 @@ public class GrammarFiller2 {
         gr.getAllParadigms().parallelStream().forEach(p -> {
             p.getVariant().forEach(v -> {
                 v.getForm().forEach(f -> {
-                    String formTag = p.getTag() + f.getTag();
+                    String formTag = SetUtils.tag(p, v, f);
                     String orig = BelarusianWordNormalizer.normalize(f.getValue());
                     add(lemmas, orig, p.getLemma());
                     add(tags, orig, formTag);

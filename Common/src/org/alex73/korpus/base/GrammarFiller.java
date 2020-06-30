@@ -11,6 +11,7 @@ import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.text.xml.P;
 import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.XMLText;
+import org.alex73.korpus.utils.SetUtils;
 import org.alex73.korpus.utils.StressUtils;
 
 /**
@@ -119,12 +120,12 @@ public class GrammarFiller {
                         if (hasStress) {
                             if (word.equals(form)) {
                                 lemmas.add(p.getLemma());
-                                cats.add(p.getTag() + f.getTag());
+                                cats.add(SetUtils.tag(p, v, f));
                             }
                         } else {
                             if (word.equals(StressUtils.unstress(form))) {
                                 lemmas.add(p.getLemma());
-                                cats.add(p.getTag() + f.getTag());
+                                cats.add(SetUtils.tag(p, v, f));
                             }
                         }
                     }

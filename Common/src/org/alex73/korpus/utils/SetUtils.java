@@ -87,6 +87,18 @@ public class SetUtils {
         v.setPravapis(addTag(v.getPravapis(), pravapis));
     }
 
+    public static String tag(Paradigm p, Variant v) {
+        String pt = p.getTag() != null ? p.getTag() : "";
+        String vt = v.getTag() != null ? v.getTag() : "";
+        return pt + vt;
+    }
+
+    public static String tag(Paradigm p, Variant v, Form f) {
+        String pt = p.getTag() != null ? p.getTag() : "";
+        String vt = v.getTag() != null ? v.getTag() : "";
+        return pt + vt + f.getTag();
+    }
+
     public static String toString(Paradigm p) {
         return "Paradigm: " + p.getTag() + "/" + p.getLemma() + "[" + p.getPdgId() + "]";
     }

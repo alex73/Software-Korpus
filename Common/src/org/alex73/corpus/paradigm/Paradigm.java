@@ -27,7 +27,7 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;/sequence>
  *       &lt;attribute name="pdgId" use="required" type="{http://www.w3.org/2001/XMLSchema}int" />
  *       &lt;attribute name="lemma" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="tag" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="tag" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="theme" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="govern" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="type" type="{}VariantType" />
@@ -61,7 +61,7 @@ public class Paradigm {
     protected int pdgId;
     @XmlAttribute(name = "lemma", required = true)
     protected String lemma;
-    @XmlAttribute(name = "tag", required = true)
+    @XmlAttribute(name = "tag")
     protected String tag;
     @XmlAttribute(name = "theme")
     protected String theme;
