@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -117,6 +118,7 @@ public class GrammarDB2 {
          * return -1; } else if (n2.equals(THEMES_FILE)) { return 1; } else {
          * return n1.compareTo(n2); } } });
          */
+        Arrays.sort(result);
         return result;
     }
 

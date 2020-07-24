@@ -143,6 +143,7 @@
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="type" type="VariantType" use="optional" />
+      <xs:attribute name="rules" type="xs:string" use="optional" />
     </xs:complexType>
   </xs:element>
   <xs:element name="Form">

@@ -25,12 +25,26 @@ import org.alex73.korpus.utils.StressUtils;
 public class GrammarDBSaver {
 
     private static String getFileForParadigm(Paradigm p) {
-        if (p.getTag().startsWith("NP")) {
-            return "NP.xml";
-        } else if (p.getTag().length() > 1 && p.getTag().charAt(1) == '+') {
-            return p.getTag().substring(0, 1) + "_.xml";
+        String ptag;
+        if ((p.getTag() == null || p.getTag().isEmpty())
+                && p.getVariant().stream().allMatch(v -> v.getTag().startsWith("V"))) {
+            ptag = "V";
         } else {
-            return p.getTag().substring(0, 1) + ".xml";
+            ptag = p.getTag();
+        }
+        if (ptag == null) {
+            return "unknown.xml";
+        } else if (ptag.startsWith("NP")) {
+            return "NP.xml";
+        } else if (ptag.length() == 2 && ptag.charAt(1) == '+') {
+            return ptag.substring(0, 1) + "__.xml";
+        } else if (p.getVariant().stream().allMatch(v -> v.getForm().isEmpty())) {
+            return ptag.substring(0, 1) + "_.xml";
+        } else if (ptag.startsWith("A") || ptag.startsWith("Nzzzz")) {
+            char s = BelarusianComparators.compareChars(p.getLemma().toLowerCase().charAt(0), 'о') < 0 ? '1' : '2';
+            return ptag.substring(0, 1) + s + ".xml";
+        } else {
+            return ptag.substring(0, 1) + ".xml";
         }
     }
 
@@ -217,17 +231,24 @@ public class GrammarDBSaver {
     public static Comparator<Paradigm> COMPARATOR = new Comparator<Paradigm>() {
         @Override
         public int compare(Paradigm p1, Paradigm p2) {
-            if (p1.getLemma().equals("абго+ртвальны")&&p2.getLemma().equals("абго+ртвальны")) {
-                System.out.println();
-            }
-            String w1 = StressUtils.unstress(p1.getLemma().toLowerCase(BE));
-            String w2 = StressUtils.unstress(p2.getLemma().toLowerCase(BE));
+            String v1 = p1.getLemma().replaceAll("^\\.+", "");
+            String v2 = p2.getLemma().replaceAll("^\\.+", "");
+            String w1 = StressUtils.unstress(v1.toLowerCase(BE));
+            String w2 = StressUtils.unstress(v2.toLowerCase(BE));
             int r = BEL.compare(w1.toLowerCase(), w2.toLowerCase());
             if (r == 0) {
-                r = BEL.compare(p1.getLemma().toLowerCase(), p2.getLemma().toLowerCase());
+                r = BEL.compare(v1.toLowerCase(), v1.toLowerCase());
+            }
+            if (r == 0) {
+                r = BEL.compare(v1, v1);
             }
             if (r == 0) {
                 r = BEL.compare(p1.getLemma(), p2.getLemma());
+            }
+            if (r == 0) {
+                String t1 = p1.getTag() != null ? p1.getTag() : "";
+                String t2 = p2.getTag() != null ? p2.getTag() : "";
+                r = t1.compareTo(t2);
             }
             if (r == 0) {
                 String m1 = p1.getMeaning();

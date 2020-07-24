@@ -51,6 +51,7 @@ import org.alex73.korpus.base.DBTagsGroups;
 import org.alex73.korpus.server.data.GrammarInitial;
 import org.alex73.korpus.server.data.WordRequest;
 import org.alex73.korpus.shared.LemmaInfo;
+import org.alex73.korpus.utils.SetUtils;
 import org.alex73.korpus.utils.StressUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -132,7 +133,7 @@ public class GrammarServiceImpl {
                             continue;
                         }
                         if (reGrammar != null) {
-                            String fTag = p.getTag() + f.getTag();
+                            String fTag = SetUtils.tag(p, v, f);
                             if (!BelarusianTags.getInstance().isValid(fTag, null)) {
                                 continue;
                             }
