@@ -40,8 +40,19 @@ public class GrammarDBSaver {
             return ptag.substring(0, 1) + "__.xml";
         } else if (p.getVariant().stream().allMatch(v -> v.getForm().isEmpty())) {
             return ptag.substring(0, 1) + "_.xml";
-        } else if (ptag.startsWith("A") || ptag.startsWith("Nzzzz")) {
+        } else if (ptag.startsWith("A")) {
             char s = BelarusianComparators.compareChars(p.getLemma().toLowerCase().charAt(0), 'о') < 0 ? '1' : '2';
+            return ptag.substring(0, 1) + s + ".xml";
+        } else if (ptag.startsWith("N")) {
+            char f = p.getLemma().toLowerCase().charAt(0);
+            char s;
+            if (f < 'к') {
+                s = '1';
+            } else if (f < 'р') {
+                s = '2';
+            } else {
+                s = '3';
+            }
             return ptag.substring(0, 1) + s + ".xml";
         } else {
             return ptag.substring(0, 1) + ".xml";
