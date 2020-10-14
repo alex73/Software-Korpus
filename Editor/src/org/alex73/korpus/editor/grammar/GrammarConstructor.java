@@ -18,6 +18,7 @@ import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.BelarusianWordNormalizer;
+import org.alex73.korpus.utils.SetUtils;
 import org.alex73.korpus.utils.StressUtils;
 
 public class GrammarConstructor {
@@ -78,10 +79,10 @@ public class GrammarConstructor {
             if (skipParadigmId != null && skipParadigmId.intValue() == p.getPdgId()) {
                 return;
             }
-            if (!isTagLooksLikeMask(p.getTag(), tagMask)) {
-                return;
-            }
             for (Variant v : p.getVariant()) {
+                if (!isTagLooksLikeMask(SetUtils.tag(p, v), tagMask)) {
+                    return;
+                }
                 if (v.getForm().isEmpty()) {
                     continue;
                 }
@@ -204,7 +205,7 @@ public class GrammarConstructor {
         Paradigm result = new Paradigm();
         result.setTag(p.getTag());
 
-        String lemma = constructWord(word, ratedForm, eq, BelarusianWordNormalizer.normalize(v.getLemma()));
+        String lemma = constructWord(word, ratedForm, eq, v.getLemma());
 
         result.setLemma(lemma);
         Variant rv = new Variant();
@@ -214,7 +215,7 @@ public class GrammarConstructor {
         for (Form f : v.getForm()) {
             Form rf = new Form();
             rf.setTag(f.getTag());
-            String fword = constructWord(word, ratedForm, eq, BelarusianWordNormalizer.normalize(f.getValue()));
+            String fword = constructWord(word, ratedForm, eq, f.getValue());
             rf.setValue(fword);
             rv.getForm().add(rf);
         }

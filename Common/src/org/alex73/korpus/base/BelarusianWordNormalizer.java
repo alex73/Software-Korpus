@@ -32,7 +32,7 @@ public class BelarusianWordNormalizer {
     public static final Locale BEL = new Locale("be");
     public static final String apostrafy = "\'\u02BC\u2019";
     public static final String letters = apostrafy
-            + "ёйцукенгшўзхфывапролджэячсмітьбющиЁЙЦУКЕНГШЎЗХФЫВАПРОЛДЖЭЯЧСМІТЬБЮЩИqwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
+            + "\u0301ёйцукенгшўзхфывапролджэячсмітьбющиЁЙЦУКЕНГШЎЗХФЫВАПРОЛДЖЭЯЧСМІТЬБЮЩИqwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
     private static final String ZNAKI = "-—,:!?/.…\"“”«»()[]";
 
     public static boolean isLetter(char c) {

@@ -49,13 +49,19 @@ import org.alex73.korpus.text.xml.W;
 public class GrammarPaneController {
     static W currentWord;
     static Integer intoParadigmId;
+    static boolean notRealUpdate = false;
 
-    public static void show(W word, Integer pdgId) {
+    public static synchronized void show(W word, Integer pdgId) {
         currentWord = word;
         intoParadigmId = pdgId;
-        UI.grammarPane.txtWord.setText(word != null && word.getValue() != null ? word.getValue() : "");
-        UI.grammarPane.txtLooksLike.setText("");
-        updateInfo();
+        notRealUpdate = true;
+        try {
+            UI.grammarPane.txtWord.setText(word != null && word.getValue() != null ? word.getValue().replace('\u0301', '+') : "");
+            UI.grammarPane.txtLooksLike.setText("");
+            updateInfo();
+        } finally {
+            notRealUpdate = false;
+        }
         updateXML();
     }
 
@@ -181,6 +187,9 @@ public class GrammarPaneController {
     static UpdaterXML updaterXML;
 
     static synchronized void updateXML() {
+        if (notRealUpdate) {
+            return;
+        }
         if (updaterXML != null) {
             updaterXML.cancel(true);
         }

@@ -26,5 +26,8 @@ public class GrammarConstructorTest {
 
         assertEquals("абакульва+е",
                 GrammarConstructor.constructWord("абаку+львацца", "пераку+львацца", 11, "перакульва+е"));
+
+        assertEquals("Смі+лавічы",
+                GrammarConstructor.constructWord("Смілавічы", "Смі+лавічы", 9, "Смі+лавічы"));
     }
 }
