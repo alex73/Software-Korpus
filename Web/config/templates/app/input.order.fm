@@ -1,0 +1,19 @@
+<div class="card" style="width:100%">
+	<div class="card-header">Парадак слоў</div>
+	<div class="card-body">
+		<div class="form-group">
+		  <label class="radio-inline pr-2">
+		  	<input type="radio" name="wordsOrder" value="PRESET" checked [(ngModel)]="serviceSearch.inputWordsOrder">
+		  		Вызначаны парадак
+		  </label>
+		  <label class="radio-inline pr-2">
+		  	<input type="radio" name="wordsOrder" value="ANY_IN_SENTENCE" [(ngModel)]="serviceSearch.inputWordsOrder">
+		  		Любая адлегласць у межах сказа
+		  </label>
+		  <label class="radio-inline">
+		  	<input type="radio" name="wordsOrder" value="ANY_IN_PARAGRAPH" [(ngModel)]="serviceSearch.inputWordsOrder">
+		  		Любая адлегласць у межах абзаца
+		  </label>
+		</div>
+	</div>
+</div>

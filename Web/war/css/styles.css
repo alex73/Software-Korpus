@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css?family=Lobster');
 
 body {
-  min-height: 400px;
+  min-height: 2000px;
   padding-top: 70px;
   font-family: 'Roboto';
 }
@@ -12,10 +12,25 @@ body {
   }
 }
 
-.navbar-default .navbar-brand {
+.card {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.card-body {
+  padding: 1rem;
+}
+
+.fixed-top {
+  margin-bottom: 19px;
+}
+
+.navbar {
+  padding: 0;
+}
+.navbar-brand {
   font-family: 'Lobster', cursive;
-  font-size: 250%;
-  color: #d9534f;
+  font-size: 2.2em;
+  color: #d9534f!important;
 }
 
 .wordFound {

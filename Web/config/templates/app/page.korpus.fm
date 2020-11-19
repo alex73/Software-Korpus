@@ -1,0 +1,118 @@
+<ul class="nav nav-tabs">
+  <li class="nav-item">
+    <a class="nav-link active" href="#">Пошук</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#">KWIC</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="#">Кластар</a>
+  </li>
+</ul>
+<br/>
+    <!--alert *ngIf="serviceSearch.errorSearch" type="danger">{{serviceSearch.errorSearch}}</alert-->
+    <div class="alert alert-danger alert-dismissible fade show d-none" role="alert">{{serviceSearch.errorSearch}}</div>
+
+    <!--div class="tab-content" (select)="serviceSearch.selectSearch()" [active]="serviceSearch.typeSearch == 'search'"-->
+	    <button #btnShowSearch type="button" style="display: none;" class="btn btn-default btn-block" (click)="serviceSearch.maximizeSearch()">Крытэрыі пошуку <img src="/icons/down.svg"/></button>
+	    <form #divInputSearch (submit)="serviceSearch.search()">
+		    <div class="row">
+		      <#include "input.filter.korpus.fm">
+		    </div>
+		    <div class="row">
+		      <#include "input.word.fm">
+		      <input-word 
+		           *ngFor="let w of serviceSearch.inputWords" 
+		           [word]="w" 
+                   [displayRemove]="serviceSearch.inputWords.length > 1"
+                   [removeFunction]="serviceSearch.removeWord"
+                   [grammarTree] = "serviceSearch.initial.grammar.grammarTree"
+                   [grammarWordTypes] = "serviceSearch.initial.grammar.grammarWordTypes"
+                   [grammarWordTypesGroups] = "serviceSearch.initial.grammar.grammarWordTypesGroups"
+		           ></input-word>
+			  <#include "input.word.add.fm">
+		    </div>
+		    <div class="row">
+		      <#include "input.order.fm">
+		    </div>
+		    <div class="row justify-content-end">
+		      <button type="submit" class="btn btn-danger btn-lg">Пошук</button>
+		    </div>
+	    </form>
+	    <alert *ngIf="serviceSearch.statusSearch" type="info">{{serviceSearch.statusSearch}}</alert>
+	
+	    <output-search *ngIf="serviceSearch.resultSearch"></output-search>
+	<!--/div-->
+	<div heading="KWIC" (select)="serviceSearch.selectKWIC()" [active]="serviceSearch.typeSearch == 'kwic'" style="display: none">
+	    <br/>
+	    <alert *ngIf="serviceSearch.errorSearch" type="danger">{{serviceSearch.errorSearch}}</alert>
+	    <button #btnShowKwic type="button" style="display: none;" class="btn btn-default btn-block" (click)="serviceSearch.maximizeKwic()">Крытэрыі пошуку <img src="/icons/down.svg"/></button>
+	    <form #divInputKwic (submit)="serviceSearch.search()">
+		    <div class="row">
+		      <#include "input.filter.korpus.fm">
+		    </div>
+		    <div class="row">
+		      <input-word 
+		           *ngFor="let w of serviceSearch.inputWords" 
+		           [word]="w"
+                   [displayRemove]="serviceSearch.inputWords.length > 1"
+                   [removeFunction]="serviceSearch.removeWord"
+                   [grammarTree] = "serviceSearch.initial.grammar.grammarTree"
+                   [grammarWordTypes] = "serviceSearch.initial.grammar.grammarWordTypes"
+                   [grammarWordTypesGroups] = "serviceSearch.initial.grammar.grammarWordTypesGroups"
+		           ></input-word>
+		      <#include "input.word.add.fm">
+		    </div>
+
+		    <div class="row">
+		      <button type="submit" class="btn btn-danger btn-lg">Пошук</button>
+		    </div>
+	    </form>
+	    <alert *ngIf="serviceSearch.statusSearch" type="info">{{serviceSearch.statusSearch}}</alert>
+	
+	    <output-search *ngIf="serviceSearch.resultKwic"></output-search>
+	</div>
+	<div heading="Кластар" [active]="serviceSearch.typeSearch == 'cluster'" style="display: none">
+	    <br/>
+	    <alert *ngIf="serviceSearch.errorSearch" type="danger">{{serviceSearch.errorSearch}}</alert>
+	    <button #btnShowCluster type="button" style="display: none;" class="btn btn-default btn-block" (click)="serviceSearch.maximizeCluster()">Крытэрыі пошуку <img src="/icons/down.svg"/></button>
+	    <form #divInputCluster (submit)="serviceSearch.searchCluster()">
+		    <div class="row">
+		      <input-filter-korpus></input-filter-korpus>
+		    </div>
+		    <div class="row">
+		      <input-word 
+		           [word]="serviceSearch.inputWords[0]"
+                   [displayRemove]="false"
+                   [grammarTree] = "serviceSearch.initial.grammar.grammarTree"
+                   [grammarWordTypes] = "serviceSearch.initial.grammar.grammarWordTypes"
+                   [grammarWordTypesGroups] = "serviceSearch.initial.grammar.grammarWordTypesGroups"
+		           ></input-word>
+		      <input-word-around></input-word-around>
+		    </div>
+		    
+		    <div class="row">
+		      <button type="submit" class="btn btn-danger btn-lg">Пошук</button>
+		    </div>
+	    </form>
+	    <alert *ngIf="serviceSearch.statusSearch" type="info">{{serviceSearch.statusSearch}}</alert>
+	
+	    <output-cluster></output-cluster>
+	</div>
+
+
+  <div *ngIf="serviceSearch.inputCorpusType == 'MAIN'">
+    <p class="text-center">Гэты корпус змяшчае вычытаныя тэксты, якія маюць метаразметку: аўтар тэксту, назва тэксту і г.д.</p>
+    <!--table class="table-borders hspacing center">
+      <tr>
+        <th></th>
+        <th class="text-center">Тэкстаў</th>
+        <th class="text-center">Слоў</th>
+      </tr>
+      <tr *ngFor="let s of serviceSearch.initial.statKorpus">
+        <td>{{s.name}}</td>
+        <td class="text-right">{{s.texts}}</td>
+        <td class="text-right">{{s.words}}</td>
+      </tr>
+    </table--> 
+  </div>

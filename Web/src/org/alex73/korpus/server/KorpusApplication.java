@@ -28,8 +28,9 @@ import org.alex73.korpus.server.data.GrammarInitial.GrammarLetter;
 import org.alex73.korpus.server.data.InitialData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.glassfish.jersey.server.ResourceConfig;
 
-@ApplicationPath("/rest")
+@ApplicationPath("rest")
 public class KorpusApplication extends Application {
     static final Logger LOGGER = LogManager.getLogger(KorpusApplication.class);
 
@@ -67,6 +68,7 @@ public class KorpusApplication extends Application {
             LOGGER.error("startup", ex);
             throw new ExceptionInInitializerError(ex);
         }
+       //packages("org.alex73.korpus.server");
     }
 
     private String getUsedMemory() {

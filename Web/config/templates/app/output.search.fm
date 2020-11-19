@@ -1,0 +1,152 @@
+<span id="searchTop" style="position: relative; top: -50px"></span>
+<nav aria-label="Page navigation">
+  <ul class="pagination">
+    <li *ngFor="let pg of serviceSearch.pages; let p=index" 
+        [ngClass]="p==serviceSearch.currentPage ? 'active' : ''" 
+        (click)="serviceSearch.requestPage(p); $event.preventDefault();">
+      <a href="#">{{p+1}}</a>
+    </li>
+    <li *ngIf="serviceSearch.hasMore"
+        (click)="serviceSearch.requestPage(-1); $event.preventDefault();">
+      <a href="#"><span aria-hidden="true">Далей &raquo;</span></a>
+    </li>
+  </ul>
+</nav>
+
+<table *ngIf="serviceSearch.resultSearch" class="table-zebra hspacing" width="100%" (click) = "over($event)">
+  <tr>
+      <th>Крыніца</th>
+      <th>Тэкст</th>
+      <th>Цалкам</th>
+    </tr>
+  <tr *ngFor="let r of serviceSearch.resultSearch.rows">
+    <td style="color: #337ab7; white-space: nowrap;">
+        <a href="#" (click)="showBiblio($event, r.doc, r.docOther)">
+          <span *ngIf="r.doc">{{getShortTitle(r.doc.authors)}}</span>
+          <span *ngIf="r.docOther">{{getShortTitle(r.docOther.name)}}</span>
+        </a>
+    </td>
+    <td>
+        <span *ngFor="let w of r.words"
+              korpusWord [korpusWordValue] = "w"
+              >{{w.orig}}</span>
+    </td>
+    <td class="text-center"><a href="#" (click)="fullText(r.origText, r.doc, r.docOther, $event)">[...]</a></td>
+  </tr>
+</table>
+
+<table *ngIf="serviceSearch.resultKwic" (click) = "over($event)" class="table-zebra hspacing" width="100%">
+    <tr>
+      <th>Крыніца</th>
+      <th colspan="3">Тэкст</th>
+      <th>Цалкам</th>
+    </tr>
+    <tr *ngFor="let r of serviceSearch.resultKwic.rows">
+      <td style="color: #337ab7; white-space: nowrap;">
+        <a href="#" (click)="showBiblio($event, r.doc, r.docOther)">
+          <span *ngIf="r.doc">{{r.doc.authors}}</span>
+          <span *ngIf="r.docOther">{{r.docOther.name}}</span>
+        </a>
+      </td>
+      <td class="text-right">
+        <span *ngFor="let w of r.kwicBefore"
+              korpusWord [korpusWordValue] = "w"
+              >{{w.orig}}</span>
+      </td>
+      <td class="text-center">
+        <span *ngFor="let w of r.kwicWords"
+              korpusWord [korpusWordValue] = "w"
+              >{{w.orig}}</span>
+      </td>
+      <td class="text-left">
+        <span *ngFor="let w of r.kwicAfter"
+              korpusWord [korpusWordValue] = "w"
+              >{{w.orig}}</span>
+      </td>
+      <td class="text-center"><a href="#" (click)="fullText(r.origText, r.doc, r.docOther, $event)">[...]</a></td>
+    </tr>
+</table>
+
+<nav aria-label="Page navigation">
+  <ul class="pagination">
+    <li *ngFor="let pg of serviceSearch.pages; let p=index" 
+        [ngClass]="p==serviceSearch.currentPage ? 'active' : ''" 
+        (click)="serviceSearch.requestPage(p); $event.preventDefault();">
+      <a href="#">{{p+1}}</a>
+    </li>
+    <li *ngIf="serviceSearch.hasMore"
+        (click)="serviceSearch.requestPage(-1); $event.preventDefault();">
+      <a href="#"><span aria-hidden="true">Далей &raquo;</span></a>
+    </li>
+  </ul>
+</nav>
+
+<div #popoverBiblio style="visibility: hidden; display: block; position: absolute;" class="popover in popover-top top" tabindex="0" (blur)="leave()">
+  <div class="popover-arrow arrow"></div>
+  <div *ngIf="biblio" style="margin: 1em">
+    <div>
+      <b>Аўтары:</b> {{biblio.authors}}
+    </div>
+    <div *ngIf="biblio.translation">
+      <b>Перакладчык:</b> {{biblio.translators}}
+    </div>
+    <div *ngIf="biblio.langOrig">
+      <b>Пераклад з:</b> {{biblio.langOrig}}
+    </div>
+    <div>
+      <b>Назва:</b> {{biblio.title}}
+    </div>
+    <div>
+      <b>Стыль/жанр:</b> {{biblio.styleGenres}}
+    </div>
+    <div>
+      <b>Выданне:</b> {{biblio.edition}}
+    </div>
+    <div>
+      <b>Час стварэння:</b> {{biblio.writtenTime}}
+    </div>
+    <div>
+      <b>Час першай публікацыі:</b> {{biblio.publicationTime}}
+    </div>
+  </div>
+  <div *ngIf="biblioOther" style="margin: 1em">
+    <div>
+      Назва: {{biblioOther.name}}
+    </div>
+    <div>
+      Спасылка: <a href="{{biblioOther.url}}" target="_blank" onmousedown="event.preventDefault()">{{biblioOther.url}}</a>
+    </div>
+    <div>
+      Дэталі: {{biblioOther.details}}
+    </div>
+  </div>
+</div>
+
+<div #popoverWord style="visibility: hidden; display: block; position: absolute;" class="popover in popover-top top" tabindex="0" (blur)="leave()">
+  <div class="popover-arrow arrow"></div>
+  <div #popoverWordContent class="popover-content"></div>
+</div>
+
+<div class="modal fade" bsModal #textDetailsModal="bs-modal" [config]="{backdrop: 'static'}"
+     tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg" *ngIf="detailsText">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 *ngIf="biblio" class="modal-title pull-left">{{biblio.authors}}. {{biblio.title}}</h4>
+        <h4 *ngIf="biblioOther" class="modal-title pull-left">{{biblioOther.textUrl}}</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="textDetailsModal.hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <span *ngFor="let row of detailsText">
+              <span *ngFor="let w of row"
+                 ><span *ngIf="w.orig != '\n'"
+                      korpusWord [korpusWordValue] = "w"
+                      >{{w.orig}}</span><br *ngIf="w.orig == '\n'"
+              /></span
+          ></span>
+      </div>
+    </div>
+  </div>
+</div>

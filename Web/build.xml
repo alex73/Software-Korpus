@@ -78,7 +78,17 @@
 		</java>
 	</target>
 
-
+	<target name="js">
+		<exec executable="tsc">
+			<arg value="--project"/>
+			<arg value="ts/tsconfig.json"/>
+			<arg value="--target"/>
+			<arg value="ES5"/>
+			<arg value="--outFile"/>
+			<arg value="war/app.js"/>
+		</exec>
+	</target>
+	
 	<target name="hosted" depends="devmode" description="Run development mode (NOTE: the 'hosted' target is deprecated)" />
 
 	<target name="build" depends="gwtc" description="Build this project" />

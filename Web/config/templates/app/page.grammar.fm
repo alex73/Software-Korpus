@@ -1,0 +1,22 @@
+<br/>
+<alert *ngIf="serviceGrammar.error" type="danger">{{serviceGrammar.error}}</alert>
+<form #divInput (submit)="serviceGrammar.search()">
+    <div class="row">
+      <input-word 
+           [word]="serviceGrammar.inputWord"
+           [grammarTree] = "serviceGrammar.initial.grammarTree"
+           [grammarWordTypes] = "serviceGrammar.initial.grammarWordTypes"
+           [grammarWordTypesGroups] = "serviceGrammar.initial.grammarWordTypesGroups"
+           ></input-word>
+    </div>
+    <div class="row">
+      <input-order-grammar></input-order-grammar>
+    </div>
+    
+    <div class="row">
+      <a class="btn btn-danger btn-lg pull-right" (click)="serviceGrammar.search()">Пошук</a>
+    </div>
+</form>
+<alert *ngIf="serviceGrammar.status" type="info">{{serviceGrammar.status}}</alert>
+
+<output-grammar *ngIf="serviceGrammar.results.length > 0"></output-grammar>
