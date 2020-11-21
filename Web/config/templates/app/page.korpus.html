@@ -1,26 +1,27 @@
 <ul class="nav nav-tabs">
   <li class="nav-item">
-    <a class="nav-link active" href="#">Пошук</a>
+    <a class="nav-link active" href="#" onzClick="korpusUI.switchMode('search'); return false;">Пошук</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="#">KWIC</a>
+    <a class="nav-link" href="#" onzClick="korpusUI.switchMode('kwic'); return false;">KWIC</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="#">Кластар</a>
+    <a class="nav-link" href="#" onzClick="korpusUI.switchMode('cluster'); return false;">Кластар</a>
   </li>
 </ul>
 <br/>
     <!--alert *ngIf="serviceSearch.errorSearch" type="danger">{{serviceSearch.errorSearch}}</alert-->
-    <div class="alert alert-danger alert-dismissible fade show d-none" role="alert">{{serviceSearch.errorSearch}}</div>
+    <div id="error" class="alert alert-danger fade show" role="alert"></div>
+    <div id="status" class="alert alert-info fade show" role="alert"></div>
 
     <!--div class="tab-content" (select)="serviceSearch.selectSearch()" [active]="serviceSearch.typeSearch == 'search'"-->
 	    <button #btnShowSearch type="button" style="display: none;" class="btn btn-default btn-block" (click)="serviceSearch.maximizeSearch()">Крытэрыі пошуку <img src="/icons/down.svg"/></button>
 	    <form #divInputSearch (submit)="serviceSearch.search()">
 		    <div class="row">
-		      <#include "input.filter.korpus.fm">
+		      <#include "input.filter.korpus.html">
 		    </div>
 		    <div class="row">
-		      <#include "input.word.fm">
+		      <#include "input.word.html">
 		      <input-word 
 		           *ngFor="let w of serviceSearch.inputWords" 
 		           [word]="w" 
@@ -30,13 +31,13 @@
                    [grammarWordTypes] = "serviceSearch.initial.grammar.grammarWordTypes"
                    [grammarWordTypesGroups] = "serviceSearch.initial.grammar.grammarWordTypesGroups"
 		           ></input-word>
-			  <#include "input.word.add.fm">
+			  <#include "input.word.add.html">
 		    </div>
 		    <div class="row">
-		      <#include "input.order.fm">
+		      <#include "input.order.html">
 		    </div>
 		    <div class="row justify-content-end">
-		      <button type="submit" class="btn btn-danger btn-lg">Пошук</button>
+		      <button type="button" class="btn btn-danger btn-lg" onClick="korpusService.search()">Пошук</button>
 		    </div>
 	    </form>
 	    <alert *ngIf="serviceSearch.statusSearch" type="info">{{serviceSearch.statusSearch}}</alert>
@@ -49,7 +50,7 @@
 	    <button #btnShowKwic type="button" style="display: none;" class="btn btn-default btn-block" (click)="serviceSearch.maximizeKwic()">Крытэрыі пошуку <img src="/icons/down.svg"/></button>
 	    <form #divInputKwic (submit)="serviceSearch.search()">
 		    <div class="row">
-		      <#include "input.filter.korpus.fm">
+		      <!--#include "input.filter.korpus.html"-->
 		    </div>
 		    <div class="row">
 		      <input-word 
@@ -61,7 +62,7 @@
                    [grammarWordTypes] = "serviceSearch.initial.grammar.grammarWordTypes"
                    [grammarWordTypesGroups] = "serviceSearch.initial.grammar.grammarWordTypesGroups"
 		           ></input-word>
-		      <#include "input.word.add.fm">
+		      <!--#include "input.word.add.html"-->
 		    </div>
 
 		    <div class="row">
@@ -116,3 +117,8 @@
       </tr>
     </table--> 
   </div>
+
+
+<#include "dialog.authors.html">
+<#include "dialog.stylegenres.html">
+<#include "dialog.wordgrammar.html">

@@ -1,0 +1,30 @@
+<script id="template-authors" type="text/x-jsrender">
+	{{for ~root.authors}}
+		<div>
+			<label><input type="checkbox" name="{{:}}"> {{:}}</label>
+		</div>
+	{{/for}}
+</script>
+
+<div id="dialog-authors" class="modal fade" bsModal #styleModal="bs-modal" [config]="{backdrop: 'static'}"
+     tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">Аўтары</h4>
+        <span>
+          <button type="button" class="btn btn-secondary" onClick="dialogAuthors.onCancel()">Скасаваць</button>
+          <button type="button" class="btn btn-primary" onClick="dialogAuthors.onOk()">Абраць</button>
+        </span>
+      </div>
+      <div class="modal-header">
+        <span>
+          <button type="button" class="btn btn-secondary" onClick="dialogAuthors.all(true)">Пазначыць усе</button>
+          <button type="button" class="btn btn-secondary" onClick="dialogAuthors.all(false)">Зняць усе</button>
+        </span>
+      </div>
+      <div id="dialog-authors-place" class="modal-body">
+      </div>
+    </div>
+  </div>
+</div>

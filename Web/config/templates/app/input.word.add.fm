@@ -1,7 +1,0 @@
-<div class="col-sm-4">
-	<div class="card">
-		<div class="card-body text-center">
-				<button type="button" class="btn btn-secondary" onClick="korpusService.addWord('inputword')">Дадаць слова</button>
-		</div>
-	</div>
-</div>

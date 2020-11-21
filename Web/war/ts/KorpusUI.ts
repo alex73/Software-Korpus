@@ -1,0 +1,149 @@
+declare var $: any;
+
+class KorpusUI {
+	constructor() {
+		this.hideStatusError();
+	}
+	switchMode(mode: string) {
+		
+	}
+	addWord(type: string): HTMLElement {
+		const templateWord: HTMLElement = document.getElementById("template-" + type);
+		const newWord: HTMLElement = <HTMLElement>templateWord.cloneNode(true);
+		newWord.removeAttribute('id');
+		newWord.style.display = 'block';
+		let r = templateWord.parentElement.insertBefore(newWord, templateWord);
+		this.repaintRemoveIcons(type);
+		return r;
+	}
+	removeWord(type: string, button: HTMLElement) {
+		const block: HTMLElement = button.closest("." + type);
+		block.remove();
+		this.repaintRemoveIcons(type);
+	}
+	getWordCollection(type: string): NodeListOf<HTMLElement> {
+		return document.querySelectorAll("." + type + ":not(#template-" + type + ")");
+	}
+	repaintRemoveIcons(type: string) {
+		var collection: NodeListOf<HTMLElement> = document.querySelectorAll("." + type + ":not(#template-" + type + ")");
+		collection.forEach(el => (<NodeListOf<HTMLElement>>el.querySelectorAll("." + type + "-remove")).forEach(er => er.style.display = collection.length > 1 ? 'block' : 'none'));
+	}
+	hideStatusError() {
+		$('#status').hide();
+		$('#error').hide();
+	}
+	showError(err: string) {
+		console.log("Error: " + err);
+		$('#status').hide();
+		document.getElementById("error").innerText = err;
+		$('#error').show();
+	}
+	showStatus(s: string) {
+		$('#error').hide();
+		document.getElementById("status").innerText = s;
+		$('#status').show();
+	}
+	static textToWordGrammar(grammar: string) {
+		let db: DBTagsGroups = korpusService.initial.grammar.grammarWordTypesGroups[grammar.charAt(0)];
+		let checked = {};
+		for (let group of db.groups) {
+			checked[group.name] = "";
+		}
+		let grindex: number = 0;
+		for (let i = 1; i < grammar.length; i++) {
+			let group = db.groups[grindex];
+			let ch: string = grammar.charAt(i);
+			if (ch == '[') {
+				for (; i < grammar.length; i++) {
+					ch = grammar.charAt(i);
+					if (ch == ']') {
+						break;
+					} else {
+						checked[group.name] += ch;
+					}
+				}
+			} else if (ch == '.') {
+			} else {
+				checked[group.name] += ch;
+			}
+			grindex++;
+		}
+		let cbs: NodeListOf<HTMLInputElement> = document.querySelectorAll("#dialog-wordgrammar-place input[type='checkbox']");
+		cbs.forEach(cb => {
+			cb.checked = checked[cb.name].indexOf(cb.value) >= 0;
+		});
+	}
+	static wordGrammarToText(grammar: string): string {
+		if (grammar) {
+			let p: string = grammar.charAt(0);
+			let display = korpusService.initial.grammar.grammarTree[p].desc;
+			if (!/^\.*$/.test(grammar.substring(1))) {
+				display += ', ...';
+			}
+			return display;
+		} else {
+			return '---';
+		}
+	}
+	collectFromScreen(): SearchParams {
+		let requestedParams: SearchParams = new SearchParams();
+		requestedParams.textStandard.authors = this.separatedStringToArray(document.getElementById('inputFilterAuthor').innerText);
+		requestedParams.textStandard.stylegenres = this.separatedStringToArray(document.getElementById('inputFilterStyle').innerText);
+		requestedParams.textStandard.yearWrittenFrom = (<HTMLInputElement>document.getElementById('inputFilterYearWrittenFrom')).value;
+		requestedParams.textStandard.yearWrittenTo = (<HTMLInputElement>document.getElementById('inputFilterYearWrittenTo')).value;
+		requestedParams.textStandard.yearPublishedFrom = (<HTMLInputElement>document.getElementById('inputFilterYearPublishedFrom')).value;
+		requestedParams.textStandard.yearPublishedTo = (<HTMLInputElement>document.getElementById('inputFilterYearPublishedTo')).value;
+		requestedParams.words = [];
+		this.getWordCollection('inputword').forEach(w => {
+			let wrq = new WordRequest();
+			wrq.allForms = (<HTMLInputElement>w.querySelector("input[type='checkbox']")).checked;
+			wrq.word = (<HTMLInputElement>w.querySelector("input[type='text']")).value;
+			wrq.grammar = (<HTMLElement>w.querySelector(".wordgram-grammar-string")).innerText;
+			requestedParams.words.push(wrq);
+		});
+		requestedParams.wordsOrder = (<HTMLInputElement>document.querySelector("#part-wordorder input[type='radio']:checked")).value;
+		return requestedParams;
+	}
+	restoreToScreen(data: SearchParams) {
+		(<HTMLInputElement>document.getElementById('inputFilterYearWrittenFrom')).value = data && data.textStandard && data.textStandard.yearWrittenFrom ? data.textStandard.yearWrittenFrom : "";
+		(<HTMLInputElement>document.getElementById('inputFilterYearWrittenTo')).value = data && data.textStandard && data.textStandard.yearWrittenTo ? data.textStandard.yearWrittenTo : "";
+		(<HTMLInputElement>document.getElementById('inputFilterYearPublishedFrom')).value = data && data.textStandard && data.textStandard.yearPublishedFrom ? data.textStandard.yearPublishedFrom : "";
+		(<HTMLInputElement>document.getElementById('inputFilterYearPublishedTo')).value = data && data.textStandard && data.textStandard.yearPublishedTo ? data.textStandard.yearPublishedTo : "";
+		document.getElementById('inputFilterAuthor').innerText = data && data.textStandard && data.textStandard.authors ? data.textStandard.authors.join(';') : "Усе";
+		document.getElementById('inputFilterStyle').innerText = data && data.textStandard && data.textStandard.stylegenres ? data.textStandard.stylegenres.join(';') : "Усе";
+		if (data && data.words) {
+			data.words.forEach(wdata => {
+				let w = this.addWord('inputword');
+				(<HTMLInputElement>w.querySelector("input[type='text']")).value = wdata.word ? wdata.word : "";
+				(<HTMLInputElement>w.querySelector("input[type='checkbox']")).checked = wdata.allForms;
+				(<HTMLElement>w.querySelector(".wordgram-grammar-string")).innerText = wdata.grammar ? wdata.grammar : "";
+				(<HTMLElement>w.querySelector(".wordgram-display")).innerText = KorpusUI.wordGrammarToText(wdata.grammar);
+			});
+		} else {
+			this.addWord('inputword');
+		}
+		if (data && data.wordsOrder) {
+			(<HTMLInputElement>document.querySelector("#part-wordorder input[type='radio'][value='" + data.wordsOrder + "']")).checked = true;
+		}
+	}
+	separatedStringToArray(v: string): string[] {
+		if (!v || v == 'Усе') {
+			return null;
+		}
+		return v.split(';');
+	}
+}
+
+$.views.converters("json", function (val) {
+	return JSON.stringify(val);
+});
+
+var korpusui: KorpusUI = null;
+var korpusService: KorpusService = null;
+var dialogAuthors: DialogAuthors = null;
+var dialogStyleGenres: DialogStyleGenres = null;
+var dialogWordGrammar: DialogWordGrammar = null;
+function initializeKorpusPage() {
+	korpusui = new KorpusUI();
+	korpusService = new KorpusService();
+}

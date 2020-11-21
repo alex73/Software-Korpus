@@ -1,10 +1,10 @@
 <#assign active = "korpus">
 <#assign title = "Корпус | Беларускі N-корпус">
-<#include "header.fm">
+<#include "header.html">
 
     <div class="container">
 
-        <#include "app/page.korpus.fm">
+        <#include "app/page.korpus.html">
 
     </div>
     <div class="container text-center">
@@ -12,5 +12,9 @@
         Лексіка-граматычная база даступная на ўмовах ліцэнзіі <a target="_blank" href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Рухавік даступны на ўмовах ліцэнзіі <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a>.
     </div>
 
+    <script src="app.js"></script>
+    <script>
+      initializeKorpusPage();
+    </script>
 
-<#include "footer.fm">
+<#include "footer.html">

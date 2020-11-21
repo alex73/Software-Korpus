@@ -1,0 +1,35 @@
+<script id="styleGenresCards" type="text/x-jsrender">
+  {{for ~root.initial.styleGenresParts itemVar="~item"}}
+    <div class="card">
+      <div class="card-header"><label><input type="checkbox" onChange="korpusui.styleModalGroup(this)"> {{:~item}}</label></div>
+      <div class="card-body">
+        {{for ~root.initial.styleGenres[~item]}} 
+          <label><input type="checkbox" name="{{:~item}}/{{:}}"> {{:}}</label>
+        {{/for}}
+      </div>
+    </div>
+  {{/for}}
+</script>
+
+<div id="dialog-sg" class="modal fade" bsModal #styleModal="bs-modal" [config]="{backdrop: 'static'}"
+     tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">Стыль/жанр</h4>
+        <span>
+          <button type="button" class="btn btn-secondary" onClick="dialogStyleGenres.onCancel()">Скасаваць</button>
+          <button type="button" class="btn btn-primary" onClick="dialogStyleGenres.onOk()">Абраць</button>
+        </span>
+      </div>
+      <div class="modal-header">
+        <span>
+          <button type="button" class="btn btn-secondary" onClick="dialogStyleGenres.all(true)">Пазначыць усе</button>
+          <button type="button" class="btn btn-secondary" onClick="dialogStyleGenres.all(false)">Зняць усе</button>
+        </span>
+      </div>
+      <div id="dialog-sg-place" class="modal-body">
+      </div>
+    </div>
+  </div>
+</div>

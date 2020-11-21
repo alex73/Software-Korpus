@@ -27,7 +27,7 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarText">
           <ul class="navbar-nav ml-auto">
-            <li class="nav-item active"><a class="nav-link" href="index.html">Пра праект</a></li>
+            <li class="nav-item"><a class="nav-link" href="index.html">Пра праект</a></li>
             <li class="nav-item"><a class="nav-link" href="korpus.html">Корпус</a></li>
             <li class="nav-item"><a class="nav-link" href="grammar.html">Граматычная база</a></li>
             <li class="nav-item"><a class="nav-link" href="download.html">Спампаваць</a></li>
@@ -35,14 +35,7 @@
         </div>
       </div>
     </nav>
-    <script>
-      function c() {
-        var el = document.getElementById('navbar');
-        if(el.className.includes(' collapse')) {
-          el.className = "navbar-collapse";
-        } else {
-          el.className = "navbar-collapse collapse";
-        }
-        return false;
-      }
-    </script>
+<script>
+var page = window.location.pathname.replace(/.+\//, "");
+document.querySelector("a.nav-link[href$='"+page+"']").classList.add("active");
+</script>

@@ -1,0 +1,41 @@
+<script id="template-wordgrammar" type="text/x-jsrender">
+	<select id="dialog-wordgrammar-grselected" class="form-control" onChange="dialogWordGrammar.changeType(this.value)">
+		<option value="">-- Не абраная --</option>
+		{{for ~root.grammar.grammarWordTypes}}
+			<option value="{{:key}}">{{:value}}</option>
+		{{/for}}
+	</select>
+	<br/>
+	<div id="dialog-wordgrammar-place2">
+	</div>
+</script>
+<script id="template-wordgrammar2" type="text/x-jsrender">
+	{{for ~root.grammar.grammarWordTypesGroups[~root.grselected].groups itemVar="~group"}}
+		{{if !~group.hidden}}
+			<div class="card panel-default">
+				<div class="card-header">{{:~group.name}}</div>
+				<div class="card-body">
+				{{for ~group.items}}
+					<label><input type="checkbox" name="{{:~group.name}}" value="{{:code}}"> {{:description}} ({{:code}})</label>
+				{{/for}}
+				</div>
+			</div>
+		{{/if}}
+	{{/for}}
+</script>
+
+<div id="dialog-wordgrammar" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">Граматыка</h4>
+        <span>
+          <button type="button" class="btn btn-secondary" onClick="dialogWordGrammar.onCancel()">Скасаваць</button>
+          <button type="button" class="btn btn-primary" onClick="dialogWordGrammar.onOk()">Абраць</button>
+        </span>
+      </div>
+      <div id="dialog-wordgrammar-place" class="modal-body">
+      </div>
+    </div>
+  </div>
+</div>
