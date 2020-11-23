@@ -8,7 +8,6 @@ import java.util.Map;
 import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.server.data.ClusterParams;
 import org.alex73.korpus.server.data.ClusterResults;
-import org.alex73.korpus.server.data.CorpusType;
 import org.alex73.korpus.server.data.ResultText;
 import org.alex73.korpus.server.data.WordRequest;
 import org.alex73.korpus.server.data.WordResult;
@@ -30,11 +29,7 @@ public class ClusterServiceImpl {
         this.params = params;
 
         BooleanQuery query = new BooleanQuery();
-        if (params.corpusType == CorpusType.MAIN) {
-            process.addKorpusTextFilter(query, params.textStandard);
-        } else {
-            process.addOtherTextFilter(query, params.textUnprocessed);
-        }
+        process.addKorpusTextFilter(query, params.textStandard);
 
         WordRequest w = params.word;
         w.word = BelarusianWordNormalizer.normalize(w.word);

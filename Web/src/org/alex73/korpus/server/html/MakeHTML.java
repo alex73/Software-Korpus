@@ -34,21 +34,10 @@ public class MakeHTML extends HttpServlet {
         cfg.setDefaultEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
     }
-    public void doGet(String path, HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String templateFile = "templates/" + path.replaceAll("\\.html$", ".fm");
-        Template t = cfg.getTemplate(templateFile);
-        Map<String, Object> context = new TreeMap<>();
-        resp.setContentType("text/html; charset=UTF-8");
-        try (OutputStreamWriter wr = new OutputStreamWriter(resp.getOutputStream(), "UTF-8")) {
-            t.process(context, wr);
-        } catch (TemplateException ex) {
-            ex.printStackTrace();
-            throw new ServletException(ex);
-        }
-    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String templateFile = "templates/" + req.getServletPath().replaceAll("\\.html$", ".fm");
+        String templateFile = "templates/" + req.getServletPath();
         Template t = cfg.getTemplate(templateFile);
         Map<String, Object> context = new TreeMap<>();
         resp.setContentType("text/html; charset=UTF-8");

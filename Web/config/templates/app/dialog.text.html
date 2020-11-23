@@ -1,0 +1,31 @@
+<script id="template-text" type="text/x-jsrender">
+  <div class="modal-dialog modal-lg" *ngIf="detailsText">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 *ngIf="biblio" class="modal-title pull-left">{{>biblio.authors}}. {{>biblio.title}}</h4>
+        <button type="button" class="close pull-right" aria-label="Close" onClick="dialogText.cancel()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        {{for detailsText.words}}
+          <span>
+            {{for}}
+              <span>
+                {{* if (data.orig == '\n') { }}
+                  <br/>
+                {{* } else { }}
+                  <span {{if isWord}} wlemma="{{>lemma}}" wcat="{{>cat}}" {{/if}} {{if requestedWord}}class="wordFound"{{/if}}>{{>orig}}</span>
+                {{* } }}
+              </span>
+            {{/for}}
+          </span>
+        {{/for}}
+      </div>
+    </div>
+  </div>
+</script>
+
+<div id="dialog-text" class="modal fade" bsModal #textDetailsModal="bs-modal" [config]="{backdrop: 'static'}"
+     tabindex="-1" role="dialog" aria-hidden="true">
+</div>

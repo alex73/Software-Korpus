@@ -48,12 +48,12 @@ public class PrepareCache2 {
         textStat.write("Korpus-cache/");
 
         // other trash corpus
-        luceneOpen("Other-cache/");
-        otherQueueProcessor = new OtherQueueProcessor();
-        new OtherFilesIterator(errors, processOtherKorpus).iterate("Other-texts/");
-        otherQueueProcessor.fin();
-        luceneClose();
-        otherStat.write("Other-cache/");
+//        luceneOpen("Other-cache/");
+//        otherQueueProcessor = new OtherQueueProcessor();
+//        new OtherFilesIterator(errors, processOtherKorpus).iterate("Other-texts/");
+//        otherQueueProcessor.fin();
+//        luceneClose();
+//        otherStat.write("Other-cache/");
 
         List<String> errorNames = new ArrayList<>(errorsCount.keySet());
         Collections.sort(errorNames, new Comparator<String>() {

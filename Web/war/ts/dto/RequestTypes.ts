@@ -49,8 +49,8 @@ class BaseParams {
 }
 
 class SearchParams extends BaseParams {
-    public words: WordRequest[] = [];
-    public wordsOrder: string = "PRESET"; // "PRESET" | "ANY_IN_SENTENCE" | "ANY_IN_PARAGRAPH";
+    public words: WordRequest[];
+    public wordsOrder: string;
 
     getWord(n): WordRequest {
       let i: number = parseInt(n);
@@ -101,9 +101,9 @@ class SearchParams extends BaseParams {
 }
 
 class ClusterParams extends BaseParams {
-    public word: WordRequest = new WordRequest();
-    public wordsBefore: number = 1;
-    public wordsAfter: number = 1;
+    public word: WordRequest;
+    public wordsBefore: number;
+    public wordsAfter: number;
 
     exportParameters(): string {
         let out: string = super.exportParameters("cluster");

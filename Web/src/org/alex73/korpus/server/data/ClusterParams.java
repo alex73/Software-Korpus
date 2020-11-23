@@ -28,8 +28,11 @@ import java.io.Serializable;
  * Parameters for cluster requests.
  */
 public class ClusterParams implements Serializable {
+    @Deprecated
     public CorpusType corpusType;
+
     public StandardTextRequest textStandard = new StandardTextRequest();
+    @Deprecated
     public UnprocessedTextRequest textUnprocessed = new UnprocessedTextRequest();
     public WordRequest word;
     public int wordsBefore, wordsAfter;

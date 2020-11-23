@@ -33,6 +33,7 @@ import org.alex73.korpus.base.TextInfo;
 @SuppressWarnings("serial")
 public class SearchResults implements Serializable {
     public TextInfo doc;
+    @Deprecated
     public OtherInfo docOther;
     public ResultText text;
 }

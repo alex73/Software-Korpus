@@ -57,12 +57,17 @@ public class LuceneFilter {
 
     public void addKorpusTextFilter(BooleanQuery query, StandardTextRequest filter) {
         // author
-        if (StringUtils.isNotEmpty(filter.author)) {
-            Query q = new TermQuery(new Term(lucene.fieldSentenceTextAuthor.name(), filter.author));
+        if (filter.authors != null) {
+            BooleanQuery q = new BooleanQuery();
+            for (String a : filter.authors) {
+                q.add(new TermQuery(new Term(lucene.fieldSentenceTextAuthor.name(), a)),
+                        BooleanClause.Occur.SHOULD);
+            }
+            q.setMinimumNumberShouldMatch(1);
             query.add(q, BooleanClause.Occur.MUST);
         }
         // style/genre
-        if (!filter.stylegenres.isEmpty()) {
+        if (filter.stylegenres != null) {
             BooleanQuery q = new BooleanQuery();
             for (String sg : filter.stylegenres) {
                 q.add(new TermQuery(new Term(lucene.fieldSentenceTextStyleGenre.name(), sg)),
@@ -89,6 +94,7 @@ public class LuceneFilter {
         }
     }
 
+    @Deprecated
     public void addOtherTextFilter(BooleanQuery query, UnprocessedTextRequest filter) {
         // volume
         if (StringUtils.isNotEmpty(filter.volume)) {

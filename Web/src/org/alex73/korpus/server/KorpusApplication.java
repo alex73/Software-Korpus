@@ -28,7 +28,6 @@ import org.alex73.korpus.server.data.GrammarInitial.GrammarLetter;
 import org.alex73.korpus.server.data.InitialData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.glassfish.jersey.server.ResourceConfig;
 
 @ApplicationPath("rest")
 public class KorpusApplication extends Application {
@@ -59,7 +58,7 @@ public class KorpusApplication extends Application {
             grFinder = new GrammarFinder(gr);
             LOGGER.info("GrammarDB indexed. Used memory: " + getUsedMemory());
             processKorpus = new LuceneFilter(dirPrefix + "/Korpus-cache/");
-            processOther = new LuceneFilter(dirPrefix + "/Other-cache/");
+            //TODO processOther = new LuceneFilter(dirPrefix + "/Other-cache/");
             LOGGER.info("Lucene initialized");
 
             prepareInitial();
@@ -98,10 +97,10 @@ public class KorpusApplication extends Application {
         searchInitial.grammar = grammarInitial;
 
         props = new Properties();
-        try (InputStream in = new FileInputStream(dirPrefix + "/Other-cache/stat.properties")) {
-            props.load(in);
-        }
-        searchInitial.volumes = Arrays.asList(props.getProperty("volumes").split(";"));
+//        try (InputStream in = new FileInputStream(dirPrefix + "/Other-cache/stat.properties")) {
+//            props.load(in);
+//        }
+        //TODO searchInitial.volumes = Arrays.asList(props.getProperty("volumes").split(";"));
         searchInitial.statOther = stat(props);
     }
 

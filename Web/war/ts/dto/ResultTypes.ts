@@ -1,11 +1,9 @@
 class SearchResults {
     public doc: TextInfo;
-    public docOther: OtherInfo;
     public text: SearchResultsText;
     
     constructor(o:any) {
       this.doc = o.doc;
-      this.docOther = o.docOther;
       this.text = new SearchResultsText();
       this.text.words = o.text.words;
     }
@@ -16,14 +14,12 @@ class SearchResultsText {
 
 class ResultKwicOutRow {
     public doc: TextInfo;
-    public docOther: OtherInfo;
     public origText: SearchResultsText;
     public kwicBefore: WordResult[];
     public kwicWords: WordResult[];
     public kwicAfter: WordResult[];
     constructor(o:SearchResults) {
       this.doc = o.doc;
-      this.docOther = o.docOther;
       this.origText = o.text;
     }
 }
@@ -84,12 +80,10 @@ class ResultKwicOut {
 
 class ResultSearchOutRow {
     public doc: TextInfo;
-    public docOther: OtherInfo;
     public origText: SearchResultsText;
     public words: WordResult[] = [];
     constructor(o:SearchResults) {
       this.doc = o.doc;
-      this.docOther = o.docOther;
       this.origText = o.text;
     }
 }
@@ -241,10 +235,6 @@ class TextInfo {
     public styleGenres: string[];
     public writtenYear: number;
     public publishedYear: number;
-}
-
-class OtherInfo {
-    public textURL: string;
 }
 
 class ClusterResult {

@@ -2,7 +2,7 @@
 	<select id="dialog-wordgrammar-grselected" class="form-control" onChange="dialogWordGrammar.changeType(this.value)">
 		<option value="">-- Не абраная --</option>
 		{{for ~root.grammar.grammarWordTypes}}
-			<option value="{{:key}}">{{:value}}</option>
+			<option value="{{>key}}">{{>value}}</option>
 		{{/for}}
 	</select>
 	<br/>
@@ -13,10 +13,10 @@
 	{{for ~root.grammar.grammarWordTypesGroups[~root.grselected].groups itemVar="~group"}}
 		{{if !~group.hidden}}
 			<div class="card panel-default">
-				<div class="card-header">{{:~group.name}}</div>
+				<div class="card-header">{{>~group.name}}</div>
 				<div class="card-body">
 				{{for ~group.items}}
-					<label><input type="checkbox" name="{{:~group.name}}" value="{{:code}}"> {{:description}} ({{:code}})</label>
+					<label><input type="checkbox" name="{{>~group.name}}" value="{{>code}}"> {{>description}} ({{>code}})</label>
 				{{/for}}
 				</div>
 			</div>

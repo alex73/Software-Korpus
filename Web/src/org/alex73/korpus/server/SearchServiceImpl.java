@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -37,14 +39,12 @@ import org.alex73.korpus.text.xml.S;
 import org.alex73.korpus.text.xml.Se;
 import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.Z;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.BooleanQuery;
 
 @Path("/korpus")
 public class SearchServiceImpl {
-    static final Logger LOGGER = LogManager.getLogger(SearchServiceImpl.class);
+    private final static Logger LOGGER = Logger.getLogger(SearchServiceImpl.class.getName());
 
     @Context
     HttpServletRequest request;
@@ -61,7 +61,7 @@ public class SearchServiceImpl {
         try {
             return getApp().searchInitial;
         } catch (Exception ex) {
-            LOGGER.error("getInitialData", ex);
+            LOGGER.log(Level.SEVERE, "getInitialData", ex);
             throw ex;
         }
     }
@@ -145,7 +145,7 @@ public class SearchServiceImpl {
             LOGGER.info("<< Result: found: " + result.foundIDs.length + " hasMore:" + result.hasMore);
             return result;
         } catch (Throwable ex) {
-            LOGGER.info("<< Result error: " + ex.getMessage());
+            LOGGER.log(Level.SEVERE, "<< Result error", ex);
             SearchResult result = new SearchResult();
             result.error = ex.getMessage();
             return result;

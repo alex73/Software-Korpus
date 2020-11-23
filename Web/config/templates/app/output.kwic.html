@@ -1,0 +1,32 @@
+<table onClick="new PopoverWord(event);" class="table-zebra hspacing" width="100%">
+    <tr>
+      <th>Крыніца</th>
+      <th colspan="3">Тэкст</th>
+      <th>Цалкам</th>
+	</tr>
+	{{for resultKwic.rows}}
+    <tr>
+      <td style="color: #337ab7; white-space: nowrap;">
+        <a href="#" onClick="showBiblio($event, doc, docOther)">
+          {{titleShort:doc.authors}}
+        </a>
+      </td>
+      <td class="text-right">
+		{{for kwicBefore}}
+			<span {{if isWord}} wlemma="{{>lemma}}" wcat="{{>cat}}" {{/if}} {{if requestedWord}}class="wordFound"{{/if}}>{{>orig}}</span>
+		{{/for}}
+      </td>
+      <td class="text-center">
+		{{for kwicWords}}
+			<span {{if isWord}} wlemma="{{>lemma}}" wcat="{{>cat}}" {{/if}} {{if requestedWord}}class="wordFound"{{/if}}>{{>orig}}</span>
+		{{/for}}
+      </td>
+      <td class="text-left">
+		{{for kwicAfter}}
+			<span {{if isWord}} wlemma="{{>lemma}}" wcat="{{>cat}}" {{/if}} {{if requestedWord}}class="wordFound"{{/if}}>{{>orig}}</span>
+		{{/for}}
+      </td>
+      <td class="text-center"><a href="#" onClick="dialogText = new DialogText(korpusService.resultSearch.rows[{{:#index}}], this); return false;">[...]</a></td>
+	</tr>
+	{{/for}}
+</table>
