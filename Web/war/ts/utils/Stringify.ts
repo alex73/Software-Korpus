@@ -3,3 +3,10 @@ function stringify(v: Object) {
 		if (value) return value
 	});
 }
+
+function fulltrim(s: string): string {
+	if (s) {
+		s = s.trim();
+	}
+	return s ? s : null;
+}

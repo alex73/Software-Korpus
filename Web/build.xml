@@ -79,9 +79,9 @@
 	</target>
 
 	<target name="js">
-		<exec executable="tsc">
+		<exec executable="tsc" failonerror="true">
 			<arg value="--project"/>
-			<arg value="ts/tsconfig.json"/>
+			<arg value="war/ts/tsconfig.json"/>
 			<arg value="--target"/>
 			<arg value="ES5"/>
 			<arg value="--outFile"/>
@@ -91,9 +91,7 @@
 	
 	<target name="hosted" depends="devmode" description="Run development mode (NOTE: the 'hosted' target is deprecated)" />
 
-	<target name="build" depends="gwtc" description="Build this project" />
-
-	<target name="war" depends="build" description="Create a war file">
+	<target name="war" depends="js,javac" description="Create a war file">
 		<zip destfile="build/ROOT.war" basedir="war" excludes="logs/**, **/lib/sources/**">
 			<zipfileset dir="build/classes/" prefix="WEB-INF/classes/" />
 			<zipfileset dir="../Common/lib/" prefix="WEB-INF/lib/" includes="*.jar" />

@@ -1,0 +1,29 @@
+<div class="col-sm-6 col-lg-4 inputword" style="display: none" id="template-inputword">
+	<div class="card">
+		<span class="d-none wordgram-grammar-string"></span>
+		<div class="card-body">
+			<div class="form-inline float-right ml-2">
+				<button type="button" class="inputword-remove close" aria-label="Close"
+					onClick="korpusui.removeWord('inputword', this); return false;">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="form-inline form-group my-1">
+				<label>Усе словаформы
+					<input class="ml-2" type="checkbox" name="allForms" onChange="KorpusUI.lemmaChange('inputword', this)">
+				</label>
+			</div>
+			<div class="form-inline form-group my-1">
+				<label><span class="inputword-lemma-prompt">Слова</span>
+					<input type="text" placeholder="уводзіць тут" class="form-control ml-2 w-100" name="wordText">
+				</label>
+			</div>
+			<div class="form-inline form-group my-1">
+				<label>Граматыка
+					<a href="#" class="form-control wordgram-display ml-2"
+						onClick="dialogWordGrammar = new DialogWordGrammar(this); return false;">---</a>
+				</label>
+			</div>
+		</div>
+	</div>
+</div>

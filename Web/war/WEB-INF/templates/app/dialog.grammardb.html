@@ -1,0 +1,47 @@
+<script id="template-grammardb" type="text/x-jsrender">
+  <div class="modal-header">
+    <h4 class="modal-title pull-left">{{>details.lemma}}</h4>
+      <button type="button" class="close pull-right" aria-label="Close" onClick="dialogGrammarDB.onClose()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="card">
+      <div class="card-header">
+        {{for details.catText}}
+        <div>{{>key}}: {{>value}}</div>
+        {{/for}}
+      </div>
+      {{for details.variants}}
+        <div class="card-body">
+          <table class="table-borders hspacing">
+            <tr>
+              {{for catnames}}
+                <th>{{>}}</th>
+              {{/for}}
+              <th></th>
+            </tr>
+            {{for forms itemVar="~f"}}
+            <tr>
+              {{for data}}
+                {{if ~f.colspan[#index] > 0}}
+                  <td rowSpan="{{:~f.colspan[#getIndex()]}}">{{>}}</td>
+                {{/if}}
+              {{/for}}
+              <td>{{>value}}</td>
+            </tr>
+            {{/for}}
+          </table>
+        </div>
+      {{/for}}
+    </div>
+  </div>
+</script>
+
+<div id="dialog-grammardb" class="modal fade" bsModal #lemmaModal="bs-modal" [config]="{backdrop: 'static'}"
+     tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div id="dialog-grammardb-details" class="modal-content">
+    </div>
+  </div>
+</div>

@@ -142,7 +142,17 @@ public class WordsDetailsChecks {
         if (wordParam.word != null && !wordParam.word.trim().isEmpty()) {
             if (wordParam.allForms) {
                 // lemma
-                if (!wordParam.lemmas.contains(wordResult.lemma)) {
+                if (wordResult.lemma == null) {
+                    return false;
+                }
+                boolean found = false;
+                for (String le : wordParam.lemmaMarks) {
+                    if (wordResult.lemma.contains(le)) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
                     return false;
                 }
             } else {

@@ -35,11 +35,7 @@ public class SearchParams implements Serializable {
         PRESET, ANY_IN_SENTENCE, ANY_IN_PARAGRAPH
     };
 
-    @Deprecated
-    public CorpusType corpusType;
-
     public StandardTextRequest textStandard;
-    public UnprocessedTextRequest textUnprocessed;
     public List<WordRequest> words = new ArrayList<WordRequest>();
     public WordsOrder wordsOrder = WordsOrder.PRESET;
 }

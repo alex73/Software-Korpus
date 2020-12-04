@@ -8,14 +8,6 @@ class DialogText {
 		$('#dialog-text').modal('show');
 		target.classList.add('visited');
 	}
-	fullText(origText: SearchResultsText, doc: TextInfo, docOther: OtherInfo, event) {
-		this.biblio = doc;
-		this.biblioOther = docOther;
-		this.detailsText = origText.words;
-		this.textDetailsModal.show();
-		event.target.className = "visited";
-		return false;
-	}
 	cancel() {
 		$('#dialog-text').modal('hide');
 	}

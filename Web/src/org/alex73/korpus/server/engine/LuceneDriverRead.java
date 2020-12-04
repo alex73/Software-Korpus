@@ -36,6 +36,8 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
@@ -69,11 +71,12 @@ public class LuceneDriverRead extends LuceneFields {
         final List<T> result = new ArrayList<>(maxResults);
 
         TopDocs rs;
+        Sort sort = new Sort(new SortField(fieldSentenceTextDate.name(), SortField.Type.LONG, true), SortField.FIELD_DOC);
         if (latest.doc == 0 && latest.shardIndex == 0) {
-            rs = indexSearcher.search(query, maxResults);
+            rs = indexSearcher.search(query, null, maxResults, sort);
         } else {
             ScoreDoc latestDoc = new ScoreDoc(latest.doc, latest.score, latest.shardIndex);
-            rs = indexSearcher.searchAfter(latestDoc, query, maxResults);
+            rs = indexSearcher.searchAfter(latestDoc, query, null, maxResults, sort);
             latest.doc = 0;
             latest.shardIndex = 0;
         }
@@ -111,7 +114,7 @@ public class LuceneDriverRead extends LuceneFields {
                 }
             }
             if (result.size() < maxResults) {
-                rs = indexSearcher.searchAfter(rs.scoreDocs[rs.scoreDocs.length - 1], query, maxResults);
+                rs = indexSearcher.searchAfter(rs.scoreDocs[rs.scoreDocs.length - 1], query, null, maxResults, sort);
                 LOGGER.info("   Lucene found: block: " + rs.scoreDocs.length);
                 System.out.println("found block " + rs.scoreDocs.length);
             } else {
@@ -159,15 +162,21 @@ public class LuceneDriverRead extends LuceneFields {
         }
         Document doc = directoryReader.document(rs.scoreDocs[0].doc);
         TextInfo result = new TextInfo();
+        result.url = simplify(doc.getField(fieldTextURL.name()).stringValue());
+        result.subcorpus = simplify(doc.getField(fieldTextSubcorpus.name()).stringValue());
         result.authors = doc.getField(fieldTextAuthors.name()).stringValue().split(";");
-        result.title = doc.getField(fieldTextTitle.name()).stringValue();
+        result.title = simplify(doc.getField(fieldTextTitle.name()).stringValue());
         result.translators = doc.getField(fieldTextTranslators.name()).stringValue().split(";");
-        result.langOrig = doc.getField(fieldTextLangOrig.name()).stringValue();
+        result.langOrig = simplify(doc.getField(fieldTextLangOrig.name()).stringValue());
         result.styleGenres = doc.getField(fieldTextStyleGenre.name()).stringValue().split(";");
-        result.edition = doc.getField(fieldTextEdition.name()).stringValue();
-        result.writtenTime = doc.getField(fieldTextWrittenTime.name()).stringValue();
-        result.publicationTime = doc.getField(fieldTextPublicationTime.name()).stringValue();
+        result.edition = simplify(doc.getField(fieldTextEdition.name()).stringValue());
+        result.writtenTime = simplify(doc.getField(fieldTextWrittenTime.name()).stringValue());
+        result.publicationTime = simplify(doc.getField(fieldTextPublicationTime.name()).stringValue());
         return result;
+    }
+
+    private String simplify(String s) {
+        return s == null || s.isEmpty() ? null : s;
     }
 
     public interface DocFilter<T> {

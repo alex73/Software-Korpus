@@ -6,20 +6,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import javax.annotation.PreDestroy;
+import javax.naming.Context;
+import javax.naming.InitialContext;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.DBTagsGroups;
+import org.alex73.korpus.base.DBTagsGroups.KeyValue;
 import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.base.TagLetter;
@@ -33,8 +38,10 @@ import org.apache.logging.log4j.Logger;
 public class KorpusApplication extends Application {
     static final Logger LOGGER = LogManager.getLogger(KorpusApplication.class);
 
-    public String dirPrefix = System.getProperty("KORPUS_DIR");
+    public String korpusDir = System.getProperty("KORPUS_DIR");
+    public String configDir = System.getProperty("CONFIG_DIR");
 
+    Properties settings;
     GrammarDB2 gr;
     GrammarFinder grFinder;
     GrammarInitial grammarInitial;
@@ -47,17 +54,36 @@ public class KorpusApplication extends Application {
 
     public KorpusApplication() {
         instance = this;
-        if (dirPrefix == null) {
-            LOGGER.fatal("KORPUS_DIR is not defined");
-            return;
-        }
+
         LOGGER.info("Starting...");
         try {
-            gr = GrammarDB2.initializeFromDir(dirPrefix + "/GrammarDB/");
+            InitialContext context = new InitialContext();
+            Context xmlNode = (Context) context.lookup("java:comp/env");
+            if (korpusDir == null) {
+                korpusDir = (String) xmlNode.lookup("KORPUS_DIR");
+            }
+            if (configDir == null) {
+                configDir = (String) xmlNode.lookup("CONFIG_DIR");
+            }
+            if (configDir == null) {
+                LOGGER.fatal("CONFIG_DIR is not defined");
+                return;
+            }
+            if (korpusDir == null) {
+                LOGGER.fatal("KORPUS_DIR is not defined");
+                return;
+            }
+            settings = new Properties();
+            try (BufferedReader input = Files.newBufferedReader(Paths.get(configDir + "/settings.ini"),
+                    StandardCharsets.UTF_8)) {
+                settings.load(input);
+            }
+            
+            gr = GrammarDB2.initializeFromDir(korpusDir + "/GrammarDB/");
             LOGGER.info("GrammarDB loaded with " + gr.getAllParadigms().size() + " paradigms. Used memory: " + getUsedMemory());
             grFinder = new GrammarFinder(gr);
             LOGGER.info("GrammarDB indexed. Used memory: " + getUsedMemory());
-            processKorpus = new LuceneFilter(dirPrefix + "/Korpus-cache/");
+            processKorpus = new LuceneFilter(korpusDir + "/Korpus-cache/");
             //TODO processOther = new LuceneFilter(dirPrefix + "/Other-cache/");
             LOGGER.info("Lucene initialized");
 
@@ -84,63 +110,44 @@ public class KorpusApplication extends Application {
         grammarInitial.grammarTree = addGrammar(BelarusianTags.getInstance().getRoot());
         grammarInitial.grammarWordTypes = DBTagsGroups.wordTypes;
         grammarInitial.grammarWordTypesGroups = DBTagsGroups.tagGroupsByWordType;
+        
+        grammarInitial.skipGrammar = new TreeMap<>();
+        Properties settings = new Properties();
+        try (BufferedReader in = Files.newBufferedReader(Paths.get(configDir + "/settings.ini"))) {
+            settings.load(in);
+        }
+        for (String k : (Set<String>) (Set<?>) settings.keySet()) {
+            if (k.startsWith("grammar.skip.")) {
+                Set<String> vs = Arrays.stream(settings.getProperty(k).split(";")).map(s -> s.trim())
+                        .collect(Collectors.toSet());
+                grammarInitial.skipGrammar.put(k.charAt(13), vs);
+            }
+        }
 
         searchInitial = new InitialData();
 
         Properties props = new Properties();
-        try (InputStream in = new FileInputStream(dirPrefix + "/Korpus-cache/stat.properties")) {
+        try (InputStream in = new FileInputStream(korpusDir + "/Korpus-cache/stat.properties")) {
             props.load(in);
         }
         searchInitial.authors = Arrays.asList(props.getProperty("authors").split(";"));
-        searchInitial.statKorpus = stat(props);
-        loadStyleGenres();
-        searchInitial.grammar = grammarInitial;
-
-        props = new Properties();
-//        try (InputStream in = new FileInputStream(dirPrefix + "/Other-cache/stat.properties")) {
-//            props.load(in);
-//        }
-        //TODO searchInitial.volumes = Arrays.asList(props.getProperty("volumes").split(";"));
-        searchInitial.statOther = stat(props);
-    }
-
-    List<InitialData.StatLine> stat(Properties props) {
-        List<String> names = new ArrayList<>();
-        for (Object k : props.keySet()) {
-            if (k.toString().startsWith("texts.")) {
-                names.add(k.toString().substring(6));
+        searchInitial.subcorpuses = new ArrayList<>();
+        for (String k : (Set<String>) (Set<?>) settings.keySet()) {
+            if (k.startsWith("subcorpus.")) {
+                searchInitial.subcorpuses.add(new KeyValue(k.substring(10), settings.getProperty(k)));
             }
         }
-        Collections.sort(names);
-        if (names.contains("_")) {
-            names.remove("_");
-            names.add("_");
-        }
-
-        List<InitialData.StatLine> r = new ArrayList<>();
-        InitialData.StatLine row0 = new InitialData.StatLine();
-        row0.name = "Агулам";
-        row0.texts = 0;
-        row0.words = 0;
-        r.add(row0);
-        for (String n : names) {
-            InitialData.StatLine row = new InitialData.StatLine();
-            row.name = "_".equals(n) ? "нявызначаны" : n;
-            row.texts = Integer.parseInt(props.getProperty("texts." + n));
-            row.words = Integer.parseInt(props.getProperty("words." + n));
-            row0.texts += row.texts;
-            row0.words += row.words;
-            r.add(row);
-        }
-        return r;
+        loadStyleGenres();
+        searchInitial.grammar = grammarInitial;
     }
 
     @PreDestroy
     public void shutdown() {
         LOGGER.info("shutdown");
         try {
-            processKorpus.close();
-            processOther.close();
+            if (processKorpus!=null) {
+                processKorpus.close();
+            }
         } catch (Exception ex) {
             LOGGER.error("shutdown", ex);
         }
@@ -164,8 +171,8 @@ public class KorpusApplication extends Application {
     private void loadStyleGenres() throws IOException {
         searchInitial.styleGenresParts = new ArrayList<>();
         searchInitial.styleGenres = new TreeMap<>();
-        try (BufferedReader rd = new BufferedReader(
-                new InputStreamReader(getClass().getClassLoader().getResourceAsStream("/styleGenres.txt"), StandardCharsets.UTF_8))) {
+        try (BufferedReader rd = new BufferedReader(new InputStreamReader(
+                getClass().getClassLoader().getResourceAsStream("/styleGenres.txt"), StandardCharsets.UTF_8))) {
             String s;
             while ((s = rd.readLine()) != null) {
                 s = s.trim();

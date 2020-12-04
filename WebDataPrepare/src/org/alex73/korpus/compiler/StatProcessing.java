@@ -1,18 +1,17 @@
 package org.alex73.korpus.compiler;
 
-import java.io.FileOutputStream;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.text.xml.P;
@@ -22,166 +21,122 @@ import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.XMLText;
 
 public class StatProcessing {
-    private final Map<String, Integer> countsByOne = new HashMap<>();
-    private final Map<String, Float> countsByPart = new HashMap<>();
-    private final Set<String> authors = new TreeSet<>();
-    private final StatInfo total = new StatInfo("");
-    private final Map<String, StatInfo> parts = new HashMap<>();
-    private final Set<String> volumes = new TreeSet<>();
+    private final Set<String> authors = Collections.synchronizedSet(new HashSet<>());
+    private final Map<String, StatInfo> stats = new HashMap<>();
 
     public void add(TextInfo textInfo, XMLText doc) {
-        int wc = 0;
-        for (Object p : doc.getContent().getPOrTagOrPoetry()) {
+        for (String a : textInfo.authors) {
+            authors.add(a);
+        }
+
+        List<StatInfo> todo = new ArrayList<>();
+        todo.add(getStatInfo(""));
+        todo.add(getStatInfo(textInfo.subcorpus));
+        if (textInfo.styleGenres.length > 0) {
+            for (String s : textInfo.styleGenres) {
+                todo.add(getStatInfo(textInfo.subcorpus + "." + s));
+            }
+        } else {
+            todo.add(getStatInfo(textInfo.subcorpus + "._"));
+        }
+        todo.forEach(s -> {
+            synchronized (s) {
+                s.texts++;
+            }
+        });
+
+        doc.getContent().getPOrTagOrPoetry().parallelStream().forEach(p -> {
             if (p instanceof P) {
-                wc += process((P) p);
+                process((P) p, todo);
             } else if (p instanceof Poetry) {
                 Poetry po = (Poetry) p;
                 for (Object p2 : po.getPOrTag()) {
                     if (p2 instanceof P) {
-                        wc += process((P) p2);
+                        process((P) p2, todo);
                     }
                 }
             }
-        }
-
-        synchronized (this) {
-            total.addText(wc);
-            if (textInfo.styleGenres.length > 0) {
-                for (String s : textInfo.styleGenres) {
-                    addKorpusStat(s, wc);
-                }
-            } else {
-                addKorpusStat("_", wc);
-            }
-            for (String a : textInfo.authors) {
-                authors.add(a);
-            }
-        }
+        });
     }
 
-    public synchronized void addVolume(String v) {
-        volumes.add(v);
+    private synchronized StatInfo getStatInfo(String key) {
+        StatInfo r = stats.get(key);
+        if (r == null) {
+            r = new StatInfo();
+            stats.put(key, r);
+        }
+        return r;
     }
 
-    private void addKorpusStat(String styleGenre, int wordsCount) {
-        int p = styleGenre.indexOf('/');
-        String st = p < 0 ? styleGenre : styleGenre.substring(0, p);
-        StatInfo i = parts.get(st);
-        if (i == null) {
-            i = new StatInfo(st);
-            parts.put(st, i);
-        }
-        i.addText(wordsCount);
-    }
-
-    public synchronized void write(String dir) throws Exception {
-        List<String> listByOne = new ArrayList<>(countsByOne.keySet());
-        Collections.sort(listByOne, COMP_BY_ONE);
-        write(listByOne, countsByOne, dir + "/statWords.tab");
-
-        Properties stat = new Properties();
-
-        String authorsstr = "";
-        for (String s : authors) {
-            authorsstr += ";" + s;
-        }
-        if (!authors.isEmpty()) {
-            stat.setProperty("authors", authorsstr.substring(1));
-        } else {
-            stat.setProperty("authors", "");
-        }
-        for (StatInfo si : parts.values()) {
-            si.write(stat); // - don't output details yet
-        }
-        total.write(stat);
-
-        String volumesstr = "";
-        for (String s : volumes) {
-            volumesstr += ";" + s;
-        }
-        if (!volumesstr.isEmpty()) {
-            stat.setProperty("volumes", volumesstr.substring(1));
-        } else {
-            stat.setProperty("volumes", "");
+    public synchronized void write(Path dir) throws Exception {
+        for (Map.Entry<String, StatInfo> en : stats.entrySet()) {
+            en.getValue().write(dir.resolve("stat.freq." + en.getKey() + ".tab"));
         }
 
-        try (FileOutputStream o = new FileOutputStream(dir + "/stat.properties")) {
-            stat.store(o, null);
+        List<String> stat = new ArrayList<>();
+        stat.add("authors=" + String.join(";", authors));
+        for (Map.Entry<String, StatInfo> en : stats.entrySet()) {
+            stat.add("texts." + en.getKey() + "=" + en.getValue().texts);
+            stat.add("words." + en.getKey() + "=" + en.getValue().words);
         }
-    }
-
-    private void write(List<String> keys, Map<String, ?> values, String fn) throws Exception {
-        for (int i = 0; i < keys.size(); i++) {
-            String k = keys.get(i);
-            keys.set(i, k + '\t' + values.get(k));
-        }
-        Files.write(Paths.get(fn), keys);
+        Files.write(dir.resolve("stat.properties"), stat);
     }
 
     private static final Pattern RE_SPLIT = Pattern.compile("_");
 
-    private int process(P p) {
-        int wc = 0;
+    private void process(P p, List<StatInfo> todo) {
         for (Se se : p.getSe()) {
             for (Object o : se.getWOrSOrZ()) {
                 if (o instanceof W) {
-                    wc++;
                     W w = (W) o;
                     if (w.getLemma() != null) {
                         String[] lemmas = RE_SPLIT.split(w.getLemma());
-                        float part = 1.0f / lemmas.length;
-                        for (String lemma : lemmas) {
-                            inc(lemma, part);
-                        }
+                        todo.forEach(s -> s.addWord(w.getValue(), lemmas));
                     }
                 }
             }
         }
-        return wc;
     }
-
-    private synchronized void inc(String lemma, float part) {
-        Integer prev1 = countsByOne.get(lemma);
-        int v1 = prev1 == null ? 1 : prev1 + 1;
-        countsByOne.put(lemma, v1);
-        Float prev2 = countsByPart.get(lemma);
-        float v2 = prev2 == null ? part : prev2 + part;
-        countsByPart.put(lemma, v2);
-    }
-
-    private final Comparator<String> COMP_BY_ONE = new Comparator<String>() {
-        @Override
-        public int compare(String s1, String s2) {
-            int v1 = countsByOne.get(s1);
-            int v2 = countsByOne.get(s2);
-            return Integer.compare(v2, v1);
-        }
-    };
-    private final Comparator<String> COMP_BY_PART = new Comparator<String>() {
-        @Override
-        public int compare(String s1, String s2) {
-            float v1 = countsByPart.get(s1);
-            float v2 = countsByPart.get(s2);
-            return Float.compare(v2, v1);
-        }
-    };
 
     private static class StatInfo {
-        private final String suffix;
         public int texts, words;
+        private final Map<String, ParadigmStat> byLemma = new HashMap<>();
 
-        public StatInfo(String suffix) {
-            this.suffix = suffix.isEmpty() ? suffix : "." + suffix;
+        synchronized void addWord(String value, String[] lemmas) {
+            words++;
+            float part = 1.0f / lemmas.length;
+            for (String lemma : lemmas) {
+                if (lemma.isEmpty()) {
+                    continue;
+                }
+                ParadigmStat ps;
+                synchronized (this) {
+                    ps = byLemma.get(lemma);
+                    if (ps == null) {
+                        ps = new ParadigmStat();
+                        ps.para = lemma;
+                        byLemma.put(lemma, ps);
+                    }
+                    ps.intCount++;
+                    ps.floatCount += part;
+                    Integer prev = ps.valuesCount.get(value);
+                    ps.valuesCount.put(value, prev == null ? 1 : prev.intValue() + 1);
+                }
+            }
         }
 
-        public void addText(int wordsCount) {
-            texts++;
-            words += wordsCount;
+        void write(Path f) throws Exception {
+            List<ParadigmStat> list = byLemma.values().stream()
+                    .sorted((a, b) -> Integer.compare(b.intCount, a.intCount)).collect(Collectors.toList());
+            Files.write(f, list.stream().map(s -> s.para + "\t" + s.intCount + "\t" + s.valuesCount)
+                    .collect(Collectors.toList()));
         }
-
-        public void write(Properties props) {
-            props.setProperty("texts" + suffix, "" + texts);
-            props.setProperty("words" + suffix, "" + words);
-        }
+    }
+    
+    static class ParadigmStat {
+        String para;
+        int intCount;
+        float floatCount;
+        Map<String,Integer> valuesCount=new TreeMap<>();
     }
 }

@@ -1,6 +1,8 @@
 package org.alex73.korpus.server.engine;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.BelarusianWordNormalizer;
@@ -50,19 +52,18 @@ public class LuceneDriverWrite extends LuceneFields {
         docSentence.add(fieldSentenceLemmas);
         docSentence.add(fieldSentencePBinary);
 
+        docSentence.add(fieldSentenceTextSubcorpus);
         docSentence.add(fieldSentenceTextID);
         docSentence.add(fieldSentenceTextStyleGenre);
         docSentence.add(fieldSentenceTextAuthor);
         docSentence.add(fieldSentenceTextWrittenYear);
         docSentence.add(fieldSentenceTextPublishedYear);
-
-        docSentence.add(fieldSentenceOtherVolume);
-        docSentence.add(fieldSentenceOtherName);
-        docSentence.add(fieldSentenceOtherURL);
-        docSentence.add(fieldSentenceOtherDetails);
+        docSentence.add(fieldSentenceTextDate);
 
         docText = new Document();
         docText.add(fieldTextID);
+        docText.add(fieldTextURL);
+        docText.add(fieldTextSubcorpus);
         docText.add(fieldTextAuthors);
         docText.add(fieldTextTitle);
         docText.add(fieldTextTranslators);
@@ -87,6 +88,8 @@ public class LuceneDriverWrite extends LuceneFields {
         currentUrl = null;
 
         fieldTextID.setIntValue(textId);
+        fieldTextURL.setStringValue(nvl(info.url));
+        fieldTextSubcorpus.setStringValue(info.subcorpus);
         fieldTextAuthors.setStringValue(merge(info.authors, ";"));
         fieldTextTitle.setStringValue(nvl(info.title));
         fieldTextTranslators.setStringValue(merge(info.translators, ";"));
@@ -97,14 +100,6 @@ public class LuceneDriverWrite extends LuceneFields {
         fieldTextPublicationTime.setStringValue(nvl(info.publicationTime));
 
         indexWriter.addDocument(docText);
-    }
-
-    public synchronized void setOtherInfo(String volume, String name, String textURL, String details) throws Exception {
-        currentVolume = volume;
-        currentName = name;
-        currentUrl = textURL;
-        currentDetails = details;
-        textId = -1;
     }
 
     /**
@@ -142,30 +137,27 @@ public class LuceneDriverWrite extends LuceneFields {
         });
 
         synchronized (this) {
-            if (currentVolume != null && currentUrl != null) {
-                fieldSentenceOtherVolume.setStringValue(currentVolume);
-                fieldSentenceOtherName.setStringValue(currentName);
-                fieldSentenceOtherURL.setStringValue(currentUrl);
-                fieldSentenceOtherDetails.setStringValue(currentDetails);
-            } else {
-                fieldSentenceTextID.setIntValue(textId);
-            }
+            fieldSentenceTextSubcorpus.setStringValue(currentTextInfo.subcorpus);
+            fieldSentenceTextID.setIntValue(textId);
 
             fieldSentenceValues.setStringValue(values.toString());
             fieldSentenceDBGrammarTags.setStringValue(dbGrammarTags.toString());
             fieldSentenceLemmas.setStringValue(lemmas.toString());
             fieldSentencePBinary.setBytesValue(xml);
 
-            if (currentTextInfo != null) {
-                fieldSentenceTextStyleGenre.setTokenStream(new StringArrayTokenStream(currentTextInfo.styleGenres));
-                //TODO fieldSentenceTextWrittenYear.setIntValue(nvl(currentTextInfo.writtenYear));
-                //TODO fieldSentenceTextPublishedYear.setIntValue(nvl(currentTextInfo.publishedYear));
-                fieldSentenceTextAuthor.setTokenStream(new StringArrayTokenStream(currentTextInfo.authors));
-            }
-
+            fieldSentenceTextStyleGenre.setTokenStream(new StringArrayTokenStream(currentTextInfo.styleGenres));
+            //TODO fieldSentenceTextWrittenYear.setIntValue(nvl(currentTextInfo.writtenYear));
+            //TODO fieldSentenceTextPublishedYear.setIntValue(nvl(currentTextInfo.publishedYear));
+            fieldSentenceTextAuthor.setTokenStream(new StringArrayTokenStream(currentTextInfo.authors));
+            fieldSentenceTextDate.setLongValue(currentTextInfo.date);
+log.add("lemmas: "+lemmas);
+log.add("values: "+values);
+log.add("gramma: "+dbGrammarTags);
+log.add("");
             indexWriter.addDocument(docSentence);
         }
     }
+public static List<String> log=new ArrayList<>();
 
     private String merge(String[] strs, String sep) {
         StringBuilder out = new StringBuilder();

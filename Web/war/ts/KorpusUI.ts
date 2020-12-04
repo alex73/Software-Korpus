@@ -72,6 +72,9 @@ class KorpusUI {
 		collection.forEach(el => (<NodeListOf<HTMLElement>>el.querySelectorAll("." + type + "-remove")).forEach(er =>
 			er.style.display = collection.length > 1 ? 'block' : 'none'));
 	}
+	static lemmaChange(type: string, cb: HTMLInputElement) {
+		cb.closest('.' + type).querySelector("." + type + "-lemma-prompt").textContent = cb.checked ? "Лема" : "Слова";
+	}
 	hideStatusError() {
 		$('#status').hide();
 		$('#error').hide();
@@ -87,55 +90,13 @@ class KorpusUI {
 		document.getElementById("status").innerText = s;
 		$('#status').show();
 	}
-	static textToWordGrammar(grammar: string) {
-		let db: DBTagsGroups = korpusService.initial.grammar.grammarWordTypesGroups[grammar.charAt(0)];
-		let checked = {};
-		for (let group of db.groups) {
-			checked[group.name] = "";
-		}
-		let grindex: number = 0;
-		for (let i = 1; i < grammar.length; i++) {
-			let group = db.groups[grindex];
-			let ch: string = grammar.charAt(i);
-			if (ch == '[') {
-				for (; i < grammar.length; i++) {
-					ch = grammar.charAt(i);
-					if (ch == ']') {
-						break;
-					} else {
-						checked[group.name] += ch;
-					}
-				}
-			} else if (ch == '.') {
-			} else {
-				checked[group.name] += ch;
-			}
-			grindex++;
-		}
-		let cbs: NodeListOf<HTMLInputElement> = document.querySelectorAll("#dialog-wordgrammar-place input[type='checkbox']");
-		cbs.forEach(cb => {
-			cb.checked = checked[cb.name].indexOf(cb.value) >= 0;
-		});
-	}
-	static wordGrammarToText(grammar: string): string {
-		if (grammar) {
-			let p: string = grammar.charAt(0);
-			let display = korpusService.initial.grammar.grammarTree[p].desc;
-			if (!/^\.*$/.test(grammar.substring(1))) {
-				display += ', ...';
-			}
-			return display;
-		} else {
-			return '---';
-		}
-	}
 	private collectFromScreenBase(p: BaseParams) {
 		p.textStandard.authors = this.separatedStringToArray(document.getElementById('inputFilterAuthor').innerText);
 		p.textStandard.stylegenres = this.separatedStringToArray(document.getElementById('inputFilterStyle').innerText);
-		p.textStandard.yearWrittenFrom = (<HTMLInputElement>document.getElementById('inputFilterYearWrittenFrom')).value;
-		p.textStandard.yearWrittenTo = (<HTMLInputElement>document.getElementById('inputFilterYearWrittenTo')).value;
-		p.textStandard.yearPublishedFrom = (<HTMLInputElement>document.getElementById('inputFilterYearPublishedFrom')).value;
-		p.textStandard.yearPublishedTo = (<HTMLInputElement>document.getElementById('inputFilterYearPublishedTo')).value;
+		p.textStandard.yearWrittenFrom = fulltrim((<HTMLInputElement>document.getElementById('inputFilterYearWrittenFrom')).value);
+		p.textStandard.yearWrittenTo = fulltrim((<HTMLInputElement>document.getElementById('inputFilterYearWrittenTo')).value);
+		p.textStandard.yearPublishedFrom = fulltrim((<HTMLInputElement>document.getElementById('inputFilterYearPublishedFrom')).value);
+		p.textStandard.yearPublishedTo = fulltrim((<HTMLInputElement>document.getElementById('inputFilterYearPublishedTo')).value);
 	}
 	collectFromScreenSearch(): SearchParams {
 		let requestedParams: SearchParams = new SearchParams();
@@ -144,8 +105,8 @@ class KorpusUI {
 		this.getWordCollection('inputword').forEach(w => {
 			let wrq = new WordRequest();
 			wrq.allForms = (<HTMLInputElement>w.querySelector("input[type='checkbox']")).checked;
-			wrq.word = (<HTMLInputElement>w.querySelector("input[type='text']")).value;
-			wrq.grammar = (<HTMLElement>w.querySelector(".wordgram-grammar-string")).innerText;
+			wrq.word = fulltrim((<HTMLInputElement>w.querySelector("input[type='text']")).value);
+			wrq.grammar = fulltrim((<HTMLElement>w.querySelector(".wordgram-grammar-string")).innerText);
 			requestedParams.words.push(wrq);
 		});
 		if (this.getMode() == 'search') {
@@ -159,8 +120,8 @@ class KorpusUI {
 		this.getWordCollection('inputword').forEach(w => {
 			let wrq = new WordRequest();
 			wrq.allForms = (<HTMLInputElement>w.querySelector("input[type='checkbox']")).checked;
-			wrq.word = (<HTMLInputElement>w.querySelector("input[type='text']")).value;
-			wrq.grammar = (<HTMLElement>w.querySelector(".wordgram-grammar-string")).innerText;
+			wrq.word = fulltrim((<HTMLInputElement>w.querySelector("input[type='text']")).value);
+			wrq.grammar = fulltrim((<HTMLElement>w.querySelector(".wordgram-grammar-string")).innerText);
 			requestedParams.word = wrq;
 		});
 		requestedParams.wordsBefore = parseInt((<HTMLInputElement>document.getElementById("inputClusterBefore")).value);
@@ -185,8 +146,9 @@ class KorpusUI {
 						let w = this.addWord('inputword');
 						(<HTMLInputElement>w.querySelector("input[type='text']")).value = wdata.word ? wdata.word : "";
 						(<HTMLInputElement>w.querySelector("input[type='checkbox']")).checked = wdata.allForms;
+						(<HTMLElement>w.querySelector(".inputword-lemma-prompt")).textContent = wdata.allForms ? "Лема" : "Слова";
 						(<HTMLElement>w.querySelector(".wordgram-grammar-string")).innerText = wdata.grammar ? wdata.grammar : "";
-						(<HTMLElement>w.querySelector(".wordgram-display")).innerText = KorpusUI.wordGrammarToText(wdata.grammar);
+						(<HTMLElement>w.querySelector(".wordgram-display")).innerText = DialogWordGrammar.wordGrammarToText(wdata.grammar, korpusService.initial.grammar);
 					});
 				} else {
 					this.addWord('inputword');
@@ -201,8 +163,9 @@ class KorpusUI {
 					let w: HTMLElement = this.addWord('inputword');
 					(<HTMLInputElement>w.querySelector("input[type='text']")).value = cp.word.word ? cp.word.word : "";
 					(<HTMLInputElement>w.querySelector("input[type='checkbox']")).checked = cp.word.allForms;
+					(<HTMLElement>w.querySelector(".inputword-lemma-prompt")).textContent = cp.word.allForms ? "Лема" : "Слова";
 					(<HTMLElement>w.querySelector(".wordgram-grammar-string")).innerText = cp.word.grammar ? cp.word.grammar : "";
-					(<HTMLElement>w.querySelector(".wordgram-display")).innerText = KorpusUI.wordGrammarToText(cp.word.grammar);
+					(<HTMLElement>w.querySelector(".wordgram-display")).innerText = DialogWordGrammar.wordGrammarToText(cp.word.grammar, korpusService.initial.grammar);
 				}
 				(<HTMLInputElement>document.getElementById("inputClusterBefore")).value = cp.wordsBefore ? cp.wordsBefore.toString():"1";
 				(<HTMLInputElement>document.getElementById("inputClusterAfter")).value = cp.wordsAfter ? cp.wordsAfter.toString():"1";
@@ -265,6 +228,10 @@ $.views.converters("titleShort", function (str) {
       return s;
     }
 });
+$('body')
+	.on('mousedown', '.popover', function (e) {
+		e.preventDefault();
+	});
 
 var korpusui: KorpusUI = null;
 var korpusService: KorpusService = null;

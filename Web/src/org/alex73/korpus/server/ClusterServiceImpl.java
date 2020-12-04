@@ -49,7 +49,7 @@ public class ClusterServiceImpl {
     private void process(int docID, LuceneFilter process) throws Exception {
         Document doc = process.getSentence(docID);
 
-        ResultText text = parent.restoreText(params.corpusType, doc);
+        ResultText text = parent.restoreText(doc);
 
         for (int i = 0; i < text.words.length; i++) {
             for (int j = 0; j < text.words[i].length; j++) {

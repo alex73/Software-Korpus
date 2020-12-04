@@ -26,7 +26,7 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-core-2.14.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-web-2.14.0.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-analyzers-common-5.1.0.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-core-5.1.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-core-5.1.0.jar" sourcepath="/data/src/lucene-5.1.0-src.zip"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/osgi-resource-locator-1.0.3.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-core-2.10.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-databind-2.10.1.jar"/>

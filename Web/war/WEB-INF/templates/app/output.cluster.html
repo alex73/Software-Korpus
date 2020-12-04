@@ -1,0 +1,22 @@
+  <table class="table-zebra hspacing" width="100%">
+    <tr>
+      <th colspan="3">Словазлучэнні</th>
+      <th>Знойдзена</th>
+    </tr>
+    {{for resultCluster.rows}}
+    <tr>
+      <td class="text-right">
+        {{for wordsBefore}} {{>}} {{/for}}
+      </td>
+      <td class="text-center">
+        {{>word}}
+      </td>
+      <td class="text-left">
+        {{for wordsAfter}} {{>}} {{/for}}
+      </td>
+      <td class="text-right">
+        {{>count}}
+      </td>
+    </tr>
+    {{/for}}
+  </table>

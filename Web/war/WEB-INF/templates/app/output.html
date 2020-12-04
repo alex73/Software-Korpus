@@ -1,0 +1,52 @@
+<script id="template-output" type="text/x-jsrender">
+{{if pages}}
+<nav aria-label="Page navigation" class="mt-4">
+  <ul class="pagination">
+    {{for pages}}
+      <li class="page-item {{if ~root.currentPage == #index}}active{{/if}}" onClick="korpusService.requestPage({{:#index}}); return false;">
+        <a class="page-link" href="#">{{:(#index+1)}}</a>
+      </li>
+    {{/for}}
+    {{if hasMore}}
+      <li class="page-item" onClick="korpusService.requestPage(-1); return false;">
+        <a class="page-link" href="#"><span aria-hidden="true">Далей &raquo;</span></a>
+      </li>
+    {{/if}}
+  </ul>
+</nav>
+{{/if}}
+
+{{if resultSearch}}
+<#include "output.search.html">
+{{/if}}
+{{if resultKwic}}
+<#include "output.kwic.html">
+{{/if}}
+{{if resultCluster}}
+<#include "output.cluster.html">
+{{/if}}
+
+{{if pages}}
+<nav aria-label="Page navigation" class="mt-4">
+  <ul class="pagination">
+    {{* window.outputPageNumber = 0;}}
+    {{for pages}}
+      <li class="page-item {{if ~root.currentPage == #index}}active{{/if}}" onClick="korpusService.requestPage({{*:outputPageNumber}}); return false;">
+        <a class="page-link" href="#">{{*:outputPageNumber+1}}</a>
+      </li>
+      {{* outputPageNumber++; }}
+    {{/for}}
+    {{if hasMore}}
+      <li class="page-item" onClick="korpusService.requestPage(-1); return false;">
+        <a class="page-link" href="#"><span aria-hidden="true">Далей &raquo;</span></a>
+      </li>
+    {{/if}}
+  </ul>
+</nav>
+{{/if}}
+</script>
+
+<div id="popoverWord" style="visibility: hidden; display: block; position: absolute;" class="popover in popover-top top" tabindex="0" onBlur="this.style.visibility = 'hidden'">
+  <div class="popover-arrow arrow"></div>
+  <div id="popoverWordContent" class="popover-content" style="margin: 0.5em"></div>
+</div>

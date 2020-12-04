@@ -24,7 +24,10 @@ package org.alex73.korpus.base;
 
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class TextInfo implements Serializable {
+    public String url;
+    public String subcorpus;
     public String[] authors;
     public String title;
     public String[] translators;
@@ -32,4 +35,5 @@ public class TextInfo implements Serializable {
     public String[] styleGenres;
     public String edition;
     public String writtenTime, publicationTime;
+    public long date;
 }

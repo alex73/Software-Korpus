@@ -24,15 +24,12 @@ package org.alex73.korpus.server;
 
 import java.util.List;
 
-import org.alex73.korpus.base.OtherInfo;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.server.data.LatestMark;
 import org.alex73.korpus.server.data.StandardTextRequest;
-import org.alex73.korpus.server.data.UnprocessedTextRequest;
 import org.alex73.korpus.server.data.WordRequest;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
 import org.alex73.korpus.server.engine.LuceneDriverRead.DocFilter;
-import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.index.Term;
@@ -56,6 +53,16 @@ public class LuceneFilter {
     }
 
     public void addKorpusTextFilter(BooleanQuery query, StandardTextRequest filter) {
+        // subcorpus
+        if (filter.subcorpuses != null) {
+            BooleanQuery q = new BooleanQuery();
+            for (String a : filter.subcorpuses) {
+                q.add(new TermQuery(new Term(lucene.fieldSentenceTextSubcorpus.name(), a)),
+                        BooleanClause.Occur.SHOULD);
+            }
+            q.setMinimumNumberShouldMatch(1);
+            query.add(q, BooleanClause.Occur.MUST);
+        }
         // author
         if (filter.authors != null) {
             BooleanQuery q = new BooleanQuery();
@@ -90,15 +97,6 @@ public class LuceneFilter {
             int yTo = filter.yearPublishedTo != null ? filter.yearPublishedTo : 9999;
             Query q = NumericRangeQuery.newIntRange(lucene.fieldSentenceTextPublishedYear.name(), yFrom, yTo,
                     true, true);
-            query.add(q, BooleanClause.Occur.MUST);
-        }
-    }
-
-    @Deprecated
-    public void addOtherTextFilter(BooleanQuery query, UnprocessedTextRequest filter) {
-        // volume
-        if (StringUtils.isNotEmpty(filter.volume)) {
-            Query q = new TermQuery(new Term(lucene.fieldSentenceOtherVolume.name(), filter.volume));
             query.add(q, BooleanClause.Occur.MUST);
         }
     }
@@ -162,13 +160,5 @@ public class LuceneFilter {
         int textId = fieldTextId.numericValue().intValue();
 
         return lucene.getTextInfo(textId);
-    }
-
-    public OtherInfo getOtherInfo(Document doc) throws Exception {
-        OtherInfo info = new OtherInfo();
-        info.name = doc.getField(lucene.fieldSentenceOtherName.name()).stringValue();
-        info.url = doc.getField(lucene.fieldSentenceOtherURL.name()).stringValue();
-        info.details = doc.getField(lucene.fieldSentenceOtherDetails.name()).stringValue();
-        return info;
     }
 }

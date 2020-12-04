@@ -23,7 +23,6 @@
 package org.alex73.korpus.text.parser;
 
 import org.alex73.korpus.base.BelarusianWordNormalizer;
-import org.alex73.korpus.base.GrammarFiller;
 import org.alex73.korpus.text.xml.ITextLineElement;
 import org.alex73.korpus.text.xml.InlineTag;
 import org.alex73.korpus.text.xml.O;

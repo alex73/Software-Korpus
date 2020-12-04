@@ -3,6 +3,7 @@ package org.alex73.korpus.server.html;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.URL;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -25,20 +26,21 @@ public class MakeHTML extends HttpServlet {
 
     @Override
     public void init(ServletConfig config) throws ServletException {
+        super.init(config);
         cfg = new Configuration(Configuration.VERSION_2_3_23);
-        try {
-            cfg.setDirectoryForTemplateLoading(new File(System.getProperty("CONFIG_DIR")));
-        } catch (IOException ex) {
-            throw new ServletException(ex);
-        }
+        cfg.setServletContextForTemplateLoading(getServletContext(), "/WEB-INF/templates/");
+//        try {
+//            cfg.setDirectoryForTemplateLoading(new File(System.getProperty("CONFIG_DIR")));
+//        } catch (IOException ex) {
+//            throw new ServletException(ex);
+//        }
         cfg.setDefaultEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String templateFile = "templates/" + req.getServletPath();
-        Template t = cfg.getTemplate(templateFile);
+        Template t = cfg.getTemplate(req.getServletPath());
         Map<String, Object> context = new TreeMap<>();
         resp.setContentType("text/html; charset=UTF-8");
         try (OutputStreamWriter wr = new OutputStreamWriter(resp.getOutputStream(), "UTF-8")) {

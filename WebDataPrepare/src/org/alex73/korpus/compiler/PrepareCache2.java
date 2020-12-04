@@ -1,7 +1,10 @@
 package org.alex73.korpus.compiler;
 
-import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,6 +16,8 @@ import java.util.Properties;
 import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.base.GrammarFiller2;
 import org.alex73.korpus.base.TextInfo;
+import org.alex73.korpus.compiler.parsers.IParser;
+import org.alex73.korpus.compiler.parsers.ParserFactory;
 import org.alex73.korpus.server.engine.LuceneDriverWrite;
 import org.alex73.korpus.server.text.BinaryParagraphWriter;
 import org.alex73.korpus.text.parser.IProcess;
@@ -22,38 +27,44 @@ import org.alex73.korpus.text.xml.XMLText;
 import org.apache.commons.io.FileUtils;
 
 public class PrepareCache2 {
+    static final Path INPUT = Paths.get("Korpus-texts/");
+    static final Path OUTPUT = Paths.get("Korpus-cache/");
     static final Object WRITER_LOCK = new Object();
     static GrammarFiller2 grFiller;
     static LuceneDriverWrite lucene;
 
-    static TextQueueProcessor textQueueProcessor;
-    static OtherQueueProcessor otherQueueProcessor;
+    static String currentSubcorpus;
     static StatProcessing textStat = new StatProcessing();
-    static StatProcessing otherStat = new StatProcessing();
     static volatile Exception exception;
+    
 
     public static void main(String[] args) throws Exception {
+        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "32");
+
         Thread.currentThread().setName("Main parsing thread");
         System.out.println("Load GrammarDB...");
         GrammarDB2 gr = GrammarDB2.initializeFromDir("GrammarDB");
         grFiller = new GrammarFiller2(gr);
 
         // main texts corpus
-        luceneOpen("Korpus-cache/");
-        textQueueProcessor = new TextQueueProcessor();
-        new KorpusFilesIterator(errors, processTextKorpus).iterate("Korpus-texts/A/");
-        new KorpusFilesIterator(errors, processTextKorpus).iterate("Korpus-texts/B/");
-        textQueueProcessor.fin();
+        luceneOpen(OUTPUT);
+        Files.find(INPUT, Integer.MAX_VALUE, (p, a) -> a.isRegularFile(), FileVisitOption.FOLLOW_LINKS).sorted()
+                .forEach(p -> {
+                    String rel = INPUT.relativize(p).toString();
+                    currentSubcorpus = rel.substring(0,rel.indexOf('/'));
+                    IParser parser = ParserFactory.getParser(rel);
+                    if (parser == null) {
+                        errors.reportError("Unknown parser for " + rel);
+                    } else {
+                        try {
+                            parser.parse(p);
+                        } catch (Exception ex) {
+                            errors.reportError(ex.getMessage() + ": " + p);
+                        }
+                    }
+                });
         luceneClose();
-        textStat.write("Korpus-cache/");
-
-        // other trash corpus
-//        luceneOpen("Other-cache/");
-//        otherQueueProcessor = new OtherQueueProcessor();
-//        new OtherFilesIterator(errors, processOtherKorpus).iterate("Other-texts/");
-//        otherQueueProcessor.fin();
-//        luceneClose();
-//        otherStat.write("Other-cache/");
+        textStat.write(OUTPUT);
 
         List<String> errorNames = new ArrayList<>(errorsCount.keySet());
         Collections.sort(errorNames, new Comparator<String>() {
@@ -70,14 +81,13 @@ public class PrepareCache2 {
         if (exception != null) {
             exception.printStackTrace();
         }
+Files.write(Paths.get("log"), LuceneDriverWrite.log);
         System.out.println("Finished");
     }
 
-    static void luceneOpen(String dir) throws Exception {
-        File d = new File(dir);
-        FileUtils.deleteDirectory(d);
-        d.mkdirs();
-        lucene = new LuceneDriverWrite(dir);
+    static void luceneOpen(Path dir) throws Exception {
+        FileUtils.deleteDirectory(dir.toFile());
+        lucene = new LuceneDriverWrite(dir.toString());
     }
 
     static void luceneClose() throws Exception {
@@ -85,53 +95,17 @@ public class PrepareCache2 {
         lucene = null;
     }
 
-    static IFilesIterator processTextKorpus = new IFilesIterator() {
-        @Override
-        public void onText(XMLText doc) throws Exception {
-            textQueueProcessor.put(doc);
+    public static void process(XMLText doc) throws Exception {
+        grFiller.fill(doc);
+        TextInfo textInfo = KorpusFilesIterator.createTextInfo(doc);
+        textInfo.subcorpus = currentSubcorpus;
+        textStat.add(textInfo, doc);
+
+        synchronized (WRITER_LOCK) {
+            lucene.setTextInfo(textInfo);
+            writeDoc(doc);
         }
-    };
-
-    static class TextQueueProcessor extends QueueProcessor<XMLText> {
-
-        @Override
-        public void process(XMLText doc) throws Exception {
-            grFiller.fill(doc);
-            TextInfo textInfo = KorpusFilesIterator.createTextInfo(doc);
-            textStat.add(textInfo, doc);
-
-            synchronized (WRITER_LOCK) {
-                lucene.setTextInfo(textInfo);
-                writeDoc(doc);
-            }
-        }
-    };
-
-    static class OtherQueueProcessor extends QueueProcessor<XMLText> {
-
-        @Override
-        public void process(XMLText doc) throws Exception {
-            grFiller.fill(doc);
-            TextInfo textInfo = KorpusFilesIterator.createTextInfo(doc);
-            otherStat.add(textInfo, doc);
-            otherStat.addVolume("kamunikat.org");
-
-            String id = OtherFilesIterator.getTagValue(doc, "id");
-            String details = OtherFilesIterator.getTagValue(doc, "details");
-
-            synchronized (WRITER_LOCK) {
-                lucene.setOtherInfo("kamunikat.org", "kamunikat.org", "http://kamunikat.org/halounaja.html?pubid=" + id, details);
-                writeDoc(doc);
-            }
-        }
-    };
-
-    static IFilesIterator processOtherKorpus = new IFilesIterator() {
-        @Override
-        public void onText(XMLText doc) throws Exception {
-            otherQueueProcessor.put(doc);
-        }
-    };
+    }
 
     static void writeDoc(XMLText doc) {
         List<P> ps = new ArrayList<>();
@@ -164,7 +138,7 @@ public class PrepareCache2 {
     }
 
     private static Map<String, Integer> errorsCount = new HashMap<>();
-    static IProcess errors = new IProcess() {
+    public static IProcess errors = new IProcess() {
         @Override
         public synchronized void showStatus(String status) {
             // System.out.println(status);

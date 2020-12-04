@@ -13,6 +13,18 @@ import org.alex73.korpus.text.xml.XMLText;
 import org.alex73.korpus.utils.SetUtils;
 import org.alex73.korpus.utils.StressUtils;
 
+/**
+ * Як шукаем парадыгмы для слова.
+ * 
+ * Шукаем без уліку вялікіх/малых літараў. Няма сэнсу нешта адмысловае рабіць
+ * для ўласных імёнаў, бо спатыкнемся на назвах накшталт "Вялікае Княства
+ * Літоўскае" - словы з вялікай літары будуць разглядацца як уласныя імёны, што
+ * няправільна.
+ * 
+ * Націск мусіць быць "несупярэчлівым". То бок калі ў тэксце слова з націскам -
+ * выбіраем парадыгмы з базы з такім самым націскамі ці без націску, але не з
+ * іншым націскам.
+ */
 public class GrammarFiller2 {
     public static final Locale BEL = new Locale("be");
 
@@ -24,8 +36,18 @@ public class GrammarFiller2 {
         gr.getAllParadigms().parallelStream().forEach(p -> {
             p.getVariant().forEach(v -> {
                 v.getForm().forEach(f -> {
+                    if (f.getValue()==null) {
+                        return;
+                    }
+                    if (f.getValue().indexOf('_') >= 0) {
+                        throw new RuntimeException("Слова ў базе не можа быць выкарыстана: " + p.getPdgId() + v.getId()
+                                + ": " + f.getValue());
+                    }
                     String formTag = SetUtils.tag(p, v, f);
                     String orig = BelarusianWordNormalizer.normalize(f.getValue());
+                    if (orig.isEmpty()) {
+                        return;
+                    }
                     add(lemmas, orig, p.getLemma());
                     add(tags, orig, formTag);
                     String s = StressUtils.unstress(orig);
@@ -43,18 +65,16 @@ public class GrammarFiller2 {
     static Pattern SEP = Pattern.compile("_");
 
     private void add(Map<String, String> map, String key, String value) {
+        String oldMark = '_' + value + '_';
         synchronized (map) {
             String old = map.get(key);
             if (old == null) {
-                map.put(key, value);
+                map.put(key, oldMark);
             } else {
-                String[] oldvs = SEP.split(old);
-                for (String o : oldvs) {
-                    if (o.equals(value)) {
-                        return;
-                    }
+                if (old.contains(oldMark)) {
+                    return;
                 }
-                old += '_' + value;
+                old += value + '_';
                 map.put(key, old);
             }
         }
@@ -76,7 +96,7 @@ public class GrammarFiller2 {
                 });
             }
         };
-        doc.getContent().getPOrTagOrPoetry().forEach(op -> {
+        doc.getContent().getPOrTagOrPoetry().parallelStream().forEach(op -> {
             if (op instanceof P) {
                 processP.accept((P) op);
             } else if (op instanceof Poetry) {

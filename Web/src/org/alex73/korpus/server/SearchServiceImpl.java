@@ -16,13 +16,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
-import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.server.data.ClusterParams;
 import org.alex73.korpus.server.data.ClusterResults;
-import org.alex73.korpus.server.data.CorpusType;
 import org.alex73.korpus.server.data.InitialData;
 import org.alex73.korpus.server.data.LatestMark;
 import org.alex73.korpus.server.data.ResultText;
@@ -97,20 +95,16 @@ public class SearchServiceImpl {
             }
             for (WordRequest w : params.words) {
                 if (w.allForms) {
-                    w.lemmas = findAllLemmas(w.word);
-                    if (w.lemmas.isEmpty()) {
+                    findAllLemmas(w);
+                        if (w.lemmas.length == 0) {
                         throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
                     }
                 }
             }
 
             BooleanQuery query = new BooleanQuery();
-            LuceneFilter process = getProcess(params.corpusType);
-            if (params.corpusType == CorpusType.MAIN) {
-                process.addKorpusTextFilter(query, params.textStandard);
-            } else {
-                process.addOtherTextFilter(query, params.textUnprocessed);
-            }
+            LuceneFilter process = getApp().processKorpus;
+            process.addKorpusTextFilter(query, params.textStandard);
 
             for (WordRequest w : params.words) {
                 process.addWordFilter(query, w);
@@ -123,8 +117,8 @@ public class SearchServiceImpl {
                     new LuceneDriverRead.DocFilter<Integer>() {
                         public Integer processDoc(int docID) {
                             try {
-                                Document doc = getProcess(params.corpusType).getSentence(docID);
-                                ResultText text = restoreText(params.corpusType, doc);
+                                Document doc = getApp().processKorpus.getSentence(docID);
+                                ResultText text = restoreText(doc);
                                 if (WordsDetailsChecks.isAllowed(params.wordsOrder, params.words, text)) {
                                     return docID;
                                 } else {
@@ -166,13 +160,13 @@ public class SearchServiceImpl {
                 throw new RuntimeException(ServerError.REQUIEST_TOO_SIMPLE);
             }
             if (params.word.allForms) {
-                params.word.lemmas = findAllLemmas(params.word.word);
-                if (params.word.lemmas.isEmpty()) {
+                findAllLemmas(params.word);
+                if (params.word.lemmas.length == 0) {
                     throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
                 }
             }
 
-            LuceneFilter corpusFilter = getProcess(params.corpusType);
+            LuceneFilter corpusFilter = getApp().processKorpus;
             ClusterResults res = new ClusterServiceImpl(this).calc(params, corpusFilter);
             LOGGER.info("<< Result clusters");
             return res;
@@ -199,8 +193,8 @@ public class SearchServiceImpl {
         }
         for (WordRequest w : params.words) {
             if (w.allForms) {
-                w.lemmas = findAllLemmas(w.word);
-                if (w.lemmas.isEmpty()) {
+                findAllLemmas(w);
+                if (w.lemmas.length == 0) {
                     throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
                 }
             }
@@ -209,10 +203,10 @@ public class SearchServiceImpl {
             WordsDetailsChecks.reset();
             SearchResults[] result = new SearchResults[list.length];
             for (int i = 0; i < list.length; i++) {
-                Document doc = getProcess(params.corpusType).getSentence(list[i]);
+                Document doc = getApp().processKorpus.getSentence(list[i]);
                 result[i] = new SearchResults();
-                restoreTextInfo(params, doc, result[i]);
-                result[i].text = restoreText(params.corpusType, doc);
+                result[i].doc = getApp().processKorpus.getKorpusTextInfo(doc);
+                result[i].text = restoreText(doc);
                 // mark result words
                 WordsDetailsChecks.isAllowed(params.wordsOrder, params.words, result[i].text);
             }
@@ -223,18 +217,8 @@ public class SearchServiceImpl {
         }
     }
 
-   
-
-    protected void restoreTextInfo(SearchParams params, Document doc, SearchResults result) throws Exception {
-        if (params.corpusType == CorpusType.MAIN) {
-            result.doc = getApp().processKorpus.getKorpusTextInfo(doc);
-        } else {
-            result.docOther = getApp().processOther.getOtherInfo(doc);
-        }
-    }
-
-    protected ResultText restoreText(CorpusType corpusType, Document doc) throws Exception {
-        LuceneFilter process=getProcess(corpusType);
+    protected ResultText restoreText(Document doc) throws Exception {
+        LuceneFilter process = getApp().processKorpus;
 
         byte[] xml = process.getXML(doc);
 
@@ -274,28 +258,19 @@ public class SearchServiceImpl {
         return text;
     }
 
-    private List<String> findAllLemmas(String word) {
-        word = BelarusianWordNormalizer.normalize(word);
+    private void findAllLemmas(WordRequest w) {
+        String word = BelarusianWordNormalizer.normalize(w.word);
         Set<String> result = new HashSet<>();
-        Paradigm[] ps = getApp().grFinder.getParadigmsLikeForm(word);
+        Paradigm[] ps = getApp().grFinder.getParadigmsLikeLemma(word);
         nextp: for (Paradigm p : ps) {
             for (Variant v : p.getVariant()) {
-                for (Form f : v.getForm()) {
-                    if (BelarusianWordNormalizer.normalize(f.getValue()).equals(word)) {
-                        result.add(p.getLemma());
-                        continue nextp;
-                    }
+                if (BelarusianWordNormalizer.normalize(v.getLemma()).equals(word)) {
+                    result.add(p.getLemma());
+                    continue nextp;
                 }
             }
         }
-        return new ArrayList<>(result);
-    }
-
-    private LuceneFilter getProcess(CorpusType corpusType) {
-        if (corpusType == CorpusType.MAIN) {
-            return getApp().processKorpus;
-        } else {
-            return getApp().processOther;
-        }
+        w.lemmas = result.stream().toArray(String[]::new);
+        w.lemmaMarks = result.stream().map(s -> '_' + s + '_').toArray(String[]::new);
     }
 }

@@ -1,0 +1,33 @@
+<div id="error" class="alert alert-danger fade show" role="alert"></div>
+<div id="status" class="alert alert-info fade show" role="alert"></div>
+
+<form onSubmit="grammarService.search(); return false;">
+  <div class="row">
+    <#include "input.word.html">
+  </div>
+  <div class="row">
+    <div class="card" style="width:100%">
+      <div class="card-body mb-0">
+        Парадак:
+        <label class="radio-inline pl-2"><input type="radio" id="inputOrderStandard" name="inputOrder" value="STANDARD" checked> Звычайны</label>
+        <label class="radio-inline pl-2"><input type="radio" id="inputOrderReverse"  name="inputOrder" value="REVERSE"> Адваротны слоўнік</label>
+      </div>
+    </div>
+  </div>
+  <div class="row justify-content-end">
+    <button type="submit" class="btn btn-danger btn-lg">Пошук</button>
+  </div>
+</form>
+
+<div id="output"></div>
+
+<script id="template-grammaroutput" type="text/x-jsrender">
+  {{for lemmas}}
+    <div class="row">
+      <a href="#" onClick="grammarService.loadDetails({{:pdgId}}); return false;">{{>lemma}}</a>
+    </div>
+  {{/for}}
+</script>
+
+<#include "dialog.wordgrammar.html">
+<#include "dialog.grammardb.html">

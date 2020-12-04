@@ -230,6 +230,8 @@ class LatestMark {
 }
 
 class TextInfo {
+    public url: string;
+    public subcorpus: string;
     public authors: string[];
     public title: string;
     public styleGenres: string[];

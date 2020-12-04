@@ -52,11 +52,6 @@ body {
 	text-align: right;
 }
 
-.hspacing {
-	margin-left: 0.2em;
-	margin-right: 0.2em;
-}
-
 .popover {
 	max-width: 90%;
 }
@@ -68,8 +63,8 @@ body {
 	border: 1px solid black;
 }
 .hspacing td {
-	padding-left: 0.2em;
-	padding-right: 0.2em;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
 }
 .table-zebra tr:nth-child(odd) {
 	background: #EEE;

@@ -1,0 +1,41 @@
+<script id="template-biblio" type="text/x-jsrender">
+  {{if doc.url}}
+  <div>
+    <b>URL:</b> <a target="_blank" href="{{> doc.url}}">{{> doc.url}}</a>
+  </div>
+  {{/if}}
+  <div>
+    <b>Аўтары:</b> {{> doc.authors}}
+  </div>
+  {{if doc.translation}}
+  <div>
+    <b>Перакладчык:</b> {{> doc.translators}}
+  </div>
+  {{/if}}
+  {{if doc.langOrig}}
+  <div>
+    <b>Пераклад з:</b> {{> doc.langOrig}}
+  </div>
+  {{/if}}
+  <div>
+    <b>Назва:</b> {{> doc.title}}
+  </div>
+  <div>
+    <b>Стыль/жанр:</b> {{> doc.styleGenres}}
+  </div>
+  <div>
+    <b>Выданне:</b> {{> doc.edition}}
+  </div>
+  <div>
+    <b>Час стварэння:</b> {{> doc.writtenTime}}
+  </div>
+  <div>
+    <b>Час першай публікацыі:</b> {{> doc.publicationTime}}
+  </div>
+</script>
+
+<div id="dialog-biblio" style="visibility: hidden; display: block; position: absolute;" class="popover in popover-top top" tabindex="0" onBlur="this.style.visibility = 'hidden'">
+  <div class="popover-arrow arrow"></div>
+  <div id="dialog-biblio-details" style="margin: 1em">
+  </div>
+</div>

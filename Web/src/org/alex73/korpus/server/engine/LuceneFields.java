@@ -3,6 +3,8 @@ package org.alex73.korpus.server.engine;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.IntField;
+import org.apache.lucene.document.LongField;
+import org.apache.lucene.index.DocValuesType;
 import org.apache.lucene.index.IndexOptions;
 
 public class LuceneFields {
@@ -33,6 +35,16 @@ public class LuceneFields {
         TYPE_NOTSTORED_INDEXED_INT.setStored(false);
         TYPE_NOTSTORED_INDEXED_INT.freeze();
     }
+    public static final FieldType TYPE_NOTSTORED_INDEXED_LONG = new FieldType();
+    static {
+        TYPE_NOTSTORED_INDEXED_LONG.setTokenized(false);
+        TYPE_NOTSTORED_INDEXED_LONG.setOmitNorms(true);
+        TYPE_NOTSTORED_INDEXED_LONG.setIndexOptions(IndexOptions.DOCS);
+        TYPE_NOTSTORED_INDEXED_LONG.setNumericType(FieldType.NumericType.LONG);
+        TYPE_NOTSTORED_INDEXED_LONG.setStored(false);
+        TYPE_NOTSTORED_INDEXED_LONG.setDocValuesType(DocValuesType.NUMERIC);
+        TYPE_NOTSTORED_INDEXED_LONG.freeze();
+    }
     public static final FieldType TYPE_NOTSTORED_INDEXED = new FieldType();
     static {
         TYPE_NOTSTORED_INDEXED.setTokenized(true);
@@ -42,23 +54,22 @@ public class LuceneFields {
         TYPE_NOTSTORED_INDEXED.freeze();
     }
 
+    public Field fieldSentenceTextSubcorpus;
     public Field fieldSentenceTextID;
     public Field fieldSentenceTextStyleGenre;
     public Field fieldSentenceTextAuthor;
     public Field fieldSentenceTextWrittenYear;
     public Field fieldSentenceTextPublishedYear;
+    public Field fieldSentenceTextDate;
 
     public Field fieldSentenceValues;
     public Field fieldSentenceDBGrammarTags;
     public Field fieldSentenceLemmas;
     public Field fieldSentencePBinary;
 
-    public Field fieldSentenceOtherVolume;
-    public Field fieldSentenceOtherName;
-    public Field fieldSentenceOtherURL;
-    public Field fieldSentenceOtherDetails;
-
     public Field fieldTextID;
+    public Field fieldTextURL;
+    public Field fieldTextSubcorpus;
     public Field fieldTextAuthors;
     public Field fieldTextTitle;
     public Field fieldTextTranslators;
@@ -75,7 +86,7 @@ public class LuceneFields {
     public String[] styleGenres;
     public String edition;
     public String writtenTime, publicationTime;
-    
+
     public LuceneFields() {
         // words fields
         fieldSentenceValues = new Field("value", "", TYPE_NOTSTORED_INDEXED);
@@ -84,14 +95,18 @@ public class LuceneFields {
         fieldSentencePBinary = new Field("pbinary", new byte[0], TYPE_STORED_NOTINDEXED);
 
         // korpus text fields for filtering
+        fieldSentenceTextSubcorpus = new Field("textSubcorpus", "", TYPE_NOTSTORED_INDEXED);
         fieldSentenceTextID = new IntField("textId", 0, TYPE_STORED_NOTINDEXED_INT);
         fieldSentenceTextStyleGenre = new Field("textStyleGenre", "", TYPE_NOTSTORED_INDEXED);
         fieldSentenceTextAuthor = new Field("textAuthor", "", TYPE_NOTSTORED_INDEXED);
         fieldSentenceTextWrittenYear = new IntField("writtenYear", 0, TYPE_NOTSTORED_INDEXED_INT);
         fieldSentenceTextPublishedYear = new IntField("publishedYear", 0, TYPE_NOTSTORED_INDEXED_INT);
+        fieldSentenceTextDate = new LongField("textDate", 0, TYPE_NOTSTORED_INDEXED_LONG);
 
         // korpus text info fields
         fieldTextID = new IntField("id", 0, TYPE_NOTSTORED_INDEXED_INT);
+        fieldTextURL = new Field("url", "", TYPE_STORED_NOTINDEXED);
+        fieldTextSubcorpus = new Field("subcorpus", "", TYPE_STORED_NOTINDEXED);
         fieldTextAuthors = new Field("authors", "", TYPE_STORED_NOTINDEXED);
         fieldTextTitle = new Field("title", "", TYPE_STORED_NOTINDEXED);
         fieldTextTranslators = new Field("translators", "", TYPE_STORED_NOTINDEXED);
@@ -100,11 +115,5 @@ public class LuceneFields {
         fieldTextEdition = new Field("edition", "", TYPE_STORED_NOTINDEXED);
         fieldTextWrittenTime = new Field("writtenTime", "", TYPE_STORED_NOTINDEXED);
         fieldTextPublicationTime = new Field("publicationTime", "", TYPE_STORED_NOTINDEXED);
-
-        // other text info fields
-        fieldSentenceOtherVolume = new Field("otherVolume", "", TYPE_NOTSTORED_INDEXED);
-        fieldSentenceOtherName = new Field("otherName", "", TYPE_STORED_NOTINDEXED);
-        fieldSentenceOtherURL = new Field("otherURL", "", TYPE_STORED_NOTINDEXED);
-        fieldSentenceOtherDetails = new Field("otherDetails", "", TYPE_STORED_NOTINDEXED);
     }
 }

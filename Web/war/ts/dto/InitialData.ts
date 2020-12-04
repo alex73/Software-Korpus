@@ -1,15 +1,7 @@
 class InitialData {
-    public authors: string[] = [];
-    public volumes: string[] = [];
-    public statKorpus: StatLine[] = [];
-    public statOther: StatLine[] = [];
-    public styleGenresParts: string[] = [];
-    public styleGenres: { [key:string]:string[]; } = {};
-    public grammar: GrammarInitial = new GrammarInitial();
-}
-
-class StatLine {
-    public name: string;
-    public texts: number;
-    public words: number;
+    public authors: string[];
+    public subcorpuses: KeyValue[];
+    public styleGenresParts: string[];
+    public styleGenres: { [key:string]:string[]; };
+    public grammar: GrammarInitial;
 }

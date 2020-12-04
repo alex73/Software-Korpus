@@ -2,6 +2,7 @@ package org.alex73.korpus.server.data;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.alex73.korpus.base.DBTagsGroups;
 import org.alex73.korpus.base.DBTagsGroups.KeyValue;
@@ -14,6 +15,7 @@ public class GrammarInitial {
     public Map<Character, GrammarLetter> grammarTree;
     public List<KeyValue> grammarWordTypes;
     public Map<Character, DBTagsGroups> grammarWordTypesGroups;
+    public Map<Character, Set<String>> skipGrammar;
 
     @JsonInclude(Include.NON_NULL)
     public static class GrammarLetter {
