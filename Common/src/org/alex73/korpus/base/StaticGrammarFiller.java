@@ -24,14 +24,17 @@ import org.alex73.korpus.utils.StressUtils;
  * Націск мусіць быць "несупярэчлівым". То бок калі ў тэксце слова з націскам -
  * выбіраем парадыгмы з базы з такім самым націскамі ці без націску, але не з
  * іншым націскам.
+ * 
+ * Гэты варыянт аптымізаваны для найхутчэйшай працы пры нязменнай базе. Усе
+ * дакладныя варыянты тэгаў і лемаў ствараюцца на старце з базы.
  */
-public class GrammarFiller2 {
+public class StaticGrammarFiller {
     public static final Locale BEL = new Locale("be");
 
     private Map<String, String> lemmas = new HashMap<>();
     private Map<String, String> tags = new HashMap<>();
 
-    public GrammarFiller2(GrammarDB2 gr) {
+    public StaticGrammarFiller(GrammarDB2 gr) {
         long be = System.currentTimeMillis();
         gr.getAllParadigms().parallelStream().forEach(p -> {
             p.getVariant().forEach(v -> {
@@ -39,11 +42,11 @@ public class GrammarFiller2 {
                     if (f.getValue()==null) {
                         return;
                     }
-                    if (f.getValue().indexOf('_') >= 0) {
-                        throw new RuntimeException("Слова ў базе не можа быць выкарыстана: " + p.getPdgId() + v.getId()
-                                + ": " + f.getValue());
-                    }
                     String formTag = SetUtils.tag(p, v, f);
+                    if (f.getValue().indexOf('_') >= 0 || formTag.indexOf('_') >= 0) {
+                        throw new RuntimeException("Слова ў базе не можа быць выкарыстана: " + p.getPdgId() + v.getId()
+                                + "/" + formTag + ": " + f.getValue());
+                    }
                     String orig = BelarusianWordNormalizer.normalize(f.getValue());
                     if (orig.isEmpty()) {
                         return;
@@ -59,7 +62,7 @@ public class GrammarFiller2 {
             });
         });
         long af = System.currentTimeMillis();
-        System.out.println("GrammarFiller2 prepare time: " + (af - be) + "ms");
+        System.out.println(this.getClass().getSimpleName() + " prepare time: " + (af - be) + "ms");
     }
 
     static Pattern SEP = Pattern.compile("_");
@@ -109,7 +112,7 @@ public class GrammarFiller2 {
         });
     }
 
-    private void fill(W w) {
+    public void fill(W w) {
         String word = BelarusianWordNormalizer.normalize(w.getValue());
         w.setLemma(lemmas.get(word));
         w.setCat(tags.get(word));

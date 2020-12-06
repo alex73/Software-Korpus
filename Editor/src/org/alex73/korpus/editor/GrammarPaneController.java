@@ -43,6 +43,7 @@ import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.GrammarDBSaver;
 import org.alex73.korpus.base.TagLetter;
+import org.alex73.korpus.editor.grammar.EditorGrammarFiller;
 import org.alex73.korpus.editor.grammar.GrammarConstructor;
 import org.alex73.korpus.text.xml.W;
 
@@ -139,7 +140,7 @@ public class GrammarPaneController {
                     Paradigm p = parseXML();
                     MainController.gr.addDocLevelParadigm(p);
                     MainController.saveGrammar();
-                    MainController.filler.fillWordInfoPagadigm(currentWord, p);
+                    MainController.gr.filler.fillFromPagadigm(currentWord, p);
                     UI.editor.repaint();
                     UI.grammarPane.outXML.setText("Захавана");
                 } catch (Exception ex) {
@@ -283,13 +284,14 @@ public class GrammarPaneController {
             boolean checkForms = intoParadigmId == null && looksLike.isEmpty();
             Paradigm p = grConstr.getLooksLike(word, looksLike, preserveCase, checkForms, grammar, like, intoParadigmId);
             if (intoParadigmId != null) {
-                Paradigm pInto = grConstr.ed.gr.getAllParadigms().stream()
+                /*Paradigm pInto = grConstr.ed.filler.gr.getAllParadigms().stream()
                         .filter(pa -> pa.getPdgId() == intoParadigmId.intValue()).findFirst().get();
 
                 pInto = GrammarDBSaver.cloneParadigm(pInto);
                 pInto.getVariant().get(0).getForm().clear();
                 pInto.getVariant().get(0).getForm().addAll(p.getVariant().get(0).getForm());
-                p = pInto;
+                p = pInto;*/
+                throw new RuntimeException();
             }
             if (p != null) {
                 p.setTheme(theme);

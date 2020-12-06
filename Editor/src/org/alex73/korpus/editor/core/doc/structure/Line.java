@@ -45,7 +45,7 @@ public class Line extends ArrayList<ITextLineElement> {
             if (item instanceof W) {
                 W w = (W) item;
                 if (w.getLemma() == null) {
-                    MainController.filler.fill(w);
+                    MainController.gr.filler.fill(w);
                 }
             }
         }

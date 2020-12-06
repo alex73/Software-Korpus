@@ -70,7 +70,7 @@ public class StatProcessing {
 
     public synchronized void write(Path dir) throws Exception {
         for (Map.Entry<String, StatInfo> en : stats.entrySet()) {
-            en.getValue().write(dir.resolve("stat.freq." + en.getKey() + ".tab"));
+            en.getValue().write(dir.resolve("stat.freq." + en.getKey().replace('/', '_') + ".tab"));
         }
 
         List<String> stat = new ArrayList<>();

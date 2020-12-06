@@ -9,7 +9,7 @@ public class ParserFactory {
     public static final List<Pair> parsers = new ArrayList<>();
     static {
         parsers.add(new Pair("nierazabranaje/.+\\-texts\\.zip", OcrTextParser.class));
-        parsers.add(new Pair("nierazabranaje/.+\\-djvuxml\\.zip", OcrDjvuParser.class));
+        parsers.add(new Pair("nierazabranaje/.+\\-djvuxml\\.gz", OcrDjvuParser.class));
         parsers.add(new Pair("teksty/.+\\.text", TextParser.class));
         parsers.add(new Pair("teksty/.+\\.(jpg|gif|png)", NullParser.class));
         parsers.add(new Pair("wiki/.+\\.xml\\.bz2", WikiParser.class));

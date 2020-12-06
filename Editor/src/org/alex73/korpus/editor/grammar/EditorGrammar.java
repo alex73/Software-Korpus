@@ -5,25 +5,20 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
-import org.alex73.corpus.paradigm.Variant;
 import org.alex73.corpus.paradigm.Wordlist;
-import org.alex73.korpus.base.BelarusianWordHash;
 import org.alex73.korpus.base.GrammarDB2;
-import org.alex73.korpus.base.IGrammarFinder;
+import org.alex73.korpus.base.StaticGrammarFiller;
 import org.alex73.korpus.editor.core.Theme;
 
-public class EditorGrammar implements IGrammarFinder {
+public class EditorGrammar {
 
     static final JAXBContext CONTEXT;
     static final Schema schema;
@@ -37,14 +32,13 @@ public class EditorGrammar implements IGrammarFinder {
         }
     }
 
-    public GrammarDB2 gr;
+    public EditorGrammarFiller filler;
     private String localGrammarFile;
 
     private List<Paradigm> docLevelParadigms = new ArrayList<>();
-    private Map<Integer, List<Paradigm>> docLevelParadigmsByForm = new HashMap<>();
 
-    public EditorGrammar(GrammarDB2 gr, String localGrammarFile) throws Exception {
-        this.gr = gr;
+    public EditorGrammar(GrammarDB2 db, StaticGrammarFiller staticFiller, String localGrammarFile) throws Exception {
+        filler = new EditorGrammarFiller(db, staticFiller, docLevelParadigms);
         this.localGrammarFile = localGrammarFile;
 
         File f = new File(localGrammarFile);
@@ -58,39 +52,17 @@ public class EditorGrammar implements IGrammarFinder {
         }
     }
 
-    public synchronized List<Paradigm> getAllParadigms() {
-        List<Paradigm> r = new ArrayList<>(gr.getAllParadigms());
-        r.addAll(docLevelParadigms);
+    public List<Paradigm> getAllParadigms() {
+        List<Paradigm> r = new ArrayList<>(filler.db.getAllParadigms());
+        synchronized (docLevelParadigms) {
+            r.addAll(docLevelParadigms);
+        }
         return r;
     }
 
-    @Override
-    public synchronized Paradigm[] getParadigmsLikeForm(String word) {
-        int hash = BelarusianWordHash.hash(word);
-        List<Paradigm> r = docLevelParadigmsByForm.get(hash);
-        return r != null ? r.toArray(new Paradigm[r.size()]) : new Paradigm[0];
-    }
-
-    public synchronized void addDocLevelParadigm(Paradigm p) {
-        docLevelParadigms.add(p);
-        for (Variant va : p.getVariant()) {
-            for (Form f : va.getForm()) {
-                if (f.getValue().isEmpty()) {
-                    continue;
-                }
-                int hash = BelarusianWordHash.hash(f.getValue());
-                List<Paradigm> byForm = docLevelParadigmsByForm.get(hash);
-                if (byForm == null) {
-                    byForm = new ArrayList<>();
-                    docLevelParadigmsByForm.put(hash, byForm);
-                } else {
-                    if (byForm.get(byForm.size() - 1) == p) {
-                        // already stored
-                        continue;
-                    }
-                }
-                byForm.add(p);
-            }
+    public  void addDocLevelParadigm(Paradigm p) {
+        synchronized (docLevelParadigms) {
+            docLevelParadigms.add(p);
         }
     }
 
@@ -131,10 +103,10 @@ public class EditorGrammar implements IGrammarFinder {
      */
 
     public Theme getThemes(String grammar) {
-        return gr.getThemes(grammar);
+        return filler.db.getThemes(grammar);
     }
 
-    public synchronized void save() throws Exception {
+    public void save() throws Exception {
         File out = new File(localGrammarFile);
         if (out.exists()) {
             File bak = new File(localGrammarFile + ".bak");
@@ -147,8 +119,9 @@ public class EditorGrammar implements IGrammarFinder {
         Marshaller m = CONTEXT.createMarshaller();
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         Wordlist list = new Wordlist();
-        list.getParadigm().addAll(docLevelParadigms);
+        synchronized (docLevelParadigms) {
+            list.getParadigm().addAll(docLevelParadigms);
+        }
         m.marshal(list, out);
     }
-
 }

@@ -22,8 +22,6 @@ public class OcrTextParser implements IParser {
     @Override
     public void parse(Path file) throws Exception {
         System.out.println(file);
-        if (true)
-            return;
 
         List<String> pages = new ArrayList<>();
         try (ZipFile zip = new ZipFile(file.toFile())) {

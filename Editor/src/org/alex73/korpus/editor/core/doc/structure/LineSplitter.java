@@ -29,6 +29,7 @@ import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.editor.MainController;
 import org.alex73.korpus.text.xml.InlineTag;
 import org.alex73.korpus.text.xml.S;
+import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.Z;
 
 /**
@@ -173,7 +174,9 @@ public class LineSplitter {
             String part = line.substring(partStart, currentPos);
             switch (mode) {
             case WORD:
-                result.add(MainController.filler.getWordInfo(part));
+                W w=new W(part);
+                MainController.gr.filler.fill(w);
+                result.add(w);
                 break;
             case SPACE:
                 result.add(new S(part));

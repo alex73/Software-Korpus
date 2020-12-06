@@ -161,7 +161,7 @@ public class Splitter2 {
                 currentChar = 0; // soft hyphen
                 break;
             default:
-                errors.reportError("Error in amp: " + name);
+                errors.reportError("Error in amp: " + name, null);
                 currentChar = ' ';
             }
         }

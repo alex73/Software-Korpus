@@ -261,7 +261,7 @@ public class SearchServiceImpl {
     private void findAllLemmas(WordRequest w) {
         String word = BelarusianWordNormalizer.normalize(w.word);
         Set<String> result = new HashSet<>();
-        Paradigm[] ps = getApp().grFinder.getParadigmsLikeLemma(word);
+        Paradigm[] ps = getApp().grFinder.getParadigms(word);
         nextp: for (Paradigm p : ps) {
             for (Variant v : p.getVariant()) {
                 if (BelarusianWordNormalizer.normalize(v.getLemma()).equals(word)) {

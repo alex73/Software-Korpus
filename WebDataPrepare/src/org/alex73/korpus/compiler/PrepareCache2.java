@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.alex73.korpus.base.GrammarDB2;
-import org.alex73.korpus.base.GrammarFiller2;
+import org.alex73.korpus.base.StaticGrammarFiller;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.compiler.parsers.IParser;
 import org.alex73.korpus.compiler.parsers.ParserFactory;
@@ -30,7 +30,7 @@ public class PrepareCache2 {
     static final Path INPUT = Paths.get("Korpus-texts/");
     static final Path OUTPUT = Paths.get("Korpus-cache/");
     static final Object WRITER_LOCK = new Object();
-    static GrammarFiller2 grFiller;
+    static StaticGrammarFiller grFiller;
     static LuceneDriverWrite lucene;
 
     static String currentSubcorpus;
@@ -44,7 +44,7 @@ public class PrepareCache2 {
         Thread.currentThread().setName("Main parsing thread");
         System.out.println("Load GrammarDB...");
         GrammarDB2 gr = GrammarDB2.initializeFromDir("GrammarDB");
-        grFiller = new GrammarFiller2(gr);
+        grFiller = new StaticGrammarFiller(gr);
 
         // main texts corpus
         luceneOpen(OUTPUT);
@@ -54,15 +54,16 @@ public class PrepareCache2 {
                     currentSubcorpus = rel.substring(0,rel.indexOf('/'));
                     IParser parser = ParserFactory.getParser(rel);
                     if (parser == null) {
-                        errors.reportError("Unknown parser for " + rel);
+                        errors.reportError("Unknown parser for " + rel, null);
                     } else {
                         try {
                             parser.parse(p);
                         } catch (Exception ex) {
-                            errors.reportError(ex.getMessage() + ": " + p);
+                            errors.reportError(ex.getMessage() + ": " + p, ex);
                         }
                     }
                 });
+        System.out.println("Finishing...");
         luceneClose();
         textStat.write(OUTPUT);
 
@@ -81,7 +82,7 @@ public class PrepareCache2 {
         if (exception != null) {
             exception.printStackTrace();
         }
-Files.write(Paths.get("log"), LuceneDriverWrite.log);
+
         System.out.println("Finished");
     }
 
@@ -145,7 +146,7 @@ Files.write(Paths.get("log"), LuceneDriverWrite.log);
         }
 
         @Override
-        public synchronized void reportError(String error) {
+        public synchronized void reportError(String error, Throwable ex) {
             Integer count = errorsCount.get(error);
             if (count == null) {
                 count = 1;
@@ -154,6 +155,9 @@ Files.write(Paths.get("log"), LuceneDriverWrite.log);
             }
             errorsCount.put(error, count);
             System.err.println(error);
+            if (ex != null) {
+                ex.printStackTrace();
+            }
         }
     };
 }

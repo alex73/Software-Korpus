@@ -1,8 +1,7 @@
 package org.alex73.korpus.server.engine;
 
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Random;
 
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.BelarusianWordNormalizer;
@@ -25,6 +24,7 @@ public class LuceneDriverWrite extends LuceneFields {
     protected final Logger LOGGER = LogManager.getLogger(LuceneDriverWrite.class);
 
     protected Directory dir;
+    protected Random random = new Random();
 
     protected IndexWriter indexWriter;
 
@@ -59,6 +59,7 @@ public class LuceneDriverWrite extends LuceneFields {
         docSentence.add(fieldSentenceTextWrittenYear);
         docSentence.add(fieldSentenceTextPublishedYear);
         docSentence.add(fieldSentenceTextDate);
+        docSentence.add(fieldSentenceTextRandomOrder);
 
         docText = new Document();
         docText.add(fieldTextID);
@@ -150,14 +151,10 @@ public class LuceneDriverWrite extends LuceneFields {
             //TODO fieldSentenceTextPublishedYear.setIntValue(nvl(currentTextInfo.publishedYear));
             fieldSentenceTextAuthor.setTokenStream(new StringArrayTokenStream(currentTextInfo.authors));
             fieldSentenceTextDate.setLongValue(currentTextInfo.date);
-log.add("lemmas: "+lemmas);
-log.add("values: "+values);
-log.add("gramma: "+dbGrammarTags);
-log.add("");
+            fieldSentenceTextRandomOrder.setIntValue(random.nextInt());
             indexWriter.addDocument(docSentence);
         }
     }
-public static List<String> log=new ArrayList<>();
 
     private String merge(String[] strs, String sep) {
         StringBuilder out = new StringBuilder();

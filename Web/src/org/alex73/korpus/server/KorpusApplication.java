@@ -1,9 +1,7 @@
 package org.alex73.korpus.server;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -42,6 +40,7 @@ public class KorpusApplication extends Application {
     public String configDir = System.getProperty("CONFIG_DIR");
 
     Properties settings;
+    Properties stat;
     GrammarDB2 gr;
     GrammarFinder grFinder;
     GrammarInitial grammarInitial;
@@ -73,12 +72,9 @@ public class KorpusApplication extends Application {
                 LOGGER.fatal("KORPUS_DIR is not defined");
                 return;
             }
-            settings = new Properties();
-            try (BufferedReader input = Files.newBufferedReader(Paths.get(configDir + "/settings.ini"),
-                    StandardCharsets.UTF_8)) {
-                settings.load(input);
-            }
-            
+            settings = loadSettings(configDir + "/settings.ini");
+            stat = loadSettings(korpusDir + "/Korpus-cache/stat.properties");
+
             gr = GrammarDB2.initializeFromDir(korpusDir + "/GrammarDB/");
             LOGGER.info("GrammarDB loaded with " + gr.getAllParadigms().size() + " paradigms. Used memory: " + getUsedMemory());
             grFinder = new GrammarFinder(gr);
@@ -110,12 +106,8 @@ public class KorpusApplication extends Application {
         grammarInitial.grammarTree = addGrammar(BelarusianTags.getInstance().getRoot());
         grammarInitial.grammarWordTypes = DBTagsGroups.wordTypes;
         grammarInitial.grammarWordTypesGroups = DBTagsGroups.tagGroupsByWordType;
-        
+
         grammarInitial.skipGrammar = new TreeMap<>();
-        Properties settings = new Properties();
-        try (BufferedReader in = Files.newBufferedReader(Paths.get(configDir + "/settings.ini"))) {
-            settings.load(in);
-        }
         for (String k : (Set<String>) (Set<?>) settings.keySet()) {
             if (k.startsWith("grammar.skip.")) {
                 Set<String> vs = Arrays.stream(settings.getProperty(k).split(";")).map(s -> s.trim())
@@ -125,12 +117,7 @@ public class KorpusApplication extends Application {
         }
 
         searchInitial = new InitialData();
-
-        Properties props = new Properties();
-        try (InputStream in = new FileInputStream(korpusDir + "/Korpus-cache/stat.properties")) {
-            props.load(in);
-        }
-        searchInitial.authors = Arrays.asList(props.getProperty("authors").split(";"));
+        searchInitial.authors = Arrays.asList(stat.getProperty("authors").split(";"));
         searchInitial.subcorpuses = new ArrayList<>();
         for (String k : (Set<String>) (Set<?>) settings.keySet()) {
             if (k.startsWith("subcorpus.")) {
@@ -164,6 +151,14 @@ public class KorpusApplication extends Application {
             g.desc = lt.description;
             g.ch = addGrammar(lt.nextLetters);
             result.put(lt.letter, g);
+        }
+        return result;
+    }
+
+    private Properties loadSettings(String path) throws IOException {
+        Properties result = new Properties();
+        try (BufferedReader input = Files.newBufferedReader(Paths.get(path), StandardCharsets.UTF_8)) {
+            result.load(input);
         }
         return result;
     }

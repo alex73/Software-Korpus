@@ -37,7 +37,8 @@ public class KorpusFilesIterator {
     public static TextInfo createTextInfo(XMLText text) {
         TextInfo r = new TextInfo();
         r.url = getTag(text, "URL");
-        r.date = Long.parseLong(getTag(text, "Date"));
+        String date = getTag(text, "Date");
+        r.date = date != null ? Long.parseLong(date) : 0;
         String authors = getTag(text, "Authors");
         if (authors != null) {
             r.authors = authors.split(",");

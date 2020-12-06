@@ -1,0 +1,31 @@
+<script id="template-subcorpuses" type="text/x-jsrender">
+	{{for ~root.subcorpuses}}
+		<div>
+      <label><input type="checkbox" name="{{>key}}"> {{>key}}</label>
+      <div style="font-size: 80%" class="mb-3">{{>value}}</div>
+		</div>
+	{{/for}}
+</script>
+
+<div id="dialog-subcorpuses" class="modal fade" bsModal #styleModal="bs-modal" [config]="{backdrop: 'static'}"
+     tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">Падкорпусы</h4>
+        <span>
+          <button type="button" class="btn btn-secondary" onClick="dialogSubcorpuses.onCancel()">Скасаваць</button>
+          <button type="button" class="btn btn-primary" onClick="dialogSubcorpuses.onOk()">Абраць</button>
+        </span>
+      </div>
+      <div class="modal-header">
+        <span>
+          <button type="button" class="btn btn-secondary" onClick="dialogSubcorpuses.all(true)">Пазначыць усе</button>
+          <button type="button" class="btn btn-secondary" onClick="dialogSubcorpuses.all(false)">Зняць усе</button>
+        </span>
+      </div>
+      <div id="dialog-subcorpuses-place" class="modal-body">
+      </div>
+    </div>
+  </div>
+</div>

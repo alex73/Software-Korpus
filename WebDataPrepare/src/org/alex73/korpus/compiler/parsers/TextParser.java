@@ -10,8 +10,6 @@ public class TextParser implements IParser {
     @Override
     public void parse(Path file) throws Exception {
         System.out.println(file);
-        if (true)
-            return;
 
         XMLText doc = new TextGeneral(file.toFile(), PrepareCache2.errors).parse();
         PrepareCache2.process(doc);

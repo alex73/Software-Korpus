@@ -32,6 +32,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.search.FieldDoc;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.Query;
@@ -71,14 +72,15 @@ public class LuceneDriverRead extends LuceneFields {
         final List<T> result = new ArrayList<>(maxResults);
 
         TopDocs rs;
-        Sort sort = new Sort(new SortField(fieldSentenceTextDate.name(), SortField.Type.LONG, true), SortField.FIELD_DOC);
+        Sort sort = new Sort(new SortField(fieldSentenceTextRandomOrder.name(), SortField.Type.INT, true));
         if (latest.doc == 0 && latest.shardIndex == 0) {
             rs = indexSearcher.search(query, null, maxResults, sort);
         } else {
-            ScoreDoc latestDoc = new ScoreDoc(latest.doc, latest.score, latest.shardIndex);
+            FieldDoc latestDoc = new FieldDoc(latest.doc, latest.score, new Object[] {latest.sortValue}, latest.shardIndex);
             rs = indexSearcher.searchAfter(latestDoc, query, null, maxResults, sort);
             latest.doc = 0;
             latest.shardIndex = 0;
+            latest.sortValue = null;
         }
         LOGGER.info("   Lucene found: total: " + rs.totalHits + ", block: " + rs.scoreDocs.length);
         while (rs.scoreDocs.length > 0) {
@@ -106,9 +108,11 @@ public class LuceneDriverRead extends LuceneFields {
                 if (res != null) {
                     result.add(res);
                     if (result.size() >= maxResults) {
-                        latest.doc = docs[i].doc;
-                        latest.score = docs[i].score;
-                        latest.shardIndex = docs[i].shardIndex;
+                        FieldDoc doc = (FieldDoc) docs[i];
+                        latest.doc = doc.doc;
+                        latest.score = doc.score;
+                        latest.shardIndex = doc.shardIndex;
+                        latest.sortValue = doc.fields[0];
                         break;
                     }
                 }

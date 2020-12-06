@@ -91,6 +91,7 @@ class KorpusUI {
 		$('#status').show();
 	}
 	private collectFromScreenBase(p: BaseParams) {
+		p.textStandard.subcorpuses = this.separatedStringToArray(document.getElementById('inputFilterCorpus').innerText);
 		p.textStandard.authors = this.separatedStringToArray(document.getElementById('inputFilterAuthor').innerText);
 		p.textStandard.stylegenres = this.separatedStringToArray(document.getElementById('inputFilterStyle').innerText);
 		p.textStandard.yearWrittenFrom = fulltrim((<HTMLInputElement>document.getElementById('inputFilterYearWrittenFrom')).value);
@@ -135,6 +136,7 @@ class KorpusUI {
 		(<HTMLInputElement>document.getElementById('inputFilterYearWrittenTo')).value = data && data.textStandard && data.textStandard.yearWrittenTo ? data.textStandard.yearWrittenTo : "";
 		(<HTMLInputElement>document.getElementById('inputFilterYearPublishedFrom')).value = data && data.textStandard && data.textStandard.yearPublishedFrom ? data.textStandard.yearPublishedFrom : "";
 		(<HTMLInputElement>document.getElementById('inputFilterYearPublishedTo')).value = data && data.textStandard && data.textStandard.yearPublishedTo ? data.textStandard.yearPublishedTo : "";
+		document.getElementById('inputFilterCorpus').innerText = data && data.textStandard && data.textStandard.subcorpuses ? data.textStandard.subcorpuses.join(';') : "Усе";
 		document.getElementById('inputFilterAuthor').innerText = data && data.textStandard && data.textStandard.authors ? data.textStandard.authors.join(';') : "Усе";
 		document.getElementById('inputFilterStyle').innerText = data && data.textStandard && data.textStandard.stylegenres ? data.textStandard.stylegenres.join(';') : "Усе";
 		switch (this.getMode()) {
@@ -236,6 +238,7 @@ $('body')
 var korpusui: KorpusUI = null;
 var korpusService: KorpusService = null;
 var dialogAuthors: DialogAuthors = null;
+var dialogSubcorpuses: DialogSubcorpuses = null;
 var dialogText: DialogText = null;
 var dialogStyleGenres: DialogStyleGenres = null;
 var dialogWordGrammar: DialogWordGrammar = null;

@@ -212,7 +212,7 @@ public class GrammarServiceImpl {
         Set<String> result = Collections.synchronizedSet(new TreeSet<>());
         try {
             form = BelarusianWordNormalizer.normalize(form);
-            for (Paradigm p : getApp().grFinder.getParadigmsLikeForm(form)) {
+            for (Paradigm p : getApp().grFinder.getParadigms(form)) {
                 for (Variant v : p.getVariant()) {
                     for (Form f : v.getForm()) {
                         if (form.equals(BelarusianWordNormalizer.normalize(f.getValue()))) {

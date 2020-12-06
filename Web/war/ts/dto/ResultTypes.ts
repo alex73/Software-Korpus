@@ -227,6 +227,7 @@ class LatestMark {
     public score: number = null;
     public doc: number = null;
     public shardIndex: number = null;
+    public sortValue = null;
 }
 
 class TextInfo {

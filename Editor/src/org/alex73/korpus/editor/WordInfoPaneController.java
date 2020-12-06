@@ -35,6 +35,7 @@ import javax.swing.JRadioButton;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.BelarusianWordNormalizer;
+import org.alex73.korpus.editor.grammar.EditorGrammarFiller;
 import org.alex73.korpus.editor.ui.WordInfoPane;
 import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.utils.StressUtils;
@@ -58,22 +59,17 @@ public class WordInfoPaneController {
             p.txtWord.setText(word.getValue());
 
             String wuns = BelarusianWordNormalizer.normalize(word.getValue());
-            Paradigm[][] pa2 = MainController.filler.getParadigmsByWord(wuns);
+            Paradigm[] pa2 = MainController.gr.filler.getParadigms(wuns);
 
             ButtonGroup rbGroupLemma = new ButtonGroup();
-            for (Paradigm[] pa1 : pa2) {
-                if (pa1 == null) {
-                    continue;
-                }
-                for (Paradigm pa : pa1) {
-                    JRadioButton rb = new JRadioButton(pa.getLemma());
-                    rb.setToolTipText("TODO");
-                    rb.setFont(p.pLemma.getFont());
-                    rbGroupLemma.add(rb);
-                    p.pLemma.add(rb);
-                    rb.addActionListener(lemmaClick);
-                    paradigmsOnLemmas.put(rb, pa);
-                }
+            for (Paradigm pa : pa2) {
+                JRadioButton rb = new JRadioButton(pa.getLemma());
+                rb.setToolTipText("TODO");
+                rb.setFont(p.pLemma.getFont());
+                rbGroupLemma.add(rb);
+                p.pLemma.add(rb);
+                rb.addActionListener(lemmaClick);
+                paradigmsOnLemmas.put(rb, pa);
             }
             if (p.pLemma.getComponentCount() == 1) {
                 ((JRadioButton) p.pLemma.getComponent(0)).setSelected(true);
@@ -141,7 +137,7 @@ public class WordInfoPaneController {
             W w = new W();
             w.setValue(UI.wordInfoPane.txtWord.getText());
             Paradigm p = paradigmsOnLemmas.get(e.getSource());
-            MainController.filler.fillWordInfoPagadigm(w, p);
+            MainController.gr.filler.fillFromPagadigm(w, p);
             fillLemmas(w);
 
             setSaveEnabled();

@@ -33,6 +33,7 @@ public class LuceneFields {
         TYPE_NOTSTORED_INDEXED_INT.setIndexOptions(IndexOptions.DOCS);
         TYPE_NOTSTORED_INDEXED_INT.setNumericType(FieldType.NumericType.INT);
         TYPE_NOTSTORED_INDEXED_INT.setStored(false);
+        TYPE_NOTSTORED_INDEXED_INT.setDocValuesType(DocValuesType.NUMERIC);
         TYPE_NOTSTORED_INDEXED_INT.freeze();
     }
     public static final FieldType TYPE_NOTSTORED_INDEXED_LONG = new FieldType();
@@ -61,6 +62,7 @@ public class LuceneFields {
     public Field fieldSentenceTextWrittenYear;
     public Field fieldSentenceTextPublishedYear;
     public Field fieldSentenceTextDate;
+    public Field fieldSentenceTextRandomOrder;
 
     public Field fieldSentenceValues;
     public Field fieldSentenceDBGrammarTags;
@@ -102,6 +104,7 @@ public class LuceneFields {
         fieldSentenceTextWrittenYear = new IntField("writtenYear", 0, TYPE_NOTSTORED_INDEXED_INT);
         fieldSentenceTextPublishedYear = new IntField("publishedYear", 0, TYPE_NOTSTORED_INDEXED_INT);
         fieldSentenceTextDate = new LongField("textDate", 0, TYPE_NOTSTORED_INDEXED_LONG);
+        fieldSentenceTextRandomOrder = new IntField("textRandomOrder", 0, TYPE_NOTSTORED_INDEXED_INT);
 
         // korpus text info fields
         fieldTextID = new IntField("id", 0, TYPE_NOTSTORED_INDEXED_INT);

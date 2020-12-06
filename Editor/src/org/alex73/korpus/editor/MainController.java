@@ -50,8 +50,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.ViewFactory;
 
 import org.alex73.korpus.base.GrammarDB2;
-import org.alex73.korpus.base.GrammarFiller;
-import org.alex73.korpus.base.GrammarFinder;
+import org.alex73.korpus.base.StaticGrammarFiller;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyLineElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyWordElement;
@@ -68,14 +67,13 @@ public class MainController {
     static final int[] FONT_SIZES = new int[] { 10, 12, 16, 20, 24, 30, 36, 44 };
     static String baseFileName;
 
-    private static GrammarDB2 globalGr;
-    private static GrammarFinder globalGrFinder;
     public static EditorGrammar gr;
-    public static GrammarFiller filler;
+    private static GrammarDB2 db;
+    private static StaticGrammarFiller staticFiller;
 
     public static void initGrammar(GrammarDB2 gr) {
-        globalGr = gr;
-        globalGrFinder = new GrammarFinder(globalGr);
+        db = gr;
+        staticFiller = new StaticGrammarFiller(gr);
     }
 
     public static void init() {
@@ -281,8 +279,7 @@ public class MainController {
         try {
             baseFileName = f.getPath().replaceAll("\\.[a-z]+$", "");
 
-            gr = new EditorGrammar(globalGr, baseFileName + "-grammar.xml");
-            filler = new GrammarFiller(globalGrFinder, gr);
+            gr = new EditorGrammar(db, staticFiller, baseFileName + "-grammar.xml");
 
             XMLText kDoc;
             if (f.getName().endsWith(".xml")) {
@@ -299,8 +296,8 @@ public class MainController {
                     }
 
                     @Override
-                    public void reportError(String error) {
-                        throw new RuntimeException(error);
+                    public void reportError(String error, Throwable ex) {
+                        throw new RuntimeException(error, ex);
                     }
                 }).parse();
             } else {
@@ -310,12 +307,12 @@ public class MainController {
                     }
 
                     @Override
-                    public void reportError(String error) {
-                        throw new RuntimeException(error);
+                    public void reportError(String error, Throwable ex) {
+                        throw new RuntimeException(error, ex);
                     }
                 }).parse();
             }
-            filler.fill(kDoc);
+            gr.filler.fill(kDoc);
             TextIO.saveXML(new File(baseFileName + ".orig.xml"), kDoc);
 
             UI.doc = new KorpusDocument3(kDoc);

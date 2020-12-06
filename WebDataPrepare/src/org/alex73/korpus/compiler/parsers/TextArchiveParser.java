@@ -18,8 +18,6 @@ public class TextArchiveParser implements IParser {
     @Override
     public void parse(Path file) throws Exception {
         System.out.println(file);
-        if (true)
-            return;
 
         if (file.toString().endsWith(".zip")) {
             try (ZipFile zip = new ZipFile(file.toFile())) {
