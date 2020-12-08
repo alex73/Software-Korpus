@@ -75,6 +75,7 @@ public class MainWindow extends javax.swing.JFrame {
         mGoGrammar = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setExtendedState(java.awt.Frame.MAXIMIZED_BOTH);
 
         jMenu1.setText("Тэксты");
 

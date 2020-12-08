@@ -26,6 +26,7 @@ import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.ButtonGroup;
@@ -34,11 +35,8 @@ import javax.swing.JRadioButton;
 
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.korpus.base.BelarusianTags;
-import org.alex73.korpus.base.BelarusianWordNormalizer;
-import org.alex73.korpus.editor.grammar.EditorGrammarFiller;
 import org.alex73.korpus.editor.ui.WordInfoPane;
 import org.alex73.korpus.text.xml.W;
-import org.alex73.korpus.utils.StressUtils;
 
 public class WordInfoPaneController {
     public static void init() {
@@ -58,13 +56,11 @@ public class WordInfoPaneController {
         } else {
             p.txtWord.setText(word.getValue());
 
-            String wuns = BelarusianWordNormalizer.normalize(word.getValue());
-            Paradigm[] pa2 = MainController.gr.filler.getParadigms(wuns);
-
+            List<Paradigm> pa2 = MainController.gr.filler.getParadigms(word.getValue());
             ButtonGroup rbGroupLemma = new ButtonGroup();
             for (Paradigm pa : pa2) {
                 JRadioButton rb = new JRadioButton(pa.getLemma());
-                rb.setToolTipText("TODO");
+                rb.setToolTipText(pa.getPdgId() + "");
                 rb.setFont(p.pLemma.getFont());
                 rbGroupLemma.add(rb);
                 p.pLemma.add(rb);
@@ -92,6 +88,9 @@ public class WordInfoPaneController {
         if (word.getCat() != null) {
             ButtonGroup rbGroupGrammar = new ButtonGroup();
             for (String c : word.getCat().split("_")) {
+                if (c.isEmpty()) {
+                    continue;
+                }
                 String outText;
                 try {
                     outText = c + ": ";

@@ -94,11 +94,8 @@ public class GrammarPaneController {
                 updateXML();
             }
         });
-        UI.grammarPane.cbPreserveCase.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                updateXML();
-            }
-        });
+        UI.grammarPane.cbPreserveCase.addItemListener(e -> updateXML());
+        UI.grammarPane.cbLikeLemma.addItemListener(e -> updateXML());
         UI.grammarPane.txtGrammar.addCaretListener(new CaretListener() {
             public void caretUpdate(CaretEvent e) {
                 updateInfo();
@@ -210,27 +207,26 @@ public class GrammarPaneController {
         @Override
         protected String doInBackground() throws Exception {
             try {
-                String outText = "<html>";
+                String outText = "";
                 List<String> descr = BelarusianTags.getInstance().describe(txt);
                 outText += "Палі: ";
                 for (String d : descr) {
                     outText += d + ",";
                 }
                 outText = outText.substring(0, outText.length() - 1);
-                outText += "<br>\n";
+                outText += "\n";
 
                 TagLetter next = BelarusianTags.getInstance().getNextAfter(txt.substring(0, posCaret));
                 if (next == null) {
                     outText += "Наступны код: няма";
                 } else {
                     String nextNames = next.getNextGroupNames();
-                    outText += "Наступны код: <b>" + (nextNames != null ? nextNames : "няма") + "</b><br>\n";
+                    outText += "Наступны код: " + (nextNames != null ? nextNames : "няма") + "\n";
                     for (TagLetter.OneLetterInfo li : next.letters) {
-                        outText += "<b>" + li.letter + "</b>: " + li.description + ", ";
+                        outText += li.letter + ": " + li.description + ", ";
                     }
                     outText = outText.substring(0, outText.length() - 2);
                 }
-                outText += "</html>";
                 return outText;
             } catch (Exception ex) {
                 return ex.getMessage();
@@ -262,7 +258,7 @@ public class GrammarPaneController {
 
     static class UpdaterXML extends SwingWorker<String, Void> {
         String word, grammar, theme, looksLike;
-        boolean preserveCase;
+        boolean preserveCase, likeLemma;
 
         public UpdaterXML() {
             word = UI.grammarPane.txtWord.getText();
@@ -270,6 +266,7 @@ public class GrammarPaneController {
             theme = UI.grammarPane.txtTheme.getText();
             looksLike = UI.grammarPane.txtLooksLike.getText().trim();
             preserveCase = UI.grammarPane.cbPreserveCase.isSelected();
+            likeLemma = UI.grammarPane.cbLikeLemma.isSelected();
             if (theme.trim().length() == 0) {
                 theme = null;
             }
@@ -282,6 +279,9 @@ public class GrammarPaneController {
             String out;
             StringBuilder like = new StringBuilder();
             boolean checkForms = intoParadigmId == null && looksLike.isEmpty();
+            if (likeLemma) {
+                checkForms = false;
+            }
             Paradigm p = grConstr.getLooksLike(word, looksLike, preserveCase, checkForms, grammar, like, intoParadigmId);
             if (intoParadigmId != null) {
                 /*Paradigm pInto = grConstr.ed.filler.gr.getAllParadigms().stream()

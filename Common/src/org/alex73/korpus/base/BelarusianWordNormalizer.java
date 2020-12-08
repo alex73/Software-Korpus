@@ -31,9 +31,10 @@ import java.util.Locale;
 public class BelarusianWordNormalizer {
     public static final Locale BEL = new Locale("be");
     public static final String apostrafy = "\'\u02BC\u2019";
-    public static final String letters = apostrafy
-            + "\u0301ёйцукенгшўзхфывапролджэячсмітьбющиЁЙЦУКЕНГШЎЗХФЫВАПРОЛДЖЭЯЧСМІТЬБЮЩИqwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
-    private static final String ZNAKI = "-—,:!?/.…\"“”«»()[]";
+    public static final String naciski = "+\u00B4\u0301";
+    public static final String letters = apostrafy + naciski
+            + "-ёйцукенгшўзхфывапролджэячсмітьбющиЁЙЦУКЕНГШЎЗХФЫВАПРОЛДЖЭЯЧСМІТЬБЮЩИqwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
+    private static final String ZNAKI = "—,:!?/.…\"“”«»()[]";
 
     public static boolean isLetter(char c) {
         return letters.indexOf(c) >= 0;
@@ -43,7 +44,7 @@ public class BelarusianWordNormalizer {
         return ZNAKI.indexOf(c) >= 0;
     }
 
-    public static String normalize(String word) {
+    public static String normalizeLowerCase(String word) {
         if (word == null) {
             return null;
         }
@@ -196,8 +197,8 @@ public class BelarusianWordNormalizer {
             case '+':
                 // Націск: асобны знак - 00B4, спалучэньне з папярэдняй літарай
                 // - 0301
-                // адкідаем націскі
-                continue;
+                c= '+';
+                break;
             }
             chars[outEnd] = c;
             outEnd++;
@@ -243,7 +244,8 @@ public class BelarusianWordNormalizer {
                     // Націск: асобны знак - 00B4, спалучэньне з папярэдняй літарай
                     // - 0301
                     // адкідаем націскі
-                    continue;
+                    c= '+';
+                    break;
                 }
             }
             chars[outEnd] = c;

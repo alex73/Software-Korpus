@@ -47,13 +47,17 @@ public class GrammarConstructor {
     };
     static Comparer eqEnds = new Comparer() {
         @Override
-        public int getScore(String target, String comparable) {
-            if (!StressUtils.hasStress(target)) {
-                comparable = StressUtils.unstress(comparable);
-            }
+        public int getScore(String target, String dbValue) {
+            boolean removeDbStress = !StressUtils.hasStress(target);
             int eq = 0;
-            for (int i1 = target.length() - 1, i2 = comparable.length() - 1; i1 >= 0 && i2 >= 0; i1--, i2--) {
-                if (target.charAt(i1) != comparable.charAt(i2)) {
+            for (int i1 = target.length() - 1, i2 = dbValue.length() - 1; i1 >= 0 && i2 >= 0; i1--, i2--) {
+                char t1 = target.charAt(i1);
+                char d1 = dbValue.charAt(i2);
+                if (removeDbStress && d1 == StressUtils.STRESS_CHAR) {
+                    i1++;
+                    continue;
+                }
+                if (t1 != d1) {
                     break;
                 }
                 eq++;
@@ -64,15 +68,16 @@ public class GrammarConstructor {
 
     public Paradigm getLooksLike(String word, String looksLike, boolean preserveCase, boolean checkForms, String tagMask, StringBuilder out,
             Integer skipParadigmId) {
+        long be = System.currentTimeMillis();
         final Comparer comparer;
         String target;
         String wordNormalized = preserveCase ? BelarusianWordNormalizer.normalizePreserveCase(word)
-                : BelarusianWordNormalizer.normalize(word);
+                : BelarusianWordNormalizer.normalizeLowerCase(word);
         if (looksLike.isEmpty()) {
             target = wordNormalized;
             comparer = eqEnds;
         } else {
-            target = BelarusianWordNormalizer.normalize(looksLike);
+            target = BelarusianWordNormalizer.normalizePreserveCase(looksLike);
             comparer = eqEqual;
         }
         ed.getAllParadigms().parallelStream().forEach(p -> {
@@ -88,11 +93,11 @@ public class GrammarConstructor {
                 }
                 if (checkForms) {
                     for (Form f : v.getForm()) {
-                        int score = comparer.getScore(target, BelarusianWordNormalizer.normalize(f.getValue()));
+                        int score = comparer.getScore(target, f.getValue());
                         addToScores(score, p, v, f.getValue());
                     }
                 } else {
-                    int score = comparer.getScore(target, BelarusianWordNormalizer.normalize(v.getLemma()));
+                    int score = comparer.getScore(target, v.getLemma());
                     addToScores(score, p, v, v.getLemma());
                 }
             }
@@ -115,8 +120,11 @@ public class GrammarConstructor {
         } catch(Exception ex) {}
         // get best
         PVW best = scores.get(scores.size() - 1).get(0);
-        out.append(best.p.getLemma() + "/" + best.p.getTag());
-        return constructParadigm(wordNormalized, best.p, best.v, best.w);
+        out.append(String.format("%d%s/%s/%s (супадзенне па %d літарам)", best.p.getPdgId(), best.v.getId(), best.p.getTag(), best.p.getLemma(), scores.size()));
+        Paradigm result = constructParadigm(wordNormalized, best.p, best.v, best.w);
+        long af = System.currentTimeMillis();
+        System.out.println("Looks like exec time: " + (af - be) + "ms");
+        return result;
     }
 
     public void addToScores(int score, Paradigm p, Variant v, String w) {

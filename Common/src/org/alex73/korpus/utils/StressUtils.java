@@ -34,7 +34,17 @@ public class StressUtils {
     public static char STRESS_CHAR = '+';
 
     public static String unstress(String stressedWord) {
-        return stressedWord.replace("" + STRESS_CHAR, "");
+        if (!hasStress(stressedWord)) {
+            return stressedWord;
+        }
+        StringBuilder s = new StringBuilder();
+        for (int i = 0; i < stressedWord.length(); i++) {
+            char c = stressedWord.charAt(i);
+            if (c != STRESS_CHAR) {
+                s.append(c);
+            }
+        }
+        return s.toString();
     }
 
     public static boolean hasStress(String word) {

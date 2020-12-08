@@ -47,17 +47,16 @@ public class StaticGrammarFiller {
                         throw new RuntimeException("Слова ў базе не можа быць выкарыстана: " + p.getPdgId() + v.getId()
                                 + "/" + formTag + ": " + f.getValue());
                     }
-                    String orig = BelarusianWordNormalizer.normalize(f.getValue());
-                    if (orig.isEmpty()) {
+                    if (f.getValue().isEmpty()) {
                         return;
                     }
-                    add(lemmas, orig, p.getLemma());
-                    add(tags, orig, formTag);
-                    String s = StressUtils.unstress(orig);
-                    if (!s.equals(orig)) {
-                        add(lemmas, s, p.getLemma());
-                        add(tags, s, formTag);
-                    }
+                    // запаўняем перадвызначаныя - з улікам вялікіх літар - з націскам
+                    add(lemmas, f.getValue(), p.getLemma());
+                    add(tags, f.getValue(), formTag);
+                    // запаўняем перадвызначаныя - з улікам вялікіх літар - націск без націска
+                    String s = StressUtils.unstress(f.getValue());
+                    add(lemmas, s, p.getLemma());
+                    add(tags, s, formTag);
                 });
             });
         });
@@ -113,8 +112,18 @@ public class StaticGrammarFiller {
     }
 
     public void fill(W w) {
-        String word = BelarusianWordNormalizer.normalize(w.getValue());
-        w.setLemma(lemmas.get(word));
-        w.setCat(tags.get(word));
+        String word = BelarusianWordNormalizer.normalizePreserveCase(w.getValue());
+        String wordLower = BelarusianWordNormalizer.normalizeLowerCase(w.getValue());
+        String le1 = lemmas.get(word);
+        String c1 = tags.get(word);
+        if (word.equals(wordLower)) {
+            w.setLemma(le1);
+            w.setCat(c1);
+            return;
+        }
+        String le2 = lemmas.get(wordLower);
+        String c2 = tags.get(wordLower);
+        w.setLemma(SetUtils.concatNullable(le1, le2));
+        w.setCat(SetUtils.concatNullable(c1, c2));
     }
 }
