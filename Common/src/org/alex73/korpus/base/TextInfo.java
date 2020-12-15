@@ -26,14 +26,14 @@ import java.io.Serializable;
 
 @SuppressWarnings("serial")
 public class TextInfo implements Serializable {
-    public String url;
+    public transient String sourceFilePath;
     public String subcorpus;
+    public String url;
     public String[] authors;
     public String title;
     public String[] translators;
     public String langOrig;
     public String[] styleGenres;
     public String edition;
-    public String writtenTime, publicationTime;
-    public long date;
+    public String creationTime, publicationTime;
 }

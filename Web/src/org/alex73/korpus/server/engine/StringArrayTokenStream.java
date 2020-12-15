@@ -43,6 +43,9 @@ public class StringArrayTokenStream extends TokenStream {
     @Override
     public boolean incrementToken() throws IOException {
         clearAttributes();
+        if (data == null) {
+            return false;
+        }
         if (index < data.length) {
             token.setEmpty().append(data[index]);
   //          offset.setOffset(0, data[index].length());

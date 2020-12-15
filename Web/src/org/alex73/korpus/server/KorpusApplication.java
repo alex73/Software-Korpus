@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -26,35 +27,34 @@ import org.alex73.korpus.base.DBTagsGroups.KeyValue;
 import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.base.TagLetter;
+import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.server.data.GrammarInitial;
 import org.alex73.korpus.server.data.GrammarInitial.GrammarLetter;
 import org.alex73.korpus.server.data.InitialData;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ApplicationPath("rest")
 public class KorpusApplication extends Application {
-    static final Logger LOGGER = LogManager.getLogger(KorpusApplication.class);
-
     public String korpusDir = System.getProperty("KORPUS_DIR");
     public String configDir = System.getProperty("CONFIG_DIR");
 
     Properties settings;
     Properties stat;
+    List<TextInfo> textInfos;
     GrammarDB2 gr;
     GrammarFinder grFinder;
     GrammarInitial grammarInitial;
     InitialData searchInitial;
 
     LuceneFilter processKorpus;
-    LuceneFilter processOther;
 
     static KorpusApplication instance;
 
     public KorpusApplication() {
         instance = this;
 
-        LOGGER.info("Starting...");
+        System.out.println("Starting...");
         try {
             InitialContext context = new InitialContext();
             Context xmlNode = (Context) context.lookup("java:comp/env");
@@ -65,31 +65,33 @@ public class KorpusApplication extends Application {
                 configDir = (String) xmlNode.lookup("CONFIG_DIR");
             }
             if (configDir == null) {
-                LOGGER.fatal("CONFIG_DIR is not defined");
+                System.err.println("CONFIG_DIR is not defined");
                 return;
             }
             if (korpusDir == null) {
-                LOGGER.fatal("KORPUS_DIR is not defined");
+                System.err.println("KORPUS_DIR is not defined");
                 return;
             }
             settings = loadSettings(configDir + "/settings.ini");
             stat = loadSettings(korpusDir + "/Korpus-cache/stat.properties");
+            readTextInfos();
 
             gr = GrammarDB2.initializeFromDir(korpusDir + "/GrammarDB/");
-            LOGGER.info("GrammarDB loaded with " + gr.getAllParadigms().size() + " paradigms. Used memory: " + getUsedMemory());
+            System.out.println("GrammarDB loaded with " + gr.getAllParadigms().size() + " paradigms. Used memory: "
+                    + getUsedMemory());
             grFinder = new GrammarFinder(gr);
-            LOGGER.info("GrammarDB indexed. Used memory: " + getUsedMemory());
+            System.out.println("GrammarDB indexed. Used memory: " + getUsedMemory());
             processKorpus = new LuceneFilter(korpusDir + "/Korpus-cache/");
-            //TODO processOther = new LuceneFilter(dirPrefix + "/Other-cache/");
-            LOGGER.info("Lucene initialized");
+            System.out.println("Lucene initialized");
 
             prepareInitial();
-            LOGGER.info("Initialization finished. Used memory: " + getUsedMemory());
+            System.out.println("Initialization finished. Used memory: " + getUsedMemory());
         } catch (Throwable ex) {
-            LOGGER.error("startup", ex);
+            System.err.println("startup");
+            ex.printStackTrace();
             throw new ExceptionInInitializerError(ex);
         }
-       //packages("org.alex73.korpus.server");
+        // packages("org.alex73.korpus.server");
     }
 
     private String getUsedMemory() {
@@ -128,15 +130,27 @@ public class KorpusApplication extends Application {
         searchInitial.grammar = grammarInitial;
     }
 
+    protected void readTextInfos() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        textInfos = Files.readAllLines(Paths.get(korpusDir + "/Korpus-cache/texts.jsons")).stream().map(s -> {
+            try {
+                return mapper.readValue(s, TextInfo.class);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
+            }
+        }).collect(Collectors.toList());
+    }
+
     @PreDestroy
     public void shutdown() {
-        LOGGER.info("shutdown");
+        System.out.println("shutdown");
         try {
-            if (processKorpus!=null) {
+            if (processKorpus != null) {
                 processKorpus.close();
             }
         } catch (Exception ex) {
-            LOGGER.error("shutdown", ex);
+            System.err.println("shutdown");
+            ex.printStackTrace();
         }
     }
 

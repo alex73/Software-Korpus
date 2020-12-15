@@ -160,6 +160,9 @@ public class Splitter2 {
             case "shy":
                 currentChar = 0; // soft hyphen
                 break;
+            case "amp":
+                currentChar = '&'; // soft hyphen
+                break;
             default:
                 errors.reportError("Error in amp: " + name, null);
                 currentChar = ' ';

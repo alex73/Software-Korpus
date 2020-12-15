@@ -1,5 +1,6 @@
 package org.alex73.korpus.compiler.parsers;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -8,21 +9,21 @@ import java.util.regex.Pattern;
 public class ParserFactory {
     public static final List<Pair> parsers = new ArrayList<>();
     static {
-        parsers.add(new Pair("nierazabranaje/.+\\-texts\\.zip", OcrTextParser.class));
-        parsers.add(new Pair("nierazabranaje/.+\\-djvuxml\\.gz", OcrDjvuParser.class));
-        parsers.add(new Pair("teksty/.+\\.text", TextParser.class));
-        parsers.add(new Pair("teksty/.+\\.(jpg|gif|png)", NullParser.class));
-        parsers.add(new Pair("wiki/.+\\.xml\\.bz2", WikiParser.class));
-        parsers.add(new Pair(".+\\.7z", TextArchiveParser.class));
-        parsers.add(new Pair(".+\\.zip", TextArchiveParser.class));
+        parsers.add(new Pair("nierazabranaje:.+\\-texts\\.zip", OcrTextParser.class));
+        parsers.add(new Pair("nierazabranaje:.+\\-djvuxml\\.gz", OcrDjvuParser.class));
+        parsers.add(new Pair("teksty:.+\\.text", TextParser.class));
+        parsers.add(new Pair("teksty:.+\\.(jpg|gif|png)", NullParser.class));
+        parsers.add(new Pair("wiki:.+\\.xml\\.bz2", WikiParser.class));
+        parsers.add(new Pair("sajty:.+\\.headers", NullParser.class));
+        parsers.add(new Pair("sajty:.+\\.zip", TextArchiveParser.class));
     }
 
-    public static IParser getParser(String fn) {
+    public static IParser getParser(String subcorpus, Path file) {
         for (Pair p : parsers) {
-            Matcher m = p.re.matcher(fn);
+            Matcher m = p.re.matcher(subcorpus + ":" + file.toString());
             if (m.matches()) {
                 try {
-                    return p.parser.newInstance();
+                    return p.parser.getConstructor(String.class, Path.class).newInstance(subcorpus, file);
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }

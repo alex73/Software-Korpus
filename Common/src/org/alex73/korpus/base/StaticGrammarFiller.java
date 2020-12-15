@@ -1,6 +1,7 @@
 package org.alex73.korpus.base;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -9,7 +10,6 @@ import java.util.regex.Pattern;
 import org.alex73.korpus.text.xml.P;
 import org.alex73.korpus.text.xml.Poetry;
 import org.alex73.korpus.text.xml.W;
-import org.alex73.korpus.text.xml.XMLText;
 import org.alex73.korpus.utils.SetUtils;
 import org.alex73.korpus.utils.StressUtils;
 
@@ -82,7 +82,7 @@ public class StaticGrammarFiller {
         }
     }
 
-    public void fill(XMLText doc) {
+    public void fill(List<Object> content) {
         Consumer<P> processP = new Consumer<P>() {
             @Override
             public void accept(P op) {
@@ -98,7 +98,7 @@ public class StaticGrammarFiller {
                 });
             }
         };
-        doc.getContent().getPOrTagOrPoetry().parallelStream().forEach(op -> {
+        content.parallelStream().forEach(op -> {
             if (op instanceof P) {
                 processP.accept((P) op);
             } else if (op instanceof Poetry) {

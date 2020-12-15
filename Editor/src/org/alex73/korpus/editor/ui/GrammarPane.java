@@ -49,7 +49,7 @@ public class GrammarPane extends javax.swing.JPanel {
         txtGrammar = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         txtTheme = new javax.swing.JTextField();
-        btnTheme = new javax.swing.JButton();
+        btnChooseLike = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
         cbPreserveCase = new javax.swing.JCheckBox();
         cbLikeLemma = new javax.swing.JCheckBox();
@@ -58,6 +58,7 @@ public class GrammarPane extends javax.swing.JPanel {
         outInfo = new javax.swing.JEditorPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         outXML = new javax.swing.JEditorPane();
+        btnTheme = new javax.swing.JButton();
 
         setFocusable(false);
         setMinimumSize(new java.awt.Dimension(150, 166));
@@ -132,13 +133,13 @@ public class GrammarPane extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(txtTheme, gridBagConstraints);
 
-        btnTheme.setText("...");
+        btnChooseLike.setText("...");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridy = 1;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(btnTheme, gridBagConstraints);
+        add(btnChooseLike, gridBagConstraints);
 
         jPanel1.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -161,7 +162,7 @@ public class GrammarPane extends javax.swing.JPanel {
         btnSave.setText("Захаваць");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 0;
+        gridBagConstraints.gridy = 4;
         gridBagConstraints.gridheight = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
@@ -171,7 +172,7 @@ public class GrammarPane extends javax.swing.JPanel {
         labelError.setText("памылка");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 2;
+        gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.SOUTHEAST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(labelError, gridBagConstraints);
@@ -198,8 +199,17 @@ public class GrammarPane extends javax.swing.JPanel {
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
         add(jScrollPane1, gridBagConstraints);
+
+        btnTheme.setText("...");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 3;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(btnTheme, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    public javax.swing.JButton btnChooseLike;
     public javax.swing.JButton btnSave;
     public javax.swing.JButton btnTheme;
     public javax.swing.JCheckBox cbLikeLemma;

@@ -41,44 +41,48 @@ public class TextGeneral implements IText {
         }
     }
 
-    public TextGeneral(InputStream in, IProcess errors) throws Exception {
+    public TextGeneral(InputStream in, IProcess errors) {
         load(in, errors);
     }
 
-    private void load(InputStream in, IProcess errors) throws Exception {
-        BufferedReader rd = new BOMBufferedReader(new InputStreamReader(in, "UTF-8"));
+    private void load(InputStream in, IProcess errors) {
+        try {
+            BufferedReader rd = new BOMBufferedReader(new InputStreamReader(in, "UTF-8"));
 
-        Map<String, String> headers = extractHeaders(rd);
+            Map<String, String> headers = extractHeaders(rd);
 
-        doc = new XMLText();
-        doc.setHeader(new Header());
-        doc.setContent(new Content());
+            doc = new XMLText();
+            doc.setHeader(new Header());
+            doc.setContent(new Content());
 
-        for (Map.Entry<String, String> en : headers.entrySet()) {
-            Tag t = new Tag();
-            t.setName(en.getKey());
-            t.setValue(en.getValue());
-            doc.getHeader().getTag().add(t);
-        }
-
-        String s;
-        while ((s = rd.readLine()) != null) {
-            s = s.trim();
-            if (s.startsWith("##")) {
-                if (isPoetryStart(s)) {
-                    Poetry p = addPoetry(rd, doc, s, errors);
-                    doc.getContent().getPOrTagOrPoetry().add(p);
-                } else {
-                    Matcher m = RE_TAG.matcher(s);
-                    if (!m.matches()) {
-                        throw new RuntimeException("Няправільны тэг: " + s);
-                    }
-                    doc.getContent().getPOrTagOrPoetry().add(new Tag(m.group(1), m.group(2).trim()));
-                }
-            } else {
-                P p = new Splitter2(s, true, errors).getP();
-                doc.getContent().getPOrTagOrPoetry().add(p);
+            for (Map.Entry<String, String> en : headers.entrySet()) {
+                Tag t = new Tag();
+                t.setName(en.getKey());
+                t.setValue(en.getValue());
+                doc.getHeader().getTag().add(t);
             }
+
+            String s;
+            while ((s = rd.readLine()) != null) {
+                s = s.trim();
+                if (s.startsWith("##")) {
+                    if (isPoetryStart(s)) {
+                        Poetry p = addPoetry(rd, doc, s, errors);
+                        doc.getContent().getPOrTagOrPoetry().add(p);
+                    } else {
+                        Matcher m = RE_TAG.matcher(s);
+                        if (!m.matches()) {
+                            throw new RuntimeException("Няправільны тэг: " + s);
+                        }
+                        doc.getContent().getPOrTagOrPoetry().add(new Tag(m.group(1), m.group(2).trim()));
+                    }
+                } else {
+                    P p = new Splitter2(s, true, errors).getP();
+                    doc.getContent().getPOrTagOrPoetry().add(p);
+                }
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
         }
     }
 

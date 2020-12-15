@@ -3,11 +3,7 @@ package org.alex73.korpus.text;
 import java.io.File;
 import java.io.InputStream;
 
-import org.alex73.korpus.base.GrammarDB2;
-import org.alex73.korpus.base.GrammarFiller;
-import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.text.parser.IProcess;
-import org.alex73.korpus.text.parser.Splitter2;
 import org.alex73.korpus.text.xml.Content;
 import org.alex73.korpus.text.xml.P;
 import org.alex73.korpus.text.xml.Poetry;
@@ -21,7 +17,7 @@ import org.xml.sax.InputSource;
 public class TextGeneralTest extends XMLTestCase {
 
     public TextGeneralTest() throws Exception {
-        Splitter2.init(new GrammarFiller(new GrammarFinder(GrammarDB2.initializeFromDir("GrammarDB"))));
+        //Splitter2.init(new GrammarFiller(new GrammarFinder(GrammarDB2.initializeFromDir("GrammarDB"))));
     }
 
     @Test
@@ -35,8 +31,8 @@ public class TextGeneralTest extends XMLTestCase {
                 }
 
                 @Override
-                public void reportError(String error) {
-                    throw new RuntimeException(error);
+                public void reportError(String error, Throwable ex) {
+                    throw new RuntimeException(error,ex);
                 }
             }).parse();
         }

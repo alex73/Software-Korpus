@@ -18,21 +18,22 @@ import org.alex73.korpus.text.xml.P;
 import org.alex73.korpus.text.xml.Poetry;
 import org.alex73.korpus.text.xml.Se;
 import org.alex73.korpus.text.xml.W;
-import org.alex73.korpus.text.xml.XMLText;
 
 public class StatProcessing {
     private final Set<String> authors = Collections.synchronizedSet(new HashSet<>());
     private final Map<String, StatInfo> stats = new HashMap<>();
 
-    public void add(TextInfo textInfo, XMLText doc) {
-        for (String a : textInfo.authors) {
-            authors.add(a);
+    public void add(TextInfo textInfo, List<Object> content) {
+        if (textInfo.authors != null) {
+            for (String a : textInfo.authors) {
+                authors.add(a);
+            }
         }
 
         List<StatInfo> todo = new ArrayList<>();
         todo.add(getStatInfo(""));
         todo.add(getStatInfo(textInfo.subcorpus));
-        if (textInfo.styleGenres.length > 0) {
+        if (textInfo.styleGenres != null && textInfo.styleGenres.length > 0) {
             for (String s : textInfo.styleGenres) {
                 todo.add(getStatInfo(textInfo.subcorpus + "." + s));
             }
@@ -45,7 +46,7 @@ public class StatProcessing {
             }
         });
 
-        doc.getContent().getPOrTagOrPoetry().parallelStream().forEach(p -> {
+        content.parallelStream().forEach(p -> {
             if (p instanceof P) {
                 process((P) p, todo);
             } else if (p instanceof Poetry) {

@@ -3,17 +3,16 @@ package org.alex73.korpus.compiler.parsers;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.SAXParserFactory;
 
-import org.alex73.korpus.compiler.PrepareCache2;
+import org.alex73.korpus.base.TextInfo;
+import org.alex73.korpus.compiler.PrepareCache3;
 import org.alex73.korpus.text.parser.Splitter2;
-import org.alex73.korpus.text.xml.Content;
-import org.alex73.korpus.text.xml.Header;
-import org.alex73.korpus.text.xml.Tag;
-import org.alex73.korpus.text.xml.XMLText;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -24,10 +23,11 @@ import org.xml.sax.helpers.DefaultHandler;
  * https://dumps.wikimedia.org/bewiki/latest/bewiki-latest-pages-articles.xml.bz2,
  * https://dumps.wikimedia.org/be_x_oldwiki/latest/be_x_oldwiki-latest-pages-articles.xml.bz2
  */
-public class WikiParser implements IParser {
+public class WikiParser extends BaseParser {
     // Выкідаем: назва старонкі пачынаецца з 'Катэгорыя:', 'Файл:', 'MediaWiki:',
     // 'Шаблон:'
-    static final String[] SKIP_TITLE_MARKERS = new String[] { "Катэгорыя:", "Файл:", "MediaWiki:", "Шаблон:", "Шаблён:" };
+    static final String[] SKIP_TITLE_MARKERS = new String[] { "Катэгорыя:", "Файл:", "MediaWiki:", "Шаблон:",
+            "Шаблён:" };
     // Выкідаем: тэкст пачынаецца з #REDIRECT
     static final String[] SKIP_TEXT_MARKERS = new String[] { "#REDIRECT", "#перанакіраваньне" };
     // Выкідаем з тэксту:
@@ -36,11 +36,24 @@ public class WikiParser implements IParser {
 
     static final SAXParserFactory FACTORY = SAXParserFactory.newInstance();
 
+    private boolean onlyHeader;
     String urlPrefix;
 
+    public WikiParser(String subcorpus, Path file) {
+        super(subcorpus, file);
+    }
+
+//    @Override
+//    public void readHeaders() throws Exception {
+//        System.out.println(file);
+//        onlyHeader = true;
+//        internalParse(file);
+//    }
+
     @Override
-    public void parse(Path file) throws Exception {
+    public void parse(Executor queue) throws Exception {
         System.out.println(file);
+
         if (file.getFileName().toString().startsWith("bewiki-")) {
             urlPrefix = "https://be.wikipedia.org/wiki/";
         } else if (file.getFileName().toString().startsWith("be_x_oldwiki-")) {
@@ -70,44 +83,48 @@ public class WikiParser implements IParser {
                     if (qName.equals("title")) {
                         pageTitle = str.toString();
                     } else if (qName.equals("text")) {
-                        process(pageTitle, str.toString());
+                        process(queue, pageTitle, str.toString());
                     }
                 }
             });
         }
     }
 
-    protected void process(String title, String text) {
-        title = title.trim();
-        text = text.trim();
-        for (String st : SKIP_TITLE_MARKERS) {
-            if (title.startsWith(st)) {
-                return;
+    protected void process(Executor queue, String inTitle, String inText) {
+        queue.execute(() -> {
+            String title = inTitle.trim();
+            String text = inText.trim();
+            for (String st : SKIP_TITLE_MARKERS) {
+                if (title.startsWith(st)) {
+                    return;
+                }
             }
-        }
-        for (String st : SKIP_TEXT_MARKERS) {
-            if (text.startsWith(st)) {
-                return;
+            for (String st : SKIP_TEXT_MARKERS) {
+                if (text.startsWith(st)) {
+                    return;
+                }
             }
-        }
-
-        text = SKIP_TEXT_RE_KAT.matcher(text).replaceAll("");
-
-        XMLText doc = new XMLText();
-        doc.setHeader(new Header());
-        doc.getHeader().getTag().add(new Tag("URL", urlPrefix + title));
-        doc.getHeader().getTag().add(new Tag("Title", title));
-        doc.setContent(new Content());
-
-        Arrays.asList(text.split("\n")).parallelStream().map(s -> new Splitter2(s, false, PrepareCache2.errors).getP())
-                .sequential().forEach(p -> doc.getContent().getPOrTagOrPoetry().add(p));
-
-        if (!doc.getContent().getPOrTagOrPoetry().isEmpty()) {
             try {
-                PrepareCache2.process(doc);
+                TextInfo textInfo = new TextInfo();
+                textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + inTitle;
+                textInfo.subcorpus = subcorpus;
+                textInfo.url = urlPrefix + title;
+                textInfo.title = title;
+                if (onlyHeader) {
+                    // PrepareCache2.processHeader(textInfo);
+                } else {
+                    text = SKIP_TEXT_RE_KAT.matcher(text).replaceAll("");
+                    List<Object> content = new ArrayList<>();
+                    for (String s : text.split("\n")) {
+                        content.add(new Splitter2(s, false, PrepareCache3.errors).getP());
+                    }
+                    if (!content.isEmpty()) {
+                        PrepareCache3.process(textInfo, content);
+                    }
+                }
             } catch (Exception ex) {
-                throw new RuntimeException(ex);
+                throw new RuntimeException("Error in " + file, ex);
             }
-        }
+        });
     }
 }

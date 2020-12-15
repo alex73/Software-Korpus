@@ -28,14 +28,14 @@ public class ClusterServiceImpl {
     public ClusterResults calc(ClusterParams params, LuceneFilter process) throws Exception {
         this.params = params;
 
-        BooleanQuery query = new BooleanQuery();
+        BooleanQuery.Builder query = new BooleanQuery.Builder();
         process.addKorpusTextFilter(query, params.textStandard);
 
         WordRequest w = params.word;
-        w.word = BelarusianWordNormalizer.normalize(w.word);
+        w.word = BelarusianWordNormalizer.normalizePreserveCase(w.word);
         process.addWordFilter(query, w);
 
-        process.search(query, SEARCH_BLOCK, new LuceneDriverRead.DocFilter<Void>() {
+        process.search(query.build(), SEARCH_BLOCK, new LuceneDriverRead.DocFilter<Void>() {
             @Override
             public Void processDoc(int docID) throws Exception {
                 process(docID, process);

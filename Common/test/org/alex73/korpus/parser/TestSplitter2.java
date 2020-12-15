@@ -6,9 +6,6 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.alex73.korpus.base.GrammarDB2;
-import org.alex73.korpus.base.GrammarFiller;
-import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.text.parser.IProcess;
 import org.alex73.korpus.text.parser.Splitter2;
 import org.alex73.korpus.text.xml.O;
@@ -26,7 +23,7 @@ public class TestSplitter2 {
     IProcess errors = new IProcess() {
         
         @Override
-        public void reportError(String error) {
+        public void reportError(String error, Throwable ex) {
         }
 
         @Override
@@ -36,7 +33,7 @@ public class TestSplitter2 {
 
     @Before
     public void before() throws Exception {
-        Splitter2.init(new GrammarFiller(new GrammarFinder(GrammarDB2.initializeFromDir("GrammarDB"))));
+        //Splitter2.init(new StaticGrammarFiller(GrammarDB2.initializeFromDir("GrammarDB")));
     }
 
     @Test

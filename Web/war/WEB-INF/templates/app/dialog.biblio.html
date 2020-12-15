@@ -23,15 +23,21 @@
   <div>
     <b>Стыль/жанр:</b> {{> doc.styleGenres}}
   </div>
+  {{if doc.edition}}
   <div>
     <b>Выданне:</b> {{> doc.edition}}
   </div>
+  {{/if}}
+  {{if doc.creationTime}}
   <div>
-    <b>Час стварэння:</b> {{> doc.writtenTime}}
+    <b>Час стварэння:</b> {{> doc.creationTime}}
   </div>
+  {{/if}}
+  {{if doc.publicationTime}}
   <div>
     <b>Час першай публікацыі:</b> {{> doc.publicationTime}}
   </div>
+  {{/if}}
 </script>
 
 <div id="dialog-biblio" style="visibility: hidden; display: block; position: absolute;" class="popover in popover-top top" tabindex="0" onBlur="this.style.visibility = 'hidden'">

@@ -26,19 +26,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.server.data.LatestMark;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.search.FieldDoc;
 import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
-import org.apache.lucene.search.Sort;
-import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
@@ -47,8 +40,6 @@ import org.apache.lucene.store.NIOFSDirectory;
  * Lucene driver for corpus document's database.
  */
 public class LuceneDriverRead extends LuceneFields {
-    protected final Logger LOGGER = LogManager.getLogger(LuceneDriverRead.class);
-
     protected Directory dir;
 
     protected DirectoryReader directoryReader;
@@ -66,23 +57,22 @@ public class LuceneDriverRead extends LuceneFields {
         dir.close();
     }
 
-    public <T> List<T> search(Query query, LatestMark latest, int maxResults, DocFilter<T> filter)
-            throws Exception {
-        LOGGER.info("   Lucene search: " + query);
+    public <T> List<T> search(Query query, LatestMark latest, int maxResults, DocFilter<T> filter) throws Exception {
+        System.out.println("   Lucene search: " + query);
         final List<T> result = new ArrayList<>(maxResults);
 
         TopDocs rs;
-        Sort sort = new Sort(new SortField(fieldSentenceTextRandomOrder.name(), SortField.Type.INT, true));
+        // Sort sort = new Sort(new SortField(fieldSentenceTextRandomOrder.name(),
+        // SortField.Type.INT, true));
         if (latest.doc == 0 && latest.shardIndex == 0) {
-            rs = indexSearcher.search(query, null, maxResults, sort);
+            rs = indexSearcher.search(query, maxResults);
         } else {
-            FieldDoc latestDoc = new FieldDoc(latest.doc, latest.score, new Object[] {latest.sortValue}, latest.shardIndex);
-            rs = indexSearcher.searchAfter(latestDoc, query, null, maxResults, sort);
+            ScoreDoc latestDoc = new ScoreDoc(latest.doc, latest.score, latest.shardIndex);
+            rs = indexSearcher.searchAfter(latestDoc, query, maxResults);
             latest.doc = 0;
             latest.shardIndex = 0;
-            latest.sortValue = null;
         }
-        LOGGER.info("   Lucene found: total: " + rs.totalHits + ", block: " + rs.scoreDocs.length);
+        System.out.println("   Lucene found: total: " + rs.totalHits + ", block: " + rs.scoreDocs.length);
         while (rs.scoreDocs.length > 0) {
             List<Integer> pos = new ArrayList<>(rs.scoreDocs.length);
             List<T> resultPart = new ArrayList<>(rs.scoreDocs.length);
@@ -108,18 +98,17 @@ public class LuceneDriverRead extends LuceneFields {
                 if (res != null) {
                     result.add(res);
                     if (result.size() >= maxResults) {
-                        FieldDoc doc = (FieldDoc) docs[i];
+                        ScoreDoc doc = docs[i];
                         latest.doc = doc.doc;
                         latest.score = doc.score;
                         latest.shardIndex = doc.shardIndex;
-                        latest.sortValue = doc.fields[0];
                         break;
                     }
                 }
             }
             if (result.size() < maxResults) {
-                rs = indexSearcher.searchAfter(rs.scoreDocs[rs.scoreDocs.length - 1], query, null, maxResults, sort);
-                LOGGER.info("   Lucene found: block: " + rs.scoreDocs.length);
+                rs = indexSearcher.searchAfter(rs.scoreDocs[rs.scoreDocs.length - 1], query, maxResults);
+                System.out.println("   Lucene found: block: " + rs.scoreDocs.length);
                 System.out.println("found block " + rs.scoreDocs.length);
             } else {
                 break;
@@ -129,11 +118,11 @@ public class LuceneDriverRead extends LuceneFields {
     }
 
     public void search(Query query, int pageSize, DocFilter<Void> filter) throws Exception {
-        LOGGER.info("   Lucene search: " + query);
+        System.out.println("   Lucene search: " + query);
 
         TopDocs rs;
         rs = indexSearcher.search(query, pageSize);
-        LOGGER.info("   Lucene found: total: " + rs.totalHits + ", block: " + rs.scoreDocs.length);
+        System.out.println("   Lucene found: total: " + rs.totalHits + ", block: " + rs.scoreDocs.length);
         while (rs.scoreDocs.length > 0) {
             List<Integer> docs = new ArrayList<>(rs.scoreDocs.length);
             for (int i = 0; i < rs.scoreDocs.length; i++) {
@@ -148,39 +137,13 @@ public class LuceneDriverRead extends LuceneFields {
                 }
             });
             rs = indexSearcher.searchAfter(rs.scoreDocs[rs.scoreDocs.length - 1], query, pageSize);
-            LOGGER.info("   Lucene found: block: " + rs.scoreDocs.length);
+            System.out.println("   Lucene found: block: " + rs.scoreDocs.length);
             System.out.println("found block " + rs.scoreDocs.length);
         }
     }
 
     public Document getSentence(int docID) throws Exception {
         return indexSearcher.doc(docID);
-    }
-
-    public TextInfo getTextInfo(int textId) throws Exception {
-        NumericRangeQuery<Integer> query = NumericRangeQuery.newIntRange(fieldTextID.name(), 1, textId,
-                textId, true, true);
-        TopDocs rs = indexSearcher.search(query, 1);
-        if (rs.totalHits < 1) {
-            return null;
-        }
-        Document doc = directoryReader.document(rs.scoreDocs[0].doc);
-        TextInfo result = new TextInfo();
-        result.url = simplify(doc.getField(fieldTextURL.name()).stringValue());
-        result.subcorpus = simplify(doc.getField(fieldTextSubcorpus.name()).stringValue());
-        result.authors = doc.getField(fieldTextAuthors.name()).stringValue().split(";");
-        result.title = simplify(doc.getField(fieldTextTitle.name()).stringValue());
-        result.translators = doc.getField(fieldTextTranslators.name()).stringValue().split(";");
-        result.langOrig = simplify(doc.getField(fieldTextLangOrig.name()).stringValue());
-        result.styleGenres = doc.getField(fieldTextStyleGenre.name()).stringValue().split(";");
-        result.edition = simplify(doc.getField(fieldTextEdition.name()).stringValue());
-        result.writtenTime = simplify(doc.getField(fieldTextWrittenTime.name()).stringValue());
-        result.publicationTime = simplify(doc.getField(fieldTextPublicationTime.name()).stringValue());
-        return result;
-    }
-
-    private String simplify(String s) {
-        return s == null || s.isEmpty() ? null : s;
     }
 
     public interface DocFilter<T> {

@@ -1,9 +1,7 @@
 package org.alex73.korpus.compiler.parsers;
 
-import java.nio.file.Path;
+import java.util.concurrent.Executor;
 
 public interface IParser {
-    static final int BUFFER = 256 * 1024;
-
-    void parse(Path file) throws Exception;
+    void parse(Executor queue) throws Exception;
 }

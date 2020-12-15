@@ -115,9 +115,6 @@ public class GrammarConstructor {
                 }
             }
         }
-        try {
-        Files.write(Paths.get("dump.txt"), dump, StandardCharsets.UTF_8);
-        } catch(Exception ex) {}
         // get best
         PVW best = scores.get(scores.size() - 1).get(0);
         out.append(String.format("%d%s/%s/%s (супадзенне па %d літарам)", best.p.getPdgId(), best.v.getId(), best.p.getTag(), best.p.getLemma(), scores.size()));

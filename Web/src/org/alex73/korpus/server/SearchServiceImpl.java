@@ -19,6 +19,7 @@ import javax.ws.rs.core.MediaType;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.BelarusianWordNormalizer;
+import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.server.data.ClusterParams;
 import org.alex73.korpus.server.data.ClusterResults;
 import org.alex73.korpus.server.data.InitialData;
@@ -78,7 +79,7 @@ public class SearchServiceImpl {
         SearchParams params = rq.params;
         LatestMark latest = rq.latest;
         for (WordRequest w : params.words) {
-            w.word = BelarusianWordNormalizer.normalize(w.word);
+            w.word = BelarusianWordNormalizer.normalizePreserveCase(w.word);
         }
         try {
             WordsDetailsChecks.reset();
@@ -102,7 +103,7 @@ public class SearchServiceImpl {
                 }
             }
 
-            BooleanQuery query = new BooleanQuery();
+            BooleanQuery.Builder query = new BooleanQuery.Builder();
             LuceneFilter process = getApp().processKorpus;
             process.addKorpusTextFilter(query, params.textStandard);
 
@@ -113,7 +114,7 @@ public class SearchServiceImpl {
             if (latest == null) {
                 latest = new LatestMark();
             }
-            List<Integer> found = process.search(query, latest, Settings.KORPUS_SEARCH_RESULT_PAGE,
+            List<Integer> found = process.search(query.build(), latest, Settings.KORPUS_SEARCH_RESULT_PAGE,
                     new LuceneDriverRead.DocFilter<Integer>() {
                         public Integer processDoc(int docID) {
                             try {
@@ -152,7 +153,7 @@ public class SearchServiceImpl {
     @Produces(MediaType.APPLICATION_JSON)
     public ClusterResults calculateClusters(ClusterParams params) throws Exception {
         LOGGER.info(">> Request clusters from " + request.getRemoteAddr());
-        params.word.word = BelarusianWordNormalizer.normalize(params.word.word);
+        params.word.word = BelarusianWordNormalizer.normalizePreserveCase(params.word.word);
         try {
             WordsDetailsChecks.reset();
             if (WordsDetailsChecks.isTooSimpleWord(params.word)) {
@@ -189,7 +190,7 @@ public class SearchServiceImpl {
         SearchParams params = rq.params;
         int[] list = rq.list;
         for (WordRequest w : params.words) {
-            w.word = BelarusianWordNormalizer.normalize(w.word);
+            w.word = BelarusianWordNormalizer.normalizePreserveCase(w.word);
         }
         for (WordRequest w : params.words) {
             if (w.allForms) {
@@ -205,7 +206,7 @@ public class SearchServiceImpl {
             for (int i = 0; i < list.length; i++) {
                 Document doc = getApp().processKorpus.getSentence(list[i]);
                 result[i] = new SearchResults();
-                result[i].doc = getApp().processKorpus.getKorpusTextInfo(doc);
+                result[i].doc = restoreTextInfo(doc);
                 result[i].text = restoreText(doc);
                 // mark result words
                 WordsDetailsChecks.isAllowed(params.wordsOrder, params.words, result[i].text);
@@ -234,7 +235,7 @@ public class SearchServiceImpl {
                 WordResult rsw = new WordResult();
                 if (o instanceof W) {
                     rsw.orig = ((W) o).getValue();
-                    rsw.normalized = BelarusianWordNormalizer.normalize(rsw.orig); // TODO may be store instead convert
+                    rsw.normalized = BelarusianWordNormalizer.normalizePreserveCase(rsw.orig); // TODO may be store instead convert
                                                                                    // each time ?
                     rsw.lemma = ((W) o).getLemma();
                     rsw.cat = ((W) o).getCat();
@@ -258,13 +259,18 @@ public class SearchServiceImpl {
         return text;
     }
 
+    protected TextInfo restoreTextInfo(Document doc) throws Exception {
+        int textID = getApp().processKorpus.getTextID(doc);
+        return getApp().textInfos.get(textID);
+    }
+
     private void findAllLemmas(WordRequest w) {
-        String word = BelarusianWordNormalizer.normalize(w.word);
+        String word = BelarusianWordNormalizer.normalizePreserveCase(w.word);
         Set<String> result = new HashSet<>();
         Paradigm[] ps = getApp().grFinder.getParadigms(word);
         nextp: for (Paradigm p : ps) {
             for (Variant v : p.getVariant()) {
-                if (BelarusianWordNormalizer.normalize(v.getLemma()).equals(word)) {
+                if (BelarusianWordNormalizer.normalizePreserveCase(v.getLemma()).equals(word)) {
                     result.add(p.getLemma());
                     continue nextp;
                 }

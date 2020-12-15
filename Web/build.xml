@@ -92,7 +92,7 @@
 	<target name="hosted" depends="devmode" description="Run development mode (NOTE: the 'hosted' target is deprecated)" />
 
 	<target name="war" depends="js,javac" description="Create a war file">
-		<zip destfile="build/ROOT.war" basedir="war" excludes="logs/**, **/lib/sources/**">
+		<zip destfile="build/korpus.war" basedir="war" excludes="logs/**, **/lib/sources/**">
 			<zipfileset dir="build/classes/" prefix="WEB-INF/classes/" />
 			<zipfileset dir="../Common/lib/" prefix="WEB-INF/lib/" includes="*.jar" />
 			<zipfileset dir="../Common/lib/kryo-serialization/" prefix="WEB-INF/lib/" includes="*.jar" />

@@ -146,7 +146,7 @@ public class GrammarPaneController {
                 }
             }
         });
-        UI.grammarPane.btnTheme.addActionListener(new ActionListener() {
+        UI.grammarPane.btnChooseLike.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 Paradigm p;
                 try {

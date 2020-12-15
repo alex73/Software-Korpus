@@ -54,16 +54,12 @@ import org.alex73.korpus.shared.LemmaInfo;
 import org.alex73.korpus.utils.SetUtils;
 import org.alex73.korpus.utils.StressUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Service for find by grammar database.
  */
 @Path("/grammar")
 public class GrammarServiceImpl {
-
-    static final Logger LOGGER = LogManager.getLogger(GrammarServiceImpl.class);
 
     public static Locale BE = new Locale("be");
     public static Collator BEL = Collator.getInstance(BE);
@@ -81,11 +77,12 @@ public class GrammarServiceImpl {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public GrammarInitial getInitialData() throws Exception {
-        LOGGER.info("getInitialData from " + request.getRemoteAddr());
+        System.out.println("getInitialData from " + request.getRemoteAddr());
         try {
             return getApp().grammarInitial;
         } catch (Exception ex) {
-            LOGGER.error("getInitialData", ex);
+            System.err.println("getInitialData");
+            ex.printStackTrace();
             throw ex;
         }
     }
@@ -100,8 +97,8 @@ public class GrammarServiceImpl {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public LemmaInfo[] search(GrammarRequest rq) throws Exception {
-        LOGGER.info(">> Request from " + request.getRemoteAddr());
-        LOGGER.info(">> Request: word=" + rq.word + " orderReverse=" + rq.orderReverse);
+        System.out.println(">> Request from " + request.getRemoteAddr());
+        System.out.println(">> Request: word=" + rq.word + " orderReverse=" + rq.orderReverse);
         try {
             List<LemmaInfo> result = new ArrayList<>();
             Pattern reLemma = null;
@@ -121,7 +118,7 @@ public class GrammarServiceImpl {
          // TODO change to finder
             begpar: for (Paradigm p : getApp().gr.getAllParadigms()) {
                 if (reLemma != null) {
-                    if (!reLemma.matcher(StressUtils.unstress(BelarusianWordNormalizer.normalize(p.getLemma())))
+                    if (!reLemma.matcher(StressUtils.unstress(BelarusianWordNormalizer.normalizePreserveCase(p.getLemma())))
                             .matches()) {
                         continue;
                     }
@@ -142,7 +139,7 @@ public class GrammarServiceImpl {
                             }
                         }
                         if (reWord != null) {
-                            if (!reWord.matcher(StressUtils.unstress(BelarusianWordNormalizer.normalize(f.getValue())))
+                            if (!reWord.matcher(StressUtils.unstress(BelarusianWordNormalizer.normalizePreserveCase(f.getValue())))
                                     .matches()) {
                                 continue;
                             }
@@ -179,10 +176,10 @@ public class GrammarServiceImpl {
                     }
                 });
             }
-            LOGGER.info("<< Result: " + result.size());
+            System.out.println("<< Result: " + result.size());
             return result.toArray(new LemmaInfo[result.size()]);
         } catch (Throwable ex) {
-            LOGGER.error(ex);
+            System.out.println(ex);
             throw ex;
         }
     }
@@ -208,21 +205,21 @@ public class GrammarServiceImpl {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public String[] getLemmasByForm(@PathParam("form") String form) throws Exception {
-        LOGGER.info(">> Find lemmas by form " + form);
+        System.out.println(">> Find lemmas by form " + form);
         Set<String> result = Collections.synchronizedSet(new TreeSet<>());
         try {
-            form = BelarusianWordNormalizer.normalize(form);
+            form = BelarusianWordNormalizer.normalizePreserveCase(form);
             for (Paradigm p : getApp().grFinder.getParadigms(form)) {
                 for (Variant v : p.getVariant()) {
                     for (Form f : v.getForm()) {
-                        if (form.equals(BelarusianWordNormalizer.normalize(f.getValue()))) {
-                            result.add(BelarusianWordNormalizer.normalize(v.getLemma()));
+                        if (form.equals(BelarusianWordNormalizer.normalizePreserveCase(f.getValue()))) {
+                            result.add(BelarusianWordNormalizer.normalizePreserveCase(v.getLemma()));
                             break;
                         }
                     }
                 }
             }
-            LOGGER.info("<< Find lemmas by form result: " + result);
+            System.out.println("<< Find lemmas by form result: " + result);
             List<String> resultList = new ArrayList<>(result);
             Collections.sort(resultList, BEL);
             return resultList.toArray(new String[result.size()]);

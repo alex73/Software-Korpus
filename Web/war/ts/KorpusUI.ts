@@ -84,6 +84,7 @@ class KorpusUI {
 		$('#status').hide();
 		document.getElementById("error").innerText = err;
 		$('#error').show();
+		$('#output').html('');
 	}
 	showStatus(s: string) {
 		$('#error').hide();
