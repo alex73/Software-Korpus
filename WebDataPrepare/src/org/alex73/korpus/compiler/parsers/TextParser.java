@@ -8,38 +8,42 @@ import java.util.concurrent.Executor;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.compiler.PrepareCache3;
 import org.alex73.korpus.compiler.TextUtils;
-import org.alex73.korpus.text.TextGeneral;
-import org.alex73.korpus.text.xml.XMLText;
+import org.alex73.korpus.text.parser.TextFileParser;
 
 public class TextParser extends BaseParser {
     public TextParser(String subcorpus, Path file) {
         super(subcorpus, file);
     }
 
-//    @Override
-//    public void readHeaders() throws Exception {
-//        System.out.println(file);
-//
-//        XMLText doc = new TextGeneral(file.toFile(), PrepareCache2.errors).parse();
-//        TextInfo textInfo = new TextInfo();
-//        TextUtils.fillFromXml(textInfo, doc);
-//        PrepareCache2.processHeader(textInfo);
-//    }
-
     @Override
-    public void parse(Executor queue) throws Exception {
+    public void parse(Executor queue, boolean headersOnly) throws Exception {
         System.out.println(file);
         byte[] data = Files.readAllBytes(file);
         queue.execute(() -> {
             try {
-                XMLText doc = new TextGeneral(new ByteArrayInputStream(data), PrepareCache3.errors).parse();
+                TextFileParser doc = new TextFileParser(new ByteArrayInputStream(data), headersOnly,
+                        PrepareCache3.errors);
                 TextInfo textInfo = new TextInfo();
                 textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString();
                 textInfo.subcorpus = subcorpus;
-                TextUtils.fillFromXml(textInfo, doc);
-                PrepareCache3.process(textInfo, doc.getContent().getPOrTagOrPoetry());
+                TextUtils.fillFromHeaders(textInfo, doc.headers);
+                if ("bel".equals(textInfo.lang)) {
+                    textInfo.lang = null;
+                }
+                if ("bel".equals(textInfo.langOrig)) {
+                    textInfo.langOrig = null;
+                }
+                if (textInfo.lang != null) {
+                    // пераклад на іншую мову
+                    return;
+                }
+                if (textInfo.langOrig != null && "teksty".equals(subcorpus)) {
+                    // корпус перакладаў
+                    textInfo.subcorpus = "pieraklady";
+                }
+                PrepareCache3.process(textInfo, doc.paragraphs);
             } catch (Exception ex) {
-                throw new RuntimeException("Error parse " + file, ex);
+                PrepareCache3.errors.reportError("Error parse " + file, ex);
             }
         });
     }

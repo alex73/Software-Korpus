@@ -41,7 +41,7 @@ class GrammarService {
   }
 
   search() {
-    let rq: GrammarRequest = grammarui.collectFromScreenCluster();
+    let rq: GrammarRequest = grammarui.collectFromScreen();
     window.location.hash = '#' + stringify(rq);
 
     grammarui.showStatus("Шукаем...");
@@ -58,8 +58,8 @@ class GrammarService {
         } else {
           r.json().then(json => {
             this.results = json;
+            grammarui.showOutput(rq.grammar);
             if (this.results.length > 0) {
-              grammarui.showOutput();
               grammarui.hideStatusError();
             } else {
               grammarui.showError("Нічога не знойдзена");
@@ -88,6 +88,9 @@ class GrammarService {
 }
 
 class GrammarRequest {
-  public word: WordRequest = new WordRequest();
+  public word: string;
+  public multiForm: boolean = false;
+  public grammar: string;
+  public outputGrammar: string;
   public orderReverse: boolean;
 }

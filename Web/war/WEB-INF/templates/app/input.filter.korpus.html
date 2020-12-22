@@ -6,19 +6,25 @@
                     <a href="#" class="form-control notextout" id="inputFilterCorpus" onClick="dialogSubcorpuses = new DialogSubcorpuses(); return false;"></a>
                 </div>
             </div>
-            <div class="form-group row my-1">
+            <div id="inputFilterAuthorShow" class="form-group row my-1">
                 <label for="inputFilterAuthor" class="col-sm-4 col-md-3 col-lg-2 col-form-label">Аўтары</label>
                 <div class="col-sm-8 col-md-9 col-lg-10">
-                    <a href="#" class="form-control notextout" id="inputFilterAuthor" onClick="dialogAuthors = new DialogAuthors(); return false;"></a>
+                    <a href="#" class="form-control notextout" id="inputFilterAuthor" onClick="dialogList = new DialogList(korpusService.initial.authors, 'inputFilterAuthor', 'Аўтары'); return false;"></a>
                 </div>
             </div>
-            <div class="form-group row my-1">
+            <div id="inputFilterSourceShow" class="form-group row my-1">
+                <label for="inputFilterSource" class="col-sm-4 col-md-3 col-lg-2 col-form-label">Крыніцы</label>
+                <div class="col-sm-8 col-md-9 col-lg-10">
+                    <a href="#" class="form-control notextout" id="inputFilterSource" onClick="dialogList = new DialogList(korpusService.initial.sources, 'inputFilterSource', 'Крыніцы'); return false;"></a>
+                </div>
+            </div>
+            <div id="inputFilterStyleShow" class="form-group row my-1">
                 <label for="inputFilterStyle" class="col-sm-4 col-md-3 col-lg-2 col-form-label">Стылі/жанры</label>
                 <div class="col-sm-8 col-md-9 col-lg-10">
                     <a href="#" class="form-control notextout" id="inputFilterStyle" onClick="dialogStyleGenres = new DialogStyleGenres(); return false;"></a>
                 </div>
             </div>
-            <div class="form-group row my-1">
+            <div id="inputFilterYearWrittenShow" class="form-group row my-1">
                 <label for="inputFilterYearWrittenFrom" class="col-sm-4 col-md-3 col-lg-2 col-form-label">Год напісання</label>
                 <div class="col-sm-8 col-md-9 col-lg-10">
                     <div class="form-inline">
@@ -29,7 +35,7 @@
                     </div>
                 </div>
             </div>
-            <div class="form-group row my-1">
+            <div id="inputFilterYearPublishedShow" class="form-group row my-1">
                 <label for="inputFilterYearPublishedFrom" class="col-sm-4 col-md-3 col-lg-2 col-form-label">Год выдання</label>
                 <div class="col-sm-8 col-md-9 col-lg-10">
                     <div class="form-inline">

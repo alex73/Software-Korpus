@@ -22,7 +22,9 @@ public class KorpusDateTime {
     static Pattern RE_YEAR_SIMPLE = Pattern.compile("([0-9]{4})\\??");
     static Pattern RE_YEAR_TWO = Pattern.compile("([0-9]{4})\\-([0-9]{4})\\??");
     static Pattern RE_DATE1 = Pattern.compile("([0-9]{2})\\.([0-9]{2})\\.([0-9]{4})\\??");
-    static Pattern RE_DATE2 = Pattern.compile("([0-9]{4})\\-([0-9]{2})\\-([0-9]{2})");
+    static Pattern RE_DATE2 = Pattern
+            .compile("([0-9]{2})\\.([0-9]{2})\\.([0-9]{4})\\-([0-9]{2})\\.([0-9]{2})\\.([0-9]{4})\\??");
+    static Pattern RE_DATE3 = Pattern.compile("([0-9]{4})\\-([0-9]{2})\\-([0-9]{2})");
     static Pattern RE_MONTH1 = Pattern.compile(
             "(студзень|люты|сакавік|красавік|травень|май|чэрвень|ліпень|жнівень|верасень|кастрычнік|лістапад|снежань)\\s+([0-9]{4})");
     static Pattern RE_DATETIME1 = Pattern
@@ -59,6 +61,11 @@ public class KorpusDateTime {
                         Integer.parseInt(m.group(1)), DatatypeConstants.FIELD_UNDEFINED);
                 d2 = d1;
             } else if ((m = RE_DATE2.matcher(y)).matches()) {
+                d1 = DTFACTORY.newXMLGregorianCalendarDate(Integer.parseInt(m.group(3)), Integer.parseInt(m.group(2)),
+                        Integer.parseInt(m.group(1)), DatatypeConstants.FIELD_UNDEFINED);
+                d2 = DTFACTORY.newXMLGregorianCalendarDate(Integer.parseInt(m.group(6)), Integer.parseInt(m.group(5)),
+                        Integer.parseInt(m.group(4)), DatatypeConstants.FIELD_UNDEFINED);
+            } else if ((m = RE_DATE3.matcher(y)).matches()) {
                 d1 = DTFACTORY.newXMLGregorianCalendarDate(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)),
                         Integer.parseInt(m.group(3)), DatatypeConstants.FIELD_UNDEFINED);
                 d2 = d1;

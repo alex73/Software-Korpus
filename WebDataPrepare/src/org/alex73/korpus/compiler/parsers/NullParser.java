@@ -9,6 +9,6 @@ public class NullParser extends BaseParser {
     }
 
     @Override
-    public void parse(Executor queue) throws Exception {
+    public void parse(Executor queue, boolean headersOnly) throws Exception {
     }
 }

@@ -5,17 +5,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.base.DBTagsGroups;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.server.engine.LuceneFields;
 import org.alex73.korpus.server.engine.StringArrayTokenStream;
 import org.alex73.korpus.server.text.BinaryParagraphWriter;
-import org.alex73.korpus.text.xml.P;
-import org.alex73.korpus.text.xml.W;
+import org.alex73.korpus.text.elements.Paragraph;
+import org.alex73.korpus.text.elements.Sentence;
+import org.alex73.korpus.text.elements.Word;
 import org.alex73.korpus.utils.KorpusDateTime;
-import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.IntRange;
 import org.apache.lucene.index.IndexWriter;
@@ -38,7 +37,7 @@ public class LuceneDriverWrite extends LuceneFields {
     public LuceneDriverWrite(String rootDir) throws Exception {
         IndexWriterConfig config = new IndexWriterConfig();
         config.setOpenMode(OpenMode.CREATE);
-        config.setRAMBufferSizeMB(1024);
+        config.setRAMBufferSizeMB(2048);
         config.setIndexSort(new Sort(new SortField(fieldTextID.name(), SortField.Type.INT)));
 
         dir = new NIOFSDirectory(Paths.get(rootDir));
@@ -54,6 +53,7 @@ public class LuceneDriverWrite extends LuceneFields {
         // docSentence.add(fieldSentenceTextIDOrder);
         docSentence.add(fieldSentenceTextStyleGenre);
         docSentence.add(fieldSentenceTextAuthor);
+        docSentence.add(fieldSentenceTextSource);
         docSentence.add(fieldSentenceTextCreationYear);
         docSentence.add(fieldSentenceTextPublishedYear);
 
@@ -79,6 +79,7 @@ public class LuceneDriverWrite extends LuceneFields {
         setYearsRange(textInfo.creationTime, fieldSentenceTextCreationYear);
         setYearsRange(textInfo.publicationTime, fieldSentenceTextPublishedYear);
         fieldSentenceTextAuthor.setTokenStream(new StringArrayTokenStream(textInfo.authors));
+        fieldSentenceTextSource.setStringValue(textInfo.source != null ? textInfo.source : "");
 
         fieldSentenceValues.setTokenStream(new StringArrayTokenStream(values));
         fieldSentenceDBGrammarTags.setTokenStream(new StringArrayTokenStream(dbGrammarTags));
@@ -90,46 +91,31 @@ public class LuceneDriverWrite extends LuceneFields {
         indexWriter.addDocument(docSentence);
     }
 
-    public void addSentences(TextInfo textInfo, List<P> content) throws Exception {
+    public void addSentences(TextInfo textInfo, List<Paragraph> content) throws Exception {
         BinaryParagraphWriter pwr = new BinaryParagraphWriter();
         Set<String> values = new HashSet<>();
         Set<String> dbGrammarTags = new HashSet<>();
         Set<String> lemmas = new HashSet<>();
-        for (P p : content) {
+        for (Paragraph p : content) {
             values.clear();
             dbGrammarTags.clear();
             lemmas.clear();
-            p.getSe().forEach(op -> {
-                op.getWOrSOrZ().forEach(o -> {
-                    if (o instanceof W) {
-                        W w = (W) o;
-                        if (w.getValue() != null) {
-                            String wc = BelarusianWordNormalizer.normalizePreserveCase(w.getValue());
-                            values.add(wc);
-                        }
-                        if (StringUtils.isNotEmpty(w.getCat())) {
-                            for (String t : w.getCat().split("_")) {
-                                if (t.isEmpty()) {
-                                    continue;
-                                }
-                                if (!BelarusianTags.getInstance().isValid(t, null)) {
-                                    throw new RuntimeException("Няправільны тэг: " + t);
-                                } else {
-                                    dbGrammarTags.add(DBTagsGroups.getDBTagString(t));
-                                }
-                            }
-                        }
-                        if (w.getLemma() != null) {
-                            for (String v : w.getLemma().split("_")) {
-                                if (v.isEmpty()) {
-                                    continue;
-                                }
-                                lemmas.add(v);
-                            }
+            for (Sentence se : p.sentences) {
+                for (Word w : se.words) {
+                    String wc = BelarusianWordNormalizer.superNormalized(w.lightNormalized);
+                    values.add(wc);
+                    if (w.tags != null && !w.tags.isEmpty()) {
+                        for (String t : w.tags.split(";")) {
+                            dbGrammarTags.add(DBTagsGroups.getDBTagString(t));
                         }
                     }
-                });
-            });
+                    if (w.lemmas != null && !w.lemmas.isEmpty()) {
+                        for (String t : w.lemmas.split(";")) {
+                            lemmas.add(t);
+                        }
+                    }
+                }
+            }
             byte[] pxml = pwr.write(p);
             addSentence(textInfo, values.toArray(STRING_ARRAY), dbGrammarTags.toArray(STRING_ARRAY),
                     lemmas.toArray(STRING_ARRAY), pxml);

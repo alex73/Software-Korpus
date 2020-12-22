@@ -3,7 +3,7 @@
 		<span class="d-none wordgram-grammar-string"></span>
 		<div class="card-body">
 			<div class="form-inline float-right ml-2">
-				<button type="button" class="inputword-remove close" aria-label="Close"
+				<button type="button" class="oneword-hide close" aria-label="Close"
 					onClick="korpusui.removeWord('inputword', this); return false;">
 					<span aria-hidden="true">&times;</span>
 				</button>
@@ -21,7 +21,7 @@
 			<div class="form-inline form-group my-1">
 				<label>Граматыка
 					<a href="#" class="form-control wordgram-display ml-2"
-						onClick="dialogWordGrammar = new DialogWordGrammar(this); return false;">---</a>
+						onClick="dialogWordGrammar = DialogWordGrammar.createParadigmTagsDialog(this, true); return false;">---</a>
 				</label>
 			</div>
 		</div>

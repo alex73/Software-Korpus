@@ -1,9 +1,8 @@
 package org.alex73.korpus.server;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,7 +23,6 @@ import org.alex73.korpus.server.data.ClusterParams;
 import org.alex73.korpus.server.data.ClusterResults;
 import org.alex73.korpus.server.data.InitialData;
 import org.alex73.korpus.server.data.LatestMark;
-import org.alex73.korpus.server.data.ResultText;
 import org.alex73.korpus.server.data.SearchParams;
 import org.alex73.korpus.server.data.SearchResult;
 import org.alex73.korpus.server.data.SearchResults;
@@ -32,15 +30,11 @@ import org.alex73.korpus.server.data.WordRequest;
 import org.alex73.korpus.server.data.WordResult;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
 import org.alex73.korpus.server.text.BinaryParagraphReader;
-import org.alex73.korpus.text.xml.O;
-import org.alex73.korpus.text.xml.P;
-import org.alex73.korpus.text.xml.S;
-import org.alex73.korpus.text.xml.Se;
-import org.alex73.korpus.text.xml.W;
-import org.alex73.korpus.text.xml.Z;
+import org.alex73.korpus.text.elements.Paragraph;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.BooleanQuery;
 
+//TODO Пошук па слове з улікам першага "ў" і вялікіх літар
 @Path("/korpus")
 public class SearchServiceImpl {
     private final static Logger LOGGER = Logger.getLogger(SearchServiceImpl.class.getName());
@@ -79,7 +73,7 @@ public class SearchServiceImpl {
         SearchParams params = rq.params;
         LatestMark latest = rq.latest;
         for (WordRequest w : params.words) {
-            w.word = BelarusianWordNormalizer.normalizePreserveCase(w.word);
+            w.word = BelarusianWordNormalizer.lightNormalized(w.word);
         }
         try {
             WordsDetailsChecks.reset();
@@ -97,7 +91,7 @@ public class SearchServiceImpl {
             for (WordRequest w : params.words) {
                 if (w.allForms) {
                     findAllLemmas(w);
-                        if (w.lemmas.length == 0) {
+                    if (w.lemmas.length == 0) {
                         throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
                     }
                 }
@@ -106,7 +100,6 @@ public class SearchServiceImpl {
             BooleanQuery.Builder query = new BooleanQuery.Builder();
             LuceneFilter process = getApp().processKorpus;
             process.addKorpusTextFilter(query, params.textStandard);
-
             for (WordRequest w : params.words) {
                 process.addWordFilter(query, w);
             }
@@ -119,7 +112,7 @@ public class SearchServiceImpl {
                         public Integer processDoc(int docID) {
                             try {
                                 Document doc = getApp().processKorpus.getSentence(docID);
-                                ResultText text = restoreText(doc);
+                                Paragraph text = restoreText(doc);
                                 if (WordsDetailsChecks.isAllowed(params.wordsOrder, params.words, text)) {
                                     return docID;
                                 } else {
@@ -153,7 +146,7 @@ public class SearchServiceImpl {
     @Produces(MediaType.APPLICATION_JSON)
     public ClusterResults calculateClusters(ClusterParams params) throws Exception {
         LOGGER.info(">> Request clusters from " + request.getRemoteAddr());
-        params.word.word = BelarusianWordNormalizer.normalizePreserveCase(params.word.word);
+        params.word.word = BelarusianWordNormalizer.lightNormalized(params.word.word);
         try {
             WordsDetailsChecks.reset();
             if (WordsDetailsChecks.isTooSimpleWord(params.word)) {
@@ -190,7 +183,7 @@ public class SearchServiceImpl {
         SearchParams params = rq.params;
         int[] list = rq.list;
         for (WordRequest w : params.words) {
-            w.word = BelarusianWordNormalizer.normalizePreserveCase(w.word);
+            w.word = BelarusianWordNormalizer.lightNormalized(w.word);
         }
         for (WordRequest w : params.words) {
             if (w.allForms) {
@@ -218,45 +211,19 @@ public class SearchServiceImpl {
         }
     }
 
-    protected ResultText restoreText(Document doc) throws Exception {
+    protected Paragraph restoreText(Document doc) throws Exception {
         LuceneFilter process = getApp().processKorpus;
 
         byte[] xml = process.getXML(doc);
 
-        P paragraph = new BinaryParagraphReader(xml).read();
-
-        List<WordResult[]> sentences = new ArrayList<>();
-
-        for (int i = 0; i < paragraph.getSe().size(); i++) {
-            Se sentence = paragraph.getSe().get(i);
-            List<WordResult> words = new ArrayList<>();
-            for (int j = 0; j < sentence.getWOrSOrZ().size(); j++) {
-                Object o = sentence.getWOrSOrZ().get(j);
-                WordResult rsw = new WordResult();
-                if (o instanceof W) {
-                    rsw.orig = ((W) o).getValue();
-                    rsw.normalized = BelarusianWordNormalizer.normalizePreserveCase(rsw.orig); // TODO may be store instead convert
-                                                                                   // each time ?
-                    rsw.lemma = ((W) o).getLemma();
-                    rsw.cat = ((W) o).getCat();
-                    rsw.isWord = true;
-                } else if (o instanceof S) {
-                    rsw.orig = ((S) o).getChar();
-                } else if (o instanceof Z) {
-                    rsw.orig = ((Z) o).getChar();
-                } else if (o instanceof O) {
-                    rsw.orig = ((O) o).getValue();
-                }
-                words.add(rsw);
-            }
-            if (!words.isEmpty()) {
-                sentences.add(words.toArray(new WordResult[0]));
+        Paragraph p = new BinaryParagraphReader(xml).read();
+        for (int i = 0; i < p.sentences.length; i++) {
+            for (int j = 0; j < p.sentences[i].words.length; j++) {
+                p.sentences[i].words[j] = new WordResult(p.sentences[i].words[j]);
             }
         }
-        ResultText text = new ResultText();
-        text.words = sentences.toArray(new WordResult[0][]);
 
-        return text;
+        return p;
     }
 
     protected TextInfo restoreTextInfo(Document doc) throws Exception {
@@ -265,18 +232,17 @@ public class SearchServiceImpl {
     }
 
     private void findAllLemmas(WordRequest w) {
-        String word = BelarusianWordNormalizer.normalizePreserveCase(w.word);
-        Set<String> result = new HashSet<>();
-        Paradigm[] ps = getApp().grFinder.getParadigms(word);
-        nextp: for (Paradigm p : ps) {
+        Set<String> result = new TreeSet<>();
+        Paradigm[] ps = getApp().grFinder.getParadigms(w.word);
+        // user can enter lemma of variant, but we need to find paradigm
+        for (Paradigm p : ps) {
             for (Variant v : p.getVariant()) {
-                if (BelarusianWordNormalizer.normalizePreserveCase(v.getLemma()).equals(word)) {
+                if (BelarusianWordNormalizer.equals(v.getLemma(), w.word)) {
                     result.add(p.getLemma());
-                    continue nextp;
+                    break;
                 }
             }
         }
         w.lemmas = result.stream().toArray(String[]::new);
-        w.lemmaMarks = result.stream().map(s -> '_' + s + '_').toArray(String[]::new);
     }
 }

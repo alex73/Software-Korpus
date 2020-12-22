@@ -22,7 +22,7 @@ class DBTagsGroups {
 
 class Group {
   public name: string;
-  public hidden: boolean;
+  public formGroup: boolean;
   public items: Item[];
 }
 

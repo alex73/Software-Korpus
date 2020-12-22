@@ -99,6 +99,34 @@ public class SetUtils {
         return pt + vt + f.getTag();
     }
 
+    /**
+     * Checks if value exist in str, where str is list of values, like
+     * "value1;value2;value3".
+     */
+    public static boolean inSeparatedList(CharSequence str, String value) {
+        int j = 0;
+        for (int i = 0; i < str.length(); i++) {
+            char c = str.charAt(i);
+            if (c == ';') {
+                if (j == value.length()) {
+                    return true;
+                } else {
+                    j = 0;
+                }
+            } else {
+                if (j >= 0 && j < value.length() && c == value.charAt(j)) {
+                    j++;
+                } else {
+                    j = -1;
+                }
+            }
+        }
+        if (j == value.length()) {
+            return true;
+        }
+        return false;
+    }
+
     public static String toString(Paradigm p) {
         return "Paradigm: " + p.getTag() + "/" + p.getLemma() + "[" + p.getPdgId() + "]";
     }

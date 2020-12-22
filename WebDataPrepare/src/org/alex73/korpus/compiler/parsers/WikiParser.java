@@ -12,7 +12,8 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.compiler.PrepareCache3;
-import org.alex73.korpus.text.parser.Splitter2;
+import org.alex73.korpus.text.elements.Paragraph;
+import org.alex73.korpus.text.parser.Splitter3;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -26,8 +27,8 @@ import org.xml.sax.helpers.DefaultHandler;
 public class WikiParser extends BaseParser {
     // Выкідаем: назва старонкі пачынаецца з 'Катэгорыя:', 'Файл:', 'MediaWiki:',
     // 'Шаблон:'
-    static final String[] SKIP_TITLE_MARKERS = new String[] { "Катэгорыя:", "Файл:", "MediaWiki:", "Шаблон:",
-            "Шаблён:" };
+    static final String[] SKIP_TITLE_MARKERS = new String[] { "Катэгорыя:", "Файл:", "MediaWiki:", "Шаблон:", "Шаблён:",
+            "Вікіпедыя:", "Вікіпэдыя:" };
     // Выкідаем: тэкст пачынаецца з #REDIRECT
     static final String[] SKIP_TEXT_MARKERS = new String[] { "#REDIRECT", "#перанакіраваньне" };
     // Выкідаем з тэксту:
@@ -36,23 +37,17 @@ public class WikiParser extends BaseParser {
 
     static final SAXParserFactory FACTORY = SAXParserFactory.newInstance();
 
-    private boolean onlyHeader;
+    private boolean headersOnly;
     String urlPrefix;
 
     public WikiParser(String subcorpus, Path file) {
         super(subcorpus, file);
     }
 
-//    @Override
-//    public void readHeaders() throws Exception {
-//        System.out.println(file);
-//        onlyHeader = true;
-//        internalParse(file);
-//    }
-
     @Override
-    public void parse(Executor queue) throws Exception {
+    public void parse(Executor queue, boolean headersOnly) throws Exception {
         System.out.println(file);
+        this.headersOnly = headersOnly;
 
         if (file.getFileName().toString().startsWith("bewiki-")) {
             urlPrefix = "https://be.wikipedia.org/wiki/";
@@ -92,38 +87,54 @@ public class WikiParser extends BaseParser {
 
     protected void process(Executor queue, String inTitle, String inText) {
         queue.execute(() -> {
-            String title = inTitle.trim();
-            String text = inText.trim();
-            for (String st : SKIP_TITLE_MARKERS) {
-                if (title.startsWith(st)) {
-                    return;
-                }
-            }
-            for (String st : SKIP_TEXT_MARKERS) {
-                if (text.startsWith(st)) {
-                    return;
-                }
-            }
             try {
+                String title = inTitle.trim();
+                String text = inText.trim();
+                for (String st : SKIP_TITLE_MARKERS) {
+                    if (title.startsWith(st)) {
+                        return;
+                    }
+                }
+                for (String st : SKIP_TEXT_MARKERS) {
+                    if (text.startsWith(st)) {
+                        return;
+                    }
+                }
+
                 TextInfo textInfo = new TextInfo();
                 textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + inTitle;
                 textInfo.subcorpus = subcorpus;
                 textInfo.url = urlPrefix + title;
                 textInfo.title = title;
-                if (onlyHeader) {
-                    // PrepareCache2.processHeader(textInfo);
+                if (headersOnly) {
+                    PrepareCache3.process(textInfo, null);
                 } else {
                     text = SKIP_TEXT_RE_KAT.matcher(text).replaceAll("");
-                    List<Object> content = new ArrayList<>();
+                    List<Paragraph> content = new ArrayList<>();
+                    StringBuilder ptext = new StringBuilder();
+                    Splitter3 splitter = new Splitter3(false, PrepareCache3.errors);
                     for (String s : text.split("\n")) {
-                        content.add(new Splitter2(s, false, PrepareCache3.errors).getP());
+                        s = s.trim();
+                        if (s.isEmpty()) {
+                            if (ptext.length() > 0) {
+                                if (!ptext.toString().replace('\n', ' ').trim().isEmpty()) {
+                                    content.add(splitter.parse(ptext));
+                                }
+                                ptext.setLength(0);
+                            }
+                        } else {
+                            ptext.append(s).append('\n');
+                        }
+                    }
+                    if (!ptext.toString().replace('\n', ' ').trim().isEmpty()) {
+                        content.add(splitter.parse(ptext));
                     }
                     if (!content.isEmpty()) {
                         PrepareCache3.process(textInfo, content);
                     }
                 }
             } catch (Exception ex) {
-                throw new RuntimeException("Error in " + file, ex);
+                PrepareCache3.errors.reportError("Error parse " + file + "!" + inTitle, ex);
             }
         });
     }

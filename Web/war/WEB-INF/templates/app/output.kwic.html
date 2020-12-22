@@ -8,11 +8,13 @@
     <tr>
       <td style="color: #337ab7; white-space: nowrap;">
         <a href="#" onClick="showBiblio($event, doc, docOther)">
-          {{if doc.authors}}
-            {{titleShort:doc.authors}}
-          {{else}}
-            doc
-          {{/if}}
+              {{if doc.authors}}
+                {{titleShort:doc.authors}}
+              {{else doc.source}}
+                {{titleShort:doc.source}}
+              {{else}}
+                {{titleShort:doc.title}}
+              {{/if}}
         </a>
       </td>
       <td class="text-right">

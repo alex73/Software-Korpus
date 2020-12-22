@@ -14,5 +14,5 @@ public abstract class BaseParser implements IParser {
         this.file = file;
     }
 
-    public abstract void parse(Executor queue) throws Exception;
+    public abstract void parse(Executor queue, boolean headersOnly) throws Exception;
 }

@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_NULL)
 public class InitialData {
     public List<String> authors;
+    public List<String> sources;
     public List<KeyValue> subcorpuses;
     public List<String> styleGenresParts;
     public Map<String,List<String>> styleGenres;

@@ -1,5 +1,5 @@
 <script id="template-wordgrammar" type="text/x-jsrender">
-	<select id="dialog-wordgrammar-grselected" class="form-control" onChange="dialogWordGrammar.changeType(this.value)">
+	<select id="dialog-wordgrammar-grselected" class="form-control {{if ~root.hideParadigmGroups}}d-none{{/if}}" onChange="dialogWordGrammar.changeType(this.value)">
 		<option value="">-- Не абраная --</option>
 		{{for ~root.grammar.grammarWordTypes}}
 			<option value="{{>key}}">{{>value}}</option>
@@ -11,16 +11,14 @@
 </script>
 <script id="template-wordgrammar2" type="text/x-jsrender">
 	{{for ~root.grammar.grammarWordTypesGroups[~root.grselected].groups itemVar="~group"}}
-		{{if !~group.hidden}}
-			<div class="card panel-default">
-				<div class="card-header">{{>~group.name}}</div>
-				<div class="card-body">
-				{{for ~group.items}}
-					<label><input type="checkbox" name="{{>~group.name}}" value="{{>code}}"> {{>description}} ({{>code}})</label>
-				{{/for}}
-				</div>
+		<div class="card panel-default {{if (!~group.formGroup && ~root.hideParadigmGroups)}}d-none{{/if}} {{if (~group.formGroup && ~root.hideFormGroups)}}d-none{{/if}} {{if (~root.grammar.skipGrammar[~root.grselected] && ~root.grammar.skipGrammar[~root.grselected].includes(~group.name))}}d-none{{/if}}">
+			<div class="card-header">{{>~group.name}}</div>
+			<div class="card-body">
+			{{for ~group.items}}
+				<label><input type="checkbox" name="{{>~group.name}}" value="{{>code}}"> {{>description}} ({{>code}})</label>
+			{{/for}}
 			</div>
-		{{/if}}
+		</div>
 	{{/for}}
 </script>
 

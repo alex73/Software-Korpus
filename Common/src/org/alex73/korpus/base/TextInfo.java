@@ -28,11 +28,12 @@ import java.io.Serializable;
 public class TextInfo implements Serializable {
     public transient String sourceFilePath;
     public String subcorpus;
+    public String source;
     public String url;
     public String[] authors;
     public String title;
     public String[] translators;
-    public String langOrig;
+    public String lang, langOrig;
     public String[] styleGenres;
     public String edition;
     public String creationTime, publicationTime;

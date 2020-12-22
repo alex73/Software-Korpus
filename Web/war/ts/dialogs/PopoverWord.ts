@@ -31,4 +31,10 @@ class PopoverWord extends BasePopover {
 		}
 		return o;
 	}
+	
+}
+
+function popoverWordHide() {
+	let popover: HTMLElement = document.getElementById('popoverWord');
+	popover.style.visibility = 'hidden';
 }

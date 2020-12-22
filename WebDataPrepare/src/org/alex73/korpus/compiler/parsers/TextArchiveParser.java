@@ -6,7 +6,9 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -14,9 +16,7 @@ import java.util.zip.ZipFile;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.compiler.PrepareCache3;
 import org.alex73.korpus.compiler.TextUtils;
-import org.alex73.korpus.text.TextGeneral;
-import org.alex73.korpus.text.xml.Header;
-import org.alex73.korpus.text.xml.XMLText;
+import org.alex73.korpus.text.parser.TextFileParser;
 import org.apache.commons.io.IOUtils;
 
 public class TextArchiveParser extends BaseParser {
@@ -24,37 +24,18 @@ public class TextArchiveParser extends BaseParser {
         super(subcorpus, file);
     }
 
-//    @Override
-//    public void readHeaders() throws Exception {
-//        try (ZipFile zip = new ZipFile(file.toFile())) {
-//            for (Enumeration<? extends ZipEntry> it = zip.entries(); it.hasMoreElements();) {
-//                ZipEntry en = it.nextElement();
-//                if (en.isDirectory()) {
-//                    continue;
-//                }
-//                XMLText doc;
-//                try (InputStream in = new BufferedInputStream(zip.getInputStream(en))) {
-//                    doc = new TextGeneral(zip.getInputStream(en), PrepareCache2.errors).parse();
-//                }
-//                TextInfo textInfo = new TextInfo();
-//                TextUtils.fillFromXml(textInfo, doc);
-//                PrepareCache2.processHeader(textInfo);
-//            }
-//        }
-//    }
-
     @Override
-    public void parse(Executor queue) throws Exception {
+    public void parse(Executor queue, boolean headersOnly) throws Exception {
         System.out.println(file);
 
         Path headersFile = Paths.get(file.toString() + ".headers");
-        Header headers;
+        Map<String, String> commonHeaders;
         if (Files.exists(headersFile)) {
             try (InputStream in = Files.newInputStream(headersFile)) {
-                headers = new TextGeneral(in, PrepareCache3.errors).parse().getHeader();
+                commonHeaders = new TextFileParser(in, true, PrepareCache3.errors).headers;
             }
         } else {
-            headers = null;
+            commonHeaders = Collections.emptyMap();
         }
 
         try (ZipFile zip = new ZipFile(file.toFile())) {
@@ -69,20 +50,19 @@ public class TextArchiveParser extends BaseParser {
                 }
                 queue.execute(() -> {
                     try {
-                        XMLText doc = new TextGeneral(new ByteArrayInputStream(data), PrepareCache3.errors).parse();
-                        if (headers != null) {
-                            doc.getHeader().getTag().addAll(headers.getTag());
-                        }
+                        TextFileParser doc = new TextFileParser(new ByteArrayInputStream(data), headersOnly,
+                                PrepareCache3.errors);
                         TextInfo textInfo = new TextInfo();
+                        TextUtils.fillFromHeaders(textInfo, commonHeaders);
+                        TextUtils.fillFromHeaders(textInfo, doc.headers);
                         textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + en.getName();
                         textInfo.subcorpus = subcorpus;
-                        TextUtils.fillFromXml(textInfo, doc);
                         if (textInfo.title == null) {
                             textInfo.title = "";
                         }
-                        PrepareCache3.process(textInfo, doc.getContent().getPOrTagOrPoetry());
+                        PrepareCache3.process(textInfo, doc.paragraphs);
                     } catch (Exception ex) {
-                        throw new RuntimeException("Error parse " + file + "!" + en.getName(), ex);
+                        PrepareCache3.errors.reportError("Error parse " + file + "!" + en.getName(), ex);
                     }
                 });
             }

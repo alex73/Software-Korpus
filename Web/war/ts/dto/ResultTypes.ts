@@ -1,26 +1,23 @@
 class SearchResults {
     public doc: TextInfo;
-    public text: SearchResultsText;
+    public text: Paragraph;
     
     constructor(o:any) {
       this.doc = o.doc;
-      this.text = new SearchResultsText();
-      this.text.words = o.text.words;
+      this.text = new Paragraph();
+      this.text.sentences = o.text.sentences;
     }
-}
-class SearchResultsText {
-    public words: WordResult[][]; // paragraph is array of sentences, i.e. of array of words
 }
 
 class ResultKwicOutRow {
     public doc: TextInfo;
-    public origText: SearchResultsText;
+    public origText: Sentence;
     public kwicBefore: WordResult[];
     public kwicWords: WordResult[];
     public kwicAfter: WordResult[];
     constructor(o:SearchResults) {
       this.doc = o.doc;
-      this.origText = o.text;
+      this.origText = o.text.sentences[0];
     }
 }
 
@@ -31,12 +28,12 @@ class ResultKwicOut {
       for(let orow of o) {
         let r: SearchResults = new SearchResults(orow);
 
-        for(let i=0; i<r.text.words.length; i++) {
-          for(let j=0; j<r.text.words[i].length; j++) {
-            if (r.text.words[i][j].requestedWord && j + wordsInRequest < r.text.words[i].length) {
+        for(let i=0; i<r.text.sentences.length; i++) {
+          for(let j=0; j<r.text.sentences[i].words.length; j++) {
+            if (r.text.sentences[i].words[j].requestedWord && j + wordsInRequest < r.text.sentences[i].words.length) {
                 // show
                 let row: ResultKwicOutRow = new ResultKwicOutRow(r);
-                let wordsTo:number = this.showRow(row, r.text.words[i], j, wordsInRequest);
+                let wordsTo:number = this.showRow(row, r.text.sentences[i], j, wordsInRequest);
                 this.rows.push(row);
                 j = wordsTo;
             }
@@ -45,7 +42,7 @@ class ResultKwicOut {
       }
     }
 
-    showRow(out: ResultKwicOutRow, sentence: WordResult[], wordsFrom: number, wordsCount: number): number {
+    showRow(out: ResultKwicOutRow, sentence: Sentence, wordsFrom: number, wordsCount: number): number {
       let wordsTo: number = wordsFrom;
 
       out.kwicBefore = [];
@@ -58,7 +55,7 @@ class ResultKwicOut {
       out.kwicBefore.reverse();
       
       out.kwicWords = [];
-      for (let i = wordsFrom, count = 0; i < sentence.length && count < wordsCount; i++) {
+      for (let i = wordsFrom, count = 0; i < sentence.words.length && count < wordsCount; i++) {
         out.kwicWords.push(sentence[i]);
         if (sentence[i].isWord) {
           count++;
@@ -67,7 +64,7 @@ class ResultKwicOut {
       }
       
       out.kwicAfter = [];
-      for (let i = wordsTo + 1, count = 0; i < sentence.length && count < 5; i++) {
+      for (let i = wordsTo + 1, count = 0; i < sentence.words.length && count < 5; i++) {
         out.kwicAfter.push(sentence[i]);
         if (sentence[i].isWord) {
           count++;
@@ -80,7 +77,7 @@ class ResultKwicOut {
 
 class ResultSearchOutRow {
     public doc: TextInfo;
-    public origText: SearchResultsText;
+    public origText: Paragraph;
     public words: WordResult[] = [];
     constructor(o:SearchResults) {
       this.doc = o.doc;
@@ -95,32 +92,32 @@ class ResultSearchOut {
       for(let orow of o) {
         let r: SearchResults = new SearchResults(orow);
         
-        let num = this.getRequestedWordsCountInResult(r.text.words);
+        let num = this.getRequestedWordsCountInResult(r.text);
         let wordsCount;
         switch(num) {
           case 0:
           case 1:
-              wordsCount = 7;
-              break;
-          case 2:
               wordsCount = 5;
               break;
+          case 2:
+              wordsCount = 3;
+              break;
           case 3:
-              wordsCount = 4;
+              wordsCount = 2;
               break;
           default:
-              wordsCount = 3;
+              wordsCount = 2;
               break;
         }
         let out: ResultSearchOutRow = new ResultSearchOutRow(r);
-        this.outputText(r.text.words, out, wordsCount, 0, " ... ");
+        this.outputText(r.text, out, wordsCount, 0, " ... ");
         this.rows.push(out);
       }
     }
 
-    outputText(words: WordResult[][], row: ResultSearchOutRow, wordAround:number, sentencesAround:number, separatorText:string) {
+    outputText(words: Paragraph, row: ResultSearchOutRow, wordAround:number, sentencesAround:number, separatorText:string) {
         let begin: TextPos = new TextPos(words, 0, 0);
-        let end: TextPos = new TextPos(words, words.length - 1, words[words.length - 1].length - 1);
+        let end: TextPos = new TextPos(words, words.sentences.length - 1, words.sentences[words.sentences.length - 1].words.length - 1);
 
         let pos: TextPos = this.getNextRequestedWordPosAfter(words, null);
         let currentAroundFrom: TextPos = pos.addWords(-wordAround);
@@ -167,29 +164,25 @@ class ResultSearchOut {
             row.words.push(new WordResult(separatorText));
         }
     }
-    
-    output(words: WordResult[][], row: ResultSearchOutRow, from: TextPos, to: TextPos) {
+
+    output(words: Paragraph, row: ResultSearchOutRow, from: TextPos, to: TextPos) {
         let curr: TextPos = from;
         while (true) {
-            let w: WordResult = words[curr.sentence][curr.word];
-            if (!w.isWord && w.orig && w.orig.charAt(0) == '\n') {
-                row.words.push(new WordResult(" \\\\ ")); // TODO
-            } else {
-                row.words.push(w); 
-            }
-            let next: TextPos = curr.addPos(1);
+            let w: WordResult = words.sentences[curr.sentence].words[curr.word];
+            row.words.push(w); 
+            let next: TextPos = curr.addWords(1);
             if (curr.equals(to)) {
                 break;
             }
             curr = next;
         }
     }
-    
-    getRequestedWordsCountInResult(words: WordResult[][]): number {
+
+    getRequestedWordsCountInResult(words: Paragraph): number {
         let count: number = 0;
 
-        for (let row of words) {
-            for (let w of row) {
+        for (let row of words.sentences) {
+            for (let w of row.words) {
                 if (w.requestedWord) {
                     count++;
                 }
@@ -197,7 +190,7 @@ class ResultSearchOut {
         }
         return count;
     }
-    getNextRequestedWordPosAfter(words: WordResult[][], currentPos: TextPos): TextPos {
+    getNextRequestedWordPosAfter(words: Paragraph, currentPos: TextPos): TextPos {
         let startI: number, startJ: number;
         if (currentPos == null) {
             startI = 0;
@@ -211,9 +204,9 @@ class ResultSearchOut {
             startJ = next.word;
         }
         let j: number = startJ;
-        for (let i: number = startI; i < words.length; i++) {
-            for (; j < words[i].length; j++) {
-                if (words[i][j].requestedWord) {
+        for (let i: number = startI; i < words.sentences.length; i++) {
+            for (; j < words.sentences[i].words.length; j++) {
+                if (words.sentences[i].words[j].requestedWord) {
                     return new TextPos(words, i, j);
                 }
             }
@@ -230,13 +223,18 @@ class LatestMark {
 }
 
 class TextInfo {
-    public url: string;
     public subcorpus: string;
+    public source: string;
+    public url: string;
     public authors: string[];
     public title: string;
+    public translators: string[];
+    public lang: string;
+    public langOrig: string;
     public styleGenres: string[];
-    public writtenYear: number;
-    public publishedYear: number;
+    public edition: string;
+    public creationTime: string;
+    public publicationTime: string;
 }
 
 class ClusterResult {

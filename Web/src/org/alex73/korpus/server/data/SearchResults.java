@@ -25,6 +25,7 @@ package org.alex73.korpus.server.data;
 import java.io.Serializable;
 
 import org.alex73.korpus.base.TextInfo;
+import org.alex73.korpus.text.elements.Paragraph;
 
 /**
  * DTO for results of search by corpus documents.
@@ -32,5 +33,5 @@ import org.alex73.korpus.base.TextInfo;
 @SuppressWarnings("serial")
 public class SearchResults implements Serializable {
     public TextInfo doc;
-    public ResultText text;
+    public Paragraph text;
 }

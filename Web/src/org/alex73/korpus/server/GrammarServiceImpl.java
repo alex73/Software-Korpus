@@ -26,11 +26,18 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.Spliterators;
 import java.util.TreeSet;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -45,15 +52,13 @@ import javax.ws.rs.core.MediaType;
 import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
-import org.alex73.korpus.base.BelarusianTags;
 import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.base.DBTagsGroups;
+import org.alex73.korpus.base.OfficialSpellFilter;
 import org.alex73.korpus.server.data.GrammarInitial;
-import org.alex73.korpus.server.data.WordRequest;
 import org.alex73.korpus.shared.LemmaInfo;
 import org.alex73.korpus.utils.SetUtils;
 import org.alex73.korpus.utils.StressUtils;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Service for find by grammar database.
@@ -88,7 +93,10 @@ public class GrammarServiceImpl {
     }
 
     public static class GrammarRequest {
-        public WordRequest word;
+        public String word;
+        public boolean multiForm;
+        public String grammar;
+        public String outputGrammar;
         public boolean orderReverse;
     }
 
@@ -100,67 +108,27 @@ public class GrammarServiceImpl {
         System.out.println(">> Request from " + request.getRemoteAddr());
         System.out.println(">> Request: word=" + rq.word + " orderReverse=" + rq.orderReverse);
         try {
-            List<LemmaInfo> result = new ArrayList<>();
-            Pattern reLemma = null;
-            Pattern reWord = null;
-            if (rq.word.allForms) {
-                if (StringUtils.isNotBlank(rq.word.word)) {
-                    reWord = Pattern.compile(rq.word.word.replace("*", ".*"));
+            Pattern reGrammar = null, reOutputGrammar = null;
+            if (rq.grammar != null && !rq.grammar.isEmpty()) {
+                reGrammar = WordsDetailsChecks.getPatternRegexp(rq.grammar);
+            }
+            if (rq.outputGrammar != null && !rq.outputGrammar.isEmpty()) {
+                reOutputGrammar = WordsDetailsChecks.getWildcardRegexp(rq.outputGrammar);
+            }
+            if (rq.word != null) {
+                rq.word = rq.word.trim();
+                if (rq.word.isEmpty()) {
+                    rq.word = null;
                 }
+            }
+            Stream<LemmaInfo> output;
+            if (rq.word == null || WordsDetailsChecks.needWildcardRegexp(rq.word)) {
+                output = StreamSupport.stream(new SearchWidlcards(rq.word, reGrammar, rq.multiForm, reOutputGrammar), false);
             } else {
-                if (StringUtils.isNotBlank(rq.word.word)) {
-                    reLemma = Pattern.compile(rq.word.word.replace("*", ".*"));
-                }
+                output = searchExact(rq.word, reGrammar, rq.multiForm, reOutputGrammar);
             }
+            List<LemmaInfo> result = output.limit(Settings.GRAMMAR_SEARCH_RESULT_PAGE).collect(Collectors.toList());
 
-            Pattern reGrammar = StringUtils.isEmpty(rq.word.grammar) ? null : Pattern.compile(rq.word.grammar);
-
-         // TODO change to finder
-            begpar: for (Paradigm p : getApp().gr.getAllParadigms()) {
-                if (reLemma != null) {
-                    if (!reLemma.matcher(StressUtils.unstress(BelarusianWordNormalizer.normalizePreserveCase(p.getLemma())))
-                            .matches()) {
-                        continue;
-                    }
-                }
-                boolean found = false;
-                for (Variant v : p.getVariant()) {
-                    for (Form f : v.getForm()) {
-                        if (StringUtils.isEmpty(f.getValue())) {
-                            continue;
-                        }
-                        if (reGrammar != null) {
-                            String fTag = SetUtils.tag(p, v, f);
-                            if (!BelarusianTags.getInstance().isValid(fTag, null)) {
-                                continue;
-                            }
-                            if (!reGrammar.matcher(DBTagsGroups.getDBTagString(fTag)).matches()) {
-                                continue;
-                            }
-                        }
-                        if (reWord != null) {
-                            if (!reWord.matcher(StressUtils.unstress(BelarusianWordNormalizer.normalizePreserveCase(f.getValue())))
-                                    .matches()) {
-                                continue;
-                            }
-                        }
-
-                        found = true;
-                        break;
-                    }
-                }
-                if (found) {
-                    LemmaInfo w = new LemmaInfo();
-                    w.pdgId = p.getPdgId();
-                    w.lemma = StressUtils.combineAccute(p.getLemma());
-                    w.lemmaGrammar = p.getTag();
-                    result.add(w);
-                    if (Settings.GRAMMAR_SEARCH_RESULT_PAGE > 0
-                            && result.size() >= Settings.GRAMMAR_SEARCH_RESULT_PAGE + 1) {
-                        break begpar;
-                    }
-                }
-            }
             if (rq.orderReverse) {
                 Collections.sort(result, new Comparator<LemmaInfo>() {
                     @Override
@@ -182,6 +150,102 @@ public class GrammarServiceImpl {
             System.out.println(ex);
             throw ex;
         }
+    }
+
+    class SearchWidlcards extends Spliterators.AbstractSpliterator<LemmaInfo> {
+        private final Pattern re;
+        private final Pattern reGrammar;
+        private final boolean multiform;
+        private final Pattern reOutputGrammar;
+        private final LinkedList<LemmaInfo> buffer = new LinkedList<>();
+        private final List<Paradigm> data;
+        private int dataPos;
+
+        public SearchWidlcards(String word, Pattern reGrammar, boolean multiform, Pattern reOutputGrammar) {
+            super(Long.MAX_VALUE, 0);
+            this.re = word == null ? null : WordsDetailsChecks.getWildcardRegexp(word.trim());
+            this.reGrammar = reGrammar;
+            this.multiform = multiform;
+            this.reOutputGrammar = reOutputGrammar;
+            data = getApp().gr.getAllParadigms();
+        }
+
+        @Override
+        public boolean tryAdvance(Consumer<? super LemmaInfo> action) {
+            while (dataPos < data.size() && buffer.isEmpty()) {
+                Paradigm p = data.get(dataPos);
+                dataPos++;
+                createLemmaInfoFromParadigm(p, s -> re == null || re.matcher(StressUtils.unstress(s)).matches(),
+                        multiform, reOutputGrammar, reGrammar, buffer);
+            }
+            if (buffer.isEmpty()) {
+                return false;
+            }
+            action.accept(buffer.removeFirst());
+            return true;
+        }
+    }
+
+    private Stream<LemmaInfo> searchExact(String word, Pattern reGrammar, boolean multiform, Pattern reOutputGrammar) {
+        String normWord = BelarusianWordNormalizer.lightNormalized(word.trim());
+        Paradigm[] data = getApp().grFinder.getParadigms(normWord);
+        List<LemmaInfo> result = new ArrayList<>();
+        for (Paradigm p : data) {
+            createLemmaInfoFromParadigm(p, s -> BelarusianWordNormalizer.equals(normWord, s), multiform, reOutputGrammar,
+                    reGrammar, result);
+        }
+        return result.stream();
+    }
+
+    private void createLemmaInfoFromParadigm(Paradigm p, Predicate<String> checkWord, boolean multiform,
+            Pattern reOutputGrammar, Pattern reGrammar, List<LemmaInfo> result) {
+        for (Variant v : p.getVariant()) {
+            List<Form> forms = OfficialSpellFilter.getAcceptedForms(p, v);
+            if (forms == null) {
+                return;
+            }
+            if (multiform) {
+                for (Form f : forms) {
+                    if (checkWord.test(f.getValue())) {
+                        if (reGrammar != null
+                                && !reGrammar.matcher(DBTagsGroups.getDBTagString(SetUtils.tag(p, v, f))).matches()) {
+                            continue;
+                        }
+                        result.add(createLemmaInfo(p, v, reOutputGrammar));
+                        break;
+                    }
+                }
+            } else {
+                if (checkWord.test(v.getLemma())) {
+                    if (reGrammar != null
+                            && !reGrammar.matcher(DBTagsGroups.getDBTagString(SetUtils.tag(p, v))).matches()) {
+                        continue;
+                    }
+                    result.add(createLemmaInfo(p, v, reOutputGrammar));
+                }
+            }
+        }
+    }
+
+    private LemmaInfo createLemmaInfo(Paradigm p, Variant v, Pattern reOutputGrammar) {
+        LemmaInfo w = new LemmaInfo();
+        w.pdgId = p.getPdgId();
+        if (reOutputGrammar != null) {
+            List<String> fs = new ArrayList<>();
+            for (Form f : v.getForm()) {
+                if (reOutputGrammar.matcher(DBTagsGroups.getDBTagString(SetUtils.tag(p, v, f))).matches()) {
+                    fs.add(StressUtils.combineAccute(f.getValue()));
+                }
+            }
+            if (!fs.isEmpty()) {
+                w.lemma = String.join(", ", fs);
+            }
+        }
+        if (w.lemma == null) {
+            w.lemma = StressUtils.combineAccute(v.getLemma());
+        }
+        w.lemmaGrammar = SetUtils.tag(p, v);
+        return w;
     }
 
     @Path("details/{id}")
@@ -208,12 +272,12 @@ public class GrammarServiceImpl {
         System.out.println(">> Find lemmas by form " + form);
         Set<String> result = Collections.synchronizedSet(new TreeSet<>());
         try {
-            form = BelarusianWordNormalizer.normalizePreserveCase(form);
+            form = BelarusianWordNormalizer.lightNormalized(form);
             for (Paradigm p : getApp().grFinder.getParadigms(form)) {
                 for (Variant v : p.getVariant()) {
                     for (Form f : v.getForm()) {
-                        if (form.equals(BelarusianWordNormalizer.normalizePreserveCase(f.getValue()))) {
-                            result.add(BelarusianWordNormalizer.normalizePreserveCase(v.getLemma()));
+                        if (BelarusianWordNormalizer.equals(f.getValue(), form)) {
+                            result.add(p.getLemma());
                             break;
                         }
                     }

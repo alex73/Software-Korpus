@@ -3,23 +3,71 @@
 
 <form onSubmit="grammarService.search(); return false;">
   <div class="row">
-    <#include "input.word.html">
-  </div>
-  <div class="row">
-    <div class="card" style="width:100%">
-      <div class="card-body mb-0">
-        Парадак:
-        <label class="radio-inline pl-2"><input type="radio" id="inputOrderStandard" name="inputOrder" value="STANDARD" checked> Звычайны</label>
-        <label class="radio-inline pl-2"><input type="radio" id="inputOrderReverse"  name="inputOrder" value="REVERSE"> Адваротны</label>
-      </div>
-    </div>
+<div class="col-sm-12 col-lg-6" id="template-inputword2">
+	<div class="card">
+		<span id="grammarword-grammar" class="d-none wordgram-grammar-string"></span>
+		<div class="card-body">
+			<div class="form-inline form-group my-1">
+				<label><span class="inputword-lemma-prompt">Слова</span>
+					<input id="grammarword-word" type="text" placeholder="уводзіць тут" class="form-control ml-2 w-100" name="wordText">
+				</label>
+			</div>
+			<div class="form-group my-1">
+				<label class="radio-inline">
+					<input id="grammarword-firstform" type="radio" name="wordForm" checked> Па пачатковай форме
+				</label>
+			</div>
+			<div class="form-group my-1">
+				<label class="radio-inline">
+					<input id="grammarword-multiform" type="radio" name="wordForm"> Па ўсіх формах
+				</label>
+			</div>
+			<div class="form-group my-1">
+				<label class="radio-inline">
+					<input id="grammarword-multiformgrouped" type="radio" name="wordForm"> Згрупавана
+				</label>
+			</div>
+			<div class="form-inline form-group my-1">
+				<label>Удакладніць граматыку
+					<a href="#" id="grammarword-grammarshow" class="form-control wordgram-display ml-2"
+						onClick="dialogWordGrammar = DialogWordGrammar.createParadigmTagsDialog(this, document.getElementById('grammarword-multiform').checked); return false;">---</a>
+				</label>
+			</div>
+		</div>
+	</div>
+</div>
   </div>
   <div class="row justify-content-end">
     <button type="submit" class="btn btn-danger btn-lg">Пошук</button>
   </div>
 </form>
 
-<div id="output"></div>
+<div class="row">
+	<form class="col-md-6 order-md-2" onSubmit="grammarService.search(); return false;">
+	  <div id="grammar-addition-order" style="display: none">
+	    <div class="card" style="width:100%;">
+	      <div class="card-body mb-0">
+	        <div id="grammar-show-order">
+	          Парадак:
+	          <label class="radio-inline pl-2"><input type="radio" id="inputOrderStandard" name="inputOrder" value="STANDARD" checked> Звычайны</label>
+	          <label class="radio-inline pl-2"><input type="radio" id="inputOrderReverse"  name="inputOrder" value="REVERSE"> Адваротны</label>
+	        </div>
+	        <div id="grammar-show-forms" class="form-inline">
+	          <span id="grammarwordshow-grammar" class="d-none wordgram-grammar-string"></span>
+	          <label>Паказваць адмысловую форму: <a href="#" id="grammarwordshow-grammarshow" class="form-control wordgram-display wordgram-display-formsonly ml-2"
+	                   onClick="dialogWordGrammar = DialogWordGrammar.createFormOnlyTagsDialog(this, 'grammarword-grammar'); return false;">---</a>
+	          </label>
+	        </div>
+	        <div id="grammar-show-noforms" class="form-inline">
+	          Калі ўдакладніць граматыку і абраць часціну мовы, у якой слова можа мець некалькі формаў, можна выводзіць форму, іншую за пачатковую
+	        </div>
+	      </div>
+	    </div>
+	  </div>
+	</form>
+	
+	<div id="output" class="col-md-6 order-md-1"></div>
+</div>
 
 <script id="template-grammaroutput" type="text/x-jsrender">
   {{for lemmas}}

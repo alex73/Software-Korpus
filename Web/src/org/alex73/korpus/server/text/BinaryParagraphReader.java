@@ -4,81 +4,35 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import org.alex73.korpus.text.xml.O;
-import org.alex73.korpus.text.xml.P;
-import org.alex73.korpus.text.xml.S;
-import org.alex73.korpus.text.xml.Se;
-import org.alex73.korpus.text.xml.W;
-import org.alex73.korpus.text.xml.Z;
+import org.alex73.korpus.text.elements.Paragraph;
+import org.alex73.korpus.text.elements.Sentence;
+import org.alex73.korpus.text.elements.Word;
 
 public class BinaryParagraphReader {
     private ByteArrayInputStream bytes;
     private DataInputStream in;
-    private P result;
-    private Se se;
 
     public BinaryParagraphReader(byte[] data) {
         bytes = new ByteArrayInputStream(data);
         in = new DataInputStream(bytes);
     }
 
-    public P read() throws IOException {
-        result = new P();
-        int pCount = in.readShort();
-        for (int i = 0; i < pCount; i++) {
-            se = new Se();
-            int seCount = in.readShort();
-            for (int j = 0; j < seCount; j++) {
-                byte wt = in.readByte();
-                switch (wt) {
-                case 1:
-                    readW();
-                    break;
-                case 2:
-                    readS();
-                    break;
-                case 3:
-                    readZ();
-                    break;
-                case 4:
-                    readO();
-                    break;
-                default:
-                    throw new RuntimeException("Unknown word type: " + wt);
-                }
+    public Paragraph read() throws IOException {
+        Paragraph p = new Paragraph();
+        p.sentences = new Sentence[in.readShort()];
+        for (int i = 0; i < p.sentences.length; i++) {
+            p.sentences[i] = new Sentence();
+            p.sentences[i].words = new Word[in.readShort()];
+            for (int j = 0; j < p.sentences[i].words.length; j++) {
+                Word w = new Word();
+                w.lightNormalized = readString();
+                w.lemmas = readString();
+                w.tags = readString();
+                w.tail = readString();
+                p.sentences[i].words[j] = w;
             }
-            result.getSe().add(se);
         }
-        if (bytes.available() != 0) {
-            throw new RuntimeException("Wrong data");
-        }
-        return result;
-    }
-
-    private void readW() throws IOException {
-        W w = new W();
-        w.setValue(readString());
-        w.setCat(readString());
-        w.setLemma(readString());
-        se.getWOrSOrZ().add(w);
-    }
-
-    private void readS() throws IOException {
-        S s = new S();
-        s.setChar(readString());
-        se.getWOrSOrZ().add(s);
-    }
-
-    private void readZ() throws IOException {
-        Z z = new Z();
-        z.setChar(readString());
-        se.getWOrSOrZ().add(z);
-    }
-
-    private void readO() throws IOException {
-        O o = new O();
-        o.setValue(readString());
-        se.getWOrSOrZ().add(o);
+        return p;
     }
 
     private String readString() throws IOException {

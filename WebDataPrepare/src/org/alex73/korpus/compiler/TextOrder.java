@@ -10,7 +10,8 @@ import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.utils.KorpusDateTime;
 
 public class TextOrder implements Comparator<TextInfo> {
-    static final List<String> subcorpuses = Arrays.asList("teksty", "sajty", "wiki", "nierazabranaje", "telegram");
+    static final List<String> subcorpuses = Arrays.asList("teksty", "sajty", "wiki", "pieraklady", "nierazabranaje",
+            "telegram");
     static final Collator BE = Collator.getInstance(new Locale("be"));
 
     @Override
@@ -23,12 +24,16 @@ public class TextOrder implements Comparator<TextInfo> {
             c = Integer.compare(wikiOrder(o1), wikiOrder(o2));
         }
         if (c == 0) {
-            if ("teksty".equals(o1.subcorpus)) {
+            switch (o1.subcorpus) {
+            case "teksty":
+            case "pieraklady":
                 // першыя - найбольш раннія. не пазначана дата - на канец
                 c = Long.compare(earliest(o1, Long.MAX_VALUE), earliest(o2, Long.MAX_VALUE));
-            } else {
+                break;
+            default:
                 // першыя - найбольш апошнія. не пазначана дата - на канец
                 c = Long.compare(latest(o2, Long.MIN_VALUE), latest(o1, Long.MIN_VALUE));
+                break;
             }
         }
         if (c == 0) {

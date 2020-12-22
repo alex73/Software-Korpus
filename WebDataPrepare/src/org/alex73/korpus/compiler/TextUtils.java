@@ -1,53 +1,58 @@
 package org.alex73.korpus.compiler;
 
+import java.util.Map;
+
 import org.alex73.korpus.base.TextInfo;
-import org.alex73.korpus.text.xml.Tag;
-import org.alex73.korpus.text.xml.XMLText;
 import org.alex73.korpus.utils.KorpusDateTime;
 
 public class TextUtils {
-    public static void fillFromXml(TextInfo info, XMLText text) {
-        info.url = getTag(text, "URL");
-        String authors = getTag(text, "Authors");
-        if (authors != null) {
-            info.authors = authors.split(",");
-        } else {
-            info.authors = null;
+    public static void fillFromHeaders(TextInfo info, Map<String, String> headers) {
+        String s;
+        if ((s = get(headers, "Source")) != null) {
+            info.source = s;
         }
-        info.title = getTag(text, "Title");
-        String translation = getTag(text, "Translation");
-        if (translation != null) {
-            info.translators = translation.split(",");
-        } else {
-            info.translators = null;
+        if ((s = get(headers, "URL")) != null) {
+            info.url = s;
         }
-        info.langOrig = getTag(text, "LangOrig");
-        info.publicationTime = getTag(text, "PublicationYear");
-        if (info.publicationTime != null) {
+        if ((s = get(headers, "Authors")) != null) {
+            info.authors = s.split(";");
+        }
+        if ((s = get(headers, "Title")) != null) {
+            info.title = s;
+        }
+        if ((s = get(headers, "Translation")) != null) {
+            info.translators = s.split(";");
+        }
+        if ((s = get(headers, "Lang")) != null) {
+            info.lang = s;
+        }
+        if ((s = get(headers, "LangOrig")) != null) {
+            info.langOrig = s;
+        }
+        if ((s = get(headers, "StyleGenre")) != null) {
+            info.styleGenres = s.split("[;,]"); // TODO change to ';' separator
+        }
+        if ((s = get(headers, "Edition")) != null) {
+            info.edition = s;
+        }
+        if ((s = get(headers, "PublicationYear")) != null) {
+            info.publicationTime = s;
             new KorpusDateTime(info.publicationTime);
         }
-        info.creationTime = getTag(text, "CreationYear");
-        if (info.creationTime != null) {
+        if ((s = get(headers, "CreationYear")) != null) {
+            info.creationTime = s;
             new KorpusDateTime(info.creationTime);
-        }
-        info.edition = getTag(text, "Edition");
-        if (info.edition == null) {
-            info.edition = getTag(text, "HiddenEdition");
-        }
-        String styleGenres = getTag(text, "StyleGenre");
-        if (styleGenres != null) {
-            info.styleGenres = styleGenres.split(",");
-        } else {
-            info.styleGenres = null;
         }
     }
 
-    private static String getTag(XMLText text, String name) {
-        for (Tag tag : text.getHeader().getTag()) {
-            if (name.equals(tag.getName())) {
-                return tag.getValue().isEmpty() ? null : tag.getValue();
+    private static String get(Map<String, String> headers, String key) {
+        String v = headers.get(key);
+        if (v != null) {
+            v = v.trim();
+            if (v.isEmpty()) {
+                v = null;
             }
         }
-        return null;
+        return v;
     }
 }

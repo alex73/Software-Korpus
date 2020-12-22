@@ -8,15 +8,16 @@ import java.util.Map;
 import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.server.data.ClusterParams;
 import org.alex73.korpus.server.data.ClusterResults;
-import org.alex73.korpus.server.data.ResultText;
 import org.alex73.korpus.server.data.WordRequest;
 import org.alex73.korpus.server.data.WordResult;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
+import org.alex73.korpus.text.elements.Paragraph;
+import org.alex73.korpus.text.elements.Sentence;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.BooleanQuery;
 
 public class ClusterServiceImpl {
-   private final static int SEARCH_BLOCK = 10000;
+    private final static int SEARCH_BLOCK = 10000;
     private final SearchServiceImpl parent;
     private ClusterParams params;
     private final Map<String, Result> results = new HashMap<>();
@@ -32,7 +33,7 @@ public class ClusterServiceImpl {
         process.addKorpusTextFilter(query, params.textStandard);
 
         WordRequest w = params.word;
-        w.word = BelarusianWordNormalizer.normalizePreserveCase(w.word);
+        w.word = BelarusianWordNormalizer.lightNormalized(w.word);
         process.addWordFilter(query, w);
 
         process.search(query.build(), SEARCH_BLOCK, new LuceneDriverRead.DocFilter<Void>() {
@@ -49,18 +50,18 @@ public class ClusterServiceImpl {
     private void process(int docID, LuceneFilter process) throws Exception {
         Document doc = process.getSentence(docID);
 
-        ResultText text = parent.restoreText(doc);
+        Paragraph text = parent.restoreText(doc);
 
-        for (int i = 0; i < text.words.length; i++) {
-            for (int j = 0; j < text.words[i].length; j++) {
-                if (WordsDetailsChecks.isOneWordMatchsParam(params.word, text.words[i][j])) {
-                    process(text.words[i], j);
+        for (int i = 0; i < text.sentences.length; i++) {
+            for (int j = 0; j < text.sentences[i].words.length; j++) {
+                if (WordsDetailsChecks.isOneWordMatchsParam(params.word, (WordResult) text.sentences[i].words[j])) {
+                    process(text.sentences[i], j);
                 }
             }
         }
     }
 
-    private void process(WordResult[] words, int pos) {
+    private void process(Sentence words, int pos) {
         Result r = new Result(words, pos, params.wordsBefore, params.wordsAfter);
 
         String key = r.getKey();
@@ -97,8 +98,8 @@ public class ClusterServiceImpl {
         String word;
         String[] wordsAfter;
 
-        public Result(WordResult[] w, int pos, int beforeCount, int afterCount) {
-            word = w[pos].orig;
+        public Result(Sentence w, int pos, int beforeCount, int afterCount) {
+            word = w.words[pos].lightNormalized;
             if (word == null) {
                 word = "";
             }
@@ -106,16 +107,12 @@ public class ClusterServiceImpl {
             wordsAfter = new String[afterCount];
 
             for (int i = pos - 1, count = 0; i >= 0 && count < beforeCount; i--) {
-                if (w[i].isWord) {
-                    wordsBefore[beforeCount - count - 1] = w[i].orig;
-                    count++;
-                }
+                wordsBefore[beforeCount - count - 1] = w.words[i].lightNormalized;
+                count++;
             }
-            for (int i = pos + 1, count = 0; i < w.length && count < afterCount; i++) {
-                if (w[i].isWord) {
-                    wordsAfter[count] = w[i].orig;
-                    count++;
-                }
+            for (int i = pos + 1, count = 0; i < w.words.length && count < afterCount; i++) {
+                wordsAfter[count] = w.words[i].lightNormalized;
+                count++;
             }
         }
 

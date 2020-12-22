@@ -1,19 +1,21 @@
 package org.alex73.korpus.server.data;
 
-import java.io.Serializable;
+import org.alex73.korpus.text.elements.Word;
 
-public class WordResult implements Serializable {
-    public String orig;
-    public String normalized;
-    public String cat;
-    public String lemma;
+@SuppressWarnings("serial")
+public class WordResult extends Word {
     /** True if word is requested by user, i.e. should be marked in output. */
-    public boolean requestedWord;
+    public Boolean requestedWord;
 
-    public boolean isWord;
+    public WordResult(Word w) {
+        this.lightNormalized = w.lightNormalized;
+        this.lemmas = w.lemmas;
+        this.tags = w.tags;
+        this.tail = w.tail;
+    }
 
     @Override
     public String toString() {
-        return orig;
+        return lightNormalized + tail;
     }
 }

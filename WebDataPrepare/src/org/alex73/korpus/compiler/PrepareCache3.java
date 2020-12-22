@@ -15,11 +15,11 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 import org.alex73.korpus.base.GrammarDB2;
-import org.alex73.korpus.base.StaticGrammarFiller;
+import org.alex73.korpus.base.GrammarFinder;
+import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.base.TextInfo;
+import org.alex73.korpus.text.elements.Paragraph;
 import org.alex73.korpus.text.parser.IProcess;
-import org.alex73.korpus.text.xml.P;
-import org.alex73.korpus.text.xml.Poetry;
 import org.alex73.korpus.utils.KorpusDateTime;
 import org.apache.commons.io.FileUtils;
 
@@ -29,7 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class PrepareCache3 {
     public static final Path INPUT = Paths.get("Korpus-texts/");
     static final Path OUTPUT = Paths.get("/home/alex/Korpus-cache/");
-    static StaticGrammarFiller grFiller;
+    static StaticGrammarFiller2 grFiller;
     static LuceneDriverWrite lucene;
     public static List<TextInfo> textInfos = Collections.synchronizedList(new ArrayList<>());
     public static Map<String, Integer> textPositionsBySourceFile;
@@ -44,7 +44,7 @@ public class PrepareCache3 {
         FileUtils.deleteDirectory(OUTPUT.toFile());
 
         // read texts and sort
-        new FilesReader().run(INPUT, errors);
+        new FilesReader().run(INPUT, errors, true);
         System.out.println("1st pass finished");
         errorsCount.clear();
 
@@ -53,9 +53,9 @@ public class PrepareCache3 {
 
         System.out.println("Load GrammarDB... " + new Date());
         GrammarDB2 gr = GrammarDB2.initializeFromDir("GrammarDB");
-        grFiller = new StaticGrammarFiller(gr);
+        grFiller = new StaticGrammarFiller2(new GrammarFinder(gr));
 
-        new FilesReader().run(INPUT, errors);
+        new FilesReader().run(INPUT, errors, false);
         System.out.println("Finishing... " + new Date());
         luceneClose();
         textStat.write(OUTPUT);
@@ -89,7 +89,7 @@ public class PrepareCache3 {
         lucene = null;
     }
 
-    public static void process(TextInfo textInfo, List<Object> content) throws Exception {
+    public static void process(TextInfo textInfo, List<Paragraph> content) throws Exception {
         if (textInfo.sourceFilePath == null) {
             throw new RuntimeException("sourceFilePath нявызначаны");
         }
@@ -112,22 +112,9 @@ public class PrepareCache3 {
         } else {
             // 2nd pass
             Collections.shuffle(content);
-            grFiller.fill(content);
+            grFiller.fill2(content);
             textStat.add(textInfo, content);
-
-            List<P> ps = new ArrayList<>();
-            content.forEach(op -> {
-                if (op instanceof P) {
-                    ps.add((P) op);
-                } else if (op instanceof Poetry) {
-                    ((Poetry) op).getPOrTag().forEach(op2 -> {
-                        if (op2 instanceof P) {
-                            ps.add((P) op2);
-                        }
-                    });
-                }
-            });
-            lucene.addSentences(textInfo, ps);
+            lucene.addSentences(textInfo, content);
         }
     }
 
@@ -175,13 +162,14 @@ public class PrepareCache3 {
 
         @Override
         public synchronized void reportError(String error, Throwable ex) {
-            Integer count = errorsCount.get(error);
+            String key = ex == null ? error : error + ": " + ex.getMessage();
+            Integer count = errorsCount.get(key);
             if (count == null) {
                 count = 1;
             } else {
                 count++;
             }
-            errorsCount.put(error, count);
+            errorsCount.put(key, count);
             System.err.println(error);
             if (ex != null) {
                 ex.printStackTrace();

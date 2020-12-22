@@ -1,0 +1,30 @@
+<script id="template-list" type="text/x-jsrender">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">{{>title}}</h4>
+        <span>
+          <button type="button" class="btn btn-secondary" onClick="dialogList.onCancel()">Скасаваць</button>
+          <button type="button" class="btn btn-primary" onClick="dialogList.onOk()">Абраць</button>
+        </span>
+      </div>
+      <div class="modal-header">
+        <span>
+          <button type="button" class="btn btn-secondary" onClick="dialogList.all(true)">Пазначыць усе</button>
+          <button type="button" class="btn btn-secondary" onClick="dialogList.all(false)">Зняць усе</button>
+        </span>
+      </div>
+      <div class="modal-body">
+        {{for list}}
+          <div>
+            <label><input type="checkbox" name="{{>}}"> {{>}}</label>
+          </div>
+        {{/for}}
+      </div>
+</script>
+
+<div id="dialog-list" class="modal fade" bsModal #styleModal="bs-modal" [config]="{backdrop: 'static'}"
+     tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div id="dialog-list-place" class="modal-content">
+    </div>
+  </div>
+</div>

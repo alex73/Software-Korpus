@@ -12,12 +12,18 @@
 				<fileset dir="lib" includes="**/*.jar" />
 				<pathelement location="../Web/build/classes" />
 				<fileset dir="../Common/lib/" includes="**/*.jar" />
+				<fileset dir="../Web/war/WEB-INF/lib/" includes="**/*.jar" />
 			</classpath>
 		</javac>
 		<copy todir="build/classes">
 			<fileset dir="src" />
 		</copy>
-		<java failonerror="true" fork="true" dir=".." classname="org.alex73.korpus.compiler.PrepareCache2">
+	</target>
+
+	<target name="all" depends="clean,build"/>
+
+	<target name="run">
+		<java failonerror="true" fork="true" dir=".." classname="org.alex73.korpus.compiler.PrepareCache3">
 			<classpath>
 				<pathelement location="build/classes"/>
 				<pathelement location="../Web/build/classes" />
@@ -25,9 +31,7 @@
 				<fileset dir="../Common/lib/" includes="**/*.jar" />
 				<fileset dir="../Web/war/WEB-INF/lib/" includes="**/*.jar" />
 			</classpath>
-			<jvmarg value="-Xmx3072M"/>
+			<jvmarg value="-Xmx7g"/>
 		</java>
 	</target>
-
-	<target name="all" depends="clean,build"/>
 </project>

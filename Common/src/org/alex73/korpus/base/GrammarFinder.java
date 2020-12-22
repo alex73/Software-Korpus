@@ -32,7 +32,7 @@ public class GrammarFinder implements IGrammarFinder {
     }
 
     private void putToPrepare(String w, List<List<Paradigm>> prepare, Paradigm p) {
-        int hash = BelarusianWordHash.hash(w);
+        int hash = BelarusianWordNormalizer.hash(w);
         int indexByHash = Math.abs(hash) % HASHTABLE_SIZE;
         List<Paradigm> list = prepare.get(indexByHash);
         synchronized (list) {
@@ -63,7 +63,7 @@ public class GrammarFinder implements IGrammarFinder {
      * Find paradigms by lemma or form (lower case).
      */
     public Paradigm[] getParadigms(String word) {
-        int hash = BelarusianWordHash.hash(word);
+        int hash = BelarusianWordNormalizer.hash(word);
         int indexByHash = Math.abs(hash) % HASHTABLE_SIZE;
         Paradigm[] result = table[indexByHash];
         return result != null ? result : EMPTY;

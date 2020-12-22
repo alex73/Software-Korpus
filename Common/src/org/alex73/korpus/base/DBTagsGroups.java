@@ -25,6 +25,7 @@ package org.alex73.korpus.base;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -66,7 +67,13 @@ public class DBTagsGroups {
         return tagGroupsByWordType;
     }
 
+    private static Map<String, String> cache = Collections.synchronizedMap(new HashMap<>());
+
     public static String getDBTagString(String grammarTag) {
+        String r = cache.get(grammarTag);
+        if (r != null) {
+            return r;
+        }
         DBTagsGroups wt = tagGroupsByWordType.get(grammarTag.charAt(0));
         char[] result = new char[wt.groups.size() + 1];
         result[0] = grammarTag.charAt(0);
@@ -77,7 +84,7 @@ public class DBTagsGroups {
         TagLetter tags = BelarusianTags.getInstance().getNextAfter(grammarTag.substring(0, 1));
         for (int i = 1; i < grammarTag.length(); i++) {
             char ch = grammarTag.charAt(i);
-            if (ch == 'x') {//TODO
+            if (ch == 'x') {// TODO
                 ch = tags.letters.get(0).letter;
             }
             TagLetter.OneLetterInfo li = tags.getLetterInfo(ch);
@@ -86,18 +93,21 @@ public class DBTagsGroups {
             result[pos + 1] = ch;
             tags = li.nextLetters;
         }
-        return new String(result);
+        r = new String(result);
+        cache.put(grammarTag, r);
+        return r;
     }
 
     public List<Group> groups = new ArrayList<Group>();
 
     public static class Group {
         public final String name;
-        public boolean hidden;
+        public final boolean formGroup;
         public List<Item> items = new ArrayList<Item>(20);
 
-        public Group(String name) {
+        public Group(String name, boolean formGroup) {
             this.name = name;
+            this.formGroup = formGroup;
         }
 
         Item getItem(char code) {
@@ -120,7 +130,7 @@ public class DBTagsGroups {
     }
 
     private DBTagsGroups(TagLetter tags) {
-        collectGroups(tags);
+        collectGroups(tags, false);
 
         char[] codes = new char[groups.size()];
         for (int i = 0; i < codes.length; i++) {
@@ -149,16 +159,16 @@ public class DBTagsGroups {
         return -1;
     }
 
-    private void collectGroups(TagLetter tags) {
+    private void collectGroups(TagLetter tags, boolean formGroup) {
         for (TagLetter.OneLetterInfo li : tags.letters) {
             Group gr = getGroup(li.groupName);
             if (gr == null) {
-                gr = new Group(li.groupName);
+                gr = new Group(li.groupName, formGroup || tags.isLatestInParadigm);
                 groups.add(gr);
             }
         }
         for (TagLetter.OneLetterInfo li : tags.letters) {
-            collectGroups(li.nextLetters);
+            collectGroups(li.nextLetters, formGroup || tags.isLatestInParadigm);
         }
     }
 
@@ -212,7 +222,7 @@ public class DBTagsGroups {
         TagLetter tl = BelarusianTags.getInstance().getNextAfter("N");
         DBTagsGroups g = new DBTagsGroups(tl);
         for (Group a : g.groups) {
-            System.out.print(a.name + " : ");
+            System.out.print(a.name + (a.formGroup ? "[form]" : "") + " : ");
             for (Item it : a.items) {
                 System.out.print(it.code + "/" + it.description + " ");
             }

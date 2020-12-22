@@ -27,40 +27,40 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
-import org.alex73.korpus.base.BelarusianTags;
+import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.base.DBTagsGroups;
-import org.alex73.korpus.server.data.ResultText;
 import org.alex73.korpus.server.data.SearchParams;
 import org.alex73.korpus.server.data.WordRequest;
 import org.alex73.korpus.server.data.WordResult;
+import org.alex73.korpus.text.elements.Paragraph;
+import org.alex73.korpus.text.elements.Sentence;
+import org.alex73.korpus.utils.SetUtils;
+import org.alex73.korpus.utils.StressUtils;
 
 /**
  * Some methods for final checks.
  * 
- * Lucene can't process some complex criteria of search(like order of words). This methods used for these
- * complex check for filtering of results from Lucene's search.
+ * Lucene can't process some complex criteria of search(like order of words).
+ * This methods used for these complex check for filtering of results from
+ * Lucene's search.
  */
 public class WordsDetailsChecks {
 
     /**
-     * Is the document correspond with search criteria ? Check and mark requested words for highlight for
-     * user.
+     * Is the document correspond with search criteria ? Check and mark requested
+     * words for highlight for user.
      */
-    public static boolean isAllowed(SearchParams.WordsOrder wordsOrder, List<WordRequest> words,
-            ResultText resultText) {
+    public static boolean isAllowed(SearchParams.WordsOrder wordsOrder, List<WordRequest> words, Paragraph resultText) {
         boolean found = false;
         switch (wordsOrder) {
         case PRESET:
-            for (int i = 0; i < resultText.words.length; i++) {
-                for (int j = 0; j < resultText.words[i].length; j++) {
-                    if (resultText.words[i][j].isWord
-                            && isWordsAroundMatchParams(words, resultText.words[i], j)) {
+            for (int i = 0; i < resultText.sentences.length; i++) {
+                for (int j = 0; j < resultText.sentences[i].words.length; j++) {
+                    if (isWordsAroundMatchParams(words, resultText.sentences[i], j)) {
                         for (int k = 0, count = 0; count < words.size(); k++) {
                             // mark found words as requested
-                            if (resultText.words[i][j + k].isWord) {
-                                resultText.words[i][j + k].requestedWord = true;
-                                count++;
-                            }
+                            ((WordResult) resultText.sentences[i].words[j + k]).requestedWord = true;
+                            count++;
                         }
                         found = true;
                     }
@@ -68,13 +68,13 @@ public class WordsDetailsChecks {
             }
             break;
         case ANY_IN_SENTENCE:
-            for (int i = 0; i < resultText.words.length; i++) {
+            for (int i = 0; i < resultText.sentences.length; i++) {
                 int c = 0;
                 for (WordRequest pw : words) {
                     boolean foundWord = false;
-                    for (int j = 0; j < resultText.words[i].length; j++) {
-                        if (resultText.words[i][j].isWord && isOneWordMatchsParam(pw, resultText.words[i][j])) {
-                            resultText.words[i][j].requestedWord = true;
+                    for (int j = 0; j < resultText.sentences[i].words.length; j++) {
+                        if (isOneWordMatchsParam(pw, (WordResult) resultText.sentences[i].words[j])) {
+                            ((WordResult) resultText.sentences[i].words[j]).requestedWord = true;
                             foundWord = true;
                         }
                     }
@@ -91,10 +91,10 @@ public class WordsDetailsChecks {
             int c = 0;
             for (WordRequest pw : words) {
                 boolean foundWord = false;
-                for (int i = 0; i < resultText.words.length; i++) {
-                    for (int j = 0; j < resultText.words[i].length; j++) {
-                        if (resultText.words[i][j].isWord && isOneWordMatchsParam(pw, resultText.words[i][j])) {
-                            resultText.words[i][j].requestedWord = true;
+                for (int i = 0; i < resultText.sentences.length; i++) {
+                    for (int j = 0; j < resultText.sentences[i].words.length; j++) {
+                        if (isOneWordMatchsParam(pw, (WordResult) resultText.sentences[i].words[j])) {
+                            ((WordResult) resultText.sentences[i].words[j]).requestedWord = true;
                             foundWord = true;
                         }
                     }
@@ -111,18 +111,15 @@ public class WordsDetailsChecks {
     }
 
     /**
-     * For the wordsOrder=PRESET: specified words should correspond with specified parameter and all other
-     * parameters.
+     * For the wordsOrder=PRESET: specified words should correspond with specified
+     * parameter and all other parameters.
      */
-    private static boolean isWordsAroundMatchParams(List<WordRequest> words, WordResult[] resultWords,
-            int wordIndex) {
+    private static boolean isWordsAroundMatchParams(List<WordRequest> words, Sentence resultWords, int wordIndex) {
         WordResult[] checks = new WordResult[words.size()];
         int count = 0;
-        for (int i = wordIndex; i < resultWords.length && count < words.size(); i++) {
-            if (resultWords[i].isWord) {
-                checks[count] = resultWords[i];
-                count++;
-            }
+        for (int i = wordIndex; i < resultWords.words.length && count < words.size(); i++) {
+            checks[count] = (WordResult) resultWords.words[i];
+            count++;
         }
         if (count < words.size()) {
             return false;
@@ -139,15 +136,18 @@ public class WordsDetailsChecks {
      * Is the word corresponds with parameter ?
      */
     public static boolean isOneWordMatchsParam(WordRequest wordParam, WordResult wordResult) {
+        if (wordResult.lightNormalized == null) {
+            return false;
+        }
         if (wordParam.word != null && !wordParam.word.trim().isEmpty()) {
             if (wordParam.allForms) {
                 // lemma
-                if (wordResult.lemma == null) {
+                if (wordResult.lemmas == null) {
                     return false;
                 }
                 boolean found = false;
-                for (String le : wordParam.lemmaMarks) {
-                    if (wordResult.lemma.contains(le)) {
+                for (String expectedLemma : wordParam.lemmas) {
+                    if (SetUtils.inSeparatedList(wordResult.lemmas, expectedLemma)) {
                         found = true;
                         break;
                     }
@@ -157,35 +157,30 @@ public class WordsDetailsChecks {
                 }
             } else {
                 // concrete form
-                if (wordParam.isWildcardWord()) {
-                    if (!getWildcardRegexp(wordParam.word).matcher(wordResult.normalized).matches()) {
+                if (needWildcardRegexp(wordParam.word)) {
+                    if (wordResult.lightNormalized == null) {
                         return false;
                     }
-                } else {
-                    if (!wordParam.word.equals(wordResult.normalized)) {
+                    if (!getWildcardRegexp(wordParam.word).matcher(StressUtils.unstress(wordResult.lightNormalized)).matches()) {
                         return false;
                     }
+                } else if (!BelarusianWordNormalizer.equals(wordParam.word, wordResult.lightNormalized)) {
+                    return false;
                 }
             }
         }
         if (wordParam.grammar == null) {
             return true;
         }
-        if (wordResult.cat == null) {
+        if (wordResult.tags == null) {
             return false;
         }
         // check grammar
-        Pattern reGrammar = getRegexp(wordParam.grammar);
-        for (String t : wordResult.cat.split("_")) {
-            if (BelarusianTags.getInstance().isValid(t, null)) {
-                try {
-                    String findTag = DBTagsGroups.getDBTagString(t);
-                    if (reGrammar.matcher(findTag).matches()) {
-                        return true;
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+        Pattern reGrammar = getPatternRegexp(wordParam.grammar);
+        for (String t : wordResult.tags.split(";")) {
+            String dbTag = DBTagsGroups.getDBTagString(t);
+            if (reGrammar.matcher(dbTag).matches()) {
+                return true;
             }
         }
         return false;
@@ -204,11 +199,11 @@ public class WordsDetailsChecks {
                 }
             }
         }
-        if (w.isWildcardWord()) {
+        if (needWildcardRegexp(w.word)) {
             // contains wildcards
             if (w.allForms) {
                 return true;
-            } else if (wt.replace("*", "").replace("?", "").length() > 1) {
+            } else if (wt.replace("+", "").replace("*", "").replace("?", "").length() >= 2) {
                 return false;
             } else {
                 return true;
@@ -220,9 +215,12 @@ public class WordsDetailsChecks {
 
     public static void reset() {
         WILDCARD_REGEXPS.get().clear();
-        REGEXPS.get().clear();
+        PATTERN_REGEXPS.get().clear();
     }
 
+    /**
+     * Usually for words, like "нач*"
+     */
     private static ThreadLocal<Map<String, Pattern>> WILDCARD_REGEXPS = new ThreadLocal<Map<String, Pattern>>() {
         @Override
         protected Map<String, Pattern> initialValue() {
@@ -230,27 +228,34 @@ public class WordsDetailsChecks {
         }
     };
 
-    private static Pattern getWildcardRegexp(String wildcardWord) {
+    public static boolean needWildcardRegexp(String word) {
+        return word.contains("*") || word.contains("?");
+    }
+
+    public static Pattern getWildcardRegexp(String wildcardWord) {
         Pattern p = WILDCARD_REGEXPS.get().get(wildcardWord);
         if (p == null) {
-            p = Pattern.compile(wildcardWord.replace("*", ".*").replace('?', '.'));
+            p = Pattern.compile(wildcardWord.replace("+", "").replace("*", ".*").replace('?', '.'));
             WILDCARD_REGEXPS.get().put(wildcardWord, p);
         }
         return p;
     }
 
-    private static ThreadLocal<Map<String, Pattern>> REGEXPS = new ThreadLocal<Map<String, Pattern>>() {
+    /**
+     * Usually for grammar, like "N...[23]..."
+     */
+    private static ThreadLocal<Map<String, Pattern>> PATTERN_REGEXPS = new ThreadLocal<Map<String, Pattern>>() {
         @Override
         protected Map<String, Pattern> initialValue() {
             return new TreeMap<>();
         }
     };
 
-    private static Pattern getRegexp(String regexp) {
-        Pattern p = REGEXPS.get().get(regexp);
+    public static Pattern getPatternRegexp(String regexp) {
+        Pattern p = PATTERN_REGEXPS.get().get(regexp);
         if (p == null) {
             p = Pattern.compile(regexp);
-            REGEXPS.get().put(regexp, p);
+            PATTERN_REGEXPS.get().put(regexp, p);
         }
         return p;
     }

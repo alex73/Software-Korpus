@@ -14,20 +14,23 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.alex73.korpus.base.TextInfo;
-import org.alex73.korpus.text.xml.P;
-import org.alex73.korpus.text.xml.Poetry;
-import org.alex73.korpus.text.xml.Se;
-import org.alex73.korpus.text.xml.W;
+import org.alex73.korpus.text.elements.Paragraph;
+import org.alex73.korpus.text.elements.Sentence;
+import org.alex73.korpus.text.elements.Word;
 
 public class StatProcessing {
     private final Set<String> authors = Collections.synchronizedSet(new HashSet<>());
+    private final Set<String> sources = Collections.synchronizedSet(new HashSet<>());
     private final Map<String, StatInfo> stats = new HashMap<>();
 
-    public void add(TextInfo textInfo, List<Object> content) {
+    public void add(TextInfo textInfo, List<Paragraph> content) {
         if (textInfo.authors != null) {
             for (String a : textInfo.authors) {
                 authors.add(a);
             }
+        }
+        if (textInfo.source != null) {
+            sources.add(textInfo.source);
         }
 
         List<StatInfo> todo = new ArrayList<>();
@@ -46,18 +49,16 @@ public class StatProcessing {
             }
         });
 
-        content.parallelStream().forEach(p -> {
-            if (p instanceof P) {
-                process((P) p, todo);
-            } else if (p instanceof Poetry) {
-                Poetry po = (Poetry) p;
-                for (Object p2 : po.getPOrTag()) {
-                    if (p2 instanceof P) {
-                        process((P) p2, todo);
+        for (Paragraph p : content) {
+            for (Sentence se : p.sentences) {
+                for (Word w : se.words) {
+                    if (w.lemmas != null && !w.lemmas.isEmpty()) {
+                        String[] lemmas = RE_SPLIT.split(w.lemmas);
+                        todo.forEach(s -> s.addWord(w.lightNormalized, lemmas));
                     }
                 }
             }
-        });
+        }
     }
 
     private synchronized StatInfo getStatInfo(String key) {
@@ -76,6 +77,7 @@ public class StatProcessing {
 
         List<String> stat = new ArrayList<>();
         stat.add("authors=" + String.join(";", authors));
+        stat.add("sources=" + String.join(";", sources));
         for (Map.Entry<String, StatInfo> en : stats.entrySet()) {
             stat.add("texts." + en.getKey() + "=" + en.getValue().texts);
             stat.add("words." + en.getKey() + "=" + en.getValue().words);
@@ -83,21 +85,7 @@ public class StatProcessing {
         Files.write(dir.resolve("stat.properties"), stat);
     }
 
-    private static final Pattern RE_SPLIT = Pattern.compile("_");
-
-    private void process(P p, List<StatInfo> todo) {
-        for (Se se : p.getSe()) {
-            for (Object o : se.getWOrSOrZ()) {
-                if (o instanceof W) {
-                    W w = (W) o;
-                    if (w.getLemma() != null) {
-                        String[] lemmas = RE_SPLIT.split(w.getLemma());
-                        todo.forEach(s -> s.addWord(w.getValue(), lemmas));
-                    }
-                }
-            }
-        }
-    }
+    private static final Pattern RE_SPLIT = Pattern.compile(";");
 
     private static class StatInfo {
         public int texts, words;
@@ -133,11 +121,11 @@ public class StatProcessing {
                     .collect(Collectors.toList()));
         }
     }
-    
+
     static class ParadigmStat {
         String para;
         int intCount;
         float floatCount;
-        Map<String,Integer> valuesCount=new TreeMap<>();
+        Map<String, Integer> valuesCount = new TreeMap<>();
     }
 }

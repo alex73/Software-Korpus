@@ -69,8 +69,13 @@ class KorpusUI {
 	}
 	repaintRemoveIcons(type: string) {
 		var collection: NodeListOf<HTMLElement> = document.querySelectorAll("." + type + ":not(#template-" + type + ")");
-		collection.forEach(el => (<NodeListOf<HTMLElement>>el.querySelectorAll("." + type + "-remove")).forEach(er =>
-			er.style.display = collection.length > 1 ? 'block' : 'none'));
+		if (collection.length > 1) {
+			$(".oneword-show").hide();
+			$(".oneword-hide").show();
+		} else {
+			$(".oneword-show").show();
+			$(".oneword-hide").hide();
+		}
 	}
 	static lemmaChange(type: string, cb: HTMLInputElement) {
 		cb.closest('.' + type).querySelector("." + type + "-lemma-prompt").textContent = cb.checked ? "Лема" : "Слова";
@@ -92,13 +97,14 @@ class KorpusUI {
 		$('#status').show();
 	}
 	private collectFromScreenBase(p: BaseParams) {
-		p.textStandard.subcorpuses = this.separatedStringToArray(document.getElementById('inputFilterCorpus').innerText);
-		p.textStandard.authors = this.separatedStringToArray(document.getElementById('inputFilterAuthor').innerText);
-		p.textStandard.stylegenres = this.separatedStringToArray(document.getElementById('inputFilterStyle').innerText);
-		p.textStandard.yearWrittenFrom = fulltrim((<HTMLInputElement>document.getElementById('inputFilterYearWrittenFrom')).value);
-		p.textStandard.yearWrittenTo = fulltrim((<HTMLInputElement>document.getElementById('inputFilterYearWrittenTo')).value);
-		p.textStandard.yearPublishedFrom = fulltrim((<HTMLInputElement>document.getElementById('inputFilterYearPublishedFrom')).value);
-		p.textStandard.yearPublishedTo = fulltrim((<HTMLInputElement>document.getElementById('inputFilterYearPublishedTo')).value);
+		p.textStandard.subcorpuses = KorpusUI.separatedStringToArray(document.getElementById('inputFilterCorpus').innerText);
+		p.textStandard.authors = $('#inputFilterAuthorShow').is(":visible") ? KorpusUI.separatedStringToArray(document.getElementById('inputFilterAuthor').innerText) : null;
+		p.textStandard.sources = $('#inputFilterSourceShow').is(":visible") ? KorpusUI.separatedStringToArray(document.getElementById('inputFilterSource').innerText) : null;
+		p.textStandard.stylegenres = $('#inputFilterStyleShow').is(":visible") ? KorpusUI.separatedStringToArray(document.getElementById('inputFilterStyle').innerText) : null;
+		p.textStandard.yearWrittenFrom = $('#inputFilterYearWrittenShow').is(":visible") ? fulltrim((<HTMLInputElement>document.getElementById('inputFilterYearWrittenFrom')).value) : null;
+		p.textStandard.yearWrittenTo = $('#inputFilterYearWrittenShow').is(":visible") ? fulltrim((<HTMLInputElement>document.getElementById('inputFilterYearWrittenTo')).value) : null;
+		p.textStandard.yearPublishedFrom = $('#inputFilterYearPublishedShow').is(":visible") ? fulltrim((<HTMLInputElement>document.getElementById('inputFilterYearPublishedFrom')).value) : null;
+		p.textStandard.yearPublishedTo = $('#inputFilterYearPublishedShow').is(":visible") ? fulltrim((<HTMLInputElement>document.getElementById('inputFilterYearPublishedTo')).value) : null;
 	}
 	collectFromScreenSearch(): SearchParams {
 		let requestedParams: SearchParams = new SearchParams();
@@ -139,6 +145,7 @@ class KorpusUI {
 		(<HTMLInputElement>document.getElementById('inputFilterYearPublishedTo')).value = data && data.textStandard && data.textStandard.yearPublishedTo ? data.textStandard.yearPublishedTo : "";
 		document.getElementById('inputFilterCorpus').innerText = data && data.textStandard && data.textStandard.subcorpuses ? data.textStandard.subcorpuses.join(';') : "Усе";
 		document.getElementById('inputFilterAuthor').innerText = data && data.textStandard && data.textStandard.authors ? data.textStandard.authors.join(';') : "Усе";
+		document.getElementById('inputFilterSource').innerText = data && data.textStandard && data.textStandard.sources ? data.textStandard.sources.join(';') : "Усе";
 		document.getElementById('inputFilterStyle').innerText = data && data.textStandard && data.textStandard.stylegenres ? data.textStandard.stylegenres.join(';') : "Усе";
 		switch (this.getMode()) {
 			case 'search':
@@ -151,7 +158,7 @@ class KorpusUI {
 						(<HTMLInputElement>w.querySelector("input[type='checkbox']")).checked = wdata.allForms;
 						(<HTMLElement>w.querySelector(".inputword-lemma-prompt")).textContent = wdata.allForms ? "Лема" : "Слова";
 						(<HTMLElement>w.querySelector(".wordgram-grammar-string")).innerText = wdata.grammar ? wdata.grammar : "";
-						(<HTMLElement>w.querySelector(".wordgram-display")).innerText = DialogWordGrammar.wordGrammarToText(wdata.grammar, korpusService.initial.grammar);
+						DialogWordGrammar.wordGrammarToText(wdata.grammar, w.querySelector(".wordgram-display"));
 					});
 				} else {
 					this.addWord('inputword');
@@ -168,12 +175,13 @@ class KorpusUI {
 					(<HTMLInputElement>w.querySelector("input[type='checkbox']")).checked = cp.word.allForms;
 					(<HTMLElement>w.querySelector(".inputword-lemma-prompt")).textContent = cp.word.allForms ? "Лема" : "Слова";
 					(<HTMLElement>w.querySelector(".wordgram-grammar-string")).innerText = cp.word.grammar ? cp.word.grammar : "";
-					(<HTMLElement>w.querySelector(".wordgram-display")).innerText = DialogWordGrammar.wordGrammarToText(cp.word.grammar, korpusService.initial.grammar);
+					DialogWordGrammar.wordGrammarToText(cp.word.grammar, w.querySelector(".wordgram-display"));
 				}
 				(<HTMLInputElement>document.getElementById("inputClusterBefore")).value = cp.wordsBefore ? cp.wordsBefore.toString():"1";
 				(<HTMLInputElement>document.getElementById("inputClusterAfter")).value = cp.wordsAfter ? cp.wordsAfter.toString():"1";
 				break;
 		}
+		DialogSubcorpuses.showInputFilterDependsOnSubcorpus();
 	}
 	showOutput() {
 		$('#output').html($.templates("#template-output").render({
@@ -185,7 +193,7 @@ class KorpusUI {
 			resultCluster: korpusService.resultCluster
 		}));
 	}
-	separatedStringToArray(v: string): string[] {
+	static separatedStringToArray(v: string): string[] {
 		if (!v || v == 'Усе') {
 			return null;
 		}
@@ -225,8 +233,8 @@ $.views.converters("titleShort", function (str) {
     let s = str.toString();
     if (s.length == 0) {
       return "<...>";
-    } else if (s.length > 40) {
-      return s.substring(0,37)+"...";
+    } else if (s.length > 20) {
+      return s.substring(0,17)+"...";
     } else {
       return s;
     }
@@ -235,10 +243,18 @@ $('body')
 	.on('mousedown', '.popover', function (e) {
 		e.preventDefault();
 	});
+$.views.converters("wordtail", function (val) {
+	if (val) {
+		return val.replace('<', '&lt;').replace('>', '&gt;').replace('\n', '<br/>');
+	} else {
+		return "";
+	}
+});
 
 var korpusui: KorpusUI = null;
 var korpusService: KorpusService = null;
-var dialogAuthors: DialogAuthors = null;
+var dialogAuthors: DialogList = null;
+var dialogSources: DialogList = null;
 var dialogSubcorpuses: DialogSubcorpuses = null;
 var dialogText: DialogText = null;
 var dialogStyleGenres: DialogStyleGenres = null;

@@ -4,10 +4,7 @@ class GrammarUI {
 
   constructor() {
     this.hideStatusError();
-    const w: HTMLElement = document.getElementById("template-inputword");
-    w.style.display = 'block';
-		(<HTMLElement>w.querySelector(".inputword-remove")).style.display = 'none';
-	}
+  }
   showError(err: string) {
 		console.log("Error: " + err);
 		$('#status').hide();
@@ -19,28 +16,39 @@ class GrammarUI {
 		document.getElementById("status").innerText = s;
 		$('#status').show();
   }
-  collectFromScreenCluster(): GrammarRequest {
+  collectFromScreen(): GrammarRequest {
     let r: GrammarRequest = new GrammarRequest();
-    let w: HTMLElement = document.getElementById('template-inputword');
-    r.word.allForms = (<HTMLInputElement>w.querySelector("input[type='checkbox']")).checked;
-    r.word.word = (<HTMLInputElement>w.querySelector("input[type='text']")).value;
-    r.word.grammar = (<HTMLElement>w.querySelector(".wordgram-grammar-string")).innerText;
+
+    r.multiForm = (<HTMLInputElement>document.getElementById('grammarword-multiform')).checked;
+    r.word = (<HTMLInputElement>document.getElementById('grammarword-word')).value;
+    r.grammar = document.getElementById("grammarword-grammar").innerText;
     r.orderReverse = (<HTMLInputElement>document.getElementById("inputOrderReverse")).checked;
+    r.outputGrammar = document.getElementById("grammarwordshow-grammar").innerText;
     return r;
   }
-  showOutput() {
+  showOutput(requestGrammar: string) {
 		$('#output').html($.templates("#template-grammaroutput").render({
 			lemmas: grammarService.results
 		}));
+		if (grammarService.results.length > 0) {
+			$('#grammar-addition-order').show();
+			if (requestGrammar && DialogWordGrammar.hasFormTags(requestGrammar)) {
+				$('#grammar-show-forms').show();
+				$('#grammar-show-noforms').hide();
+			} else {
+				$('#grammar-show-forms').hide();
+				$('#grammar-show-noforms').show();
+			}
+		}
 	}
   restoreToScreen(data: GrammarRequest) {
-    if (data && data.word) {
-      let w: HTMLElement = document.getElementById('template-inputword');
-      (<HTMLInputElement>w.querySelector("input[type='text']")).value = data.word.word ? data.word.word : "";
-      (<HTMLInputElement>w.querySelector("input[type='checkbox']")).checked = data.word.allForms;
-      (<HTMLElement>w.querySelector(".inputword-lemma-prompt")).textContent = data.word.allForms ? "Лема" : "Слова";
-      (<HTMLElement>w.querySelector(".wordgram-grammar-string")).innerText = data.word.grammar ? data.word.grammar : "";
-      (<HTMLElement>w.querySelector(".wordgram-display")).innerText = DialogWordGrammar.wordGrammarToText(data.word.grammar, grammarService.initial);
+    if (data && data) {
+      (<HTMLInputElement>document.getElementById("grammarword-word")).value = data.word ? data.word : "";
+      (<HTMLInputElement>document.getElementById("grammarword-multiform")).checked = data.multiForm;
+      document.getElementById("grammarword-grammar").innerText = data.grammar ? data.grammar : "";
+      DialogWordGrammar.wordGrammarToText(data.grammar, document.getElementById("grammarword-grammarshow"));
+      document.getElementById("grammarwordshow-grammar").innerText = data.outputGrammar ? data.outputGrammar : "";
+      DialogWordGrammar.wordGrammarToText(data.outputGrammar, document.getElementById("grammarwordshow-grammarshow"));
     }
     if (data) {
       (<HTMLInputElement>document.getElementById(data.orderReverse ? "inputOrderReverse" : "inputOrderStandard")).checked = true;

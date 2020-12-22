@@ -48,6 +48,7 @@ public class LuceneFields {
     // public FieldInt fieldSentenceTextIDOrder;
     public Field fieldSentenceTextStyleGenre;
     public Field fieldSentenceTextAuthor;
+    public Field fieldSentenceTextSource;
     public IntRange fieldSentenceTextCreationYear;
     public IntRange fieldSentenceTextPublishedYear;
     //public Field fieldSentenceTextInfo;
@@ -78,6 +79,7 @@ public class LuceneFields {
         fieldSentenceTextSubcorpus = new Field("textSubcorpus", "", TYPE_NOTSTORED_INDEXED);
         fieldSentenceTextStyleGenre = new Field("textStyleGenre", "", TYPE_NOTSTORED_INDEXED);
         fieldSentenceTextAuthor = new Field("textAuthor", "", TYPE_NOTSTORED_INDEXED);
+        fieldSentenceTextSource = new Field("textSource", "", TYPE_NOTSTORED_INDEXED);
         fieldSentenceTextCreationYear = new IntRange("creationYear", new int[] { 0 }, new int[] { 0 });
         fieldSentenceTextPublishedYear = new IntRange("publishedYear", new int[] { 0 }, new int[] { 0 });
 //        fieldSentenceTextInfo = new Field("textInfo", new byte[0], TYPE_STORED_NOTINDEXED);

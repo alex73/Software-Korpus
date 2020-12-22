@@ -26,6 +26,7 @@ class DialogSubcorpuses {
 			subcorpuses = [];
 		}
 		document.getElementById('inputFilterCorpus').innerText = subcorpuses.length == 0 ? "Усе" : subcorpuses.join(';');
+		DialogSubcorpuses.showInputFilterDependsOnSubcorpus();
 		$('#dialog-subcorpuses').modal('hide');
 	}
 	onCancel() {
@@ -34,5 +35,32 @@ class DialogSubcorpuses {
 	all(v: boolean) {
 		var collection: NodeListOf<HTMLInputElement> = document.querySelectorAll("#dialog-subcorpuses input[type='checkbox']");
 		collection.forEach(cb => cb.checked = v);
+	}
+	static showInputFilterDependsOnSubcorpus() {
+		let subcorpuses: string[] = KorpusUI.separatedStringToArray(document.getElementById('inputFilterCorpus').innerText);
+		if (subcorpuses) {
+			$('#inputFilterAuthorShow').hide();
+			$('#inputFilterStyleShow').show();
+			$('#inputFilterSourceShow').hide();
+			$('#inputFilterYearWrittenShow').hide();
+			$('#inputFilterYearPublishedShow').hide();
+			if (subcorpuses.indexOf('teksty') >= 0 || subcorpuses.indexOf('pieraklady') >= 0) {
+				$('#inputFilterAuthorShow').show();
+				$('#inputFilterStyleShow').show();
+				$('#inputFilterYearWrittenShow').show();
+				$('#inputFilterYearPublishedShow').show();
+			}
+			if (subcorpuses.indexOf('sajty') >= 0) {
+				$('#inputFilterStyleShow').show();
+				$('#inputFilterSourceShow').show();
+				$('#inputFilterYearPublishedShow').show();
+			}
+		} else {
+			$('#inputFilterAuthorShow').show();
+			$('#inputFilterStyleShow').show();
+			$('#inputFilterSourceShow').show();
+			$('#inputFilterYearWrittenShow').show();
+			$('#inputFilterYearPublishedShow').show();
+		}
 	}
 }

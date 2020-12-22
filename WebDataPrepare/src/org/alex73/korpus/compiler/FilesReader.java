@@ -28,7 +28,7 @@ public class FilesReader {
         });
     }
 
-    public void run(Path inputDirectory, IProcess errors) throws Exception {
+    public void run(Path inputDirectory, IProcess errors, boolean headersOnly) throws Exception {
         try {
             Files.find(inputDirectory, Integer.MAX_VALUE, (p, a) -> a.isRegularFile(), FileVisitOption.FOLLOW_LINKS)
                     .sorted().forEach(p -> {
@@ -39,7 +39,7 @@ public class FilesReader {
                             errors.reportError("Unknown parser for " + rel, null);
                         } else {
                             try {
-                                parser.parse(parsers);
+                                parser.parse(parsers, headersOnly);
                             } catch (Exception ex) {
                                 errors.reportError(ex.getMessage() + ": " + p, ex);
                             }

@@ -39,7 +39,7 @@ public class KorpusApplication extends Application {
     public String korpusDir = System.getProperty("KORPUS_DIR");
     public String configDir = System.getProperty("CONFIG_DIR");
 
-    Properties settings;
+    List<String> settings;
     Properties stat;
     List<TextInfo> textInfos;
     GrammarDB2 gr;
@@ -72,7 +72,7 @@ public class KorpusApplication extends Application {
                 System.err.println("KORPUS_DIR is not defined");
                 return;
             }
-            settings = loadSettings(configDir + "/settings.ini");
+            settings = Files.readAllLines(Paths.get(configDir + "/settings.ini"));
             stat = loadSettings(korpusDir + "/Korpus-cache/stat.properties");
             readTextInfos();
 
@@ -110,20 +110,23 @@ public class KorpusApplication extends Application {
         grammarInitial.grammarWordTypesGroups = DBTagsGroups.tagGroupsByWordType;
 
         grammarInitial.skipGrammar = new TreeMap<>();
-        for (String k : (Set<String>) (Set<?>) settings.keySet()) {
-            if (k.startsWith("grammar.skip.")) {
-                Set<String> vs = Arrays.stream(settings.getProperty(k).split(";")).map(s -> s.trim())
+        for (String line : settings) {
+            if (line.startsWith("grammar.skip.") && line.charAt(14) == '=') {
+                char part = line.charAt(13);
+                Set<String> vs = Arrays.stream(line.substring(15).split(";")).map(s -> s.trim())
                         .collect(Collectors.toSet());
-                grammarInitial.skipGrammar.put(k.charAt(13), vs);
+                grammarInitial.skipGrammar.put(part, vs);
             }
         }
 
         searchInitial = new InitialData();
         searchInitial.authors = Arrays.asList(stat.getProperty("authors").split(";"));
+        searchInitial.sources = Arrays.asList(stat.getProperty("sources").split(";"));
         searchInitial.subcorpuses = new ArrayList<>();
-        for (String k : (Set<String>) (Set<?>) settings.keySet()) {
-            if (k.startsWith("subcorpus.")) {
-                searchInitial.subcorpuses.add(new KeyValue(k.substring(10), settings.getProperty(k)));
+        for (String line : settings) {
+            int eq = line.indexOf('=');
+            if (line.startsWith("subcorpus.") && eq >= 0) {
+                searchInitial.subcorpuses.add(new KeyValue(line.substring(10, eq), line.substring(eq + 1)));
             }
         }
         loadStyleGenres();

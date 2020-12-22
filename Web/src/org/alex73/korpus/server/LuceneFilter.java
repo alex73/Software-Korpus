@@ -69,6 +69,15 @@ public class LuceneFilter {
             q.setMinimumNumberShouldMatch(1);
             query.add(q.build(), BooleanClause.Occur.MUST);
         }
+        // source
+        if (filter.sources != null) {
+            BooleanQuery.Builder q = new BooleanQuery.Builder();
+            for (String a : filter.sources) {
+                q.add(new TermQuery(new Term(lucene.fieldSentenceTextSource.name(), a)), BooleanClause.Occur.SHOULD);
+            }
+            q.setMinimumNumberShouldMatch(1);
+            query.add(q.build(), BooleanClause.Occur.MUST);
+        }
         // style/genre
         if (filter.stylegenres != null) {
             BooleanQuery.Builder q = new BooleanQuery.Builder();
@@ -107,7 +116,7 @@ public class LuceneFilter {
                 }
                 wq = qLemmas.build();
             } else {
-                if (w.isWildcardWord()) {
+                if (WordsDetailsChecks.needWildcardRegexp(w.word)) {
                     // has wildcard
                     wq = new WildcardQuery(getValueTerm(w.word));
                 } else {
@@ -118,7 +127,7 @@ public class LuceneFilter {
             query.add(wq, BooleanClause.Occur.MUST);
         }
         if (w.grammar != null) {
-            Query wq = new RegexpQuery(getGrammarTerm(w.grammar));
+            Query wq = new RegexpQuery(getGrammarTerm(w.grammar)); // TODO change to WildcardQuery
             query.add(wq, BooleanClause.Occur.MUST);
         }
     }
