@@ -120,7 +120,7 @@ public class Splitter3 {
             }
         }
         Word w = new Word();
-        w.lightNormalized = currentWord.toString();
+        w.lightNormalized = BelarusianWordNormalizer.lightNormalized(currentWord);
         w.tail = currentTail.toString();
         currentSentence.add(w);
         currentWord.setLength(0);

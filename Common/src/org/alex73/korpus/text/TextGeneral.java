@@ -14,7 +14,6 @@ import java.util.regex.Pattern;
 
 import org.alex73.korpus.text.parser.BOMBufferedReader;
 import org.alex73.korpus.text.parser.IProcess;
-import org.alex73.korpus.text.parser.Splitter2;
 import org.alex73.korpus.text.xml.Content;
 import org.alex73.korpus.text.xml.Header;
 import org.alex73.korpus.text.xml.ITextLineElement;
@@ -62,25 +61,25 @@ public class TextGeneral implements IText {
                 doc.getHeader().getTag().add(t);
             }
 
-            String s;
-            while ((s = rd.readLine()) != null) {
-                s = s.trim();
-                if (s.startsWith("##")) {
-                    if (isPoetryStart(s)) {
-                        Poetry p = addPoetry(rd, doc, s, errors);
-                        doc.getContent().getPOrTagOrPoetry().add(p);
-                    } else {
-                        Matcher m = RE_TAG.matcher(s);
-                        if (!m.matches()) {
-                            throw new RuntimeException("Няправільны тэг: " + s);
-                        }
-                        doc.getContent().getPOrTagOrPoetry().add(new Tag(m.group(1), m.group(2).trim()));
-                    }
-                } else {
-                    P p = new Splitter2(s, true, errors).getP();
-                    doc.getContent().getPOrTagOrPoetry().add(p);
-                }
-            }
+//            String s;
+//            while ((s = rd.readLine()) != null) {
+//                s = s.trim();
+//                if (s.startsWith("##")) {
+//                    if (isPoetryStart(s)) {
+//                        Poetry p = addPoetry(rd, doc, s, errors);
+//                        doc.getContent().getPOrTagOrPoetry().add(p);
+//                    } else {
+//                        Matcher m = RE_TAG.matcher(s);
+//                        if (!m.matches()) {
+//                            throw new RuntimeException("Няправільны тэг: " + s);
+//                        }
+//                        doc.getContent().getPOrTagOrPoetry().add(new Tag(m.group(1), m.group(2).trim()));
+//                    }
+//                } else {
+//                    P p = new Splitter2(s, true, errors).getP();
+//                    doc.getContent().getPOrTagOrPoetry().add(p);
+//                }
+//            }
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
@@ -91,7 +90,7 @@ public class TextGeneral implements IText {
         return doc;
     }
 
-    static Poetry addPoetry(BufferedReader rd, XMLText doc, String s, IProcess errors) throws IOException {
+    /*static Poetry addPoetry(BufferedReader rd, XMLText doc, String s, IProcess errors) throws IOException {
         Poetry poetry = new Poetry();
         P p = null;
         Se se = null;
@@ -146,7 +145,7 @@ public class TextGeneral implements IText {
         }
 
         return poetry;
-    }
+    }*/
 
     /**
      * Check is poetry tag starts.

@@ -8,10 +8,8 @@ import java.io.InputStreamReader;
 
 import org.alex73.korpus.text.parser.BOMBufferedReader;
 import org.alex73.korpus.text.parser.IProcess;
-import org.alex73.korpus.text.parser.Splitter2;
 import org.alex73.korpus.text.xml.Content;
 import org.alex73.korpus.text.xml.Header;
-import org.alex73.korpus.text.xml.P;
 import org.alex73.korpus.text.xml.XMLText;
 
 /**
@@ -42,8 +40,8 @@ public class TextPlain implements IText {
         while ((s = rd.readLine()) != null) {
             s = s.trim();
 
-            P p = new Splitter2(s, true, errors).getP();
-            doc.getContent().getPOrTagOrPoetry().add(p);
+//            P p = new Splitter2(s, true, errors).getP();
+//            doc.getContent().getPOrTagOrPoetry().add(p);
         }
     }
 

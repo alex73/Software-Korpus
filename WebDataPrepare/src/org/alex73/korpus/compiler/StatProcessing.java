@@ -13,6 +13,7 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.text.elements.Paragraph;
 import org.alex73.korpus.text.elements.Sentence;
@@ -72,7 +73,8 @@ public class StatProcessing {
 
     public synchronized void write(Path dir) throws Exception {
         for (Map.Entry<String, StatInfo> en : stats.entrySet()) {
-            en.getValue().write(dir.resolve("stat.freq." + en.getKey().replace('/', '_') + ".tab"));
+            en.getValue().writeFormsFreq(dir.resolve("stat.formsfreq." + en.getKey().replace('/', '_') + ".tab"));
+            en.getValue().writeLemmasFreq(dir.resolve("stat.lemmasfreq." + en.getKey().replace('/', '_') + ".tab"));
         }
 
         List<String> stat = new ArrayList<>();
@@ -90,6 +92,7 @@ public class StatProcessing {
     private static class StatInfo {
         public int texts, words;
         private final Map<String, ParadigmStat> byLemma = new HashMap<>();
+        private final Map<String, Integer> byForm = new HashMap<>();
 
         synchronized void addWord(String value, String[] lemmas) {
             words++;
@@ -100,6 +103,13 @@ public class StatProcessing {
                 }
                 ParadigmStat ps;
                 synchronized (this) {
+                    String formKey = value.toLowerCase();
+                    if (formKey.charAt(0) == 'ў') {
+                        formKey = 'у' + formKey.substring(1);
+                    }
+                    Integer fc = byForm.get(formKey);
+                    fc = fc == null ? 1 : fc.intValue() + 1;
+                    byForm.put(formKey, fc);
                     ps = byLemma.get(lemma);
                     if (ps == null) {
                         ps = new ParadigmStat();
@@ -114,11 +124,16 @@ public class StatProcessing {
             }
         }
 
-        void write(Path f) throws Exception {
-            List<ParadigmStat> list = byLemma.values().stream()
-                    .sorted((a, b) -> Integer.compare(b.intCount, a.intCount)).collect(Collectors.toList());
-            Files.write(f, list.stream().map(s -> s.para + "\t" + s.intCount + "\t" + s.valuesCount)
-                    .collect(Collectors.toList()));
+        void writeFormsFreq(Path f) throws Exception {
+            List<String> list = byForm.entrySet().stream().sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
+                    .map(en -> en.toString()).collect(Collectors.toList());
+            Files.write(f, list);
+        }
+
+        void writeLemmasFreq(Path f) throws Exception {
+            List<String> list = byLemma.values().stream().sorted((a, b) -> Integer.compare(b.intCount, a.intCount))
+                    .map(s -> s.para + "\t" + s.intCount + "\t" + s.valuesCount).collect(Collectors.toList());
+            Files.write(f, list);
         }
     }
 

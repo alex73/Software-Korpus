@@ -2,9 +2,8 @@ class WordResult {
   public lightNormalized: string;
   public tail: string;
   public lemmas: string;
-  public dbTags: string;
+  public tags: string;
   public requestedWord: boolean;
-  public isWord: boolean;
 
   constructor(private text: string) {
     this.lightNormalized = text;

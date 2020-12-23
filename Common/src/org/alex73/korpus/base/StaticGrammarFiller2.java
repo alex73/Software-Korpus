@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.function.Consumer;
 
 import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
@@ -14,9 +13,6 @@ import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.text.elements.Paragraph;
 import org.alex73.korpus.text.elements.Sentence;
 import org.alex73.korpus.text.elements.Word;
-import org.alex73.korpus.text.xml.P;
-import org.alex73.korpus.text.xml.Poetry;
-import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.utils.SetUtils;
 
 public class StaticGrammarFiller2 {
@@ -33,36 +29,7 @@ public class StaticGrammarFiller2 {
         this.finder = finder;
     }
 
-    public void fill(List<Object> content) {
-        Consumer<P> processP = new Consumer<P>() {
-            @Override
-            public void accept(P op) {
-                op.getSe().forEach(s -> {
-                    s.getWOrSOrZ().forEach(ow -> {
-                        if (ow instanceof W) {
-                            W w = (W) ow;
-                            if (!w.isManual()) {
-                                fill(w);
-                            }
-                        }
-                    });
-                });
-            }
-        };
-        content.stream().forEach(op -> {
-            if (op instanceof P) {
-                processP.accept((P) op);
-            } else if (op instanceof Poetry) {
-                ((Poetry) op).getPOrTag().forEach(op2 -> {
-                    if (op2 instanceof P) {
-                        processP.accept((P) op2);
-                    }
-                });
-            }
-        });
-    }
-
-    public void fill2(List<Paragraph> content) {
+    public void fill(List<Paragraph> content) {
         for (Paragraph p : content) {
             for (Sentence se : p.sentences) {
                 for (Word w : se.words) {
@@ -76,16 +43,6 @@ public class StaticGrammarFiller2 {
                 }
             }
         }
-    }
-
-    public void fill(W w) {
-        WordInfo wi = get(w.getValue());
-        if (wi == null) {
-            wi = calculateWordInfo(w.getValue());
-            set(w.getValue(), wi);
-        }
-        w.setLemma(wi.lemmas);
-        w.setCat(wi.tags);
     }
 
     private WordInfo get(String word) {

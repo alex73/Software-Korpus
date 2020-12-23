@@ -1,5 +1,6 @@
 package org.alex73.korpus.compiler;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import org.alex73.korpus.base.TextInfo;
@@ -15,13 +16,13 @@ public class TextUtils {
             info.url = s;
         }
         if ((s = get(headers, "Authors")) != null) {
-            info.authors = s.split(";");
+            info.authors = trims(s.split(";"));
         }
         if ((s = get(headers, "Title")) != null) {
             info.title = s;
         }
         if ((s = get(headers, "Translation")) != null) {
-            info.translators = s.split(";");
+            info.translators = trims(s.split(";"));
         }
         if ((s = get(headers, "Lang")) != null) {
             info.lang = s;
@@ -30,7 +31,7 @@ public class TextUtils {
             info.langOrig = s;
         }
         if ((s = get(headers, "StyleGenre")) != null) {
-            info.styleGenres = s.split("[;,]"); // TODO change to ';' separator
+            info.styleGenres = trims(s.split("[;,]")); // TODO change to ';' separator
         }
         if ((s = get(headers, "Edition")) != null) {
             info.edition = s;
@@ -43,6 +44,16 @@ public class TextUtils {
             info.creationTime = s;
             new KorpusDateTime(info.creationTime);
         }
+    }
+
+    private static String[] trims(String[] list) {
+        for (int i = 0; i < list.length; i++) {
+            list[i] = list[i].trim();
+            if (list[i].isEmpty()) {
+                throw new RuntimeException("Wrong list data: " + Arrays.toString(list));
+            }
+        }
+        return list;
     }
 
     private static String get(Map<String, String> headers, String key) {

@@ -44,7 +44,7 @@ public class OfficialSpellFilter {
         } else {
             return null;
         }
-        List<Form> r = result.filter(standardForms).collect(Collectors.toList());
+        List<Form> r = result.filter(standardForms).filter(f -> !f.getValue().isEmpty()).collect(Collectors.toList());
         return r.isEmpty() ? null : r;
     }
 }

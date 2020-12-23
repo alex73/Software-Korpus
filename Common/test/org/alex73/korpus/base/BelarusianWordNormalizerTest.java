@@ -8,14 +8,6 @@ import org.junit.Test;
 
 public class BelarusianWordNormalizerTest {
     @Test
-    public void testNorm() {
-        assertEquals("Ко+", BelarusianWordNormalizer.normalizePreserveCase("Ко+"));
-        assertEquals("ко+", BelarusianWordNormalizer.normalizeLowerCase("Ко+"));
-        assertEquals("Ко", BelarusianWordNormalizer.normalizePreserveCase("Ко"));
-        assertEquals("ко", BelarusianWordNormalizer.normalizeLowerCase("Ко"));
-    }
-
-    @Test
     public void testHash() {
         assertEquals(BelarusianWordNormalizer.hash("Ко+"), BelarusianWordNormalizer.hash("ко"));
         assertEquals(BelarusianWordNormalizer.hash("Кў"), BelarusianWordNormalizer.hash("ку"));
@@ -24,6 +16,10 @@ public class BelarusianWordNormalizerTest {
 
     @Test
     public void testEquals() {
+        assertTrue(BelarusianWordNormalizer.equals("Ко+", "Ко+"));
+        assertTrue(BelarusianWordNormalizer.equals("ко+", "Ко+"));
+        assertTrue(BelarusianWordNormalizer.equals("Ко", "Ко"));
+        assertTrue(BelarusianWordNormalizer.equals("Ко", "Ко"));
         assertTrue(BelarusianWordNormalizer.equals("Менск", "Менск"));
         assertTrue(BelarusianWordNormalizer.equals("шмат", "Шмат"));
         assertTrue(BelarusianWordNormalizer.equals("уэлс", "Ўэлс"));

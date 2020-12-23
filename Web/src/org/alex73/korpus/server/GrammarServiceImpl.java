@@ -296,11 +296,15 @@ public class GrammarServiceImpl {
     LemmaInfo.LemmaParadigm conv(Paradigm p) {
         LemmaInfo.LemmaParadigm r = new LemmaInfo.LemmaParadigm();
         for (Variant v : p.getVariant()) {
+            List<Form> forms = OfficialSpellFilter.getAcceptedForms(p, v);
+            if (forms == null) {
+                continue;
+            }
             r.lemma = StressUtils.combineAccute(p.getLemma());
             r.tag = p.getTag();
             LemmaInfo.LemmaVariant rv = new LemmaInfo.LemmaVariant();
             r.variants.add(rv);
-            for (Form f : v.getForm()) {
+            for (Form f : forms) {
                 LemmaInfo.LemmaForm rf = new LemmaInfo.LemmaForm();
                 rf.value = StressUtils.combineAccute(f.getValue());
                 rf.tag = f.getTag();

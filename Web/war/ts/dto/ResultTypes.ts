@@ -47,8 +47,8 @@ class ResultKwicOut {
 
       out.kwicBefore = [];
       for (let i = wordsFrom - 1, count = 0; i >= 0 && count < 5; i--) {
-        out.kwicBefore.push(sentence[i]);
-        if (sentence[i].isWord) {
+        out.kwicBefore.push(sentence.words[i]);
+        if (sentence.words[i].lightNormalized) {
           count++;
         }
       }
@@ -56,8 +56,8 @@ class ResultKwicOut {
       
       out.kwicWords = [];
       for (let i = wordsFrom, count = 0; i < sentence.words.length && count < wordsCount; i++) {
-        out.kwicWords.push(sentence[i]);
-        if (sentence[i].isWord) {
+        out.kwicWords.push(sentence.words[i]);
+        if (sentence.words[i].lightNormalized) {
           count++;
           wordsTo = i;
         }
@@ -65,8 +65,8 @@ class ResultKwicOut {
       
       out.kwicAfter = [];
       for (let i = wordsTo + 1, count = 0; i < sentence.words.length && count < 5; i++) {
-        out.kwicAfter.push(sentence[i]);
-        if (sentence[i].isWord) {
+        out.kwicAfter.push(sentence.words[i]);
+        if (sentence.words[i].lightNormalized) {
           count++;
         }
       }
