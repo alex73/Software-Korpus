@@ -62,6 +62,7 @@ class GrammarUI {
 
 class OutGrammarParadigm {
     public lemma: string;
+    public meaning: string;
     public variants: OutGrammarVariant[];
 
     public catText: KeyValue[];

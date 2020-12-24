@@ -11,6 +11,7 @@ class DialogGrammarDB {
 	convert(p: LemmaParadigm): OutGrammarParadigm {
 		let r: OutGrammarParadigm = new OutGrammarParadigm();
 		r.lemma = p.lemma;
+		r.meaning = p.meaning;
 		let skip: string[] = Grammar.getSkipParts(grammarService.initial, p.tag);
 		r.catText = Grammar.parseCode(grammarService.initial, p.tag).filter(kv => skip.indexOf(kv.key) < 0);
 		r.subtree = Grammar.subtree(p.tag, grammarService.initial.grammarTree);

@@ -14,18 +14,12 @@ class DialogSubcorpuses {
 	onOk() {
 		var collection: NodeListOf<HTMLInputElement> = document.querySelectorAll("#dialog-subcorpuses input[type='checkbox']");
 		let subcorpuses = [];
-		var hasUnchecked = false;
 		collection.forEach(cb => {
 			if (cb.checked) {
 				subcorpuses.push(cb.name);
-			} else {
-				hasUnchecked = true;
 			}
 		});
-		if (!hasUnchecked) {
-			subcorpuses = [];
-		}
-		document.getElementById('inputFilterCorpus').innerText = subcorpuses.length == 0 ? "Усе" : subcorpuses.join(';');
+		document.getElementById('inputFilterCorpus').innerText = subcorpuses.length == 0 ? "teksty" : subcorpuses.join(';');
 		DialogSubcorpuses.showInputFilterDependsOnSubcorpus();
 		$('#dialog-subcorpuses').modal('hide');
 	}

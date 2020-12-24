@@ -302,6 +302,7 @@ public class GrammarServiceImpl {
             }
             r.lemma = StressUtils.combineAccute(p.getLemma());
             r.tag = p.getTag();
+            r.meaning = p.getMeaning();
             LemmaInfo.LemmaVariant rv = new LemmaInfo.LemmaVariant();
             r.variants.add(rv);
             for (Form f : forms) {

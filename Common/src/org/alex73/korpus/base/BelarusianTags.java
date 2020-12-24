@@ -221,7 +221,7 @@ public class BelarusianTags {
     }
 
     private void nazounik(TagLetter t) {
-        t = t.add("Часціна => N:Назоўнік");
+        t = t.add("Часціна мовы => N:Назоўнік");
         t.add("Новы=>+:новы").latestInParadigm();
         t = t.add("Уласнасць => C:агульны;P:уласны;X:???????");
         t = t.add("Адушаўлёнасць => A:адушаўлёны;I:неадушаўлёны;X:???????");
@@ -248,7 +248,7 @@ public class BelarusianTags {
     }
 
     private void licebnik(TagLetter t) {
-        TagLetter t0 = t.add("Часціна => M:Лічэбнік");
+        TagLetter t0 = t.add("Часціна мовы => M:Лічэбнік");
         t0.add("Новы=>+:новы").latestInParadigm();
         t = t0.add("Словазмяненне => N:як у назоўніка;A:як у прыметніка;X:???????");
         TagLetter t2=t0.add("Словазмяненне => 0:няма");
@@ -264,7 +264,7 @@ public class BelarusianTags {
     }
 
     private void zajmiennik(TagLetter t) {
-        t = t.add("Часціна => S:Займеннік");
+        t = t.add("Часціна мовы => S:Займеннік");
         t.add("Новы=>+:новы").latestInParadigm();
         t = t.add("Словазмяненне => N:як у назоўніка;A:як у прыметніка;M:як у займенніка");
         t = t.add(
@@ -278,7 +278,7 @@ public class BelarusianTags {
     }
 
     private void prymietnik(TagLetter t) {
-        t = t.add("Часціна => A:Прыметнік");
+        t = t.add("Часціна мовы => A:Прыметнік");
         t.add("Новы=>+:новы").latestInParadigm();
         t.add("Тып => 0:нескланяльны").latestInParadigm();
         t = t.add("Тып => Q:якасны;R:адносны;P:прыналежны;X:???????");
@@ -291,7 +291,7 @@ public class BelarusianTags {
     }
 
     private void dziejaslou(TagLetter t) {
-        t = t.add("Часціна => V:Дзеяслоў");
+        t = t.add("Часціна мовы => V:Дзеяслоў");
         t.add("Новы=>+:новы").latestInParadigm();
         t = t.add("Пераходнасць => T:пераходны;I:непераходны;D:пераходны/непераходны;X:???????");
         t = t.add("Трыванне => P:закончанае;M:незакончанае;X:???????");
@@ -323,7 +323,7 @@ public class BelarusianTags {
     }
 
     private void dziejeprymietnik(TagLetter t) {
-        t = t.add("Часціна => P:Дзеепрыметнік");
+        t = t.add("Часціна мовы => P:Дзеепрыметнік");
         t.add("Новы=>+:новы").latestInParadigm();
         t = t.add("Стан => A:незалежны;P:залежны");
         t = t.add("Час => R:цяперашні;P:мінулы");
@@ -337,7 +337,7 @@ public class BelarusianTags {
     }
 
     private void pryslouje(TagLetter t) {
-        t = t.add("Часціна => R:Прыслоўе");
+        t = t.add("Часціна мовы => R:Прыслоўе");
         t.add("Новы=>+:новы").latestInParadigm();
         t = t.add(
                 "Утварэнне => N:ад назоўнікаў;A:прыметнікаў;M:лічэбнікаў;S:займеннікаў;G:дзеепрыслоўяў;V:дзеясловаў;E:часціц;I:прыназоўнікаў;X:???????")
@@ -347,7 +347,7 @@ public class BelarusianTags {
     }
 
     private void zlucnik(TagLetter t) {
-        t = t.add("Часціна => C:Злучнік");
+        t = t.add("Часціна мовы => C:Злучнік");
         t.add("Новы=>+:новы").latestInParadigm();
         TagLetter s = t.add("Тып => S:падпарадкавальны");
         TagLetter k = t.add("Тып => K:злучальны");
@@ -359,31 +359,31 @@ public class BelarusianTags {
     }
 
     private void prynazounik(TagLetter t) {
-        t.add("Часціна => I:Прыназоўнік").latestInParadigm();
+        t.add("Часціна мовы => I:Прыназоўнік").latestInParadigm();
     }
 
     private void cascica(TagLetter t) {
-        t.add("Часціна => E:Часціца").latestInParadigm();
+        t.add("Часціна мовы => E:Часціца").latestInParadigm();
     }
 
     private void vyklicnik(TagLetter t) {
-        t.add("Часціна => Y:Выклічнік").latestInParadigm();
+        t.add("Часціна мовы => Y:Выклічнік").latestInParadigm();
     }
 
     private void pabocnaje(TagLetter t) {
-        t.add("Часціна => Z:Пабочнае слова").latestInParadigm();
+        t.add("Часціна мовы => Z:Пабочнае слова").latestInParadigm();
     }
 
     private void predykatyu(TagLetter t) {
-        t.add("Часціна => W:Прэдыкатыў").latestInParadigm();
+        t.add("Часціна мовы => W:Прэдыкатыў").latestInParadigm();
     }
 
     private void abrev(TagLetter t) {
-        t = t.add("Часціна => K:Абрэвіятуры").latestInParadigm();
+        t = t.add("Часціна мовы => K:Абрэвіятуры").latestInParadigm();
     }
 
     private void castki(TagLetter t) {
-        t = t.add("Часціна => F:Часткі слоў");
+        t = t.add("Часціна мовы => F:Часткі слоў");
         t.add("Тып => P:прыстаўка;F:першая састаўная частка складаных слоў;S:другая састаўная частка складаных слоў")
                 .latestInParadigm();
     }

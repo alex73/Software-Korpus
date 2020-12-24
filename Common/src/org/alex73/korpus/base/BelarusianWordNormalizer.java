@@ -79,6 +79,8 @@ public class BelarusianWordNormalizer {
         SUPERNORMALIZE['\u02BC'] = '\'';
         SUPERNORMALIZE['\u2019'] = '\'';
         SUPERNORMALIZE['-'] = '-';
+        SUPERNORMALIZE['?'] = '?';
+        SUPERNORMALIZE['*'] = '*';
     }
 
     public static int hash(String word) {

@@ -35,6 +35,7 @@ public class LemmaInfo {
     public static class LemmaParadigm {
         public String lemma;
         public String tag;
+        public String meaning;
         public List<LemmaVariant> variants = new ArrayList<>();
     }
 

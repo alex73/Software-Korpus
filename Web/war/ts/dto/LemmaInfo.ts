@@ -7,6 +7,7 @@ class LemmaInfo {
 class LemmaParadigm {
     public lemma: string;
     public tag: string;
+    public meaning: string;
     public variants: LemmaVariant[];
 }
 

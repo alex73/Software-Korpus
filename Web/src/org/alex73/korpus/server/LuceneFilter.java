@@ -24,6 +24,7 @@ package org.alex73.korpus.server;
 
 import java.util.List;
 
+import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.server.data.LatestMark;
 import org.alex73.korpus.server.data.StandardTextRequest;
 import org.alex73.korpus.server.data.WordRequest;
@@ -116,12 +117,13 @@ public class LuceneFilter {
                 }
                 wq = qLemmas.build();
             } else {
-                if (WordsDetailsChecks.needWildcardRegexp(w.word)) {
+                String wn = BelarusianWordNormalizer.superNormalized(w.word);
+                if (WordsDetailsChecks.needWildcardRegexp(wn)) {
                     // has wildcard
-                    wq = new WildcardQuery(getValueTerm(w.word));
+                    wq = new WildcardQuery(getValueTerm(wn));
                 } else {
                     // simple word
-                    wq = new TermQuery(getValueTerm(w.word));
+                    wq = new TermQuery(getValueTerm(wn));
                 }
             }
             query.add(wq, BooleanClause.Occur.MUST);
