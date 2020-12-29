@@ -2,6 +2,7 @@ class LemmaInfo {
     public pdgId: number;
     public lemma: string;
     public lemmaGrammar: string;
+    public meaning: string;
 }
 
 class LemmaParadigm {

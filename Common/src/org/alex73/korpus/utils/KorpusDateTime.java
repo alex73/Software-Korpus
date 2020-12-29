@@ -19,11 +19,11 @@ public class KorpusDateTime {
             throw new ExceptionInInitializerError(ex);
         }
     }
-    static Pattern RE_YEAR_SIMPLE = Pattern.compile("([0-9]{4})\\??");
-    static Pattern RE_YEAR_TWO = Pattern.compile("([0-9]{4})\\-([0-9]{4})\\??");
-    static Pattern RE_DATE1 = Pattern.compile("([0-9]{2})\\.([0-9]{2})\\.([0-9]{4})\\??");
+    static Pattern RE_YEAR_SIMPLE = Pattern.compile("([0-9]{4})");
+    static Pattern RE_YEAR_TWO = Pattern.compile("([0-9]{4})\\-([0-9]{4})");
+    static Pattern RE_DATE1 = Pattern.compile("([0-9]{2})\\.([0-9]{2})\\.([0-9]{4})");
     static Pattern RE_DATE2 = Pattern
-            .compile("([0-9]{2})\\.([0-9]{2})\\.([0-9]{4})\\-([0-9]{2})\\.([0-9]{2})\\.([0-9]{4})\\??");
+            .compile("([0-9]{2})\\.([0-9]{2})\\.([0-9]{4})\\-([0-9]{2})\\.([0-9]{2})\\.([0-9]{4})");
     static Pattern RE_DATE3 = Pattern.compile("([0-9]{4})\\-([0-9]{2})\\-([0-9]{2})");
     static Pattern RE_MONTH1 = Pattern.compile(
             "(студзень|люты|сакавік|красавік|травень|май|чэрвень|ліпень|жнівень|верасень|кастрычнік|лістапад|снежань)\\s+([0-9]{4})");
@@ -34,14 +34,17 @@ public class KorpusDateTime {
     static List<String> months = Arrays.asList("студзень", "люты", "сакавік", "красавік", "травень", "май", "чэрвень",
             "ліпень", "жнівень", "верасень", "кастрычнік", "лістапад", "снежань");
 
-    private final String date;
-
     private List<Pair> pairs = new ArrayList<>();
 
     public KorpusDateTime(String date) {
-        this.date = date;
         for (String y : date.split(";")) {
             y = y.trim();
+            if (y.endsWith("?")) {
+                y = y.substring(0, y.length() - 1);
+            }
+            if (y.startsWith("[") && y.endsWith("]")) {
+                y = y.substring(1, y.length() - 1);
+            }
             Matcher m;
             XMLGregorianCalendar d1, d2;
             if ((m = RE_YEAR_SIMPLE.matcher(y)).matches()) {

@@ -1,8 +1,10 @@
 class SearchResults {
+    public docId: number;
     public doc: TextInfo;
     public text: Paragraph;
     
     constructor(o:any) {
+      this.docId = o.docId;
       this.doc = o.doc;
       this.text = new Paragraph();
       this.text.sentences = o.text.sentences;
@@ -76,10 +78,12 @@ class ResultKwicOut {
 }
 
 class ResultSearchOutRow {
+    public docId: number;
     public doc: TextInfo;
     public origText: Paragraph;
     public words: WordResult[] = [];
     constructor(o:SearchResults) {
+      this.docId = o.docId;
       this.doc = o.doc;
       this.origText = o.text;
     }

@@ -10,10 +10,10 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
 public class InitialData {
-    public List<String> authors;
-    public List<String> sources;
     public List<KeyValue> subcorpuses;
+    public Map<String, List<String>> authors; // map by subcorpus name
+    public Map<String, List<String>> sources; // map by subcorpus name
     public List<String> styleGenresParts;
-    public Map<String,List<String>> styleGenres;
+    public Map<String, List<String>> styleGenres;
     public GrammarInitial grammar;
 }

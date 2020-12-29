@@ -9,5 +9,7 @@ public class KorpusDateTimeTest {
         new KorpusDateTime("2015-03-17T16:30:38");
         new KorpusDateTime("2015-03-17T16:30:38+00:00");
         new KorpusDateTime("07.05.1994-31.08.1996");
+        new KorpusDateTime("2015?");
+        new KorpusDateTime("[2015]");
     }
 }

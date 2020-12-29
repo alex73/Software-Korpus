@@ -32,6 +32,7 @@ import org.alex73.korpus.text.elements.Paragraph;
  */
 @SuppressWarnings("serial")
 public class SearchResults implements Serializable {
+    public int docId;
     public TextInfo doc;
     public Paragraph text;
 }

@@ -31,6 +31,7 @@ import java.util.List;
 public class LemmaInfo {
     public long pdgId;
     public String lemma, lemmaGrammar;
+    public String meaning;
 
     public static class LemmaParadigm {
         public String lemma;

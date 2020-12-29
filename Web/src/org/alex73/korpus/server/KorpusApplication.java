@@ -42,14 +42,14 @@ public class KorpusApplication extends Application {
     List<String> settings;
     Properties stat;
     List<TextInfo> textInfos;
-    GrammarDB2 gr;
-    GrammarFinder grFinder;
+    public GrammarDB2 gr;
+    public GrammarFinder grFinder;
     GrammarInitial grammarInitial;
     InitialData searchInitial;
 
     LuceneFilter processKorpus;
 
-    static KorpusApplication instance;
+    public static KorpusApplication instance;
 
     public KorpusApplication() {
         instance = this;
@@ -120,13 +120,27 @@ public class KorpusApplication extends Application {
         }
 
         searchInitial = new InitialData();
-        searchInitial.authors = Arrays.asList(stat.getProperty("authors").split(";"));
-        searchInitial.sources = Arrays.asList(stat.getProperty("sources").split(";"));
         searchInitial.subcorpuses = new ArrayList<>();
+        searchInitial.authors = new TreeMap<>();
+        searchInitial.sources = new TreeMap<>();
         for (String line : settings) {
             int eq = line.indexOf('=');
-            if (line.startsWith("subcorpus.") && eq >= 0) {
+            if (eq < 0) {
+                throw new RuntimeException();
+            }
+            if (line.startsWith("subcorpus.")) {
                 searchInitial.subcorpuses.add(new KeyValue(line.substring(10, eq), line.substring(eq + 1)));
+            }
+        }
+        for (String key : (Set<String>) (Set<?>) stat.keySet()) {
+            if (key.startsWith("authors.")) {
+                String subcorpus = key.substring(8);
+                String value = stat.getProperty(key);
+                searchInitial.authors.put(subcorpus, Arrays.asList(value.split(";")));
+            } else if (key.startsWith("sources.")) {
+                String subcorpus = key.substring(8);
+                String value = stat.getProperty(key);
+                searchInitial.sources.put(subcorpus, Arrays.asList(value.split(";")));
             }
         }
         loadStyleGenres();

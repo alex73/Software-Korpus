@@ -57,6 +57,7 @@ public class TextArchiveParser extends BaseParser {
                         TextUtils.fillFromHeaders(textInfo, doc.headers);
                         textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + en.getName();
                         textInfo.subcorpus = subcorpus;
+                        textInfo.source = commonHeaders.get("Source");
                         if (textInfo.title == null) {
                             textInfo.title = "";
                         }

@@ -1,0 +1,12 @@
+<table class="table-zebra hspacing">
+    <#list data as row>
+      <tr>
+        <td style="white-space: nowrap;">
+          ${row.key?html} :
+          <#list row.details as w>
+            <a href="#" title="${w.title?html}" onClick="grammarService.loadDetails(${w.pdgId?c}); return false;">${w.lemma?html}</a>
+          </#list>
+        </td>
+      </tr>
+    </#list>
+</table>

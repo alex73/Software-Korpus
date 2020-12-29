@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class PrepareCache3 {
+    public static final boolean writeToLucene = true;
     public static final Path INPUT = Paths.get("Korpus-texts/");
     static final Path OUTPUT = Paths.get("/home/alex/Korpus-cache/");
     static StaticGrammarFiller2 grFiller;
@@ -35,6 +35,8 @@ public class PrepareCache3 {
     public static Map<String, Integer> textPositionsBySourceFile;
 
     static StatProcessing textStat = new StatProcessing();
+    static List<String> errorsList = new ArrayList<>();
+
     static volatile Exception exception;
 
     public static void main(String[] args) throws Exception {
@@ -46,7 +48,7 @@ public class PrepareCache3 {
         // read texts and sort
         new FilesReader().run(INPUT, errors, true);
         System.out.println("1st pass finished");
-        errorsCount.clear();
+        errorsList.clear();
 
         luceneOpen(OUTPUT);
         textPositionsBySourceFile = calcTextsPositions();
@@ -60,18 +62,8 @@ public class PrepareCache3 {
         luceneClose();
         textStat.write(OUTPUT);
 
-        List<String> errorNames = new ArrayList<>(errorsCount.keySet());
-        Collections.sort(errorNames, new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                int c1 = errorsCount.get(o1);
-                int c2 = errorsCount.get(o2);
-                return c1 - c2;
-            }
-        });
-        for (String e : errorNames) {
-            System.err.println("ERROR: " + e + ": " + errorsCount.get(e));
-        }
+        Collections.sort(errorsList);
+        Files.write(OUTPUT.resolve("errors.txt"), errorsList);
         if (exception != null) {
             exception.printStackTrace();
         }
@@ -153,7 +145,6 @@ public class PrepareCache3 {
         o.close();
     }
 
-    private static Map<String, Integer> errorsCount = new HashMap<>();
     public static IProcess errors = new IProcess() {
         @Override
         public synchronized void showStatus(String status) {
@@ -163,13 +154,9 @@ public class PrepareCache3 {
         @Override
         public synchronized void reportError(String error, Throwable ex) {
             String key = ex == null ? error : error + ": " + ex.getMessage();
-            Integer count = errorsCount.get(key);
-            if (count == null) {
-                count = 1;
-            } else {
-                count++;
+            synchronized (errorsList) {
+                errorsList.add(key);
             }
-            errorsCount.put(key, count);
             System.err.println(error);
             if (ex != null) {
                 ex.printStackTrace();

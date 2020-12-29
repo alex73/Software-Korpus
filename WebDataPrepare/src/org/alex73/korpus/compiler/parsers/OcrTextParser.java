@@ -32,7 +32,8 @@ public class OcrTextParser extends BaseParser {
                 textInfo.subcorpus = subcorpus;
                 textInfo.url = "https://kamunikat.org/?pubid="
                         + file.getFileName().toString().replaceAll("^([0-9]+).+?$", "$1");
-                textInfo.title = textInfo.url.replaceAll(".+\\?pub", "");
+                textInfo.title = file.getFileName().toString().replaceAll("^([0-9]+).+?$", "$1");
+                textInfo.source = subcorpus + ':' + textInfo.url.replaceAll(".+\\?pubid=", "");
                 if (headersOnly) {
                     PrepareCache3.process(textInfo, null);
                 } else {

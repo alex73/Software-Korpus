@@ -37,10 +37,10 @@ public class BelarusianComparators {
             while (true) {
                 do {
                     c1 = p1 < o1.length() ? o1.charAt(p1++) : 0;
-                } while (c1 == StressUtils.STRESS_CHAR);
+                } while (StressUtils.STRESS_CHARS.indexOf(c1) >= 0);
                 do {
                     c2 = p2 < o2.length() ? o2.charAt(p2++) : 0;
-                } while (c2 == StressUtils.STRESS_CHAR);
+                } while (StressUtils.STRESS_CHARS.indexOf(c2) >= 0);
 
                 if (c1 != 0 && c2 != 0) {
                     if (c1 == c2) {

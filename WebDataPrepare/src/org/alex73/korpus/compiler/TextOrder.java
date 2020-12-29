@@ -20,48 +20,29 @@ public class TextOrder implements Comparator<TextInfo> {
             return 0;
         }
         int c = Integer.compare(subcorpuses.indexOf(o1.subcorpus), subcorpuses.indexOf(o2.subcorpus));
-        if (c == 0 && o1.subcorpus.equals("wiki")) {
-            c = Integer.compare(wikiOrder(o1), wikiOrder(o2));
-        }
         if (c == 0) {
             switch (o1.subcorpus) {
             case "teksty":
+                c = teksty.compare(o1, o2);
+                break;
             case "pieraklady":
-                // першыя - найбольш раннія. не пазначана дата - на канец
-                c = Long.compare(earliest(o1, Long.MAX_VALUE), earliest(o2, Long.MAX_VALUE));
+                c = pieraklady.compare(o1, o2);
+                break;
+            case "wiki":
+                c = wiki.compare(o1, o2);
+                break;
+            case "sajty":
+                c = sajty.compare(o1, o2);
+                break;
+            case "nierazabranaje":
+                c = nierazabranaje.compare(o1, o2);
+                break;
+            case "telegram":
+                c = telegram.compare(o1, o2);
                 break;
             default:
-                // першыя - найбольш апошнія. не пазначана дата - на канец
-                c = Long.compare(latest(o2, Long.MIN_VALUE), latest(o1, Long.MIN_VALUE));
-                break;
+                throw new RuntimeException("Unknown subcorpus: " + o1.subcorpus);
             }
-        }
-        if (c == 0) {
-            int ac1 = o1.authors != null ? o1.authors.length : 0;
-            int ac2 = o2.authors != null ? o2.authors.length : 0;
-            for (int i = 0; i < Math.max(ac1, ac2); i++) {
-                String a1, a2;
-                try {
-                    a1 = o1.authors[i];
-                } catch (Exception ex) {
-                    a1 = "";
-                }
-                try {
-                    a2 = o2.authors[i];
-                } catch (Exception ex) {
-                    a2 = "";
-                }
-                c = BE.compare(a1, a2);
-                if (c != 0) {
-                    break;
-                }
-            }
-        }
-        if (c == 0) {
-            c = BE.compare(o1.title, o2.title);
-        }
-        if (c == 0) {
-            c = compare(o1.url, o2.url);
         }
         if (c == 0) {
             c = compare(o1.sourceFilePath, o2.sourceFilePath);
@@ -73,7 +54,55 @@ public class TextOrder implements Comparator<TextInfo> {
         return c;
     }
 
-    static long earliest(TextInfo ti, long defaultValue) {
+    Comparator<TextInfo> teksty = (o1, o2) -> {
+        // першыя - найбольш раннія па даце стварэння альбо даце выдання. не пазначана
+        // дата - на канец
+        int c = Long.compare(earliestCreationPublication(o1, Long.MAX_VALUE),
+                earliestCreationPublication(o2, Long.MAX_VALUE));
+        if (c == 0) {
+            c = compareAuthors(o1, o2);
+        }
+        if (c == 0) {
+            c = BE.compare(o1.title, o2.title);
+        }
+        return c;
+    };
+    Comparator<TextInfo> pieraklady = (o1, o2) -> {
+        // першыя - найбольш раннія па даце выдання. не пазначана дата - на канец
+        int c = Long.compare(earliestPublication(o1, Long.MAX_VALUE), earliestPublication(o2, Long.MAX_VALUE));
+        if (c == 0) {
+            c = compareAuthors(o1, o2);
+        }
+        if (c == 0) {
+            c = BE.compare(o1.title, o2.title);
+        }
+        return c;
+    };
+    Comparator<TextInfo> wiki = (o1, o2) -> {
+        int c = Integer.compare(wikiOrder(o1), wikiOrder(o2));
+        if (c == 0) {
+            c = BE.compare(o1.title, o2.title);
+        }
+        return c;
+    };
+    Comparator<TextInfo> sajty = (o1, o2) -> {
+        // першыя - найбольш познія. не пазначана дата - на канец
+        int c = Long.compare(latestPublication(o2, Long.MAX_VALUE), latestPublication(o1, Long.MAX_VALUE));
+        if (c == 0) {
+            c = compare(o1.source, o2.source);
+        }
+        return c;
+    };
+    Comparator<TextInfo> nierazabranaje = (o1, o2) -> {
+        return 0;
+    };
+    Comparator<TextInfo> telegram = (o1, o2) -> {
+        // першыя - найбольш познія. не пазначана дата - на канец
+        int c = Long.compare(latestPublication(o2, Long.MAX_VALUE), latestPublication(o1, Long.MAX_VALUE));
+        return c;
+    };
+
+    static long earliestCreationPublication(TextInfo ti, long defaultValue) {
         if (ti.creationTime != null) {
             return new KorpusDateTime(ti.creationTime).earliest();
         } else if (ti.publicationTime != null) {
@@ -83,7 +112,15 @@ public class TextOrder implements Comparator<TextInfo> {
         }
     }
 
-    static long latest(TextInfo ti, long defaultValue) {
+    static long earliestPublication(TextInfo ti, long defaultValue) {
+        if (ti.publicationTime != null) {
+            return new KorpusDateTime(ti.publicationTime).earliest();
+        } else {
+            return defaultValue;
+        }
+    }
+
+    static long latestPublication(TextInfo ti, long defaultValue) {
         if (ti.creationTime != null) {
             return new KorpusDateTime(ti.creationTime).latest();
         } else if (ti.publicationTime != null) {
@@ -91,6 +128,30 @@ public class TextOrder implements Comparator<TextInfo> {
         } else {
             return defaultValue;
         }
+    }
+
+    static int compareAuthors(TextInfo o1, TextInfo o2) {
+        int ac1 = o1.authors != null ? o1.authors.length : 0;
+        int ac2 = o2.authors != null ? o2.authors.length : 0;
+        int c = 0;
+        for (int i = 0; i < Math.max(ac1, ac2); i++) {
+            String a1, a2;
+            try {
+                a1 = o1.authors[i];
+            } catch (Exception ex) {
+                a1 = "";
+            }
+            try {
+                a2 = o2.authors[i];
+            } catch (Exception ex) {
+                a2 = "";
+            }
+            c = BE.compare(a1, a2);
+            if (c != 0) {
+                break;
+            }
+        }
+        return c;
     }
 
     static int compare(String s1, String s2) {
@@ -110,5 +171,4 @@ public class TextOrder implements Comparator<TextInfo> {
             throw new RuntimeException("Невядомая спасылка на wiki: " + ti.url);
         }
     }
-
 }

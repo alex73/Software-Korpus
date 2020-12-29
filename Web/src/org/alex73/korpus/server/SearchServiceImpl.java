@@ -73,7 +73,9 @@ public class SearchServiceImpl {
         SearchParams params = rq.params;
         LatestMark latest = rq.latest;
         for (WordRequest w : params.words) {
-            w.word = BelarusianWordNormalizer.lightNormalized(w.word);
+            if (w.word != null) {
+                w.word = BelarusianWordNormalizer.lightNormalized(w.word);
+            }
         }
         try {
             WordsDetailsChecks.reset();
@@ -199,6 +201,7 @@ public class SearchServiceImpl {
             for (int i = 0; i < list.length; i++) {
                 Document doc = getApp().processKorpus.getSentence(list[i]);
                 result[i] = new SearchResults();
+                result[i].docId = list[i];
                 result[i].doc = restoreTextInfo(doc);
                 result[i].text = restoreText(doc);
                 // mark result words

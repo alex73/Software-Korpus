@@ -39,6 +39,7 @@ public class WikiParser extends BaseParser {
 
     private boolean headersOnly;
     String urlPrefix;
+    String source;
 
     public WikiParser(String subcorpus, Path file) {
         super(subcorpus, file);
@@ -51,8 +52,10 @@ public class WikiParser extends BaseParser {
 
         if (file.getFileName().toString().startsWith("bewiki-")) {
             urlPrefix = "https://be.wikipedia.org/wiki/";
+            source = "wiki:be";
         } else if (file.getFileName().toString().startsWith("be_x_oldwiki-")) {
             urlPrefix = "https://be-tarask.wikipedia.org/wiki/";
+            source = "wiki:be-x-old";
         } else {
             throw new Exception("Unknown filename: " + file);
         }
@@ -103,6 +106,7 @@ public class WikiParser extends BaseParser {
 
                 TextInfo textInfo = new TextInfo();
                 textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + inTitle;
+                textInfo.source = source;
                 textInfo.subcorpus = subcorpus;
                 textInfo.url = urlPrefix + title;
                 textInfo.title = title;

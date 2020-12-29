@@ -1,0 +1,16 @@
+<table class="table-zebra hspacing">
+    <tr>
+      <th>#</th>
+      <th>Слова</th>
+      <th>Колькасць</th>
+    </tr>
+    <#assign n = 0>
+    <#list data as row>
+      <tr>
+        <#assign n = n+1>
+        <td class="text-right">${n}</td>
+        <td style="white-space: nowrap;">${row.word?html}</td>
+        <td class="text-right">${row.count}</td>
+      </tr>
+    </#list>
+</table>

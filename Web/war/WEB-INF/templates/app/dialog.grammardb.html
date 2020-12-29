@@ -6,7 +6,7 @@
     </button>
   </div>
   <div class="modal-body">
-    <div class="card">
+    <div class="card mx-auto" style="width: fit-content;">
       <div class="card-header">
         {{for details.catText}}
         <div>{{>key}}: {{>value}}</div>
@@ -17,7 +17,7 @@
       </div>
       {{for details.variants}}
         <div class="card-body">
-          <table class="table-borders hspacing mx-auto">
+          <table class="table-borders hspacing">
             <tr>
               {{for catnames}}
                 <th>{{>}}</th>
@@ -43,7 +43,7 @@
 
 <div id="dialog-grammardb" class="modal fade" bsModal #lemmaModal="bs-modal" [config]="{backdrop: 'static'}"
      tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog modal-xl">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
     <div id="dialog-grammardb-details" class="modal-content">
     </div>
   </div>

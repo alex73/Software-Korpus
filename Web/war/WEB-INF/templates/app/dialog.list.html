@@ -11,6 +11,7 @@
           <button type="button" class="btn btn-secondary" onClick="dialogList.all(true)">Пазначыць усе</button>
           <button type="button" class="btn btn-secondary" onClick="dialogList.all(false)">Зняць усе</button>
         </span>
+        <input class="my-auto form-control w-auto" type="text" placeholder="фільтраваць" onInput="dialogList.filter(this);">
       </div>
       <div class="modal-body">
         {{for list}}

@@ -9,9 +9,6 @@ import org.alex73.korpus.utils.KorpusDateTime;
 public class TextUtils {
     public static void fillFromHeaders(TextInfo info, Map<String, String> headers) {
         String s;
-        if ((s = get(headers, "Source")) != null) {
-            info.source = s;
-        }
         if ((s = get(headers, "URL")) != null) {
             info.url = s;
         }

@@ -6,6 +6,7 @@ class DialogText {
 		});
 		$('#dialog-text').html(html);
 		$('#dialog-text').modal('show');
+		korpusui.visitedList.push(row.docId);
 		target.classList.add('visited');
 	}
 	cancel() {

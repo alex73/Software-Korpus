@@ -1,7 +1,9 @@
 package org.alex73.korpus.base;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.alex73.corpus.paradigm.Paradigm;
 
@@ -67,5 +69,9 @@ public class GrammarFinder implements IGrammarFinder {
         int indexByHash = Math.abs(hash) % HASHTABLE_SIZE;
         Paradigm[] result = table[indexByHash];
         return result != null ? result : EMPTY;
+    }
+
+    public Stream<Paradigm[]> getSimilarGroups() {
+        return Arrays.stream(table).filter(r -> r != null);
     }
 }

@@ -88,7 +88,9 @@ public class LuceneDriverWrite extends LuceneFields {
 
         fieldTextID.setIntValue(PrepareCache3.textPositionsBySourceFile.get(textInfo.sourceFilePath));
 
-        indexWriter.addDocument(docSentence);
+        if (PrepareCache3.writeToLucene) {
+            indexWriter.addDocument(docSentence);
+        }
     }
 
     public void addSentences(TextInfo textInfo, List<Paragraph> content) throws Exception {

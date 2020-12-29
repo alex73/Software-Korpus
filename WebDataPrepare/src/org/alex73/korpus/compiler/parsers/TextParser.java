@@ -24,7 +24,7 @@ public class TextParser extends BaseParser {
     public void parse(Executor queue, boolean headersOnly) throws Exception {
         System.out.println(file);
         String fn = file.getFileName().toString();
-        if (fn.startsWith("autary") && fn.endsWith(".list")) {
+        if (fn.contains("autary") && fn.endsWith(".list")) {
             initializeAuthors(file);
             return;
         }
@@ -66,7 +66,7 @@ public class TextParser extends BaseParser {
                 if (replaced != null) {
                     textInfo.authors[i] = replaced;
                 } else {
-                    String[] a = textInfo.authors[i].split("\s+");
+                    String[] a = textInfo.authors[i].split("\\s+");
                     switch (a.length) {
                     case 1:
                         break;

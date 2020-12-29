@@ -113,7 +113,7 @@ public class GrammarServiceImpl {
                 reGrammar = WordsDetailsChecks.getPatternRegexp(rq.grammar);
             }
             if (rq.outputGrammar != null && !rq.outputGrammar.isEmpty()) {
-                reOutputGrammar = WordsDetailsChecks.getWildcardRegexp(rq.outputGrammar);
+                reOutputGrammar = WordsDetailsChecks.getPatternRegexp(rq.outputGrammar);
             }
             if (rq.word != null) {
                 rq.word = rq.word.trim();
@@ -230,6 +230,7 @@ public class GrammarServiceImpl {
     private LemmaInfo createLemmaInfo(Paradigm p, Variant v, Pattern reOutputGrammar) {
         LemmaInfo w = new LemmaInfo();
         w.pdgId = p.getPdgId();
+        w.meaning = p.getMeaning();
         if (reOutputGrammar != null) {
             List<String> fs = new ArrayList<>();
             for (Form f : v.getForm()) {

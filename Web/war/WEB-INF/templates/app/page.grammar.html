@@ -73,6 +73,7 @@
   {{for lemmas}}
     <div class="row">
       <a href="#" onClick="grammarService.loadDetails({{:pdgId}}); return false;">{{>lemma}}</a>
+      {{if meaning}}&nbsp;&nbsp;‘{{>meaning}}’{{/if}}
     </div>
   {{/for}}
 </script>

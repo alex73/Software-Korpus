@@ -1,6 +1,7 @@
 declare var $: any;
 
 class KorpusUI {
+	visitedList: number[];
 	constructor() {
 		this.hideStatusError();
 	}
@@ -190,7 +191,8 @@ class KorpusUI {
 			hasMore: korpusService.hasMore,
 			resultSearch: korpusService.resultSearch,
 			resultKwic: korpusService.resultKwic,
-			resultCluster: korpusService.resultCluster
+			resultCluster: korpusService.resultCluster,
+			visitedList: this.visitedList
 		}));
 	}
 	static separatedStringToArray(v: string): string[] {

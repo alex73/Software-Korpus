@@ -2,36 +2,37 @@ package org.alex73.korpus.compiler;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.text.elements.Paragraph;
 import org.alex73.korpus.text.elements.Sentence;
 import org.alex73.korpus.text.elements.Word;
 
 public class StatProcessing {
-    private final Set<String> authors = Collections.synchronizedSet(new HashSet<>());
-    private final Set<String> sources = Collections.synchronizedSet(new HashSet<>());
     private final Map<String, StatInfo> stats = new HashMap<>();
 
     public void add(TextInfo textInfo, List<Paragraph> content) {
+        StatInfo subcorpusInfo = getStatInfo(textInfo.subcorpus);
         if (textInfo.authors != null) {
             for (String a : textInfo.authors) {
-                authors.add(a);
+                subcorpusInfo.authors.add(a);
             }
         }
         if (textInfo.source != null) {
-            sources.add(textInfo.source);
+            subcorpusInfo.sources.add(textInfo.source);
         }
 
         List<StatInfo> todo = new ArrayList<>();
@@ -78,13 +79,25 @@ public class StatProcessing {
         }
 
         List<String> stat = new ArrayList<>();
-        stat.add("authors=" + String.join(";", authors));
-        stat.add("sources=" + String.join(";", sources));
+        for (Map.Entry<String, StatInfo> en : stats.entrySet()) {
+            if (!en.getValue().authors.isEmpty()) {
+                stat.add("authors." + en.getKey() + "=" + joinSorted(en.getValue().authors));
+            }
+            if (!en.getValue().sources.isEmpty()) {
+                stat.add("sources." + en.getKey() + "=" + joinSorted(en.getValue().sources));
+            }
+        }
         for (Map.Entry<String, StatInfo> en : stats.entrySet()) {
             stat.add("texts." + en.getKey() + "=" + en.getValue().texts);
             stat.add("words." + en.getKey() + "=" + en.getValue().words);
         }
         Files.write(dir.resolve("stat.properties"), stat);
+    }
+
+    private static final Collator BE = Collator.getInstance(new Locale("be"));
+
+    private String joinSorted(Collection<String> list) {
+        return list.stream().sorted(BE).collect(Collectors.joining(";"));
     }
 
     private static final Pattern RE_SPLIT = Pattern.compile(";");
@@ -93,6 +106,8 @@ public class StatProcessing {
         public int texts, words;
         private final Map<String, ParadigmStat> byLemma = new HashMap<>();
         private final Map<String, Integer> byForm = new HashMap<>();
+        final Set<String> authors = Collections.synchronizedSet(new HashSet<>());
+        final Set<String> sources = Collections.synchronizedSet(new HashSet<>());
 
         synchronized void addWord(String value, String[] lemmas) {
             words++;

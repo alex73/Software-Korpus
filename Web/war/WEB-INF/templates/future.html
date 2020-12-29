@@ -1,0 +1,210 @@
+<#assign active = "index">
+<#assign title = "Беларускі N-корпус">
+<#include "header.html">
+
+<div class="container">
+<div id="error" class="alert alert-danger fade show" role="alert"></div>
+<div id="status" class="alert alert-info fade show" role="alert"></div>
+<div style="font-size: 2em;text-align: center;">Праекты ў распрацоўцы</div>
+<p>Тут сабраныя праекты слоўнікаў, якія будуць зробленыя нападставе граматычнай базы і корпуса. Яны яшчэ не скончаныя, таму звесткамі ў іх могуць быць памылковыя.</p>
+
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <a class="nav-link active" id="freq-tab" data-toggle="tab" href="#freq" role="tab" aria-controls="freq" aria-selected="true">Частотны</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link" id="arfa-tab" data-toggle="tab" href="#arfa" role="tab" aria-controls="arfa" aria-selected="false">Арфаграфічны</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link" id="hramatycny-tab" data-toggle="tab" href="#hramatycny" role="tab" aria-controls="hramatycny" aria-selected="false">Граматычны</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link" id="fanietycny-tab" data-toggle="tab" href="#fanietycny" role="tab" aria-controls="fanietycny" aria-selected="false">Фанетычны</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link" id="spaluc-tab" data-toggle="tab" href="#spaluc" role="tab" aria-controls="spaluc" aria-selected="false">Спалучальнасці</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link" id="advarotny-tab" data-toggle="tab" href="#advarotny" role="tab" aria-controls="advarotny" aria-selected="false">Адваротны</a>
+  </li>
+  <li class="nav-item" role="presentation">
+    <a class="nav-link" id="amonimy-tab" data-toggle="tab" href="#amonimy" role="tab" aria-controls="amonimy" aria-selected="false">Амонімаў</a>
+  </li>
+</ul>
+<br/>
+<div class="tab-content" id="myTabContent">
+  <div class="tab-pane fade show active" id="freq" role="tabpanel" aria-labelledby="freq-tab">
+    <form class="form-inline" action="javascript: reqFreq()">
+      Паказаць першыя
+      <input type="text" id="freqCount" class="form-control mx-2" pattern="[0-9]+" title="Мусіць быць лічба">
+      частотныя формы
+      <button type="submit" class="btn btn-danger btn-lg mx-4">Пошук</button>
+    </form>
+  </div>
+  <div class="tab-pane fade" id="arfa" role="tabpanel" aria-labelledby="arfa-tab">
+    <form class="form-inline" action="javascript: reqArfa()">
+      Слова для пошуку: 
+      <input type="text" id="arfaWord" class="form-control mx-2" pattern="\S+" title="Мусіць быць адно слова">
+      <button type="submit" class="btn btn-danger btn-lg mx-4">Пошук</button>
+    </form>
+  </div>
+  <div class="tab-pane fade" id="hramatycny" role="tabpanel" aria-labelledby="hramatycny-tab">
+    <form class="form-inline" action="javascript: reqHramatycny()">
+      Слова для пошуку: 
+      <input type="text" id="hramatycnyWord" class="form-control mx-2" pattern="\S+" title="Мусіць быць адно слова">
+      <button type="submit" class="btn btn-danger btn-lg mx-4">Пошук</button>
+    </form>
+  </div>
+  <div class="tab-pane fade" id="fanietycny" role="tabpanel" aria-labelledby="fanietycny-tab">
+    <form class="form-inline" action="javascript: reqFanietycny()">
+      Слова для пошуку: 
+      <input type="text" id="fanietycnyWord" class="form-control mx-2" pattern="\S+" title="Мусіць быць адно слова">
+      <button type="submit" class="btn btn-danger btn-lg mx-4">Пошук</button>
+    </form>
+  </div>
+  <div class="tab-pane fade" id="spaluc" role="tabpanel" aria-labelledby="spaluc-tab">
+  </div>
+  <div class="tab-pane fade" id="advarotny" role="tabpanel" aria-labelledby="advarotny-tab">
+    <form class="form-inline" action="javascript: reqAdvarotny()">
+      Слова для пошуку: 
+      <input type="text" id="advarotnyWord" class="form-control mx-2" pattern="\S+" title="Мусіць быць адно слова">
+      <button type="submit" class="btn btn-danger btn-lg mx-4">Пошук</button>
+    </form>
+  </div>
+  <div class="tab-pane fade" id="amonimy" role="tabpanel" aria-labelledby="amonimy-tab">
+    <form action="javascript: reqAmonimy()">
+      <div class="row">
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" id="amoFormy" name="amoType" value="FORMY" checked>
+          <label class="form-check-label" for="amoFormy" title="словы, якія звычайна адносяцца да розных часцін мовы і супадаюць толькі ў некаторых марфалагічных формах, напрыклад: вусны (назоўнік множнага ліку) і вусны (прыметнік), кліч (назоўнік) і кліч (дзеяслоў загаднага ладу)">Амаформы (граматычныя амонімы)</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" id="amoFony" name="amoType" value="FONY">
+          <label class="form-check-label" for="amoFony" title="словы, якія аднолькава гучаць, але адрозніваюцца напісаннем і значэннем, напрыклад: грыб — грып, везці — весці">Амафоны (фанетычныя амонімы)</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" id="amoHrafy" name="amoType" value="HRAFY">
+          <label class="form-check-label" for="amoHrafy" title="словы ці формы слоў, якія аднолькава пішуцца, але маюць рознае значэнне і розны націск (па+ра і пара+, пры+клад і прыкла+д)">Амографы (графічныя амонімы)</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" id="amoFull" name="amoLevel" value="FULL" checked>
+          <label class="form-check-label" for="amoFull" title="У якіх супадаюць усе формы">поўныя</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" id="amoPart" name="amoLevel" value="PART">
+          <label class="form-check-label" for="amoPart" title="у якіх супадаюць не ўсе формы">частковыя</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" id="amoSome" name="amoLevel" value="SOME">
+          <label class="form-check-label" for="amoSome" title="асобныя формы якіх супадаюць">асобныя</label>
+        </div>
+      </div>
+      <div class="row justify-content-end">
+        <button type="submit" class="btn btn-danger btn-lg mx-4">Пошук</button>
+      </div>
+    </form>
+  </div>
+</div>
+<br/>
+<div id="out">
+</div>
+</div>
+<script>
+	$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+		$("#out").html('');
+	});
+	function reqFreq() {
+		fetch('freq/'+$('#freqCount').val())
+		      .then(r => {
+		        if (!r.ok) {
+		        	alert("Памылка: " + r.status + " " + r.statusText);
+		        } else {
+		          r.text().then(data => {
+		            $("#out").html(data);
+		          });
+		        }
+		      })
+		      .catch(err => alert("Памылка: " + err));
+	}
+	function reqArfa() {
+		fetch('arfa/'+$('#arfaWord').val())
+		      .then(r => {
+		        if (!r.ok) {
+		        	alert("Памылка: " + r.status + " " + r.statusText);
+		        } else {
+		          r.text().then(data => {
+		            $("#out").html(data);
+		          });
+		        }
+		      })
+		      .catch(err => alert("Памылка: " + err));
+	}
+	function reqHramatycny() {
+		fetch('hramatycny/'+$('#hramatycnyWord').val())
+		      .then(r => {
+		        if (!r.ok) {
+		        	alert("Памылка: " + r.status + " " + r.statusText);
+		        } else {
+		          r.text().then(data => {
+		            $("#out").html(data);
+		          });
+		        }
+		      })
+		      .catch(err => alert("Памылка: " + err));
+	}
+	function reqFanietycny() {
+		fetch('fanietycny/'+$('#fanietycnyWord').val())
+		      .then(r => {
+		        if (!r.ok) {
+		        	alert("Памылка: " + r.status + " " + r.statusText);
+		        } else {
+		          r.text().then(data => {
+		            $("#out").html(data);
+		          });
+		        }
+		      })
+		      .catch(err => alert("Памылка: " + err));
+	}
+	function reqAdvarotny() {
+		fetch('advarotny/'+$('#advarotnyWord').val())
+		      .then(r => {
+		        if (!r.ok) {
+		        	alert("Памылка: " + r.status + " " + r.statusText);
+		        } else {
+		          r.text().then(data => {
+		            $("#out").html(data);
+		          });
+		        }
+		      })
+		      .catch(err => alert("Памылка: " + err));
+	}
+	function reqAmonimy() {
+		let amoType = $("input:radio[name='amoType']:checked").val();
+		let amoLevel = $("input:radio[name='amoLevel']:checked").val();
+		grammarui.showStatus("Loading...");
+		fetch('amonimy/'+amoType+'/'+amoLevel)
+		      .then(r => {
+		        if (!r.ok) {
+		        	alert("Памылка: " + r.status + " " + r.statusText);
+			        grammarui.hideStatusError();
+		        } else {
+		          r.text().then(data => {
+		            $("#out").html(data);
+			        grammarui.hideStatusError();
+		          });
+		        }
+		      })
+		      .catch(err => alert("Памылка: " + err));
+	}
+</script>
+
+<#include "app/dialog.grammardb.html">
+
+<script src="app.js"></script>
+<script>
+  initializeGrammarPage();
+</script>
+
+<#include "footer.html">

@@ -95,6 +95,7 @@ class KorpusService {
 		}
 
 		this.pages = [];
+		korpusui.visitedList = [];
 		this.resultSearch = null;
 		this.resultKwic = null;
 		this.resultCluster = null;

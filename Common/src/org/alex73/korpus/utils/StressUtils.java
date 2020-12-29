@@ -32,6 +32,7 @@ import org.alex73.korpus.base.BelarusianTags;
 public class StressUtils {
 
     public static char STRESS_CHAR = '+';
+    public static String STRESS_CHARS = "+\u0301\u00b4";
 
     public static String unstress(String stressedWord) {
         if (!hasStress(stressedWord)) {
@@ -40,7 +41,7 @@ public class StressUtils {
         StringBuilder s = new StringBuilder();
         for (int i = 0; i < stressedWord.length(); i++) {
             char c = stressedWord.charAt(i);
-            if (c != STRESS_CHAR) {
+            if (STRESS_CHARS.indexOf(c) < 0) {
                 s.append(c);
             }
         }
@@ -48,12 +49,16 @@ public class StressUtils {
     }
 
     public static boolean hasStress(String word) {
-        return word.indexOf(STRESS_CHAR) >= 0;
+        for (int i = 0; i < word.length(); i++) {
+            if (STRESS_CHARS.indexOf(word.charAt(i)) >= 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
-     * Find stress syll by ё, о using possible value. If possible < 0 - find
-     * first.
+     * Find stress syll by ё, о using possible value. If possible < 0 - find first.
      */
     public static int getUsuallyStressedSyll(String word, int possible) {
         int r = 0;
@@ -106,7 +111,7 @@ public class StressUtils {
         for (int i = 0; i < word.length() - 1; i++) {
             char c = word.charAt(i);
             char c1 = word.charAt(i + 1);
-            if (c1 == STRESS_CHAR) {
+            if (STRESS_CHARS.indexOf(c1) >= 0) {
                 return r;
             }
             boolean halosnaja = BelarusianTags.HALOSNYJA.indexOf(c) >= 0;
@@ -129,7 +134,7 @@ public class StressUtils {
         int r = 0;
         for (int i = word.length() - 1; i >= 0; i--) {
             char c = word.charAt(i);
-            if (c == STRESS_CHAR) {
+            if (STRESS_CHARS.indexOf(c) >= 0) {
                 return r;
             }
             boolean halosnaja = BelarusianTags.HALOSNYJA.indexOf(c) >= 0;
@@ -221,7 +226,7 @@ public class StressUtils {
 
     public static String setSyllHal(String word, int pos, char cr) {
         int r = 0;
-        StringBuilder s=new StringBuilder(word);
+        StringBuilder s = new StringBuilder(word);
         for (int i = 0; i < word.length(); i++) {
             char c = word.charAt(i);
             boolean halosnaja = BelarusianTags.HALOSNYJA.indexOf(c) >= 0;
