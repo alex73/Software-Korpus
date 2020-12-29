@@ -5,7 +5,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.alex73.korpus.base.BelarusianWordNormalizer;
+import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.server.data.ClusterParams;
 import org.alex73.korpus.server.data.ClusterResults;
 import org.alex73.korpus.server.data.WordRequest;

@@ -20,7 +20,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
 
-package org.alex73.korpus.base;
+package org.alex73.korpus.belarusian;
 
 import java.util.Locale;
 

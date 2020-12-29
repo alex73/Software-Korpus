@@ -24,11 +24,13 @@ package org.alex73.korpus.base;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import org.alex73.korpus.belarusian.BelarusianTags;
+import org.alex73.korpus.belarusian.TagLetter;
 
 /**
  * Зьбірае усе магчымыя назвы груп і ўсе магчымыя літары тэгаў ва ўсіх
@@ -45,17 +47,6 @@ public class DBTagsGroups {
         for (TagLetter.OneLetterInfo li : tag.letters) {
             wordTypes.add(new KeyValue(Character.toString(li.letter), li.description));
             tagGroupsByWordType.put(li.letter, new DBTagsGroups(li.nextLetters));
-        }
-    }
-
-    public static void sort(final Comparator<String> comparator) {
-        for (DBTagsGroups group : tagGroupsByWordType.values()) {
-            Collections.sort(group.groups, new Comparator<Group>() {
-                @Override
-                public int compare(Group o1, Group o2) {
-                    return ClientUtils.LocaleSensitiveComparator.compare(o1.name, o2.name);
-                }
-            });
         }
     }
 
@@ -163,12 +154,12 @@ public class DBTagsGroups {
         for (TagLetter.OneLetterInfo li : tags.letters) {
             Group gr = getGroup(li.groupName);
             if (gr == null) {
-                gr = new Group(li.groupName, formGroup || tags.isLatestInParadigm);
+                gr = new Group(li.groupName, formGroup || tags.isLatestInParadigm());
                 groups.add(gr);
             }
         }
         for (TagLetter.OneLetterInfo li : tags.letters) {
-            collectGroups(li.nextLetters, formGroup || tags.isLatestInParadigm);
+            collectGroups(li.nextLetters, formGroup || tags.isLatestInParadigm());
         }
     }
 

@@ -3,7 +3,7 @@ package org.alex73.korpus.text.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.alex73.korpus.base.BelarusianWordNormalizer;
+import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.text.elements.Paragraph;
 import org.alex73.korpus.text.elements.Sentence;
 import org.alex73.korpus.text.elements.Word;

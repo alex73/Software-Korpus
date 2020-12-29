@@ -20,7 +20,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
 
-package org.alex73.korpus.base;
+package org.alex73.korpus.belarusian;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +32,7 @@ public class TagLetter {
     public List<OneLetterInfo> letters = new ArrayList<OneLetterInfo>();
 
     /** true if letter must be latest in paradigm */
-    protected boolean isLatestInParadigm;
+    private boolean latestInParadigm;
 
     /**
      * Add child info like:
@@ -71,8 +71,12 @@ public class TagLetter {
         return c;
     }
 
+    public boolean isLatestInParadigm() {
+        return latestInParadigm;
+    }
+
     public TagLetter latestInParadigm() {
-        isLatestInParadigm = true;
+        latestInParadigm = true;
         return this;
     }
 

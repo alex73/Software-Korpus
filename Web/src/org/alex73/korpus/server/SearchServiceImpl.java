@@ -17,8 +17,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
-import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.base.TextInfo;
+import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.server.data.ClusterParams;
 import org.alex73.korpus.server.data.ClusterResults;
 import org.alex73.korpus.server.data.InitialData;

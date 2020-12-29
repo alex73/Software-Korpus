@@ -24,7 +24,7 @@ package org.alex73.korpus.server;
 
 import java.util.List;
 
-import org.alex73.korpus.base.BelarusianWordNormalizer;
+import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.server.data.LatestMark;
 import org.alex73.korpus.server.data.StandardTextRequest;
 import org.alex73.korpus.server.data.WordRequest;

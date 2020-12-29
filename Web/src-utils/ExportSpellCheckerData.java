@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.GrammarDB2;
-import org.alex73.korpus.base.OfficialSpellFilter;
+import org.alex73.korpus.belarusian.OfficialSpellFilter;
 import org.alex73.korpus.utils.SetUtils;
 import org.alex73.korpus.utils.StressUtils;
 import org.apache.commons.io.FileUtils;

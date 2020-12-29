@@ -20,12 +20,12 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
 
-package org.alex73.korpus.base;
+package org.alex73.korpus.belarusian;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.alex73.korpus.base.TagLetter.OneLetterInfo;
+import org.alex73.korpus.belarusian.TagLetter.OneLetterInfo;
 
 public class BelarusianTags {
     public static final String NO_GROUP_ITEM = "не ўжываецца";
@@ -75,7 +75,7 @@ public class BelarusianTags {
     }
 
     private void checkParadigmMarks(TagLetter tl, String code, int pmCount) {
-        if (tl.isLatestInParadigm) {
+        if (tl.isLatestInParadigm()) {
             pmCount++;
         }
         if (tl.isFinish()) {
@@ -97,7 +97,7 @@ public class BelarusianTags {
         if (after == null) {
             return false;
         }
-        if (!after.isLatestInParadigm) {
+        if (!after.isLatestInParadigm()) {
             System.out.println(code + " " + w + " - няправільны тэг парадыгмы");
             return false;
         }

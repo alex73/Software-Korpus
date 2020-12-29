@@ -20,6 +20,7 @@ import org.alex73.corpus.paradigm.FormOptions;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.corpus.paradigm.Wordlist;
+import org.alex73.korpus.belarusian.BelarusianComparators;
 import org.alex73.korpus.utils.StressUtils;
 
 public class GrammarDBSaver {

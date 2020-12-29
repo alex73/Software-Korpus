@@ -5,9 +5,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.alex73.korpus.base.BelarusianWordNormalizer;
 import org.alex73.korpus.base.DBTagsGroups;
 import org.alex73.korpus.base.TextInfo;
+import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.server.engine.LuceneFields;
 import org.alex73.korpus.server.engine.StringArrayTokenStream;
 import org.alex73.korpus.server.text.BinaryParagraphWriter;

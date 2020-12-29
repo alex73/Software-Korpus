@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.alex73.corpus.paradigm.Paradigm;
+import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 
 public class GrammarFinder implements IGrammarFinder {
     private static final int HASHTABLE_SIZE = 256 * 1024;

@@ -22,7 +22,7 @@
 
 package org.alex73.korpus.utils;
 
-import org.alex73.korpus.base.BelarusianTags;
+import org.alex73.korpus.belarusian.BelarusianTags;
 
 /**
  * Some utilities methods for stress processing.

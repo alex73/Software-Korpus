@@ -15,9 +15,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Variant;
-import org.alex73.korpus.base.BelarusianComparators;
-import org.alex73.korpus.base.BelarusianWordNormalizer;
-import org.alex73.korpus.base.OfficialSpellFilter;
+import org.alex73.korpus.belarusian.BelarusianComparators;
+import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
+import org.alex73.korpus.belarusian.OfficialSpellFilter;
 import org.alex73.korpus.server.KorpusApplication;
 import org.alex73.korpus.utils.StressUtils;
 

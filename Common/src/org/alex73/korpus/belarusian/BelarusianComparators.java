@@ -1,4 +1,4 @@
-package org.alex73.korpus.base;
+package org.alex73.korpus.belarusian;
 
 import java.util.Comparator;
 
@@ -86,7 +86,7 @@ public class BelarusianComparators {
     };
     static final String LETTERS = "абвгдеёжзійклмнопрстуўфхцчшыьэюя";
 
-    static int compareChars(char c1, char c2) {
+    public static int compareChars(char c1, char c2) {
         int p1 = LETTERS.indexOf(c1);
         int p2 = LETTERS.indexOf(c2);
         return p1 == p2 ? Character.compare(c1, c2) : p1 - p2;

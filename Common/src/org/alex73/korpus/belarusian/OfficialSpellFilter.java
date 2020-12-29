@@ -1,4 +1,4 @@
-package org.alex73.korpus.base;
+package org.alex73.korpus.belarusian;
 
 import java.util.List;
 import java.util.function.Predicate;
