@@ -2,10 +2,10 @@ package org.alex73.korpus.future;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -31,8 +31,8 @@ public class Fanietycny extends FutureBaseServlet {
         word = BelarusianWordNormalizer.lightNormalized(word.trim());
         Pattern re = Pattern.compile(word.replace("+", "").replace("*", ".*").replace('?', '.'));
 
-        List<Pair> data = Collections.synchronizedList(new ArrayList<>());
-        KorpusApplication.instance.gr.getAllParadigms().parallelStream().forEach(p -> {
+        List<Out> result = KorpusApplication.instance.gr.getAllParadigms().parallelStream().flatMap(p -> {
+            List<Out> data = new ArrayList<>();
             for (Variant v : p.getVariant()) {
                 List<Form> forms = OfficialSpellFilter.getAcceptedForms(p, v);
                 if (forms == null || forms.isEmpty()) {
@@ -41,34 +41,44 @@ public class Fanietycny extends FutureBaseServlet {
                 for (Form f : v.getForm()) {
                     Matcher m = re.matcher(StressUtils.unstress(f.getValue()));
                     if (m.matches()) {
-                        data.add(new Pair(f.getValue()));
+                        data.add(new Out(f.getValue()));
                     }
                 }
             }
-        });
-        Collections.sort(data);
+            return data.stream();
+        }).sequential().sorted().distinct().collect(Collectors.toList());
 
-        output("future/fanietycny.html", data, resp);
+        output("future/fanietycny.html", result, resp);
     }
 
-    public static class Pair implements Comparable<Pair> {
+    public static class Out implements Comparable<Out> {
         private final String word;
 
-        public Pair(String word) {
-            this.word = StressUtils.combineAccute(word);
+        public Out(String word) {
+            this.word = word;
         }
 
         public String getWord() {
-            return word;
+            return StressUtils.combineAccute(word);
         }
 
-        public String getFanietyka() {
+        public String getIpa() {
             return new FanetykaText(word.replace('+', '´')).ipa;
         }
 
+        public String getSkola() {
+            return new FanetykaText(word.replace('+', '´')).skola;
+        }
+
         @Override
-        public int compareTo(Pair o) {
+        public int compareTo(Out o) {
             return BelarusianComparators.FULL.compare(word, o.word);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            Out o = (Out) obj;
+            return word.equals(o.word);
         }
     }
 }

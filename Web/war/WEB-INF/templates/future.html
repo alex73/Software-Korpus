@@ -3,8 +3,6 @@
 <#include "header.html">
 
 <div class="container">
-<div id="error" class="alert alert-danger fade show" role="alert"></div>
-<div id="status" class="alert alert-info fade show" role="alert"></div>
 <div style="font-size: 2em;text-align: center;">Праекты ў распрацоўцы</div>
 <p>Тут сабраныя праекты слоўнікаў, якія будуць зробленыя нападставе граматычнай базы і корпуса. Яны яшчэ не скончаныя, таму звесткамі ў іх могуць быць памылковыя.</p>
 
@@ -79,15 +77,15 @@
           <label class="form-check-label" for="amoFormy" title="словы, якія звычайна адносяцца да розных часцін мовы і супадаюць толькі ў некаторых марфалагічных формах, напрыклад: вусны (назоўнік множнага ліку) і вусны (прыметнік), кліч (назоўнік) і кліч (дзеяслоў загаднага ладу)">Амаформы (граматычныя амонімы)</label>
         </div>
         <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" id="amoFony" name="amoType" value="FONY">
-          <label class="form-check-label" for="amoFony" title="словы, якія аднолькава гучаць, але адрозніваюцца напісаннем і значэннем, напрыклад: грыб — грып, везці — весці">Амафоны (фанетычныя амонімы)</label>
-        </div>
-        <div class="form-check form-check-inline">
           <input class="form-check-input" type="radio" id="amoHrafy" name="amoType" value="HRAFY">
           <label class="form-check-label" for="amoHrafy" title="словы ці формы слоў, якія аднолькава пішуцца, але маюць рознае значэнне і розны націск (па+ра і пара+, пры+клад і прыкла+д)">Амографы (графічныя амонімы)</label>
         </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" id="amoFony" name="amoType" value="FONY">
+          <label class="form-check-label" for="amoFony" title="словы, якія аднолькава гучаць, але адрозніваюцца напісаннем і значэннем, напрыклад: грыб — грып, везці — весці">Амафоны (фанетычныя амонімы)</label>
+        </div>
       </div>
-      <div class="row">
+      <div class="row d-none">
         <div class="form-check form-check-inline">
           <input class="form-check-input" type="radio" id="amoFull" name="amoLevel" value="FULL" checked>
           <label class="form-check-label" for="amoFull" title="У якіх супадаюць усе формы">поўныя</label>
@@ -108,6 +106,8 @@
   </div>
 </div>
 <br/>
+<div id="error" class="alert alert-danger fade show" role="alert"></div>
+<div id="status" class="alert alert-info fade show" role="alert"></div>
 <div id="out">
 </div>
 </div>
@@ -115,88 +115,41 @@
 	$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 		$("#out").html('');
 	});
-	function reqFreq() {
-		fetch('freq/'+$('#freqCount').val())
+	function req(url) {
+        grammarui.hideStatusError();
+		grammarui.showStatus("Запыт...");
+		fetch(url)
 		      .then(r => {
 		        if (!r.ok) {
-		        	alert("Памылка: " + r.status + " " + r.statusText);
+		        	grammarui.showError("Памылка: " + r.status + " " + r.statusText);
 		        } else {
 		          r.text().then(data => {
 		            $("#out").html(data);
+			        grammarui.hideStatusError();
 		          });
 		        }
 		      })
-		      .catch(err => alert("Памылка: " + err));
+		      .catch(err => grammarui.showError("Памылка: " + err));
+	}
+	function reqFreq() {
+		req('freq/'+$('#freqCount').val());
 	}
 	function reqArfa() {
-		fetch('arfa/'+$('#arfaWord').val())
-		      .then(r => {
-		        if (!r.ok) {
-		        	alert("Памылка: " + r.status + " " + r.statusText);
-		        } else {
-		          r.text().then(data => {
-		            $("#out").html(data);
-		          });
-		        }
-		      })
-		      .catch(err => alert("Памылка: " + err));
+		req('arfa/'+$('#arfaWord').val());
 	}
 	function reqHramatycny() {
-		fetch('hramatycny/'+$('#hramatycnyWord').val())
-		      .then(r => {
-		        if (!r.ok) {
-		        	alert("Памылка: " + r.status + " " + r.statusText);
-		        } else {
-		          r.text().then(data => {
-		            $("#out").html(data);
-		          });
-		        }
-		      })
-		      .catch(err => alert("Памылка: " + err));
+		req('hramatycny/'+$('#hramatycnyWord').val());
 	}
 	function reqFanietycny() {
-		fetch('fanietycny/'+$('#fanietycnyWord').val())
-		      .then(r => {
-		        if (!r.ok) {
-		        	alert("Памылка: " + r.status + " " + r.statusText);
-		        } else {
-		          r.text().then(data => {
-		            $("#out").html(data);
-		          });
-		        }
-		      })
-		      .catch(err => alert("Памылка: " + err));
+		req('fanietycny/'+$('#fanietycnyWord').val());
 	}
 	function reqAdvarotny() {
-		fetch('advarotny/'+$('#advarotnyWord').val())
-		      .then(r => {
-		        if (!r.ok) {
-		        	alert("Памылка: " + r.status + " " + r.statusText);
-		        } else {
-		          r.text().then(data => {
-		            $("#out").html(data);
-		          });
-		        }
-		      })
-		      .catch(err => alert("Памылка: " + err));
+		req('advarotny/'+$('#advarotnyWord').val());
 	}
 	function reqAmonimy() {
 		let amoType = $("input:radio[name='amoType']:checked").val();
 		let amoLevel = $("input:radio[name='amoLevel']:checked").val();
-		grammarui.showStatus("Loading...");
-		fetch('amonimy/'+amoType+'/'+amoLevel)
-		      .then(r => {
-		        if (!r.ok) {
-		        	alert("Памылка: " + r.status + " " + r.statusText);
-			        grammarui.hideStatusError();
-		        } else {
-		          r.text().then(data => {
-		            $("#out").html(data);
-			        grammarui.hideStatusError();
-		          });
-		        }
-		      })
-		      .catch(err => alert("Памылка: " + err));
+		req('amonimy/'+amoType+'/'+amoLevel);
 	}
 </script>
 

@@ -1,5 +1,7 @@
 <table class="table-zebra hspacing">
     <#list data as row>
-      ${row}
+      <tr><td>${row.word?html}</td>
+      <td><span style="color: #880; font-style: italic;">${row.grammar?html}</span>
+      <br/>${row.list}</td></tr>
     </#list>
 </table>

@@ -1,12 +1,14 @@
 <table class="table-zebra hspacing">
-    <tr>
+    <thead>
       <th>Слова</th>
-      <th>Фанетыка</th>
-    </tr>
+      <th>IPA</th>
+      <th>Школьная транскрыпцыя</th>
+    </thead>
     <#list data as row>
       <tr>
         <td style="white-space: nowrap;">${row.word?html}</td>
-        <td style="white-space: nowrap;">${row.fanietyka?html}</td>
+        <td style="white-space: nowrap;">${row.ipa?html}</td>
+        <td style="white-space: nowrap;">${row.skola?html}</td>
       </tr>
     </#list>
 </table>

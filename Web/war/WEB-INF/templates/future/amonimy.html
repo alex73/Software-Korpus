@@ -1,12 +1,27 @@
-<table class="table-zebra hspacing">
+<table class="table-zebra hspacing" style="width: 100%; table-layout: fixed;">
+    <thead>
+      <th>Амонімы</th>
+      <th>Падобныя формы</th>
+      <th>Парадыгмы</th>
+    </thead>
     <#list data as row>
       <tr>
-        <td style="white-space: nowrap;">
-          ${row.key?html} :
+        <td>
+          <#list row.keys as k>
+            <span style="white-space: nowrap;">${k?html}</span>
+          </#list>
+        </td>
+        <td>
+          <#list row.byForms as f>
+            <span style="white-space: nowrap;">${f?html}</span>
+          </#list>
+        </td>
+        <td>
           <#list row.details as w>
-            <a href="#" title="${w.title?html}" onClick="grammarService.loadDetails(${w.pdgId?c}); return false;">${w.lemma?html}</a>
+            <a href="#" title="${w.title?html}" style="white-space: nowrap;" onClick="grammarService.loadDetails(${w.pdgId?c}); return false;">${w.lemma?html}</a>
           </#list>
         </td>
       </tr>
     </#list>
 </table>
+Колькасць: ${data?size}
