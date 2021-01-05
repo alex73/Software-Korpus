@@ -28,6 +28,7 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;attribute name="id" type="{}latin_char" />
  *       &lt;attribute name="lemma" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="tag" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="slouniki" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="pravapis" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="type" type="{}VariantType" />
  *       &lt;attribute name="rules" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -59,6 +60,8 @@ public class Variant {
     protected String lemma;
     @XmlAttribute(name = "tag")
     protected String tag;
+    @XmlAttribute(name = "slouniki")
+    protected String slouniki;
     @XmlAttribute(name = "pravapis")
     protected String pravapis;
     @XmlAttribute(name = "type")
@@ -223,6 +226,30 @@ public class Variant {
      */
     public void setTag(String value) {
         this.tag = value;
+    }
+
+    /**
+     * Gets the value of the slouniki property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getSlouniki() {
+        return slouniki;
+    }
+
+    /**
+     * Sets the value of the slouniki property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setSlouniki(String value) {
+        this.slouniki = value;
     }
 
     /**

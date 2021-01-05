@@ -54,7 +54,7 @@ import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.DBTagsGroups;
 import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
-import org.alex73.korpus.belarusian.OfficialSpellFilter;
+import org.alex73.korpus.belarusian.FormsReadyFilter;
 import org.alex73.korpus.server.data.GrammarInitial;
 import org.alex73.korpus.shared.LemmaInfo;
 import org.alex73.korpus.utils.SetUtils;
@@ -200,7 +200,7 @@ public class GrammarServiceImpl {
     private void createLemmaInfoFromParadigm(Paradigm p, Predicate<String> checkWord, boolean multiform,
             Pattern reOutputGrammar, Pattern reGrammar, List<LemmaInfo> result) {
         for (Variant v : p.getVariant()) {
-            List<Form> forms = OfficialSpellFilter.getAcceptedForms(p, v);
+            List<Form> forms = FormsReadyFilter.getAcceptedForms(p, v);
             if (forms == null) {
                 return;
             }
@@ -297,7 +297,7 @@ public class GrammarServiceImpl {
     LemmaInfo.LemmaParadigm conv(Paradigm p) {
         LemmaInfo.LemmaParadigm r = new LemmaInfo.LemmaParadigm();
         for (Variant v : p.getVariant()) {
-            List<Form> forms = OfficialSpellFilter.getAcceptedForms(p, v);
+            List<Form> forms = FormsReadyFilter.getAcceptedForms(p, v);
             if (forms == null) {
                 continue;
             }

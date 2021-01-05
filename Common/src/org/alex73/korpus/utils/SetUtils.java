@@ -63,8 +63,16 @@ public class SetUtils {
         return hasTag(f.getSlouniki(), slounik);
     }
 
+    public static boolean hasSlounik(Variant v, String slounik) {
+        return hasTag(v.getSlouniki(), slounik);
+    }
+
     public static void addSlounik(Form f, String slounik) {
         f.setSlouniki(addTag(f.getSlouniki(), slounik));
+    }
+
+    public static void addSlounik(Variant v, String slounik) {
+        v.setSlouniki(addTag(v.getSlouniki(), slounik));
     }
 
     public static void removeSlounik(Form f, String slounik) {

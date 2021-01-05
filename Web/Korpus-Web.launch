@@ -22,6 +22,6 @@
     <booleanAttribute key="org.eclipse.jdt.launching.DEFAULT_CLASSPATH" value="false"/>
     <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.8.0_251"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="start"/>
-    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dcatalina.base=&quot;/home/alex/Workspace/.metadata/.plugins/org.eclipse.wst.server.core/tmp0&quot; -Dcatalina.home=&quot;/opt/apache-tomcat-9.0.37&quot; -Dwtp.deploy=&quot;/home/alex/Workspace&quot; -Djava.endorsed.dirs=&quot;/opt/apache-tomcat-9.0.37/endorsed&quot; -DCONFIG_DIR=/data/gits/korpus-code/Web/config -DKORPUS_DIR=/data/gits/korpus-code"/>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Dcatalina.base=&quot;/home/alex/Workspace/.metadata/.plugins/org.eclipse.wst.server.core/tmp0&quot; -Dcatalina.home=&quot;/opt/apache-tomcat-9.0.37&quot; -Dwtp.deploy=&quot;/home/alex/Workspace&quot; -Djava.endorsed.dirs=&quot;/opt/apache-tomcat-9.0.37/endorsed&quot; -DCONFIG_DIR=/data/gits/korpus-code/Web/config -DKORPUS_CACHE=/data/gits/korpus-code/Korpus-cache -DGRAMMAR_DB=/data/gits/korpus-code/GrammarDB"/>
     <stringAttribute key="server-id" value="Tomcat v9.0 Server at localhost"/>
 </launchConfiguration>

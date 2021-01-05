@@ -36,12 +36,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ApplicationPath("rest")
 public class KorpusApplication extends Application {
-    public String korpusDir = System.getProperty("KORPUS_DIR");
+    public String korpusCache = System.getProperty("KORPUS_CACHE");
+    public String grammarDb = System.getProperty("GRAMMAR_DB");
     public String configDir = System.getProperty("CONFIG_DIR");
 
     List<String> settings;
     Properties stat;
-    List<TextInfo> textInfos;
+    private List<String> textInfos;
     public GrammarDB2 gr;
     public GrammarFinder grFinder;
     GrammarInitial grammarInitial;
@@ -58,8 +59,11 @@ public class KorpusApplication extends Application {
         try {
             InitialContext context = new InitialContext();
             Context xmlNode = (Context) context.lookup("java:comp/env");
-            if (korpusDir == null) {
-                korpusDir = (String) xmlNode.lookup("KORPUS_DIR");
+            if (korpusCache == null) {
+                korpusCache = (String) xmlNode.lookup("KORPUS_CACHE");
+            }
+            if (grammarDb == null) {
+                grammarDb = (String) xmlNode.lookup("GRAMMAR_DB");
             }
             if (configDir == null) {
                 configDir = (String) xmlNode.lookup("CONFIG_DIR");
@@ -68,20 +72,28 @@ public class KorpusApplication extends Application {
                 System.err.println("CONFIG_DIR is not defined");
                 return;
             }
-            if (korpusDir == null) {
+            if (korpusCache == null) {
                 System.err.println("KORPUS_DIR is not defined");
                 return;
             }
+            if (grammarDb == null) {
+                System.err.println("GRAMMAR_DB is not defined");
+                return;
+            }
             settings = Files.readAllLines(Paths.get(configDir + "/settings.ini"));
-            stat = loadSettings(korpusDir + "/Korpus-cache/stat.properties");
+            stat = loadSettings(korpusCache + "/stat.properties");
             readTextInfos();
 
-            gr = GrammarDB2.initializeFromDir(korpusDir + "/GrammarDB/");
+            if (!grammarDb.isEmpty()) {
+                gr = GrammarDB2.initializeFromDir(grammarDb);
+            } else {
+                gr = GrammarDB2.empty();
+            }
             System.out.println("GrammarDB loaded with " + gr.getAllParadigms().size() + " paradigms. Used memory: "
                     + getUsedMemory());
             grFinder = new GrammarFinder(gr);
             System.out.println("GrammarDB indexed. Used memory: " + getUsedMemory());
-            processKorpus = new LuceneFilter(korpusDir + "/Korpus-cache/");
+            processKorpus = new LuceneFilter(korpusCache);
             System.out.println("Lucene initialized");
 
             prepareInitial();
@@ -148,14 +160,15 @@ public class KorpusApplication extends Application {
     }
 
     protected void readTextInfos() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        textInfos = Files.readAllLines(Paths.get(korpusDir + "/Korpus-cache/texts.jsons")).stream().map(s -> {
-            try {
-                return mapper.readValue(s, TextInfo.class);
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-        }).collect(Collectors.toList());
+        textInfos = Files.readAllLines(Paths.get(korpusCache + "/texts.jsons"));
+    }
+
+    public TextInfo getTextInfo(int pos) {
+        try {
+            return new ObjectMapper().readValue(textInfos.get(pos), TextInfo.class);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     @PreDestroy

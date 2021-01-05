@@ -18,7 +18,7 @@ import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.belarusian.BelarusianComparators;
 import org.alex73.korpus.belarusian.BelarusianTags;
 import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
-import org.alex73.korpus.belarusian.OfficialSpellFilter;
+import org.alex73.korpus.belarusian.FormsReadyFilter;
 import org.alex73.korpus.server.KorpusApplication;
 import org.alex73.korpus.utils.SetUtils;
 import org.alex73.korpus.utils.StressUtils;
@@ -36,7 +36,7 @@ public class Hramatycny extends FutureBaseServlet {
         List<Out> data = Collections.synchronizedList(new ArrayList<>());
         KorpusApplication.instance.gr.getAllParadigms().parallelStream().forEach(p -> {
             for (Variant v : p.getVariant()) {
-                List<Form> forms = OfficialSpellFilter.getAcceptedForms(p, v);
+                List<Form> forms = FormsReadyFilter.getAcceptedForms(p, v);
                 if (forms == null || forms.isEmpty()) {
                     continue;
                 }

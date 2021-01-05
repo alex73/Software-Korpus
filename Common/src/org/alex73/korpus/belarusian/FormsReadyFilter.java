@@ -15,15 +15,25 @@ import org.alex73.korpus.utils.SetUtils;
  * Фільтруе толькі тыя варыянты і формы, якія варта паказваць карыстальніку і
  * экспартаваць у праверку правапісу.
  */
-public class OfficialSpellFilter {
-    private static Predicate<Form> standardForms = (f) -> (f.getType() == null || f.getType() == FormType.NUMERAL);
+public class FormsReadyFilter {
+    public enum MODE {
+        // spell checker - A2008 with official dictionaries
+        SPELL,
+        // for show - A2008 with any dictionaries
+        SHOW
+    };
 
-    public static List<Form> getAcceptedForms(Paradigm p, Variant v) {
+    public static List<Form> getAcceptedForms(MODE mode, Paradigm p, Variant v) {
         String tag = SetUtils.tag(p, v);
         if (tag.startsWith("K") || tag.startsWith("F") || v.getLemma().contains(" ") || v.getForm().isEmpty()) {
             return null;
         }
         boolean hasSlouniki = false;
+        if (mode == MODE.SHOW) {
+            if (!v.getSlounik().isEmpty()) {
+                hasSlouniki = true; // правапіс - без піскунова, база - з піскуновым
+            }
+        }
         if (v.getForm().get(0).getSlouniki() != null) {
             for (String sl : v.getForm().get(0).getSlouniki().split(",")) {
                 if (sl.equals("piskunou2012") || sl.equals("tsbm2016")) {
@@ -47,4 +57,6 @@ public class OfficialSpellFilter {
         List<Form> r = result.filter(standardForms).filter(f -> !f.getValue().isEmpty()).collect(Collectors.toList());
         return r.isEmpty() ? null : r;
     }
+
+    private static Predicate<Form> standardForms = (f) -> (f.getType() == null || f.getType() == FormType.NUMERAL);
 }

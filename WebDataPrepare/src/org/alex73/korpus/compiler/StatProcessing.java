@@ -20,6 +20,7 @@ import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.text.elements.Paragraph;
 import org.alex73.korpus.text.elements.Sentence;
 import org.alex73.korpus.text.elements.Word;
+import org.alex73.korpus.utils.StressUtils;
 
 public class StatProcessing {
     private final Map<String, StatInfo> stats = new HashMap<>();
@@ -54,10 +55,8 @@ public class StatProcessing {
         for (Paragraph p : content) {
             for (Sentence se : p.sentences) {
                 for (Word w : se.words) {
-                    if (w.lemmas != null && !w.lemmas.isEmpty()) {
-                        String[] lemmas = RE_SPLIT.split(w.lemmas);
-                        todo.forEach(s -> s.addWord(w.lightNormalized, lemmas));
-                    }
+                    String[] lemmas = w.lemmas == null || w.lemmas.isEmpty() ? null : RE_SPLIT.split(w.lemmas);
+                    todo.forEach(s -> s.addWord(w.lightNormalized, lemmas));
                 }
             }
         }
@@ -111,21 +110,22 @@ public class StatProcessing {
 
         synchronized void addWord(String value, String[] lemmas) {
             words++;
-            float part = 1.0f / lemmas.length;
-            for (String lemma : lemmas) {
-                if (lemma.isEmpty()) {
-                    continue;
+            String formKey = StressUtils.unstress(value).toLowerCase();
+            if (!formKey.isEmpty()) {
+                if (formKey.charAt(0) == 'ў') {
+                    formKey = 'у' + formKey.substring(1);
                 }
-                ParadigmStat ps;
-                synchronized (this) {
-                    String formKey = value.toLowerCase();
-                    if (formKey.charAt(0) == 'ў') {
-                        formKey = 'у' + formKey.substring(1);
+                Integer fc = byForm.get(formKey);
+                fc = fc == null ? 1 : fc.intValue() + 1;
+                byForm.put(formKey, fc);
+            }
+            if (lemmas != null) {
+                float part = 1.0f / lemmas.length;
+                for (String lemma : lemmas) {
+                    if (lemma.isEmpty()) {
+                        continue;
                     }
-                    Integer fc = byForm.get(formKey);
-                    fc = fc == null ? 1 : fc.intValue() + 1;
-                    byForm.put(formKey, fc);
-                    ps = byLemma.get(lemma);
+                    ParadigmStat ps = byLemma.get(lemma);
                     if (ps == null) {
                         ps = new ParadigmStat();
                         ps.para = lemma;

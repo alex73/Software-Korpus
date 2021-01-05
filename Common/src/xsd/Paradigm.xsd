@@ -137,6 +137,11 @@
       <xs:attribute name="id" type="latin_char" use="optional"/>
       <xs:attribute name="lemma" type="xs:string" use="required" />
       <xs:attribute name="tag" type="xs:string" use="optional" />
+      <xs:attribute name="slouniki" type="xs:string" use="optional">
+        <xs:annotation>
+          <xs:documentation>У якіх слоўніках сустракаецца</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
       <xs:attribute name="pravapis" type="xs:string" use="optional">
         <xs:annotation>
           <xs:documentation>Правапіс: A1933,A1957,A2008,T1929,K2005,NIEST</xs:documentation>

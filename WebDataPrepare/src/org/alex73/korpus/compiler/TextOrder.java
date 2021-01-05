@@ -99,32 +99,35 @@ public class TextOrder implements Comparator<TextInfo> {
     Comparator<TextInfo> telegram = (o1, o2) -> {
         // першыя - найбольш познія. не пазначана дата - на канец
         int c = Long.compare(latestPublication(o2, Long.MAX_VALUE), latestPublication(o1, Long.MAX_VALUE));
+        if (c == 0) {
+            c = compare(o1.source, o2.source);
+        }
         return c;
     };
 
     static long earliestCreationPublication(TextInfo ti, long defaultValue) {
-        if (ti.creationTime != null) {
-            return new KorpusDateTime(ti.creationTime).earliest();
-        } else if (ti.publicationTime != null) {
-            return new KorpusDateTime(ti.publicationTime).earliest();
+        if (ti.creationTimeEarliest() != null) {
+            return ti.creationTimeEarliest();
+        } else if (ti.publicationTimeEarliest() != null) {
+            return ti.publicationTimeEarliest();
         } else {
             return defaultValue;
         }
     }
 
     static long earliestPublication(TextInfo ti, long defaultValue) {
-        if (ti.publicationTime != null) {
-            return new KorpusDateTime(ti.publicationTime).earliest();
+        if (ti.publicationTimeEarliest() != null) {
+            return ti.publicationTimeEarliest();
         } else {
             return defaultValue;
         }
     }
 
     static long latestPublication(TextInfo ti, long defaultValue) {
-        if (ti.creationTime != null) {
-            return new KorpusDateTime(ti.creationTime).latest();
-        } else if (ti.publicationTime != null) {
-            return new KorpusDateTime(ti.publicationTime).latest();
+        if (ti.creationTimeLatest() != null) {
+            return ti.creationTimeLatest();
+        } else if (ti.publicationTimeLatest() != null) {
+            return ti.publicationTimeLatest();
         } else {
             return defaultValue;
         }

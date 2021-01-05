@@ -27,10 +27,8 @@ public class KorpusDateTime {
     static Pattern RE_DATE3 = Pattern.compile("([0-9]{4})\\-([0-9]{2})\\-([0-9]{2})");
     static Pattern RE_MONTH1 = Pattern.compile(
             "(студзень|люты|сакавік|красавік|травень|май|чэрвень|ліпень|жнівень|верасень|кастрычнік|лістапад|снежань)\\s+([0-9]{4})");
-    static Pattern RE_DATETIME1 = Pattern
-            .compile("([0-9]{4})\\-([0-9]{2})\\-([0-9]{2})T([0-9]{2})\\:([0-9]{2})\\:([0-9]{2})");
-    static Pattern RE_DATETIME2 = Pattern.compile(
-            "([0-9]{4})\\-([0-9]{2})\\-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})[\\-+]([0-9]{2}):([0-9]{2})");
+    static Pattern RE_DATETIME = Pattern.compile(
+            "([0-9]{4})\\-([0-9]{2})\\-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(\\.[0-9]{3})?([\\-+]([0-9]{2}):([0-9]{2}))?");
     static List<String> months = Arrays.asList("студзень", "люты", "сакавік", "красавік", "травень", "май", "чэрвень",
             "ліпень", "жнівень", "верасень", "кастрычнік", "лістапад", "снежань");
 
@@ -47,7 +45,10 @@ public class KorpusDateTime {
             }
             Matcher m;
             XMLGregorianCalendar d1, d2;
-            if ((m = RE_YEAR_SIMPLE.matcher(y)).matches()) {
+            if (y.indexOf('T') > 0 && RE_DATETIME.matcher(y).matches()) {
+                d1 = DTFACTORY.newXMLGregorianCalendar(y);
+                d2 = d1;
+            } else if ((m = RE_YEAR_SIMPLE.matcher(y)).matches()) {
                 d1 = DTFACTORY.newXMLGregorianCalendarDate(Integer.parseInt(m.group(1)),
                         DatatypeConstants.FIELD_UNDEFINED, DatatypeConstants.FIELD_UNDEFINED,
                         DatatypeConstants.FIELD_UNDEFINED);
@@ -75,9 +76,6 @@ public class KorpusDateTime {
             } else if ((m = RE_MONTH1.matcher(y)).matches()) {
                 d1 = DTFACTORY.newXMLGregorianCalendarDate(Integer.parseInt(m.group(2)), months.indexOf(m.group(1)) + 1,
                         DatatypeConstants.FIELD_UNDEFINED, DatatypeConstants.FIELD_UNDEFINED);
-                d2 = d1;
-            } else if (RE_DATETIME1.matcher(y).matches() || RE_DATETIME2.matcher(y).matches()) {
-                d1 = DTFACTORY.newXMLGregorianCalendar(y);
                 d2 = d1;
             } else {
                 throw new RuntimeException("Wrong date format: " + date);

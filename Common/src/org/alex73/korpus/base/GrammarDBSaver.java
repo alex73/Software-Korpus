@@ -20,10 +20,10 @@ import org.alex73.corpus.paradigm.FormOptions;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.corpus.paradigm.Wordlist;
-import org.alex73.korpus.belarusian.BelarusianComparators;
 import org.alex73.korpus.utils.StressUtils;
 
 public class GrammarDBSaver {
+    static final String LETTERS = "абвгдеёжзіклмнопрстуфхцчшыьэюя";
 
     private static String getFileForParadigm(Paradigm p) {
         String ptag;
@@ -42,14 +42,14 @@ public class GrammarDBSaver {
         } else if (p.getVariant().stream().allMatch(v -> v.getForm().isEmpty())) {
             return ptag.substring(0, 1) + "_.xml";
         } else if (ptag.startsWith("A")) {
-            char s = BelarusianComparators.compareChars(p.getLemma().toLowerCase().charAt(0), 'о') < 0 ? '1' : '2';
+            char s = LETTERS.indexOf(p.getLemma().toLowerCase().charAt(0)) < LETTERS.indexOf('о') ? '1' : '2';
             return ptag.substring(0, 1) + s + ".xml";
         } else if (ptag.startsWith("N")) {
             char f = p.getLemma().toLowerCase().charAt(0);
             char s;
-            if (f < 'к') {
+            if (LETTERS.indexOf(f) < LETTERS.indexOf('к')) {
                 s = '1';
-            } else if (f < 'р') {
+            } else if (LETTERS.indexOf(f) < LETTERS.indexOf('р')) {
                 s = '2';
             } else {
                 s = '3';
@@ -93,7 +93,7 @@ public class GrammarDBSaver {
         Marshaller m = GrammarDB2.getContext().createMarshaller();
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         for (String fn : es.keySet()) {
-            Wordlist wl=es.get(fn);
+            Wordlist wl = es.get(fn);
             Collections.sort(wl.getParadigm(), COMPARATOR);
             m.marshal(wl, new File(dir, fn));
         }
@@ -117,6 +117,7 @@ public class GrammarDBSaver {
         Paradigm r = (Paradigm) unm.unmarshal(new ByteArrayInputStream(out.toByteArray()));
         return r;
     }
+
     public static Variant cloneVariant(Variant v) throws Exception {
         Marshaller m = GrammarDB2.getContext().createMarshaller();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -127,9 +128,9 @@ public class GrammarDBSaver {
     }
 
     /**
-     * TODO: сартаваць склоны файл A: сартуем: па 1 літары(род) : MNFP 2
-     * (склон): NGDAIL 3 (лік): SP файл N: (ад прыметнікаў - як прыметнікі)
-     * формы MNS - мужчынскі сартуем: па 1 літары(склон): NGDAIL 2 (лік): SP
+     * TODO: сартаваць склоны файл A: сартуем: па 1 літары(род) : MNFP 2 (склон):
+     * NGDAIL 3 (лік): SP файл N: (ад прыметнікаў - як прыметнікі) формы MNS -
+     * мужчынскі сартуем: па 1 літары(склон): NGDAIL 2 (лік): SP
      */
     static public Comparator<Form> COMPARATOR_FORM_PRYM = new Comparator<Form>() {
         public int compare(Form o1, Form o2) {
@@ -148,8 +149,8 @@ public class GrammarDBSaver {
                     p2 = "NGDAIL".indexOf(o2.getTag().charAt(1));
                 }
                 if (p1 == p2) {
-                    p1=formOptionIndex(o1.getOptions());
-                    p2=formOptionIndex(o2.getOptions());
+                    p1 = formOptionIndex(o1.getOptions());
+                    p2 = formOptionIndex(o2.getOptions());
                 }
                 return p1 - p2;
             } catch (StringIndexOutOfBoundsException ex) {
@@ -188,7 +189,8 @@ public class GrammarDBSaver {
     };
 
     /**
-     * Сартуем дзеясловы: 0; F/R 1S, F/R 2S, F/R R3S; F/R 1P, F/R 2P, F/R R3P; PMS,PFS,PNS,PXP; I2S, I2P; PG/RG  
+     * Сартуем дзеясловы: 0; F/R 1S, F/R 2S, F/R R3S; F/R 1P, F/R 2P, F/R R3P;
+     * PMS,PFS,PNS,PXP; I2S, I2P; PG/RG
      */
     static public Comparator<Form> COMPARATOR_FORM_DZSL = new Comparator<Form>() {
         public int compare(Form o1, Form o2) {

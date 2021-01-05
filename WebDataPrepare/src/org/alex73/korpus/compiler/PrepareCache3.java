@@ -1,5 +1,6 @@
 package org.alex73.korpus.compiler;
 
+import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,16 +20,19 @@ import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.text.elements.Paragraph;
 import org.alex73.korpus.text.parser.IProcess;
-import org.alex73.korpus.utils.KorpusDateTime;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class PrepareCache3 {
+    private static final Logger LOG = LoggerFactory.getLogger(PrepareCache3.class);
+
     public static final boolean writeToLucene = true;
-    public static final Path INPUT = Paths.get("Korpus-texts/");
-    static final Path OUTPUT = Paths.get("/home/alex/Korpus-cache/");
+    public static Path INPUT;
+    public static Path OUTPUT;
     static StaticGrammarFiller2 grFiller;
     static LuceneDriverWrite lucene;
     public static List<TextInfo> textInfos = Collections.synchronizedList(new ArrayList<>());
@@ -42,23 +46,40 @@ public class PrepareCache3 {
     public static void main(String[] args) throws Exception {
         System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "32");
 
-        Thread.currentThread().setName("Main parsing thread");
+        String input = getKey("input", args);
+        String output = getKey("output", args);
+        String grammardb = getKey("grammardb", args);
+        if (input == null) {
+            throw new Exception("--input not defined");
+        }
+        if (output == null) {
+            throw new Exception("--output not defined");
+        }
+
+        INPUT = Paths.get(input);
+        OUTPUT = Paths.get(output);
         FileUtils.deleteDirectory(OUTPUT.toFile());
 
         // read texts and sort
+        LOG.info("1st pass...");
         new FilesReader().run(INPUT, errors, true);
-        System.out.println("1st pass finished");
         errorsList.clear();
 
         luceneOpen(OUTPUT);
         textPositionsBySourceFile = calcTextsPositions();
 
-        System.out.println("Load GrammarDB... " + new Date());
-        GrammarDB2 gr = GrammarDB2.initializeFromDir("GrammarDB");
+        GrammarDB2 gr;
+        if (grammardb != null) {
+            LOG.info("Loading GrammarDB...");
+            gr = GrammarDB2.initializeFromDir(grammardb);
+        } else {
+            gr = GrammarDB2.empty();
+        }
         grFiller = new StaticGrammarFiller2(new GrammarFinder(gr));
 
+        LOG.info("2nd pass...");
         new FilesReader().run(INPUT, errors, false);
-        System.out.println("Finishing... " + new Date());
+        LOG.info("Finishing...");
         luceneClose();
         textStat.write(OUTPUT);
 
@@ -68,7 +89,16 @@ public class PrepareCache3 {
             exception.printStackTrace();
         }
 
-        System.out.println("Finished " + new Date());
+        LOG.info("Finished");
+    }
+
+    static String getKey(String key, String[] args) {
+        for (String a : args) {
+            if (a.startsWith("--" + key + "=")) {
+                return a.substring(key.length() + 3);
+            }
+        }
+        return null;
     }
 
     static void luceneOpen(Path dir) throws Exception {
@@ -91,12 +121,8 @@ public class PrepareCache3 {
         if (textInfo.title == null) {
             throw new RuntimeException("title нявызначаны ў " + textInfo.sourceFilePath);
         }
-        if (textInfo.creationTime != null) {
-            new KorpusDateTime(textInfo.creationTime);
-        }
-        if (textInfo.publicationTime != null) {
-            new KorpusDateTime(textInfo.publicationTime);
-        }
+        textInfo.creationTimeLatest();
+        textInfo.publicationTimeLatest();
 
         if (lucene == null) {
             // 1st pass - just remember TextInfo
@@ -111,9 +137,11 @@ public class PrepareCache3 {
     }
 
     static Map<String, Integer> calcTextsPositions() throws Exception {
+        LOG.info("Sorting {} text infos...", textInfos.size());
         // sort
         Collections.sort(textInfos, new TextOrder());
 
+        LOG.info("Storing text positions...");
         // remember positions
         Map<String, Integer> result = new HashMap<>();
         for (int i = 0; i < textInfos.size(); i++) {
@@ -122,17 +150,17 @@ public class PrepareCache3 {
             }
         }
 
+        LOG.info("Writing texts infos to file...");
         // write to json
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setSerializationInclusion(Include.NON_NULL);
-        List<String> list2 = textInfos.stream().map(ti -> {
-            try {
-                return objectMapper.writeValueAsString(ti);
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
+        System.out.println(textInfos.size());
+        try (BufferedWriter wr = Files.newBufferedWriter(OUTPUT.resolve("texts.jsons"))) {
+            for (TextInfo ti : textInfos) {
+                wr.write(objectMapper.writeValueAsString(ti));
+                wr.write('\n');
             }
-        }).collect(Collectors.toList());
-        Files.write(OUTPUT.resolve("texts.jsons"), list2);
+        }
 
         textInfos = null;
 

@@ -76,7 +76,7 @@ public class HramatycnyHram {
 
     private void toGrammarSklonavyja(boolean usieRody) {
         if (usieRody) {
-            Group am = new Group("<i>адз. м.р.</i> ", "Склон").setTag("Лік", 'S').setTag("Род", 'S');
+            Group am = new Group("<i>адз. м.р.</i> ", "Склон").setTag("Лік", 'S').setTag("Род", 'M');
             sklony(am);
             Group af = new Group("<i>адз. ж.р.</i> ", "Склон").setTag("Лік", 'S').setTag("Род", 'F');
             sklony(af);
