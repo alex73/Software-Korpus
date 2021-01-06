@@ -39,6 +39,9 @@ public class HramatycnyHram {
         case 'R':
             toGrammarPryslouje();
             break;
+        case 'F':
+            toGrammarNiazmiennyja();
+            break;
         }
         for (Form f : forms) {
             String ftag = SetUtils.tag(p, v, f);
@@ -55,10 +58,11 @@ public class HramatycnyHram {
                 }
             }
             if (groupCounts > 1 || itemsCount > 1) {
-                System.err.println(ftag + " трапляе ў некалькі граматык");
+                System.err.println(
+                        ftag + " трапляе ў некалькі граматык: " + BelarusianTags.getInstance().describe(ftag, null));
             }
             if (itemsCount == 0) {
-                other.add(StressUtils.combineAccute(f.getValue()));
+                other.add(StressUtils.combineAccute(f.getValue()) + '/' + ftag);
             }
         }
         text.append("<b>").append(StressUtils.combineAccute(v.getLemma())).append("</b> ");
@@ -93,11 +97,13 @@ public class HramatycnyHram {
     }
 
     private void toGrammarDziejaslou() {
-        Group c = new Group("<i>цяп.</i> ", null).setTag("Час", 'R');
+        Group h = new HiddenGroup().setTag("Інфінітыў", '0');
+        h.new Item();
+        Group c = new Group("<i>цяп.</i> ", null).setTag("Час", 'R').setTag("Дзеепрыслоўе", '\0');
         c.new Item();
-        Group b = new Group("<i>будуч.</i> ", null).setTag("Час", 'F');
+        Group b = new Group("<i>будуч.</i> ", null).setTag("Час", 'F').setTag("Дзеепрыслоўе", '\0');
         b.new Item();
-        Group m = new Group("<i>прошл.</i> ", null).setTag("Час", 'P');
+        Group m = new Group("<i>прошл.</i> ", null).setTag("Час", 'P').setTag("Дзеепрыслоўе", '\0');
         m.new Item();
         Group z = new Group("<i>заг.</i> ", null).setTag("Загадны лад", 'I');
         z.new Item();
@@ -106,11 +112,15 @@ public class HramatycnyHram {
     }
 
     private void toGrammarPryslouje() {
-        new HiddenGroup().setTag("Ступень параўнання", 'P');
         Group p = new Group("", "Ступень параўнання");
         p.new Item("", 'P');
         p.new Item("<i>выш.</i> ", 'C');
         p.new Item("<i>найвыш.</i> ", 'S');
+    }
+
+    private void toGrammarNiazmiennyja() {
+        Group p = new Group("", null);
+        p.new Item("", ' ');
     }
 
     private void sklony(Group g) {
@@ -203,6 +213,10 @@ public class HramatycnyHram {
     public class HiddenGroup extends Group {
         public HiddenGroup() {
             super(null, null);
+        }
+
+        public boolean isEmpty() {
+            return true;
         }
     }
 }

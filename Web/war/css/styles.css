@@ -102,3 +102,12 @@ table.center {
 table th {
     text-align: center;
 }
+
+#future-hramatycny-output .paradigm-desc {
+	color: #995731;
+	font-style: italic;
+	margin-left: 2em;
+}
+#future-hramatycny-output i {
+	color: #080;
+}

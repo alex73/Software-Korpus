@@ -2,8 +2,13 @@ package org.alex73.korpus.future;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,6 +31,14 @@ import org.alex73.korpus.utils.StressUtils;
 @SuppressWarnings("serial")
 @WebServlet(urlPatterns = { "/hramatycny/*" })
 public class Hramatycny extends FutureBaseServlet {
+    static final Map<Character, Set<String>> excludeTagGroups = new TreeMap<>();
+    static {
+        excludeTagGroups.put('N', new TreeSet<>(Arrays.asList("Скарот")));
+        excludeTagGroups.put('M', new TreeSet<>(Arrays.asList("Словазмяненне", "Форма")));
+        excludeTagGroups.put('S', new TreeSet<>(Arrays.asList("Словазмяненне", "Асоба")));
+        excludeTagGroups.put('A', new TreeSet<>(Arrays.asList("Ступень параўнання")));
+        excludeTagGroups.put('R', new TreeSet<>(Arrays.asList("Утварэнне")));
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -36,7 +49,7 @@ public class Hramatycny extends FutureBaseServlet {
         List<Out> data = Collections.synchronizedList(new ArrayList<>());
         KorpusApplication.instance.gr.getAllParadigms().parallelStream().forEach(p -> {
             for (Variant v : p.getVariant()) {
-                List<Form> forms = FormsReadyFilter.getAcceptedForms(p, v);
+                List<Form> forms = FormsReadyFilter.getAcceptedForms(FormsReadyFilter.MODE.SHOW, p, v);
                 if (forms == null || forms.isEmpty()) {
                     continue;
                 }
@@ -62,7 +75,9 @@ public class Hramatycny extends FutureBaseServlet {
         public Out(Paradigm p, Variant v, List<Form> forms) {
             this.word = StressUtils.combineAccute(v.getLemma());
             list = new HramatycnyHram(p, v, forms).toString();
-            grammar = String.join(", ", BelarusianTags.getInstance().describe(SetUtils.tag(p, v)));
+            String tag=SetUtils.tag(p, v);
+            grammar = String.join(", ",
+                    BelarusianTags.getInstance().describe(tag, excludeTagGroups.get(tag.charAt(0))));
         }
 
         public String getWord() {
@@ -82,6 +97,4 @@ public class Hramatycny extends FutureBaseServlet {
             return BelarusianComparators.FULL.compare(word, o.word);
         }
     }
-
-   
 }

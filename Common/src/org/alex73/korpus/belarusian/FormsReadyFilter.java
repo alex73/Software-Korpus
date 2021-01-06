@@ -24,19 +24,31 @@ public class FormsReadyFilter {
     };
 
     public static List<Form> getAcceptedForms(MODE mode, Paradigm p, Variant v) {
-        String tag = SetUtils.tag(p, v);
-        if (tag.startsWith("K") || tag.startsWith("F") || v.getLemma().contains(" ") || v.getForm().isEmpty()) {
+        if (v.getForm().isEmpty()) {
             return null;
+        }
+        String tag = SetUtils.tag(p, v);
+        switch (mode) {
+        case SPELL:
+            if (tag.startsWith("K") || tag.startsWith("F") || v.getLemma().contains(" ")) {
+                return null;
+            }
+            break;
+        case SHOW:
+            if (tag.startsWith("K")) {
+                return null;
+            }
+            break;
         }
         boolean hasSlouniki = false;
         if (mode == MODE.SHOW) {
-            if (!v.getSlounik().isEmpty()) {
+            if (v.getSlouniki()!=null && !v.getSlouniki().isEmpty()) {
                 hasSlouniki = true; // правапіс - без піскунова, база - з піскуновым
             }
         }
         if (v.getForm().get(0).getSlouniki() != null) {
             for (String sl : v.getForm().get(0).getSlouniki().split(",")) {
-                if (sl.equals("piskunou2012") || sl.equals("tsbm2016")) {
+                if (sl.isEmpty()) {
                     continue;
                 }
                 hasSlouniki = true;

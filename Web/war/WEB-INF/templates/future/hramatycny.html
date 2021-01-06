@@ -1,7 +1,8 @@
-<table class="table-zebra hspacing">
+<table id="future-hramatycny-output" class="table-zebra hspacing">
     <#list data as row>
-      <tr><td>${row.word?html}</td>
-      <td><span style="color: #080; font-style: italic;">${row.grammar?html}</span>
-      <br/>${row.list}</td></tr>
+      <tr>
+        <td><span class="paradigm-desc">${row.grammar?html}</span>
+        <br/>${row.list}</td>
+      </tr>
     </#list>
 </table>

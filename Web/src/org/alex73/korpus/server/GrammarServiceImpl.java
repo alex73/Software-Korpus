@@ -200,7 +200,7 @@ public class GrammarServiceImpl {
     private void createLemmaInfoFromParadigm(Paradigm p, Predicate<String> checkWord, boolean multiform,
             Pattern reOutputGrammar, Pattern reGrammar, List<LemmaInfo> result) {
         for (Variant v : p.getVariant()) {
-            List<Form> forms = FormsReadyFilter.getAcceptedForms(p, v);
+            List<Form> forms = FormsReadyFilter.getAcceptedForms(FormsReadyFilter.MODE.SHOW, p, v);
             if (forms == null) {
                 return;
             }
@@ -297,7 +297,7 @@ public class GrammarServiceImpl {
     LemmaInfo.LemmaParadigm conv(Paradigm p) {
         LemmaInfo.LemmaParadigm r = new LemmaInfo.LemmaParadigm();
         for (Variant v : p.getVariant()) {
-            List<Form> forms = FormsReadyFilter.getAcceptedForms(p, v);
+            List<Form> forms = FormsReadyFilter.getAcceptedForms(FormsReadyFilter.MODE.SHOW, p, v);
             if (forms == null) {
                 continue;
             }

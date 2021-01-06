@@ -47,7 +47,7 @@ public class Amonimy extends FutureBaseServlet {
 
         KorpusApplication.instance.gr.getAllParadigms().parallelStream().forEach(p -> {
             for (Variant v : p.getVariant()) {
-                List<Form> forms = FormsReadyFilter.getAcceptedForms(p, v);
+                List<Form> forms = FormsReadyFilter.getAcceptedForms(FormsReadyFilter.MODE.SHOW, p, v);
                 if (forms == null || forms.isEmpty()) {
                     continue;
                 }

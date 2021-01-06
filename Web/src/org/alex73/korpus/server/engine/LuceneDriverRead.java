@@ -32,6 +32,7 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
@@ -65,10 +66,10 @@ public class LuceneDriverRead extends LuceneFields {
         // Sort sort = new Sort(new SortField(fieldSentenceTextRandomOrder.name(),
         // SortField.Type.INT, true));
         if (latest.doc == 0 && latest.shardIndex == 0) {
-            rs = indexSearcher.search(query, maxResults);
+            rs = indexSearcher.search(query, maxResults, Sort.INDEXORDER);
         } else {
             ScoreDoc latestDoc = new ScoreDoc(latest.doc, latest.score, latest.shardIndex);
-            rs = indexSearcher.searchAfter(latestDoc, query, maxResults);
+            rs = indexSearcher.searchAfter(latestDoc, query, maxResults, Sort.INDEXORDER);
             latest.doc = 0;
             latest.shardIndex = 0;
         }
@@ -107,7 +108,7 @@ public class LuceneDriverRead extends LuceneFields {
                 }
             }
             if (result.size() < maxResults) {
-                rs = indexSearcher.searchAfter(rs.scoreDocs[rs.scoreDocs.length - 1], query, maxResults);
+                rs = indexSearcher.searchAfter(rs.scoreDocs[rs.scoreDocs.length - 1], query, maxResults, Sort.INDEXORDER);
                 System.out.println("   Lucene found: block: " + rs.scoreDocs.length);
                 System.out.println("found block " + rs.scoreDocs.length);
             } else {
@@ -121,7 +122,7 @@ public class LuceneDriverRead extends LuceneFields {
         System.out.println("   Lucene search: " + query);
 
         TopDocs rs;
-        rs = indexSearcher.search(query, pageSize);
+        rs = indexSearcher.search(query, pageSize, Sort.INDEXORDER);
         System.out.println("   Lucene found: total: " + rs.totalHits + ", block: " + rs.scoreDocs.length);
         while (rs.scoreDocs.length > 0) {
             List<Integer> docs = new ArrayList<>(rs.scoreDocs.length);
@@ -136,7 +137,7 @@ public class LuceneDriverRead extends LuceneFields {
                     throw new RuntimeException(ex);
                 }
             });
-            rs = indexSearcher.searchAfter(rs.scoreDocs[rs.scoreDocs.length - 1], query, pageSize);
+            rs = indexSearcher.searchAfter(rs.scoreDocs[rs.scoreDocs.length - 1], query, pageSize, Sort.INDEXORDER);
             System.out.println("   Lucene found: block: " + rs.scoreDocs.length);
             System.out.println("found block " + rs.scoreDocs.length);
         }
