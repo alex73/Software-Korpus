@@ -221,8 +221,9 @@ class ResultSearchOut {
 }
 
 class LatestMark {
-    public score: number = null;
     public doc: number = null;
+    public score: number = null;
+    public fields: object[] = null;
     public shardIndex: number = null;
 }
 

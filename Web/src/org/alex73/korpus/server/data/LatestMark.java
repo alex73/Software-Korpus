@@ -4,7 +4,8 @@ import java.io.Serializable;
 
 @SuppressWarnings("serial")
 public class LatestMark implements Serializable {
-    public float score;
     public int doc;
+    public float score;
+    public Object[] fields;
     public int shardIndex;
 }

@@ -29,6 +29,7 @@ import java.util.List;
 import org.alex73.korpus.server.data.LatestMark;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.search.FieldDoc;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
@@ -68,7 +69,7 @@ public class LuceneDriverRead extends LuceneFields {
         if (latest.doc == 0 && latest.shardIndex == 0) {
             rs = indexSearcher.search(query, maxResults, Sort.INDEXORDER);
         } else {
-            ScoreDoc latestDoc = new ScoreDoc(latest.doc, latest.score, latest.shardIndex);
+            FieldDoc latestDoc = new FieldDoc(latest.doc, latest.score, latest.fields, latest.shardIndex);
             rs = indexSearcher.searchAfter(latestDoc, query, maxResults, Sort.INDEXORDER);
             latest.doc = 0;
             latest.shardIndex = 0;
@@ -99,10 +100,19 @@ public class LuceneDriverRead extends LuceneFields {
                 if (res != null) {
                     result.add(res);
                     if (result.size() >= maxResults) {
-                        ScoreDoc doc = docs[i];
-                        latest.doc = doc.doc;
-                        latest.score = doc.score;
-                        latest.shardIndex = doc.shardIndex;
+                        if (docs[i] instanceof FieldDoc) {
+                            FieldDoc doc = (FieldDoc) docs[i];
+                            latest.doc = doc.doc;
+                            latest.score = doc.score;
+                            latest.fields = doc.fields;
+                            latest.shardIndex = doc.shardIndex;
+                        } else {
+                            ScoreDoc doc = docs[i];
+                            latest.doc = doc.doc;
+                            latest.score = doc.score;
+                            latest.fields = null;
+                            latest.shardIndex = doc.shardIndex;
+                        }
                         break;
                     }
                 }
