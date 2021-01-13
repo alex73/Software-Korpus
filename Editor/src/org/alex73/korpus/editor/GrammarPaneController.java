@@ -30,8 +30,6 @@ import java.util.concurrent.CancellationException;
 import javax.swing.SwingWorker;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
@@ -40,10 +38,8 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
 import org.alex73.corpus.paradigm.Paradigm;
-import org.alex73.korpus.base.BelarusianTags;
-import org.alex73.korpus.base.GrammarDBSaver;
-import org.alex73.korpus.base.TagLetter;
-import org.alex73.korpus.editor.grammar.EditorGrammarFiller;
+import org.alex73.korpus.belarusian.BelarusianTags;
+import org.alex73.korpus.belarusian.TagLetter;
 import org.alex73.korpus.editor.grammar.GrammarConstructor;
 import org.alex73.korpus.text.xml.W;
 
@@ -208,7 +204,7 @@ public class GrammarPaneController {
         protected String doInBackground() throws Exception {
             try {
                 String outText = "";
-                List<String> descr = BelarusianTags.getInstance().describe(txt);
+                List<String> descr = BelarusianTags.getInstance().describe(txt, null);
                 outText += "Палі: ";
                 for (String d : descr) {
                     outText += d + ",";

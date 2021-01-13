@@ -42,8 +42,8 @@ public class BelarusianTags {
     private TagLetter root;
 
     public static void main(String[] a) {
-        INSTANCE.isValidParadigm("VTPN1", "err p");
-        INSTANCE.isValid("VTPN1PG", "err f");
+        INSTANCE.isValidParadigmTag("VTPN1", "err p");
+        INSTANCE.isValidFormTag("VTPN1PG", "err f");
     }
 
     private BelarusianTags() {
@@ -93,19 +93,21 @@ public class BelarusianTags {
     /**
      * Ці правільны тэг у парадыгме ? latestInParadigm==true
      */
-    public boolean isValidParadigm(String code, String w) {
+    public boolean isValidParadigmTag(String code, String w) {
         TagLetter after = getTagLetterAfter(code, w);
         if (after == null) {
             return false;
         }
         if (!after.isLatestInParadigm()) {
-            System.out.println(code + " " + w + " - няправільны тэг парадыгмы");
+            if (w != null) {
+                System.out.println(code + " " + w + " - няправільны тэг парадыгмы");
+            }
             return false;
         }
         return true;
     }
 
-    public boolean isValid(String code, String w) {
+    public boolean isValidFormTag(String code, String w) {
         TagLetter after = getTagLetterAfter(code, w);
         if (after == null) {
             return false;
@@ -252,7 +254,6 @@ public class BelarusianTags {
 
     private void licebnik(TagLetter t) {
         TagLetter t0 = t.add("Часціна мовы => M:Лічэбнік");
-        t0.add("Новы=>+:новы").latestInParadigm();
         t = t0.add("Словазмяненне => N:як у назоўніка;A:як у прыметніка;X:???????");
         TagLetter t2=t0.add("Словазмяненне => 0:няма");
         t = t.add("Значэнне => C:колькасны;O:парадкавы;K:зборны;F:дробавы");
@@ -268,7 +269,6 @@ public class BelarusianTags {
 
     private void zajmiennik(TagLetter t) {
         t = t.add("Часціна мовы => S:Займеннік");
-        t.add("Новы=>+:новы").latestInParadigm();
         t = t.add("Словазмяненне => N:як у назоўніка;A:як у прыметніка;M:як у займенніка");
         t = t.add(
                 "Разрад => P:асабовы;R:зваротны;S:прыналежны;D:указальны;E:азначальны;L:пытальна-адносны;N:адмоўны;F:няпэўны");
@@ -282,7 +282,6 @@ public class BelarusianTags {
 
     private void prymietnik(TagLetter t) {
         t = t.add("Часціна мовы => A:Прыметнік");
-        t.add("Новы=>+:новы").latestInParadigm();
         t.add("Тып => 0:нескланяльны").latestInParadigm();
         t = t.add("Тып => Q:якасны;R:адносны;P:прыналежны;X:???????");
         TagLetter a = t.add("Ступень параўнання => P:станоўчая;C:вышэйшая;S:найвышэйшая").latestInParadigm();
@@ -327,7 +326,6 @@ public class BelarusianTags {
 
     private void dziejeprymietnik(TagLetter t) {
         t = t.add("Часціна мовы => P:Дзеепрыметнік");
-        t.add("Новы=>+:новы").latestInParadigm();
         t = t.add("Стан => A:незалежны стан;P:залежны стан");
         t = t.add("Час => R:цяперашні час;P:прошлы час");
         TagLetter pt = t.add("Трыванне => P:закончанае трыванне;M:незакончанае трыванне;D:закончанае/незакончанае трыванне;X:???????")
@@ -351,7 +349,6 @@ public class BelarusianTags {
 
     private void zlucnik(TagLetter t) {
         t = t.add("Часціна мовы => C:Злучнік");
-        t.add("Новы=>+:новы").latestInParadigm();
         TagLetter s = t.add("Тып => S:падпарадкавальны");
         TagLetter k = t.add("Тып => K:злучальны");
         t.add("Тып => P:паясняльны").latestInParadigm();

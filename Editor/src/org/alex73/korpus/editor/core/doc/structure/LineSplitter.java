@@ -25,7 +25,7 @@ package org.alex73.korpus.editor.core.doc.structure;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-import org.alex73.korpus.base.BelarusianWordNormalizer;
+import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.editor.MainController;
 import org.alex73.korpus.text.xml.InlineTag;
 import org.alex73.korpus.text.xml.S;

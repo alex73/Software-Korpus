@@ -185,7 +185,9 @@ public class SearchServiceImpl {
         SearchParams params = rq.params;
         int[] list = rq.list;
         for (WordRequest w : params.words) {
-            w.word = BelarusianWordNormalizer.lightNormalized(w.word);
+            if (w.word != null) {
+                w.word = BelarusianWordNormalizer.lightNormalized(w.word);
+            }
         }
         for (WordRequest w : params.words) {
             if (w.allForms) {

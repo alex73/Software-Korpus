@@ -34,7 +34,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 import org.alex73.corpus.paradigm.Paradigm;
-import org.alex73.korpus.base.BelarusianTags;
+import org.alex73.korpus.belarusian.BelarusianTags;
 import org.alex73.korpus.editor.ui.WordInfoPane;
 import org.alex73.korpus.text.xml.W;
 
@@ -94,7 +94,7 @@ public class WordInfoPaneController {
                 String outText;
                 try {
                     outText = c + ": ";
-                    for (String d : BelarusianTags.getInstance().describe(c)) {
+                    for (String d : BelarusianTags.getInstance().describe(c, null)) {
                         outText += d + ", ";
                     }
                     outText = outText.substring(0, outText.length() - 2);
