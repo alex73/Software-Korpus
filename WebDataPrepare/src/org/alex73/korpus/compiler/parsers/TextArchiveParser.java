@@ -3,12 +3,8 @@ package org.alex73.korpus.compiler.parsers;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -28,16 +24,6 @@ public class TextArchiveParser extends BaseParser {
     public void parse(Executor queue, boolean headersOnly) throws Exception {
         System.out.println(file);
 
-        Path headersFile = Paths.get(file.toString() + ".headers");
-        Map<String, String> commonHeaders;
-        if (Files.exists(headersFile)) {
-            try (InputStream in = Files.newInputStream(headersFile)) {
-                commonHeaders = new TextFileParser(in, true, PrepareCache3.errors).headers;
-            }
-        } else {
-            commonHeaders = Collections.emptyMap();
-        }
-
         try (ZipFile zip = new ZipFile(file.toFile())) {
             for (Enumeration<? extends ZipEntry> it = zip.entries(); it.hasMoreElements();) {
                 ZipEntry en = it.nextElement();
@@ -53,11 +39,9 @@ public class TextArchiveParser extends BaseParser {
                         TextFileParser doc = new TextFileParser(new ByteArrayInputStream(data), headersOnly,
                                 PrepareCache3.errors);
                         TextInfo textInfo = new TextInfo();
-                        TextUtils.fillFromHeaders(textInfo, commonHeaders);
                         TextUtils.fillFromHeaders(textInfo, doc.headers);
                         textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + en.getName();
                         textInfo.subcorpus = subcorpus;
-                        textInfo.source = commonHeaders.get("Source");
                         if (textInfo.title == null) {
                             textInfo.title = "";
                         }

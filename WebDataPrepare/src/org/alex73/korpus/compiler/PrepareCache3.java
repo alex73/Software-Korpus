@@ -7,12 +7,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.base.GrammarFinder;
@@ -30,7 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class PrepareCache3 {
     private static final Logger LOG = LoggerFactory.getLogger(PrepareCache3.class);
 
-    public static final boolean writeToLucene = true;
+    public static final boolean writeToLucene = false;
     public static Path INPUT;
     public static Path OUTPUT;
     static StaticGrammarFiller2 grFiller;
@@ -132,7 +130,9 @@ public class PrepareCache3 {
             Collections.shuffle(content);
             grFiller.fill(content);
             textStat.add(textInfo, content);
-            lucene.addSentences(textInfo, content);
+            if (writeToLucene) {
+                lucene.addSentences(textInfo, content);
+            }
         }
     }
 

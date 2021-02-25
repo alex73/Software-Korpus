@@ -75,6 +75,7 @@ public class StatProcessing {
         for (Map.Entry<String, StatInfo> en : stats.entrySet()) {
             en.getValue().writeFormsFreq(dir.resolve("stat.formsfreq." + en.getKey().replace('/', '_') + ".tab"));
             en.getValue().writeLemmasFreq(dir.resolve("stat.lemmasfreq." + en.getKey().replace('/', '_') + ".tab"));
+            en.getValue().writeUnknownFreq(dir.resolve("stat.unknownfreq." + en.getKey().replace('/', '_') + ".tab"));
         }
 
         List<String> stat = new ArrayList<>();
@@ -105,6 +106,7 @@ public class StatProcessing {
         public int texts, words;
         private final Map<String, ParadigmStat> byLemma = new HashMap<>();
         private final Map<String, Integer> byForm = new HashMap<>();
+        private final Map<String, Integer> byUnknown = new HashMap<>();
         final Set<String> authors = Collections.synchronizedSet(new HashSet<>());
         final Set<String> sources = Collections.synchronizedSet(new HashSet<>());
 
@@ -119,7 +121,21 @@ public class StatProcessing {
                 fc = fc == null ? 1 : fc.intValue() + 1;
                 byForm.put(formKey, fc);
             }
-            if (lemmas != null) {
+            if (lemmas == null) {
+                // TODO адкидаць пустыя словы, нумары, лацінку, 
+                if (formKey.isEmpty()) {
+                    return;
+                }
+                for (int i = 0; i < formKey.length(); i++) {
+                    char c = formKey.charAt(i);
+                    if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z')) {
+                        return;
+                    }
+                }
+                Integer fc = byUnknown.get(formKey);
+                fc = fc == null ? 1 : fc.intValue() + 1;
+                byUnknown.put(formKey, fc);
+            } else {
                 float part = 1.0f / lemmas.length;
                 for (String lemma : lemmas) {
                     if (lemma.isEmpty()) {
@@ -142,6 +158,13 @@ public class StatProcessing {
         void writeFormsFreq(Path f) throws Exception {
             List<String> list = byForm.entrySet().stream().sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
                     .map(en -> en.toString()).collect(Collectors.toList());
+            Files.write(f, list);
+        }
+
+        void writeUnknownFreq(Path f) throws Exception {
+            List<String> list = byUnknown.entrySet().stream()
+                    .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue())).map(en -> en.toString())
+                    .collect(Collectors.toList());
             Files.write(f, list);
         }
 

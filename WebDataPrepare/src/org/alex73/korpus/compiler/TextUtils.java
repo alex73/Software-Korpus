@@ -2,6 +2,7 @@ package org.alex73.korpus.compiler;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.utils.KorpusDateTime;
@@ -41,6 +42,41 @@ public class TextUtils {
             info.creationTime = s;
             new KorpusDateTime(info.creationTime);
         }
+    }
+
+    public static Map<String, String> fillToHeaders(TextInfo info) {
+        Map<String, String> result = new TreeMap<>();
+        if (info.url != null) {
+            result.put("URL", info.url);
+        }
+        if (info.authors != null) {
+            result.put("Authors", String.join(";", info.authors));
+        }
+        if (info.title != null) {
+            result.put("Title", info.title);
+        }
+        if (info.translators != null) {
+            result.put("Translation", String.join(";", info.translators));
+        }
+        if (info.lang != null) {
+            result.put("Lang", info.lang);
+        }
+        if (info.langOrig != null) {
+            result.put("LangOrig", info.langOrig);
+        }
+        if (info.styleGenres != null) {
+            result.put("StyleGenre", String.join(";", info.styleGenres));
+        }
+        if (info.edition != null) {
+            result.put("Edition", info.edition);
+        }
+        if (info.publicationTime != null) {
+            result.put("PublicationYear", info.publicationTime);
+        }
+        if (info.creationTime != null) {
+            result.put("CreationYear", info.creationTime);
+        }
+        return result;
     }
 
     private static String[] trims(String[] list) {
