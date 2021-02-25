@@ -1,0 +1,17 @@
+<h1>${title}</h1>
+<table class="table-zebra hspacing" border="1px">
+    <tr>
+      <#list table.columns as c>
+        <th>${c}</th>
+      </#list>
+    </tr>
+    <#list table.rows as row>
+      <tr>
+        <#list row.columns as c>
+          <#if c.cspan &gt; 0>
+            <td rowspan="${c.rspan?c}">${c.v}</td>
+          </#if>
+        </#list>
+      </tr>
+    </#list>
+</table>

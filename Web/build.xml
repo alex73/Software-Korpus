@@ -1,30 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <project name="Korpus-Web" default="all" basedir=".">
 
-	<!-- Arguments to gwtc and devmode targets -->
-	<property name="gwt.args" value="" />
-
-	<!-- Configure path to GWT SDK -->
-	<condition property="gwt.sdk" value="C:/opt/gwt-2.8.0-rc1">
-		<os family="windows"/>
-	</condition>
-	<condition property="gwt.sdk" value="/opt/gwt-2.8.0-rc1">
-		<os family="unix"/>
-	</condition>
-
 	<path id="project.class.path">
 		<pathelement location="war/WEB-INF/classes"/>
-		<!--pathelement location="${gwt.sdk}/gwt-user.jar"/>
-		<fileset dir="${gwt.sdk}" includes="gwt-dev*.jar"/-->
-		<!-- Add any additional non-server libs (such as JUnit) -->
 		<fileset dir="war/WEB-INF/lib" includes="**/*.jar"/>
 	</path>
 
 	<target name="libs" description="Copy libs to WEB-INF/lib">
 		<mkdir dir="war/WEB-INF/lib" />
-		<!--copy todir="war/WEB-INF/lib" file="${gwt.sdk}/gwt-servlet.jar" />
-		<copy todir="war/WEB-INF/lib" file="${gwt.sdk}/gwt-servlet-deps.jar" /-->
-		<!-- Add any additional server libs that need to be copied -->
 	</target>
 
 	<target name="javac" depends="libs" description="Compile java source to bytecode">
@@ -43,41 +26,6 @@
 		<!--copy file="../GrammarDB/db.cache" todir="build/classes" /-->
 	</target>
 
-	<target name="gwtc" depends="javac" description="GWT compile to JavaScript (production mode)">
-		<!--java failonerror="true" fork="true" classname="com.google.gwt.dev.Compiler">
-			<classpath>
-				<pathelement location="src"/>
-				<pathelement location="../Common/src"/>
-				<path refid="project.class.path"/>
-			</classpath>
-			<jvmarg value="-Xmx512M"/>
-			<arg line="-war"/>
-			<arg value="war"/>
-			<arg line="${gwt.args} -style PRETTY"/>
-			<arg value="org.alex73.korpus.Korpus"/>
-		</java-->
-	</target>
-
-	<target name="devmode" depends="javac" description="Run development mode">
-		<java failonerror="true" fork="true" classname="com.google.gwt.dev.DevMode">
-			<classpath>
-				<pathelement location="src-web"/>
-				<pathelement location="src-common"/>
-				<path refid="project.class.path"/>
-				<pathelement location="/opt/gwt-2.6.1/validation-api-1.0.0.GA.jar" />
-				<pathelement location="/opt/gwt-2.6.1/validation-api-1.0.0.GA-sources.jar" />
-			</classpath>
-			<jvmarg value="-Xmx256M"/>
-			<arg value="-startupUrl"/>
-			<arg value="korpusSearch.html"/>
-			<arg line="-war"/>
-			<arg value="war"/>
-			<!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
-			<arg line="${gwt.args}"/>
-			<arg value="org.alex73.korpus.Korpus"/>
-		</java>
-	</target>
-
 	<target name="js">
 		<exec executable="tsc" failonerror="true">
 			<arg value="--project"/>
@@ -89,14 +37,19 @@
 		</exec>
 	</target>
 	
-	<target name="hosted" depends="devmode" description="Run development mode (NOTE: the 'hosted' target is deprecated)" />
-
 	<target name="war" depends="js,javac" description="Create a war file">
-		<zip destfile="build/korpus.war" basedir="war" excludes="logs/**, **/lib/sources/**">
+		<war destfile="build/korpus.war" basedir="war" needxmlfile="false" excludes="logs/**, **/lib/sources/**">
 			<zipfileset dir="build/classes/" prefix="WEB-INF/classes/" />
 			<zipfileset dir="../Common/lib/" prefix="WEB-INF/lib/" includes="*.jar" />
-			<zipfileset dir="../Common/lib/kryo-serialization/" prefix="WEB-INF/lib/" includes="*.jar" />
-		</zip>
+		</war>
+		<copy todir="build/war">
+			<fileset dir="war"/>
+		</copy>
+		<copy file="build/war/WEB-INF/templates/grammar1.html" tofile="build/war/WEB-INF/templates/index.html" overwrite="true" />
+		<war destfile="build/grammar1.war" basedir="build/war" needxmlfile="false" excludes="logs/**, **/lib/sources/**">
+			<zipfileset dir="build/classes/" prefix="WEB-INF/classes/" />
+			<zipfileset dir="../Common/lib/" prefix="WEB-INF/lib/" includes="*.jar" />
+		</war>
 	</target>
 
 	<target name="clean" description="Cleans this project">

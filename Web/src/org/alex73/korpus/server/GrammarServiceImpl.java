@@ -56,6 +56,7 @@ import org.alex73.korpus.base.DBTagsGroups;
 import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.belarusian.FormsReadyFilter;
 import org.alex73.korpus.server.data.GrammarInitial;
+import org.alex73.korpus.shared.GrammarSearchResult;
 import org.alex73.korpus.shared.LemmaInfo;
 import org.alex73.korpus.utils.SetUtils;
 import org.alex73.korpus.utils.StressUtils;
@@ -98,16 +99,51 @@ public class GrammarServiceImpl {
         public String grammar;
         public String outputGrammar;
         public boolean orderReverse;
+        public boolean outputGrouping;
     }
 
     @Path("search")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public LemmaInfo[] search(GrammarRequest rq) throws Exception {
+    public GrammarSearchResult search(GrammarRequest rq) throws Exception {
         System.out.println(">> Request from " + request.getRemoteAddr());
         System.out.println(">> Request: word=" + rq.word + " orderReverse=" + rq.orderReverse);
         try {
+            GrammarSearchResult result = new GrammarSearchResult();
+            if (rq.word != null) {
+                rq.word = rq.word.trim();
+            }
+            if (rq.word.isEmpty()) {
+                rq.word = null;
+            }
+            if (rq.grammar != null && rq.grammar.isEmpty()) {
+                rq.grammar = null;
+            }
+            int grammarCount = 0;
+            int lettersCount = 0;
+            boolean hasStar = false;
+            if (rq.word != null) {
+                hasStar = WordsDetailsChecks.needWildcardRegexp(rq.word);
+                for (char c : rq.word.toCharArray()) {
+                    if ("абвгдеёжзійклмнопрстуўфхцчшыьэюя'".indexOf(Character.toLowerCase(c)) >= 0) {
+                        lettersCount++;
+                    }
+                }
+            }
+            if (rq.grammar != null) {
+                grammarCount = rq.grammar.replace(".", "").length();
+            }
+            if (grammarCount > 0) {
+                // ok
+            } else if (hasStar && lettersCount >= 2) {
+                // ok
+            } else if (!hasStar && lettersCount > 0) {
+                // ok
+            } else {
+                result.error = "Увядзіце слова для пошуку альбо удакладніце граматыку";
+                return result;
+            }
             Pattern reGrammar = null, reOutputGrammar = null;
             if (rq.grammar != null && !rq.grammar.isEmpty()) {
                 reGrammar = WordsDetailsChecks.getPatternRegexp(rq.grammar);
@@ -115,37 +151,74 @@ public class GrammarServiceImpl {
             if (rq.outputGrammar != null && !rq.outputGrammar.isEmpty()) {
                 reOutputGrammar = WordsDetailsChecks.getPatternRegexp(rq.outputGrammar);
             }
-            if (rq.word != null) {
-                rq.word = rq.word.trim();
-                if (rq.word.isEmpty()) {
-                    rq.word = null;
-                }
-            }
             Stream<LemmaInfo> output;
             if (rq.word == null || WordsDetailsChecks.needWildcardRegexp(rq.word)) {
-                output = StreamSupport.stream(new SearchWidlcards(rq.word, reGrammar, rq.multiForm, reOutputGrammar), false);
+                output = StreamSupport.stream(new SearchWidlcards(rq.word, reGrammar, rq.multiForm, reOutputGrammar),
+                        false);
             } else {
                 output = searchExact(rq.word, reGrammar, rq.multiForm, reOutputGrammar);
             }
-            List<LemmaInfo> result = output.limit(Settings.GRAMMAR_SEARCH_RESULT_PAGE).collect(Collectors.toList());
+            result.output = output.limit(Settings.GRAMMAR_SEARCH_RESULT_PAGE).collect(Collectors.toList());
 
-            if (rq.orderReverse) {
-                Collections.sort(result, new Comparator<LemmaInfo>() {
+            // remove duplicates
+            Collections.sort(result.output, (a, b) -> {
+                int r = Long.compare(a.pdgId, b.pdgId);
+                if (r == 0) {
+                    r = BEL.compare(a.output, b.output);
+                }
+                return r;
+            });
+            for (int i = 1; i < result.output.size(); i++) {
+                LemmaInfo a = result.output.get(i - 1);
+                LemmaInfo b = result.output.get(i);
+                if (a.pdgId == b.pdgId && a.output.equals(b.output)) {
+                    result.output.remove(i);
+                    i--;
+                }
+            }
+            for (int i = 1; i < result.output.size(); i++) {
+                LemmaInfo a = result.output.get(i - 1);
+                LemmaInfo b = result.output.get(i);
+                if (a.pdgId == b.pdgId) {
+                    result.hasDuplicateParadigms = true;
+                    break;
+                }
+            }
+            if (rq.outputGrouping) {
+                for (int i = 1; i < result.output.size(); i++) {
+                    LemmaInfo a = result.output.get(i - 1);
+                    LemmaInfo b = result.output.get(i);
+                    if (a.pdgId == b.pdgId) {
+                        a.output += ", " + b.output;
+                        a.meaning = null;
+                        b.meaning = null;
+                        result.output.remove(i);
+                        i--;
+                    }
+                }
+                Collections.sort(result.output, new Comparator<LemmaInfo>() {
                     @Override
                     public int compare(LemmaInfo o1, LemmaInfo o2) {
-                        return BEL.compare(revert(o1.lemma), revert(o2.lemma));
+                        return BEL.compare(o1.output, o2.output);
+                    }
+                });
+            } else if (rq.orderReverse) {
+                Collections.sort(result.output, new Comparator<LemmaInfo>() {
+                    @Override
+                    public int compare(LemmaInfo o1, LemmaInfo o2) {
+                        return BEL.compare(revert(o1.output), revert(o2.output));
                     }
                 });
             } else {
-                Collections.sort(result, new Comparator<LemmaInfo>() {
+                Collections.sort(result.output, new Comparator<LemmaInfo>() {
                     @Override
                     public int compare(LemmaInfo o1, LemmaInfo o2) {
-                        return BEL.compare(o1.lemma, o2.lemma);
+                        return BEL.compare(o1.output, o2.output);
                     }
                 });
             }
-            System.out.println("<< Result: " + result.size());
-            return result.toArray(new LemmaInfo[result.size()]);
+            System.out.println("<< Result: " + result.output.size());
+            return result;
         } catch (Throwable ex) {
             System.out.println(ex);
             throw ex;
@@ -191,14 +264,15 @@ public class GrammarServiceImpl {
         Paradigm[] data = getApp().grFinder.getParadigms(normWord);
         List<LemmaInfo> result = new ArrayList<>();
         for (Paradigm p : data) {
-            createLemmaInfoFromParadigm(p, s -> BelarusianWordNormalizer.equals(normWord, s), multiform, reOutputGrammar,
-                    reGrammar, result);
+            createLemmaInfoFromParadigm(p, s -> BelarusianWordNormalizer.equals(normWord, s), multiform,
+                    reOutputGrammar, reGrammar, result);
         }
         return result.stream();
     }
 
     private void createLemmaInfoFromParadigm(Paradigm p, Predicate<String> checkWord, boolean multiform,
             Pattern reOutputGrammar, Pattern reGrammar, List<LemmaInfo> result) {
+        Set<String> found = new TreeSet<>();
         for (Variant v : p.getVariant()) {
             List<Form> forms = FormsReadyFilter.getAcceptedForms(FormsReadyFilter.MODE.SHOW, p, v);
             if (forms == null) {
@@ -211,8 +285,7 @@ public class GrammarServiceImpl {
                                 && !reGrammar.matcher(DBTagsGroups.getDBTagString(SetUtils.tag(p, v, f))).matches()) {
                             continue;
                         }
-                        result.add(createLemmaInfo(p, v, reOutputGrammar));
-                        break;
+                        found.add(f.getValue());
                     }
                 }
             } else {
@@ -221,32 +294,38 @@ public class GrammarServiceImpl {
                             && !reGrammar.matcher(DBTagsGroups.getDBTagString(SetUtils.tag(p, v))).matches()) {
                         continue;
                     }
-                    result.add(createLemmaInfo(p, v, reOutputGrammar));
+                    found.add(v.getLemma());
                 }
+            }
+            for (String f : found) {
+                createLemmaInfo(p, v, f, reOutputGrammar, result);
             }
         }
     }
 
-    private LemmaInfo createLemmaInfo(Paradigm p, Variant v, Pattern reOutputGrammar) {
-        LemmaInfo w = new LemmaInfo();
-        w.pdgId = p.getPdgId();
-        w.meaning = p.getMeaning();
+    private void createLemmaInfo(Paradigm p, Variant v, String output, Pattern reOutputGrammar,
+            List<LemmaInfo> result) {
         if (reOutputGrammar != null) {
-            List<String> fs = new ArrayList<>();
+            Set<String> found = new TreeSet<>();
             for (Form f : v.getForm()) {
                 if (reOutputGrammar.matcher(DBTagsGroups.getDBTagString(SetUtils.tag(p, v, f))).matches()) {
-                    fs.add(StressUtils.combineAccute(f.getValue()));
+                    found.add(f.getValue());
                 }
             }
-            if (!fs.isEmpty()) {
-                w.lemma = String.join(", ", fs);
+            for (String f : found) {
+                LemmaInfo w = new LemmaInfo();
+                w.pdgId = p.getPdgId();
+                w.meaning = p.getMeaning();
+                w.output = StressUtils.combineAccute(f);
+                result.add(w);
             }
+        } else {
+            LemmaInfo w = new LemmaInfo();
+            w.pdgId = p.getPdgId();
+            w.meaning = p.getMeaning();
+            w.output = StressUtils.combineAccute(output);
+            result.add(w);
         }
-        if (w.lemma == null) {
-            w.lemma = StressUtils.combineAccute(v.getLemma());
-        }
-        w.lemmaGrammar = SetUtils.tag(p, v);
-        return w;
     }
 
     @Path("details/{id}")

@@ -1,6 +1,8 @@
 class GrammarUI {
 
- // public details: OutGrammarParadigm;
+  showExtended: boolean;
+  responseReversed: boolean;
+  responseHasDuplicateParadigms: boolean;
 
   constructor() {
     this.hideStatusError();
@@ -15,48 +17,106 @@ class GrammarUI {
 		$('#error').hide();
 		document.getElementById("status").innerText = s;
 		$('#status').show();
-  }
-  collectFromScreen(): GrammarRequest {
-    let r: GrammarRequest = new GrammarRequest();
-
-    r.multiForm = (<HTMLInputElement>document.getElementById('grammarword-multiform')).checked;
-    r.word = (<HTMLInputElement>document.getElementById('grammarword-word')).value;
-    r.grammar = document.getElementById("grammarword-grammar").innerText;
-    r.orderReverse = (<HTMLInputElement>document.getElementById("inputOrderReverse")).checked;
-    r.outputGrammar = document.getElementById("grammarwordshow-grammar").innerText;
-    return r;
-  }
-  showOutput(requestGrammar: string) {
-		$('#output').html($.templates("#template-grammaroutput").render({
-			lemmas: grammarService.results
-		}));
-		if (grammarService.results.length > 0) {
-			$('#grammar-addition-order').show();
-			if (requestGrammar && DialogWordGrammar.hasFormTags(requestGrammar)) {
-				$('#grammar-show-forms').show();
-				$('#grammar-show-noforms').hide();
-			} else {
-				$('#grammar-show-forms').hide();
-				$('#grammar-show-noforms').show();
-			}
-		}
 	}
-  restoreToScreen(data: GrammarRequest) {
-    if (data && data) {
-      (<HTMLInputElement>document.getElementById("grammarword-word")).value = data.word ? data.word : "";
-      (<HTMLInputElement>document.getElementById("grammarword-multiform")).checked = data.multiForm;
-      document.getElementById("grammarword-grammar").innerText = data.grammar ? data.grammar : "";
-      DialogWordGrammar.wordGrammarToText(data.grammar, document.getElementById("grammarword-grammarshow"));
-      document.getElementById("grammarwordshow-grammar").innerText = data.outputGrammar ? data.outputGrammar : "";
-      DialogWordGrammar.wordGrammarToText(data.outputGrammar, document.getElementById("grammarwordshow-grammarshow"));
-    }
-    if (data) {
-      (<HTMLInputElement>document.getElementById(data.orderReverse ? "inputOrderReverse" : "inputOrderStandard")).checked = true;
-    }
-  }
-  hideStatusError() {
+	collectFromScreen(): GrammarRequest {
+		let r: GrammarRequest = new GrammarRequest();
+		
+		r.multiForm = (<HTMLInputElement>document.getElementById('grammarword-multiform')).checked;
+		r.word = (<HTMLInputElement>document.getElementById('grammarword-word')).value;
+		if ($('#grammar-show-grammardetails').is(":visible")) {
+			r.grammar = document.getElementById("grammarword-grammar").innerText;
+		}
+		if ($('#grammar-show-order').is(":visible")) {
+			r.orderReverse = (<HTMLInputElement>document.getElementById("inputOrderReverse")).checked;
+		}
+		if ($('#grammar-show-forms').is(":visible")) {
+			r.outputGrammar = document.getElementById("grammarwordshow-grammar").innerText;
+		}
+		if ($('#grammar-show-grouping').is(":visible")) {
+			r.outputGrouping = (<HTMLInputElement>document.getElementById("inputGrouping")).checked;
+		}
+		return r;
+	}
+	restoreToScreen(data: GrammarRequest) {
+		if (data) {
+			(<HTMLInputElement>document.getElementById("grammarword-word")).value = data.word ? data.word : "";
+			(<HTMLInputElement>document.getElementById("grammarword-multiform")).checked = data.multiForm;
+			if (data.grammar) {
+				document.getElementById("grammarword-grammar").innerText = data.grammar;
+				DialogWordGrammar.wordGrammarToText(data.grammar, document.getElementById("grammarword-grammarshow"));
+				this.showExtended = true;
+			}
+			if (data.outputGrammar) {
+				document.getElementById("grammarwordshow-grammar").innerText = data.outputGrammar;
+				DialogWordGrammar.wordGrammarToText(data.outputGrammar, document.getElementById("grammarwordshow-grammarshow"));
+				this.showExtended = true;
+			}
+			if (data.orderReverse) {
+				$("#inputOrderReverse").prop('checked', true);
+				this.showExtended = true;
+			}
+			this.visibilityChange();
+		}
+		let gr = this;
+		new MutationObserver(function(mutationsList, observer) {
+		   document.getElementById('grammarwordshow-grammar').innerText = '';
+		   document.getElementById('grammarwordshow-grammarshow').innerText = '---';
+		   gr.visibilityChange();
+		}).observe(document.getElementById('grammarword-grammar'), {childList: true});
+		new MutationObserver(function(mutationsList, observer) {
+		   gr.visibilityChange();
+		}).observe(document.getElementById('grammarwordshow-grammar'), {childList: true});
+	}
+	showOutput(requestGrammar: string, reverse: boolean) {
+		this.showExtended = true;
+		this.responseHasDuplicateParadigms = grammarService.result.hasDuplicateParadigms;
+		$('#output').html($.templates("#template-grammaroutput").render({
+			lemmas: grammarService.result.output,
+			reverse: reverse
+		}));
+		if (grammarService.result.output.length > 0) {
+			$('#grammar-addition-order').show();
+		}
+		this.visibilityChange();
+	}
+	hideStatusError() {
 		$('#status').hide();
 		$('#error').hide();
+	}
+	resetControls() {
+		this.showExtended = false;
+		document.getElementById("grammarword-grammar").innerText = '';
+		document.getElementById("grammarword-grammarshow").innerHTML = "---";
+		$('#grammar-show-order').hide();
+		$("#inputOrderStandard").prop('checked', true);
+		$('#grammar-show-forms').hide();
+		document.getElementById("grammarwordshow-grammar").innerText = '';
+		document.getElementById("grammarword-grammarshow").innerHTML = "---";
+		$('#grammar-show-grouping').hide();
+		$('#grammar-show-noforms').hide();
+		this.visibilityChange();
+	}
+	visibilityChange() {
+		if (this.showExtended) {
+			$('#grammar-show-order').show();
+			$('#grammar-show-reset').show();
+		}
+		if (this.responseHasDuplicateParadigms) {
+			$('#grammar-show-grouping').show();
+		} else {
+			$('#grammar-show-grouping').hide();
+		}
+		if ($('#grammar-show-grouping').is(":visible") && (<HTMLInputElement>document.getElementById("inputGrouping")).checked) {
+			$('#grammar-show-order').hide();
+		}
+		let grammar: string = document.getElementById('grammarword-grammar').innerText;
+		if ($('#grammar-show-grammardetails').is(":visible") && grammar && DialogWordGrammar.hasFormTags(grammar)) {
+			$('#grammar-show-forms').show();
+			$('#grammar-show-noforms').hide();
+		} else if (this.showExtended) {
+			$('#grammar-show-forms').hide();
+			$('#grammar-show-noforms').show();
+		}
 	}
 }
 

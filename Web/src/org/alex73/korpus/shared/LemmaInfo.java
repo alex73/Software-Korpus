@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class LemmaInfo {
     public long pdgId;
-    public String lemma, lemmaGrammar;
+    public String output;
     public String meaning;
 
     public static class LemmaParadigm {
@@ -41,6 +41,7 @@ public class LemmaInfo {
     }
 
     public static class LemmaVariant {
+        public String id;
         public List<LemmaForm> forms = new ArrayList<>();
     }
 

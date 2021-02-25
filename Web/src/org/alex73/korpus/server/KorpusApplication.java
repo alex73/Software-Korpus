@@ -39,6 +39,7 @@ public class KorpusApplication extends Application {
     public String korpusCache = System.getProperty("KORPUS_CACHE");
     public String grammarDb = System.getProperty("GRAMMAR_DB");
     public String configDir = System.getProperty("CONFIG_DIR");
+    public String noKorpus = System.getProperty("NOKORPUS");
 
     List<String> settings;
     Properties stat;
@@ -93,8 +94,10 @@ public class KorpusApplication extends Application {
                     + getUsedMemory());
             grFinder = new GrammarFinder(gr);
             System.out.println("GrammarDB indexed. Used memory: " + getUsedMemory());
-            processKorpus = new LuceneFilter(korpusCache);
-            System.out.println("Lucene initialized");
+            if (!"yes".equals(noKorpus)) {
+                processKorpus = new LuceneFilter(korpusCache);
+                System.out.println("Lucene initialized");
+            }
 
             prepareInitial();
             System.out.println("Initialization finished. Used memory: " + getUsedMemory());

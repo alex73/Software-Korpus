@@ -4,7 +4,7 @@ class DialogWordGrammar {
 	private hideFormGroups: boolean;
 
 	private constructor(inner: HTMLElement) {
-		this.currentWordElement = inner.closest(".card");
+		this.currentWordElement = inner.closest(".word-select");
 	}
 	static createParadigmTagsDialog(inner: HTMLElement, showFormGroups: boolean): DialogWordGrammar {
 		let result: DialogWordGrammar = new DialogWordGrammar(inner);

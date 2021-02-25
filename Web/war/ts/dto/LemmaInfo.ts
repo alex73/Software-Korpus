@@ -1,7 +1,11 @@
+class GrammarSearchResult {
+	public error: string;
+	public hasDuplicateParadigms: boolean;
+	public output: LemmaInfo[];
+}
 class LemmaInfo {
     public pdgId: number;
-    public lemma: string;
-    public lemmaGrammar: string;
+    public output: string;
     public meaning: string;
 }
 
@@ -13,6 +17,7 @@ class LemmaParadigm {
 }
 
 class LemmaVariant {
+    public id: string;
     public forms: LemmaForm[];
 }
 

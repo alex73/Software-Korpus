@@ -7,7 +7,7 @@ class GrammarService {
   public inputWord: WordRequest = new WordRequest();
   public inputOrder: string = "STANDARD"; // "STANDARD" | "REVERSE";
 
-  public results: LemmaInfo[] = [];
+  public result: GrammarSearchResult;
   public details: LemmaParadigm;
 
   constructor() {
@@ -57,12 +57,16 @@ class GrammarService {
           grammarui.showError("Памылка пошуку: " + r.status + " " + r.statusText);
         } else {
           r.json().then(json => {
-            this.results = json;
-            grammarui.showOutput(rq.grammar);
-            if (this.results.length > 0) {
-              grammarui.hideStatusError();
+            this.result = json;
+            if (this.result.error) {
+              grammarui.showError(this.result.error);
             } else {
-              grammarui.showError("Нічога не знойдзена");
+              grammarui.showOutput(rq.grammar, rq.orderReverse && !rq.outputGrouping);
+              if (this.result.output.length > 0) {
+                grammarui.hideStatusError();
+              } else {
+                grammarui.showError("Нічога не знойдзена");
+              }
             }
           });
         }
@@ -88,9 +92,10 @@ class GrammarService {
 }
 
 class GrammarRequest {
-  public word: string;
-  public multiForm: boolean = false;
-  public grammar: string;
-  public outputGrammar: string;
-  public orderReverse: boolean;
+  public word: string; // тое што ўвёў карыстальнік
+  public multiForm: boolean = false; // пошук па формах ?
+  public grammar: string; // удакладненая граматыка
+  public outputGrammar: string; // адмысловая форма
+  public orderReverse: boolean; // адваротны парадак
+  public outputGrouping: boolean; // групаваць
 }
