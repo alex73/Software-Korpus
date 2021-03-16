@@ -33,6 +33,7 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;attribute name="type" type="{}VariantType" />
  *       &lt;attribute name="marked" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="options" type="{}ParadigmOptions" />
+ *       &lt;attribute name="regulation" type="{}RegulationType" />
  *       &lt;attribute name="todo" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="comment" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="meaning" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -73,6 +74,8 @@ public class Paradigm {
     protected String marked;
     @XmlAttribute(name = "options")
     protected ParadigmOptions options;
+    @XmlAttribute(name = "regulation")
+    protected RegulationType regulation;
     @XmlAttribute(name = "todo")
     protected String todo;
     @XmlAttribute(name = "comment")
@@ -349,6 +352,30 @@ public class Paradigm {
      */
     public void setOptions(ParadigmOptions value) {
         this.options = value;
+    }
+
+    /**
+     * Gets the value of the regulation property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link RegulationType }
+     *     
+     */
+    public RegulationType getRegulation() {
+        return regulation;
+    }
+
+    /**
+     * Sets the value of the regulation property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link RegulationType }
+     *     
+     */
+    public void setRegulation(RegulationType value) {
+        this.regulation = value;
     }
 
     /**

@@ -1,7 +1,6 @@
 package org.alex73.korpus.text.parser;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.ParseException;
@@ -15,14 +14,19 @@ import java.util.regex.Pattern;
 import org.alex73.korpus.text.elements.Paragraph;
 
 public class TextFileParser {
+    enum BLOCK_MODE {
+        ONE_LINE, POETRY, PAGE
+    };
 
     private static Pattern RE_TAG = Pattern.compile("##([A-Za-z0-9]+):?(.*)");
     private static Pattern RE_TAG_BEGIN = Pattern.compile("##([A-Za-z0-9]+)_BEGIN");
 
     public final Map<String, String> headers = new TreeMap<>();
     public final List<Paragraph> paragraphs = new ArrayList<>();
-    private final StringBuilder poetryBuffer = new StringBuilder();
+    private final StringBuilder buffer = new StringBuilder();
     private Splitter3 splitter;
+    private BLOCK_MODE mode = BLOCK_MODE.ONE_LINE;
+    private int page;
 
     public TextFileParser(InputStream in, boolean headersOnly, IProcess errors) {
         splitter = new Splitter3(true, errors);
@@ -37,70 +41,52 @@ public class TextFileParser {
             String s;
             while ((s = rd.readLine()) != null) {
                 s = s.trim();
-                if (s.isEmpty() && paragraphs.isEmpty()) {
-                    continue;
+                if (s.isEmpty()) {
+                    switch (mode) {
+                    case ONE_LINE:
+                        continue;
+                    case POETRY:
+                        flushBuffer();
+                        continue;
+                    default:
+                        break;
+                    }
                 }
                 if (s.startsWith("##")) {
-                    if (isPoetryStart(s)) {
-                        addPoetry(rd);
+                    s = s.replace(" ", "");
+                    if ("##Poetry:begin".equals(s)) {
+                        mode = BLOCK_MODE.POETRY;
+                    } else if ("##Poetry:end".equals(s)) {
+                        flushBuffer();
+                        mode = BLOCK_MODE.ONE_LINE;
+                    } else if (s.startsWith("##Page:")) {
+                        flushBuffer();
+                        mode = BLOCK_MODE.PAGE;
+                        page = Integer.parseInt(s.substring(7));
                     }
+                    continue;
                 } else {
-                    paragraphs.add(splitter.parse(s));
+                    buffer.append(s).append('\n');
+                }
+                if (mode == BLOCK_MODE.ONE_LINE) {
+                    Paragraph p = splitter.parse(s);
+                    p.page = page;
+                    paragraphs.add(p);
+                    buffer.setLength(0);
                 }
             }
+            flushBuffer();
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
     }
 
-    void addPoetry(BufferedReader rd) throws IOException {
-        String s;
-        while ((s = rd.readLine()) != null) {
-            s = s.trim();
-            if (s.isEmpty()) {
-                // empty line - new paragraph
-                flushPoetry();
-            } else if (s.startsWith("##")) {
-                if (isPoetryEnd(s)) {
-                    flushPoetry();
-                    return;
-                }
-            } else {
-                poetryBuffer.append(s).append('\n');
-            }
-        }
-
-        flushPoetry();
-    }
-
-    private void flushPoetry() {
-        if (poetryBuffer.length() > 0) {
-            paragraphs.add(splitter.parse(poetryBuffer));
-            poetryBuffer.setLength(0);
-        }
-    }
-
-    /**
-     * Check is poetry tag starts.
-     */
-    static boolean isPoetryStart(String s) {
-        Matcher m = RE_TAG.matcher(s);
-        if (m.matches()) {
-            return "Poetry".equals(m.group(1)) && "begin".equals(m.group(2).trim());
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Check is poetry tag ends.
-     */
-    static boolean isPoetryEnd(String s) {
-        Matcher m = RE_TAG.matcher(s);
-        if (m.matches()) {
-            return "Poetry".equals(m.group(1)) && "end".equals(m.group(2).trim());
-        } else {
-            return false;
+    private void flushBuffer() {
+        if (buffer.length() > 0) {
+            Paragraph p = splitter.parse(buffer);
+            p.page = page;
+            paragraphs.add(p);
+            buffer.setLength(0);
         }
     }
 

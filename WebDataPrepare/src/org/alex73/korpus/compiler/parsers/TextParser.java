@@ -24,7 +24,7 @@ public class TextParser extends BaseParser {
     public void parse(Executor queue, boolean headersOnly) throws Exception {
         System.out.println(file);
         String fn = file.getFileName().toString();
-        if (fn.contains("autary") && fn.endsWith(".list")) {
+        if (headersOnly && fn.contains("autary") && fn.endsWith(".list")) {
             initializeAuthors(file);
             return;
         }
@@ -103,7 +103,7 @@ public class TextParser extends BaseParser {
             }
             addAuthorToIndex(tags);
         } catch (Exception ex) {
-            throw new RuntimeException();
+            throw new RuntimeException(ex);
         }
     }
 

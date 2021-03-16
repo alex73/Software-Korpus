@@ -32,6 +32,7 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;attribute name="pravapis" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="type" type="{}VariantType" />
  *       &lt;attribute name="rules" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="regulation" type="{}RegulationType" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -68,6 +69,8 @@ public class Variant {
     protected VariantType type;
     @XmlAttribute(name = "rules")
     protected String rules;
+    @XmlAttribute(name = "regulation")
+    protected RegulationType regulation;
 
     /**
      * Gets the value of the note property.
@@ -322,6 +325,30 @@ public class Variant {
      */
     public void setRules(String value) {
         this.rules = value;
+    }
+
+    /**
+     * Gets the value of the regulation property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link RegulationType }
+     *     
+     */
+    public RegulationType getRegulation() {
+        return regulation;
+    }
+
+    /**
+     * Sets the value of the regulation property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link RegulationType }
+     *     
+     */
+    public void setRegulation(RegulationType value) {
+        this.regulation = value;
     }
 
 }

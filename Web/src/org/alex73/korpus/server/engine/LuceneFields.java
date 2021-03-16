@@ -57,6 +57,7 @@ public class LuceneFields {
     public Field fieldSentenceDBGrammarTags;
     public Field fieldSentenceLemmas;
     public Field fieldSentencePBinary;
+    public FieldInt fieldSentencePage;
 
     public FieldInt fieldTextID;
 
@@ -82,6 +83,7 @@ public class LuceneFields {
         fieldSentenceTextSource = new Field("textSource", "", TYPE_NOTSTORED_INDEXED);
         fieldSentenceTextCreationYear = new IntRange("creationYear", new int[] { 0 }, new int[] { 0 });
         fieldSentenceTextPublishedYear = new IntRange("publishedYear", new int[] { 0 }, new int[] { 0 });
+        fieldSentencePage = new FieldInt("textPage", TYPE_STORED_NOTINDEXED_INT);
 //        fieldSentenceTextInfo = new Field("textInfo", new byte[0], TYPE_STORED_NOTINDEXED);
 
         fieldTextID = new FieldInt("textId", TYPE_STORED_INDEXED_INT);

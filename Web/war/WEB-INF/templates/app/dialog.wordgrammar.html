@@ -11,11 +11,13 @@
 </script>
 <script id="template-wordgrammar2" type="text/x-jsrender">
 	{{for ~root.grammar.grammarWordTypesGroups[~root.grselected].groups itemVar="~group"}}
-		<div class="card panel-default {{if (!~group.formGroup && ~root.hideParadigmGroups)}}d-none{{/if}} {{if (~group.formGroup && ~root.hideFormGroups)}}d-none{{/if}} {{if (~root.grammar.skipGrammar[~root.grselected] && ~root.grammar.skipGrammar[~root.grselected].includes(~group.name))}}d-none{{/if}}">
-			<div class="card-header">{{>~group.name}}</div>
-			<div class="card-body">
+		<div class="my-2 panel-default {{if (!~group.formGroup && ~root.hideParadigmGroups)}}d-none{{/if}} {{if (~group.formGroup && ~root.hideFormGroups)}}d-none{{/if}} {{if (~root.grammar.skipGrammar[~root.grselected] && ~root.grammar.skipGrammar[~root.grselected].includes(~group.name))}}d-none{{/if}}">
+			<div style="font-size: 120%; font-weight: bold;">{{>~group.name}}</div>
+			<div>
 			{{for ~group.items}}
-				<label><input type="checkbox" name="{{>~group.name}}" value="{{>code}}"> {{>description}} ({{>code}})</label>
+				{{if code != '_' && code != 'X'}}
+					<label class="ml-2"><input type="checkbox" name="{{>~group.name}}" value="{{>code}}"> {{>description}}</label>
+				{{/if}}
 			{{/for}}
 			</div>
 		</div>

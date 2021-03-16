@@ -34,6 +34,12 @@ public class TextUtils {
         if ((s = get(headers, "Edition")) != null) {
             info.edition = s;
         }
+        if ((s = get(headers, "Details")) != null) {
+            info.details = s;
+        }
+        if ((s = get(headers, "File")) != null) {
+            info.file = s;
+        }
         if ((s = get(headers, "PublicationYear")) != null) {
             info.publicationTime = s;
             new KorpusDateTime(info.publicationTime);
@@ -69,6 +75,12 @@ public class TextUtils {
         }
         if (info.edition != null) {
             result.put("Edition", info.edition);
+        }
+        if (info.details != null) {
+            result.put("Details", info.details);
+        }
+        if (info.file != null) {
+            result.put("File", info.file);
         }
         if (info.publicationTime != null) {
             result.put("PublicationYear", info.publicationTime);

@@ -85,6 +85,58 @@
       </xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
+  <xs:simpleType name="RegulationType">
+    <xs:annotation>
+      <xs:documentation>Класіфікацыйныя тыпы</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="add">
+        <xs:annotation>
+          <xs:documentation>Якія няма ў слоўніках, але мусяць быць</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="mistake">
+        <xs:annotation>
+          <xs:documentation>Памылковыя  ў асобных слоўніках: калашы+на</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="fantasy">
+        <xs:annotation>
+          <xs:documentation>Няісныя словы: трудава+ны</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="undesirable">
+        <xs:annotation>
+          <xs:documentation>Якія не варта выкарыстоўваць: першынству+ючы</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="limited">
+        <xs:annotation>
+          <xs:documentation>Якія варта рэгуляваць: пушкіні+ст</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="rare">
+        <xs:annotation>
+          <xs:documentation>Рэдкія: вісо+н</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="rare_branch">
+        <xs:annotation>
+          <xs:documentation>Рэдкая галіновая тэрміналогія</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="obscenism">
+        <xs:annotation>
+          <xs:documentation>Мацюкі(абсцэнізмы)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="invective">
+        <xs:annotation>
+          <xs:documentation>Лаянкі(інвектывы)</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
   <xs:element name="Paradigm">
     <!-- Усярэдзіне парадыгмы - тэг Variant -->
     <xs:complexType>
@@ -114,6 +166,7 @@
       <xs:attribute name="type" type="VariantType" use="optional" />
       <xs:attribute name="marked" type="xs:string" use="optional" />
       <xs:attribute name="options" type="ParadigmOptions" use="optional" />
+      <xs:attribute name="regulation" type="RegulationType" use="optional" />
       <xs:attribute name="todo" type="xs:string" use="optional">
         <xs:annotation>
           <xs:documentation>Што трэба выправіць</xs:documentation>
@@ -149,6 +202,7 @@
       </xs:attribute>
       <xs:attribute name="type" type="VariantType" use="optional" />
       <xs:attribute name="rules" type="xs:string" use="optional" />
+      <xs:attribute name="regulation" type="RegulationType" use="optional" />
     </xs:complexType>
   </xs:element>
   <xs:element name="Form">

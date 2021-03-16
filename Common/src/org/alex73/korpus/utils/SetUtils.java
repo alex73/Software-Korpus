@@ -1,8 +1,11 @@
 package org.alex73.korpus.utils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
@@ -73,6 +76,26 @@ public class SetUtils {
 
     public static void addSlounik(Variant v, String slounik) {
         v.setSlouniki(addTag(v.getSlouniki(), slounik));
+    }
+
+    public static Map<String, String> getSlouniki(String slouniki) {
+        if (slouniki == null) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> result = new TreeMap<>();
+        for (String s : slouniki.split(",")) {
+            s = s.trim();
+            if (s.isEmpty()) {
+                continue;
+            }
+            int p = s.indexOf(':');
+            if (p < 0) {
+                result.put(s, null);
+            } else {
+                result.put(s.substring(0, p), s.substring(p + 1));
+            }
+        }
+        return result;
     }
 
     public static void removeSlounik(Form f, String slounik) {

@@ -206,6 +206,7 @@ public class SearchServiceImpl {
                 result[i].docId = list[i];
                 result[i].doc = restoreTextInfo(doc);
                 result[i].text = restoreText(doc);
+                result[i].text.page = getApp().processKorpus.getPage(doc);
                 // mark result words
                 WordsDetailsChecks.isAllowed(params.wordsOrder, params.words, result[i].text);
             }

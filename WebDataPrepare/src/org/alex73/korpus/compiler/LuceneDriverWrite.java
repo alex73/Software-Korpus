@@ -48,6 +48,7 @@ public class LuceneDriverWrite extends LuceneFields {
         docSentence.add(fieldSentenceDBGrammarTags);
         docSentence.add(fieldSentenceLemmas);
         docSentence.add(fieldSentencePBinary);
+        docSentence.add(fieldSentencePage);
 
         docSentence.add(fieldSentenceTextSubcorpus);
         // docSentence.add(fieldSentenceTextIDOrder);
@@ -72,7 +73,7 @@ public class LuceneDriverWrite extends LuceneFields {
      * 
      * @return words count
      */
-    protected synchronized void addSentence(TextInfo textInfo, String[] values, String[] dbGrammarTags, String[] lemmas,
+    protected synchronized void addSentence(TextInfo textInfo, int page, String[] values, String[] dbGrammarTags, String[] lemmas,
             byte[] xml) throws Exception {
         fieldSentenceTextSubcorpus.setStringValue(textInfo.subcorpus);
         fieldSentenceTextStyleGenre.setTokenStream(new StringArrayTokenStream(textInfo.styleGenres));
@@ -85,6 +86,7 @@ public class LuceneDriverWrite extends LuceneFields {
         fieldSentenceDBGrammarTags.setTokenStream(new StringArrayTokenStream(dbGrammarTags));
         fieldSentenceLemmas.setTokenStream(new StringArrayTokenStream(lemmas));
         fieldSentencePBinary.setBytesValue(xml);
+        fieldSentencePage.setIntValue(page);
 
         fieldTextID.setIntValue(PrepareCache3.textPositionsBySourceFile.get(textInfo.sourceFilePath));
 
@@ -117,7 +119,7 @@ public class LuceneDriverWrite extends LuceneFields {
                 }
             }
             byte[] pxml = pwr.write(p);
-            addSentence(textInfo, values.toArray(STRING_ARRAY), dbGrammarTags.toArray(STRING_ARRAY),
+            addSentence(textInfo, p.page, values.toArray(STRING_ARRAY), dbGrammarTags.toArray(STRING_ARRAY),
                     lemmas.toArray(STRING_ARRAY), pxml);
         }
     }

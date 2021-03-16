@@ -1,6 +1,7 @@
 package org.alex73.korpus.belarusian;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -8,6 +9,7 @@ import java.util.stream.Stream;
 import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.FormType;
 import org.alex73.corpus.paradigm.Paradigm;
+import org.alex73.corpus.paradigm.RegulationType;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.utils.SetUtils;
 
@@ -40,19 +42,17 @@ public class FormsReadyFilter {
             }
             break;
         }
-        boolean hasSlouniki = false;
-        if (mode == MODE.SHOW) {
-            if (v.getSlouniki()!=null && !v.getSlouniki().isEmpty()) {
-                hasSlouniki = true; // правапіс - без піскунова, база - з піскуновым
-            }
+        Set<String> slv = SetUtils.getSlouniki(v.getSlouniki()).keySet();
+        if (mode == MODE.SPELL) {
+            slv.remove("piskunou2012");// правапіс - без піскунова, база - з піскуновым
         }
-        if (v.getForm().get(0).getSlouniki() != null) {
-            for (String sl : v.getForm().get(0).getSlouniki().split(",")) {
-                if (sl.isEmpty()) {
-                    continue;
-                }
+        boolean hasSlouniki = !slv.isEmpty();
+        if (!SetUtils.getSlouniki(v.getForm().get(0).getSlouniki()).isEmpty()) {
+            hasSlouniki = true;
+        }
+        if (!hasSlouniki) {
+            if (p.getRegulation() == RegulationType.ADD || v.getRegulation() == RegulationType.ADD) {
                 hasSlouniki = true;
-                break;
             }
         }
         if (!tag.startsWith("NP") && !hasSlouniki) {

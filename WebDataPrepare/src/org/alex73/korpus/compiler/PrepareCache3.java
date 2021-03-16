@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class PrepareCache3 {
     private static final Logger LOG = LoggerFactory.getLogger(PrepareCache3.class);
 
-    public static final boolean writeToLucene = false;
+    public static final boolean writeToLucene = true;
     public static Path INPUT;
     public static Path OUTPUT;
     static StaticGrammarFiller2 grFiller;

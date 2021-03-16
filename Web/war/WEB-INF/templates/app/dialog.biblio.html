@@ -4,9 +4,11 @@
     <b>URL:</b> <a target="_blank" href="{{> doc.url}}">{{> doc.url}}</a>
   </div>
   {{/if}}
+  {{if doc.authors}}
   <div>
     <b>Аўтары:</b> {{> doc.authors}}
   </div>
+  {{/if}}
   {{if doc.translation}}
   <div>
     <b>Перакладчык:</b> {{> doc.translators}}
@@ -20,12 +22,24 @@
   <div>
     <b>Назва:</b> {{> doc.title}}
   </div>
+  {{if doc.styleGenres}}
   <div>
     <b>Стыль/жанр:</b> {{> doc.styleGenres}}
   </div>
+  {{/if}}
   {{if doc.edition}}
   <div>
     <b>Выданне:</b> {{> doc.edition}}
+  </div>
+  {{/if}}
+  {{if doc.details}}
+  <div>
+    <b>Падрабязнасці:</b> {{> doc.details}}
+  </div>
+  {{/if}}
+  {{if doc.file}}
+  <div>
+    <b>Файл:</b> {{> doc.file}}
   </div>
   {{/if}}
   {{if doc.creationTime}}

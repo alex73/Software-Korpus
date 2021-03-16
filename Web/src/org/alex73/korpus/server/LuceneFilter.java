@@ -165,4 +165,8 @@ public class LuceneFilter {
     public int getTextID(Document doc) {
         return doc.getField(lucene.fieldTextID.name()).numericValue().intValue();
     }
+
+    public int getPage(Document doc) {
+        return doc.getField(lucene.fieldSentencePage.name()).numericValue().intValue();
+    }
 }

@@ -38,6 +38,8 @@ public class TextInfo implements Serializable {
     public String lang, langOrig;
     public String[] styleGenres;
     public String edition;
+    public String details;
+    public String file;
     public String creationTime, publicationTime;
 
     private transient Long creationTimeLatest, creationTimeEarliest;
