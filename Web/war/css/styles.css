@@ -115,3 +115,11 @@ table th {
 .grvalue {
 	background: #f9f8d5
 }
+
+.grtag {
+	font-style: italic;
+}
+
+.grheadertag {
+	font-weight: bold;
+}

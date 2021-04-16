@@ -9,7 +9,7 @@
     <div class="card mx-auto" style="width: fit-content;">
       <div class="card-header">
         {{for details.catText}}
-        <div>{{>key}}: {{>value}}</div>
+        <div><span class="grheadertag">{{>key}}</span>: {{>value}}</div>
         {{/for}}
         {{if details.meaning}}
           <br/>Значэнне: {{>details.meaning}}
@@ -28,7 +28,7 @@
             <tr>
               {{for data}}
                 {{if ~f.colspan[#index] > 0}}
-                  <td rowSpan="{{:~f.colspan[#getIndex()]}}">{{>}}</td>
+                  <td class="grtag" rowSpan="{{:~f.colspan[#getIndex()]}}">{{>}}</td>
                 {{/if}}
               {{/for}}
               <td class="grvalue">{{>value}}</td>

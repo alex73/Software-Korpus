@@ -28,6 +28,13 @@ import java.util.Set;
 
 import org.alex73.korpus.belarusian.TagLetter.OneLetterInfo;
 
+/**
+ * Граматычныя пазнакі паказваюцца ў наступных месцах:
+ * 1) Фільтар граматыкі для слова - checkboxes.
+ * 2) Паказ граматычных табліц для слова.
+ * 3) Паказ граматычных характарыстык аднаго слова.
+ * 4) Граматычны слоўнік у "праектах у распрацоўцы".
+ */
 public class BelarusianTags {
     public static final String NO_GROUP_ITEM = "не ўжываецца";
     public static final String HALOSNYJA = "ёуеыаоэяіюЁУЕЫАОЭЯІЮ";
