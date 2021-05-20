@@ -26,8 +26,6 @@ public class TextArchiveParser extends BaseParser {
 
     @Override
     public void parse(Executor queue, boolean headersOnly) throws Exception {
-        System.out.println(file);
-
         Path headersFile = Paths.get(file.toString() + ".headers");
         Map<String, String> commonHeaders;
         if (Files.exists(headersFile)) {

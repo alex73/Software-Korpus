@@ -53,6 +53,9 @@ public class PrepareCache3 {
         if (output == null) {
             throw new Exception("--output not defined");
         }
+        if (grammardb == null) {
+            throw new Exception("--grammardb not defined");
+        }
 
         INPUT = Paths.get(input);
         OUTPUT = Paths.get(output);

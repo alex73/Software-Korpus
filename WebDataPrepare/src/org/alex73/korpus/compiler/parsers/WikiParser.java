@@ -47,7 +47,6 @@ public class WikiParser extends BaseParser {
 
     @Override
     public void parse(Executor queue, boolean headersOnly) throws Exception {
-        System.out.println(file);
         this.headersOnly = headersOnly;
 
         if (file.getFileName().toString().startsWith("bewiki-")) {

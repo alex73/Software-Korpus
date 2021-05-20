@@ -37,7 +37,7 @@ public class LuceneDriverWrite extends LuceneFields {
     public LuceneDriverWrite(String rootDir) throws Exception {
         IndexWriterConfig config = new IndexWriterConfig();
         config.setOpenMode(OpenMode.CREATE);
-        config.setRAMBufferSizeMB(2048);
+        config.setRAMBufferSizeMB(16384);
         config.setIndexSort(new Sort(new SortField(fieldTextID.name(), SortField.Type.INT)));
 
         dir = new NIOFSDirectory(Paths.get(rootDir));

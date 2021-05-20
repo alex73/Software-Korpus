@@ -2,13 +2,8 @@ package org.alex73.korpus.future;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,14 +26,6 @@ import org.alex73.korpus.utils.StressUtils;
 @SuppressWarnings("serial")
 @WebServlet(urlPatterns = { "/hramatycny/*" })
 public class Hramatycny extends FutureBaseServlet {
-    static final Map<Character, Set<String>> excludeTagGroups = new TreeMap<>();
-    static {
-        excludeTagGroups.put('N', new TreeSet<>(Arrays.asList("Скарот")));
-        excludeTagGroups.put('M', new TreeSet<>(Arrays.asList("Словазмяненне", "Форма")));
-        excludeTagGroups.put('S', new TreeSet<>(Arrays.asList("Словазмяненне", "Асоба")));
-        excludeTagGroups.put('A', new TreeSet<>(Arrays.asList("Ступень параўнання")));
-        excludeTagGroups.put('R', new TreeSet<>(Arrays.asList("Утварэнне")));
-    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -77,7 +64,7 @@ public class Hramatycny extends FutureBaseServlet {
             list = new HramatycnyHram(p, v, forms).toString();
             String tag=SetUtils.tag(p, v);
             grammar = String.join(", ",
-                    BelarusianTags.getInstance().describe(tag, excludeTagGroups.get(tag.charAt(0))));
+                    BelarusianTags.getInstance().describe(tag, KorpusApplication.instance.grammarInitial.skipGrammar.get(tag.charAt(0))));
         }
 
         public String getWord() {

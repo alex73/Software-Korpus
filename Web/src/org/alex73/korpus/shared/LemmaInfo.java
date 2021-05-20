@@ -32,6 +32,7 @@ public class LemmaInfo {
     public long pdgId;
     public String output;
     public String meaning;
+    public String grammar;
 
     public static class LemmaParadigm {
         public String lemma;
@@ -48,5 +49,6 @@ public class LemmaInfo {
     public static class LemmaForm {
         public String tag;
         public String value;
+        public String options;
     }
 }

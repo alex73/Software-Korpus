@@ -23,6 +23,23 @@ class Grammar {
     }
     return r;
   }
+  static getCodes(data: GrammarInitial, cat: string): { [key:string]: string; } {
+    let gr = data.grammarTree;
+    let r = {};
+    for (let c of cat.split('')) {
+      let g = gr[c];
+      if (g) {
+        r[g.name] = c;
+        gr = g.ch;
+        if (!gr) {
+          break;
+        }
+      } else {
+        break;
+      }
+    }
+    return r;
+  }
   static subtree(cat: string, grammarTree: { [key: string]: GrammarLetter; }): { [key: string]: GrammarLetter; } {
     let gr = grammarTree;
     for (let c of cat.split('')) {

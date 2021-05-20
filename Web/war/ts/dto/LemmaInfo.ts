@@ -7,6 +7,7 @@ class LemmaInfo {
     public pdgId: number;
     public output: string;
     public meaning: string;
+    public grammar: string;
 }
 
 class LemmaParadigm {
@@ -24,4 +25,5 @@ class LemmaVariant {
 class LemmaForm {
     public tag: string;
     public value: string;
+    public options: string;
 }

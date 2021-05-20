@@ -10,6 +10,9 @@ import org.alex73.korpus.utils.KorpusDateTime;
 public class TextUtils {
     public static void fillFromHeaders(TextInfo info, Map<String, String> headers) {
         String s;
+        if ((s = get(headers, "Source")) != null) {
+            info.source = s;
+        }
         if ((s = get(headers, "URL")) != null) {
             info.url = s;
         }
@@ -52,6 +55,9 @@ public class TextUtils {
 
     public static Map<String, String> fillToHeaders(TextInfo info) {
         Map<String, String> result = new TreeMap<>();
+        if (info.source != null) {
+            result.put("Source", info.source);
+        }
         if (info.url != null) {
             result.put("URL", info.url);
         }

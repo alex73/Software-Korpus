@@ -64,16 +64,7 @@
 </form>
 
 <div class="row">
-	<form class="col-md-6 order-md-2" onSubmit="grammarService.search(); return false;">
-	  <div id="grammar-addition-order" style="display: none">
-	    <div class="card" style="width:100%;">
-	      <div class="card-body mb-0">
-	      </div>
-	    </div>
-	  </div>
-	</form>
-	
-	<div id="output" class="col-md-6 order-md-1 pr-4"></div>
+	<div id="output" class="col-md-12"></div>
 </div>
 
 <script id="template-grammaroutput" type="text/x-jsrender">
@@ -83,6 +74,7 @@
       {{if meaning && ~root.reverse}}‘{{>meaning}}’&nbsp;&nbsp;{{/if}}
       <a href="#" onClick="grammarService.loadDetails({{:pdgId}}); return false;">{{>output}}</a>
       {{if meaning && !~root.reverse}}&nbsp;&nbsp;‘{{>meaning}}’{{/if}}
+      <span class="grtag">&ndash; {{>grammar}}</span>
       </div>
     </div>
   {{/for}}

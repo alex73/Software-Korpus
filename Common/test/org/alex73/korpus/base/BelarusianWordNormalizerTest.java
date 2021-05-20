@@ -44,5 +44,8 @@ public class BelarusianWordNormalizerTest {
         assertFalse(BelarusianWordNormalizer.equals("малы´", "ма´лы"));
         assertTrue(BelarusianWordNormalizer.equals("малы", "ма+лы"));
         assertTrue(BelarusianWordNormalizer.equals("малы", "ма+лы+"));
+        assertTrue(BelarusianWordNormalizer.equals("Нью-Ё+рк", "Нью-Ёрк"));
+        assertFalse(BelarusianWordNormalizer.equals("Нью-Ё+рк", "Нью-ёрк" ));
+        assertTrue(BelarusianWordNormalizer.equals("ВКПб", "ВКПб"));
     }
 }

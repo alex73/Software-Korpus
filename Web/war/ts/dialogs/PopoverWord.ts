@@ -16,12 +16,12 @@ class PopoverWord extends BasePopover {
 	html(lemma: string, cat: string): string {
 		let o: string = "";
 		if (lemma) {
-			let lemmas: string[] = lemma.split('_');
+			let lemmas: string[] = lemma.split(';');
 			o += '<b>Лема</b>:&nbsp;' + lemmas.join(', ');
 		}
 		if (cat) {
 			o += '<br/><b>Граматыка</b>:';
-			for (let c of cat.split('_')) {
+			for (let c of cat.split(';')) {
 				o += '<br/>' + c + ':&nbsp;';
 				let oo: KeyValue[] = Grammar.parseCode(korpusService.initial.grammar, c);
 				if (oo) {

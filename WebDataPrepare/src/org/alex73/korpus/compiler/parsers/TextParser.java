@@ -22,7 +22,6 @@ public class TextParser extends BaseParser {
 
     @Override
     public void parse(Executor queue, boolean headersOnly) throws Exception {
-        System.out.println(file);
         String fn = file.getFileName().toString();
         if (headersOnly && fn.contains("autary") && fn.endsWith(".list")) {
             initializeAuthors(file);

@@ -165,16 +165,16 @@ public class BelarusianWordNormalizer {
             if (cAny == 0 || cDb == 0) {
                 return false;
             }
+            // першы сімвал - можа вялікі ?
+            boolean vialikiDb = CIVIALIKIJA[cDb];
+            boolean vialikiAny = CIVIALIKIJA[cAny];
+            if (vialikiDb && !vialikiAny) {
+                return false;
+            }
+            cDb = UMALYJA[cDb];
+            cAny = UMALYJA[cAny];
+            // першы сімвал - можа у/ў?
             if (iDb == 0 && iAny == 0) {
-                // першы сімвал - можа вялікі ?
-                boolean vialikiDb = CIVIALIKIJA[cDb];
-                boolean vialikiAny = CIVIALIKIJA[cAny];
-                if (vialikiDb && !vialikiAny) {
-                    return false;
-                }
-                cDb = UMALYJA[cDb];
-                cAny = UMALYJA[cAny];
-                // першы сімвал - можа у/ў?
                 if (cDb == 'ў') {
                     if (cAny == 'ў') {
                         continue;
@@ -185,8 +185,6 @@ public class BelarusianWordNormalizer {
                 if (cAny == 'ў') {
                     cAny = 'у';
                 }
-            } else {
-                cAny = UMALYJA[cAny];
             }
             if (cDb == '+' && cAny == '+') {
                 stressWasEquals = 1;

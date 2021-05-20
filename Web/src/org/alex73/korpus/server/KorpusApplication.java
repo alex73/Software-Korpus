@@ -46,7 +46,7 @@ public class KorpusApplication extends Application {
     private List<String> textInfos;
     public GrammarDB2 gr;
     public GrammarFinder grFinder;
-    GrammarInitial grammarInitial;
+    public GrammarInitial grammarInitial;
     InitialData searchInitial;
 
     LuceneFilter processKorpus;

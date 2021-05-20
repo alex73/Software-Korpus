@@ -17,7 +17,6 @@ public class OcrTextParser extends BaseParser {
 
     @Override
     public void parse(Executor queue, boolean headersOnly) throws Exception {
-        System.out.println(file);
         byte[] data = Files.readAllBytes(file);
 
         queue.execute(() -> {

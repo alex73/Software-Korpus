@@ -15,30 +15,218 @@
           <br/>Значэнне: {{>details.meaning}}
         {{/if}}
       </div>
-      {{for details.variants}}
+      {{for details.variants itemVar="~v"}}
         <div class="card-body">
-          <table class="table-borders hspacing">
-            <tr>
-              {{for catnames}}
-                <th>{{>}}</th>
-              {{/for}}
-              <th></th>
-            </tr>
-            {{for forms itemVar="~f"}}
-            <tr>
-              {{for data}}
-                {{if ~f.colspan[#index] > 0}}
-                  <td class="grtag" rowSpan="{{:~f.colspan[#getIndex()]}}">{{>}}</td>
-                {{/if}}
-              {{/for}}
-              <td class="grvalue">{{>value}}</td>
-            </tr>
-            {{/for}}
-          </table>
+          {{if tag.match("^N.....5$") tmpl="#template-grammardb-prymietnik"}}
+          {{else tag.match("^N.+$") tmpl="#template-grammardb-nazounik"}}
+          {{else tag.match("^A0$") tmpl="#template-grammardb-prosta"}}
+          {{else tag.match("^A.+$") tmpl="#template-grammardb-prymietnik"}}
+          {{else tag.match("^P.+$") tmpl="#template-grammardb-dziejeprymietnik"}}
+          {{else tag.match("^[MS]N.+$") tmpl="#template-grammardb-licebnikN"}}
+          {{else tag.match("^[MS]A.+$") tmpl="#template-grammardb-prymietnik"}}
+          {{else tag.match("^M0.+$") tmpl="#template-grammardb-licebnik0"}}
+          {{else tag.match("^S0.+$") tmpl="#template-grammardb-prosta"}}
+          {{else tag.match("^V.P.+$") tmpl="#template-grammardb-dziejaslouP"}}
+          {{else tag.match("^V.+$") tmpl="#template-grammardb-dziejaslouM"}}
+          {{else tag.match("^R.+$") tmpl="#template-grammardb-pryslouje"}}
+          {{else tag.match("^[CIEYZWK].*$") tmpl="#template-grammardb-prosta"}}
+          {{else tmpl="#template-grammardb-other"}}
+          {{/if}}
         </div>
       {{/for}}
     </div>
   </div>
+</script>
+
+<script id="template-grammardb-nazounik" type="text/x-jsrender">
+  <table class="table-borders hspacing">
+    <tr><td class="grtagcenter">Лік</td><td class="grtagcenter">Склон</td><td> </td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">Н.</td><td class="grvalue">{{:~root.getter('Склон:N;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">Р.</td><td class="grvalue">{{:~root.getter('Склон:G;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">Д.</td><td class="grvalue">{{:~root.getter('Склон:D;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">В.</td><td class="grvalue">{{:~root.getter('Склон:A;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">Т.</td><td class="grvalue">{{:~root.getter('Склон:I;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">М.</td><td class="grvalue">{{:~root.getter('Склон:L;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">Кл.</td><td class="grvalue">{{:~root.getter('Склон:V;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">мн.</td><td class="grtag">Н.</td><td class="grvalue">{{:~root.getter('Склон:N;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">мн.</td><td class="grtag">Р.</td><td class="grvalue">{{:~root.getter('Склон:G;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">мн.</td><td class="grtag">Д.</td><td class="grvalue">{{:~root.getter('Склон:D;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">мн.</td><td class="grtag">В.</td><td class="grvalue">{{:~root.getter('Склон:A;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">мн.</td><td class="grtag">Т.</td><td class="grvalue">{{:~root.getter('Склон:I;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">мн.</td><td class="grtag">М.</td><td class="grvalue">{{:~root.getter('Склон:L;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">мн.</td><td class="grtag">Кл.</td><td class="grvalue">{{:~root.getter('Склон:V;Лік:P',~v)}}</td></tr>
+  </table>
+  {{> ~root.log(~v) }}
+</script>
+
+<script id="template-grammardb-licebnikN" type="text/x-jsrender">
+  <table class="table-borders hspacing">
+    <tr><td class="grtagcenter">Лік</td><td class="grtagcenter">Склон</td><td> </td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">Н.</td><td class="grvalue">{{:~root.getter('Склон:N;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">Р.</td><td class="grvalue">{{:~root.getter('Склон:G;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">Д.</td><td class="grvalue">{{:~root.getter('Склон:D;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">В.</td><td class="grvalue">{{:~root.getter('Склон:A;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">Т.</td><td class="grvalue">{{:~root.getter('Склон:I;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">М.</td><td class="grvalue">{{:~root.getter('Склон:L;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">мн.</td><td class="grtag">Н.</td><td class="grvalue">{{:~root.getter('Склон:N;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">мн.</td><td class="grtag">Р.</td><td class="grvalue">{{:~root.getter('Склон:G;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">мн.</td><td class="grtag">Д.</td><td class="grvalue">{{:~root.getter('Склон:D;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">мн.</td><td class="grtag">В.</td><td class="grvalue">{{:~root.getter('Склон:A;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">мн.</td><td class="grtag">Т.</td><td class="grvalue">{{:~root.getter('Склон:I;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">мн.</td><td class="grtag">М.</td><td class="grvalue">{{:~root.getter('Склон:L;Лік:P',~v)}}</td></tr>
+  </table>
+  {{> ~root.log(~v) }}
+</script>
+
+<script id="template-grammardb-prymietnik" type="text/x-jsrender">
+  <table class="table-borders hspacing">
+    <tr><td class="grtagcenter">Лік</td><td class="grtagcenter">Род</td><td class="grtagcenter">Склон</td><td> </td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">м.</td><td class="grtag">Н.</td><td class="grvalue">{{:~root.getter('Род:M;Склон:N;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">м.</td><td class="grtag">Р.</td><td class="grvalue">{{:~root.getter('Род:M;Склон:G;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">м.</td><td class="grtag">Д.</td><td class="grvalue">{{:~root.getter('Род:M;Склон:D;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">м.</td><td class="grtag">В.</td><td class="grvalue">{{:~root.getter('Род:M;Склон:A;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">м.</td><td class="grtag">Т.</td><td class="grvalue">{{:~root.getter('Род:M;Склон:I;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">м.</td><td class="grtag">М.</td><td class="grvalue">{{:~root.getter('Род:M;Склон:L;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">адз.</td><td class="grtag">н.</td><td class="grtag">Н.</td><td class="grvalue">{{:~root.getter('Род:N;Склон:N;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">адз.</td><td class="grtag">н.</td><td class="grtag">Р.</td><td class="grvalue">{{:~root.getter('Род:N;Склон:G;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">адз.</td><td class="grtag">н.</td><td class="grtag">Д.</td><td class="grvalue">{{:~root.getter('Род:N;Склон:D;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">адз.</td><td class="grtag">н.</td><td class="grtag">В.</td><td class="grvalue">{{:~root.getter('Род:N;Склон:A;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">адз.</td><td class="grtag">н.</td><td class="grtag">Т.</td><td class="grvalue">{{:~root.getter('Род:N;Склон:I;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">адз.</td><td class="grtag">н.</td><td class="grtag">М.</td><td class="grvalue">{{:~root.getter('Род:N;Склон:L;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p3"><td class="grtag">адз.</td><td class="grtag">ж.</td><td class="grtag">Н.</td><td class="grvalue">{{:~root.getter('Род:F;Склон:N;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p3"><td class="grtag">адз.</td><td class="grtag">ж.</td><td class="grtag">Р.</td><td class="grvalue">{{:~root.getter('Род:F;Склон:G;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p3"><td class="grtag">адз.</td><td class="grtag">ж.</td><td class="grtag">Д.</td><td class="grvalue">{{:~root.getter('Род:F;Склон:D;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p3"><td class="grtag">адз.</td><td class="grtag">ж.</td><td class="grtag">В.</td><td class="grvalue">{{:~root.getter('Род:F;Склон:A;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p3"><td class="grtag">адз.</td><td class="grtag">ж.</td><td class="grtag">Т.</td><td class="grvalue">{{:~root.getter('Род:F;Склон:I;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p3"><td class="grtag">адз.</td><td class="grtag">ж.</td><td class="grtag">М.</td><td class="grvalue">{{:~root.getter('Род:F;Склон:L;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p4"><td class="grtag">мн.</td><td> </td><td class="grtag">Н.</td><td class="grvalue">{{:~root.getter('Склон:N;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p4"><td class="grtag">мн.</td><td> </td><td class="grtag">Р.</td><td class="grvalue">{{:~root.getter('Склон:G;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p4"><td class="grtag">мн.</td><td> </td><td class="grtag">Д.</td><td class="grvalue">{{:~root.getter('Склон:D;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p4"><td class="grtag">мн.</td><td> </td><td class="grtag">В.</td><td class="grvalue">{{:~root.getter('Склон:A;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p4"><td class="grtag">мн.</td><td> </td><td class="grtag">Т.</td><td class="grvalue">{{:~root.getter('Склон:I;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p4"><td class="grtag">мн.</td><td> </td><td class="grtag">М.</td><td class="grvalue">{{:~root.getter('Склон:L;Лік:P',~v)}}</td></tr>
+  </table>
+  {{> ~root.log(~v) }}
+</script>
+
+<script id="template-grammardb-dziejeprymietnik" type="text/x-jsrender">
+  <table class="table-borders hspacing">
+    <tr><td class="grtagcenter">Лік</td><td class="grtagcenter">Род</td><td class="grtagcenter">Склон</td><td> </td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">м.</td><td class="grtag">Н.</td><td class="grvalue">{{:~root.getter('Род:M;Склон:N;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">м.</td><td class="grtag">Р.</td><td class="grvalue">{{:~root.getter('Род:M;Склон:G;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">м.</td><td class="grtag">Д.</td><td class="grvalue">{{:~root.getter('Род:M;Склон:D;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">м.</td><td class="grtag">В.</td><td class="grvalue">{{:~root.getter('Род:M;Склон:A;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">м.</td><td class="grtag">Т.</td><td class="grvalue">{{:~root.getter('Род:M;Склон:I;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">м.</td><td class="grtag">М.</td><td class="grvalue">{{:~root.getter('Род:M;Склон:L;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">адз.</td><td class="grtag">н.</td><td class="grtag">Н.</td><td class="grvalue">{{:~root.getter('Род:N;Склон:N;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">адз.</td><td class="grtag">н.</td><td class="grtag">Р.</td><td class="grvalue">{{:~root.getter('Род:N;Склон:G;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">адз.</td><td class="grtag">н.</td><td class="grtag">Д.</td><td class="grvalue">{{:~root.getter('Род:N;Склон:D;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">адз.</td><td class="grtag">н.</td><td class="grtag">В.</td><td class="grvalue">{{:~root.getter('Род:N;Склон:A;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">адз.</td><td class="grtag">н.</td><td class="grtag">Т.</td><td class="grvalue">{{:~root.getter('Род:N;Склон:I;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">адз.</td><td class="grtag">н.</td><td class="grtag">М.</td><td class="grvalue">{{:~root.getter('Род:N;Склон:L;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p3"><td class="grtag">адз.</td><td class="grtag">ж.</td><td class="grtag">Н.</td><td class="grvalue">{{:~root.getter('Род:F;Склон:N;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p3"><td class="grtag">адз.</td><td class="grtag">ж.</td><td class="grtag">Р.</td><td class="grvalue">{{:~root.getter('Род:F;Склон:G;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p3"><td class="grtag">адз.</td><td class="grtag">ж.</td><td class="grtag">Д.</td><td class="grvalue">{{:~root.getter('Род:F;Склон:D;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p3"><td class="grtag">адз.</td><td class="grtag">ж.</td><td class="grtag">В.</td><td class="grvalue">{{:~root.getter('Род:F;Склон:A;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p3"><td class="grtag">адз.</td><td class="grtag">ж.</td><td class="grtag">Т.</td><td class="grvalue">{{:~root.getter('Род:F;Склон:I;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p3"><td class="grtag">адз.</td><td class="grtag">ж.</td><td class="grtag">М.</td><td class="grvalue">{{:~root.getter('Род:F;Склон:L;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p4"><td class="grtag">мн.</td><td> </td><td class="grtag">Н.</td><td class="grvalue">{{:~root.getter('Склон:N;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p4"><td class="grtag">мн.</td><td> </td><td class="grtag">Р.</td><td class="grvalue">{{:~root.getter('Склон:G;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p4"><td class="grtag">мн.</td><td> </td><td class="grtag">Д.</td><td class="grvalue">{{:~root.getter('Склон:D;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p4"><td class="grtag">мн.</td><td> </td><td class="grtag">В.</td><td class="grvalue">{{:~root.getter('Склон:A;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p4"><td class="grtag">мн.</td><td> </td><td class="grtag">Т.</td><td class="grvalue">{{:~root.getter('Склон:I;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p4"><td class="grtag">мн.</td><td> </td><td class="grtag">М.</td><td class="grvalue">{{:~root.getter('Склон:L;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p5"><td class="grtag" colspan="3">кароткая форма</td><td class="grvalue">{{:~root.getter('Кароткая форма:R',~v)}}</td></tr>
+  </table>
+  {{> ~root.log(~v) }}
+</script>
+
+<script id="template-grammardb-licebnik0" type="text/x-jsrender">
+  <table class="table-borders hspacing">
+    <tr><td class="grtagcenter">Нескланяльны</td></tr>
+    <tr><td class="grvalue">{{:~root.getter('',~v)}}</td></tr>
+  </table>
+  {{> ~root.log(~v) }}
+</script>
+
+<script id="template-grammardb-pryslouje" type="text/x-jsrender">
+  <table class="table-borders hspacing">
+    <tr><td class="grtagcenter">Ступень параўнання</td><td> </td></tr>
+    <tr><td class="grtag">станоўч.</td><td class="grvalue">{{:~root.getter('Ступень параўнання:P',~v)}}</td></tr>
+    <tr><td class="grtag">выш.</td><td class="grvalue">{{:~root.getter('Ступень параўнання:C',~v)}}</td></tr>
+    <tr><td class="grtag">найвыш.</td><td class="grvalue">{{:~root.getter('Ступень параўнання:S',~v)}}</td></tr>
+  </table>
+  {{> ~root.log(~v) }}
+</script>
+
+<script id="template-grammardb-dziejaslouP" type="text/x-jsrender">
+  <table class="table-borders hspacing">
+    <!-- {{:~root.getter('Інфінітыў:0',~v)}} -->
+    <tr><td class="grtagcenter" colspan="3">Будучы час</td></tr>
+    <tr><td> </td><td class="grtagcenter">адз.</td><td class="grtagcenter">мн.</td></tr>
+    <tr><td class="grtag">1-я ас.</td><td class="grvalue">{{:~root.getter('Час:F;Асоба:1;Лік:S',~v)}}</td><td class="grvalue">{{:~root.getter('Час:F;Асоба:1;Лік:P',~v)}}</td></tr>
+    <tr><td class="grtag">2-я ас.</td><td class="grvalue">{{:~root.getter('Час:F;Асоба:2;Лік:S',~v)}}</td><td class="grvalue">{{:~root.getter('Час:F;Асоба:2;Лік:P',~v)}}</td></tr>
+    <tr><td class="grtag">3-я ас.</td><td class="grvalue">{{:~root.getter('Час:F;Асоба:3;Лік:S',~v)}}</td><td class="grvalue">{{:~root.getter('Час:F;Асоба:3;Лік:P',~v)}}</td></tr>
+    <tr><td class="grtagcenter" colspan="3">Прошлы час</td></tr>
+    <tr><td class="grtag">м., адз.</td><td class="grvalue" colspan="2">{{:~root.getter('Час:P;Род:M;Лік:S',~v)}}</td></tr>
+    <tr><td class="grtag">ж., адз.</td><td class="grvalue" colspan="2">{{:~root.getter('Час:P;Род:F;Лік:S',~v)}}</td></tr>
+    <tr><td class="grtag">н., адз.</td><td class="grvalue" colspan="2">{{:~root.getter('Час:P;Род:N;Лік:S',~v)}}</td></tr>
+    <tr><td class="grtag">мн.</td><td class="grvalue" colspan="2">{{:~root.getter('Час:P;Род:X;Лік:P',~v)}}</td></tr>
+    <tr><td class="grtagcenter" colspan="3">Загадны лад</td></tr>
+    <tr><td class="grtag">2-я ас., адз.</td><td class="grvalue" colspan="2">{{:~root.getter('Загадны лад:I;Асоба:2;Лік:S',~v)}}</td></tr>
+    <tr><td class="grtag">2-я ас., мн.</td><td class="grvalue" colspan="2">{{:~root.getter('Загадны лад:I;Асоба:2;Лік:P',~v)}}</td></tr>
+    <tr><td class="grtagcenter" colspan="3">Дзеепрыслоўе</td></tr>
+    <tr><td class="grtag">прош. час</td><td class="grvalue" colspan="2">{{:~root.getter('Час:P;Дзеепрыслоўе:G',~v)}}</td></tr>
+  </table>
+  {{> ~root.log(~v) }}
+</script>
+
+<script id="template-grammardb-dziejaslouM" type="text/x-jsrender">
+  <table class="table-borders hspacing">
+    <!-- {{:~root.getter('Інфінітыў:0',~v)}} -->
+    <tr><td class="grtagcenter" colspan="3">Цяперашні час</td></tr>
+    <tr><td> </td><td class="grtagcenter">адз.</td><td class="grtagcenter">мн.</td></tr>
+    <tr><td class="grtag">1-я ас.</td><td class="grvalue">{{:~root.getter('Час:R;Асоба:1;Лік:S',~v)}}</td><td class="grvalue">{{:~root.getter('Час:R;Асоба:1;Лік:P',~v)}}</td></tr>
+    <tr><td class="grtag">2-я ас.</td><td class="grvalue">{{:~root.getter('Час:R;Асоба:2;Лік:S',~v)}}</td><td class="grvalue">{{:~root.getter('Час:R;Асоба:2;Лік:P',~v)}}</td></tr>
+    <tr><td class="grtag">3-я ас.</td><td class="grvalue">{{:~root.getter('Час:R;Асоба:3;Лік:S',~v)}}</td><td class="grvalue">{{:~root.getter('Час:R;Асоба:3;Лік:P',~v)}}</td></tr>
+    <tr><td class="grtagcenter" colspan="3">Прошлы час</td></tr>
+    <tr><td class="grtag">м., адз.</td><td class="grvalue" colspan="2">{{:~root.getter('Час:P;Род:M;Лік:S',~v)}}</td></tr>
+    <tr><td class="grtag">ж., адз.</td><td class="grvalue" colspan="2">{{:~root.getter('Час:P;Род:F;Лік:S',~v)}}</td></tr>
+    <tr><td class="grtag">н., адз.</td><td class="grvalue" colspan="2">{{:~root.getter('Час:P;Род:N;Лік:S',~v)}}</td></tr>
+    <tr><td class="grtag">мн.</td><td class="grvalue" colspan="2">{{:~root.getter('Час:P;Род:X;Лік:P',~v)}}</td></tr>
+    <tr><td class="grtagcenter" colspan="3">Загадны лад</td></tr>
+    <tr><td class="grtag">2-я ас., адз.</td><td class="grvalue" colspan="2">{{:~root.getter('Загадны лад:I;Асоба:2;Лік:S',~v)}}</td></tr>
+    <tr><td class="grtag">2-я ас., мн.</td><td class="grvalue" colspan="2">{{:~root.getter('Загадны лад:I;Асоба:2;Лік:P',~v)}}</td></tr>
+    <tr class="hide-gr1-"><td class="grtagcenter" colspan="3">Дзеепрыслоўе</td></tr>
+    <tr class="hide-no-w- hide-gr1-mark-"><td class="grtag">цяп. час</td><td class="grvalue" colspan="2">{{:~root.getter('Час:R;Дзеепрыслоўе:G',~v)}}</td></tr>
+  </table>
+  {{> ~root.log(~v) }}
+</script>
+
+<script id="template-grammardb-prosta" type="text/x-jsrender">
+  <div class="grvalue">{{:~root.getter('',~v)}}</div>
+  {{> ~root.log(~v) }}
+</script>
+
+<script id="template-grammardb-other" type="text/x-jsrender">
+  <table class="table-borders hspacing">
+    <tr class="grheaderdefault">
+      {{for catnames}}
+        <th>{{>}}</th>
+      {{/for}}
+      <th></th>
+    </tr>
+    {{for forms itemVar="~f"}}
+    <tr>
+      {{for data}}
+        {{if ~f.colspan[#index] > 0}}
+          <td class="grtag" rowSpan="{{:~f.colspan[#getIndex()]}}">{{>}}</td>
+        {{/if}}
+      {{/for}}
+      <td class="grvalue">{{>value}}</td>
+    </tr>
+    {{/for}}
+  </table>
 </script>
 
 <div id="dialog-grammardb" class="modal fade" bsModal #lemmaModal="bs-modal" [config]="{backdrop: 'static'}"

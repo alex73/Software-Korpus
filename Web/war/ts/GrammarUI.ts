@@ -74,9 +74,6 @@ class GrammarUI {
 			lemmas: grammarService.result.output,
 			reverse: reverse
 		}));
-		if (grammarService.result.output.length > 0) {
-			$('#grammar-addition-order').show();
-		}
 		this.visibilityChange();
 	}
 	hideStatusError() {
@@ -130,8 +127,11 @@ class OutGrammarParadigm {
 }
 
 class OutGrammarVariant {
+    public tag: string;
     public forms: OutGrammarForm[];
     public catnames: string[];
+    public sourceForms: LemmaForm[];
+    public sourceFormsUsageCount: number[];
 }
 
 class OutGrammarForm {

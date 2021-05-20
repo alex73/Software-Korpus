@@ -46,16 +46,41 @@ public class FormsReadyFilter {
         if (mode == MODE.SPELL) {
             slv.remove("piskunou2012");// правапіс - без піскунова, база - з піскуновым
         }
-        boolean hasSlouniki = !slv.isEmpty();
+        boolean use = !slv.isEmpty();
         if (!SetUtils.getSlouniki(v.getForm().get(0).getSlouniki()).isEmpty()) {
-            hasSlouniki = true;
+            use = true;
         }
-        if (!hasSlouniki) {
-            if (p.getRegulation() == RegulationType.ADD || v.getRegulation() == RegulationType.ADD) {
-                hasSlouniki = true;
+        if (tag.startsWith("NP")) {
+            use = true;
+        }
+        RegulationType reg = v.getRegulation() != null ? v.getRegulation() : p.getRegulation();
+        if (reg != null) {
+            switch (reg) {
+            case ADD:
+                use = true;
+                break;
+            case MISTAKE:
+            case FANTASY:
+            case UNDESIRABLE:
+            case LIMITED:
+            case OBSCENISM:
+            case INVECTIVE:
+                use = false;
+                break;
+            case RARE:
+            case RARE_BRANCH:
+                switch (mode) {
+                case SPELL:
+                    use = false;
+                    break;
+                case SHOW:
+                    use = true;
+                    break;
+                }
+                break;
             }
         }
-        if (!tag.startsWith("NP") && !hasSlouniki) {
+        if (!use) {
             return null;
         }
         Stream<Form> result;

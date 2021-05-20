@@ -53,6 +53,7 @@ import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.DBTagsGroups;
+import org.alex73.korpus.belarusian.BelarusianTags;
 import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.belarusian.FormsReadyFilter;
 import org.alex73.korpus.server.data.GrammarInitial;
@@ -305,6 +306,7 @@ public class GrammarServiceImpl {
 
     private void createLemmaInfo(Paradigm p, Variant v, String output, Pattern reOutputGrammar,
             List<LemmaInfo> result) {
+    	String tag = SetUtils.tag(p, v);
         if (reOutputGrammar != null) {
             Set<String> found = new TreeSet<>();
             for (Form f : v.getForm()) {
@@ -317,6 +319,8 @@ public class GrammarServiceImpl {
                 w.pdgId = p.getPdgId();
                 w.meaning = p.getMeaning();
                 w.output = StressUtils.combineAccute(f);
+                w.grammar = String.join(", ",
+                        BelarusianTags.getInstance().describe(tag, getApp().grammarInitial.skipGrammar.get(tag.charAt(0))));
                 result.add(w);
             }
         } else {
@@ -324,6 +328,8 @@ public class GrammarServiceImpl {
             w.pdgId = p.getPdgId();
             w.meaning = p.getMeaning();
             w.output = StressUtils.combineAccute(output);
+            w.grammar = String.join(", ",
+                    BelarusianTags.getInstance().describe(tag, getApp().grammarInitial.skipGrammar.get(tag.charAt(0))));
             result.add(w);
         }
     }
@@ -389,6 +395,7 @@ public class GrammarServiceImpl {
                 LemmaInfo.LemmaForm rf = new LemmaInfo.LemmaForm();
                 rf.value = StressUtils.combineAccute(f.getValue());
                 rf.tag = f.getTag();
+				rf.options = f.getOptions() != null ? f.getOptions().name() : null;
                 rv.forms.add(rf);
             }
         }
