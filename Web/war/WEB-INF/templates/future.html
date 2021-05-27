@@ -135,16 +135,16 @@
 		req('freq/'+$('#freqCount').val());
 	}
 	function reqArfa() {
-		req('arfa/'+$('#arfaWord').val());
+		req('arfa/'+$('#arfaWord').val().toLowerCase());
 	}
 	function reqHramatycny() {
-		req('hramatycny/'+$('#hramatycnyWord').val());
+		req('hramatycny/'+$('#hramatycnyWord').val().toLowerCase());
 	}
 	function reqFanietycny() {
-		req('fanietycny/'+$('#fanietycnyWord').val());
+		req('fanietycny/'+$('#fanietycnyWord').val().toLowerCase());
 	}
 	function reqAdvarotny() {
-		req('advarotny/'+$('#advarotnyWord').val());
+		req('advarotny/'+$('#advarotnyWord').val().toLowerCase());
 	}
 	function reqAmonimy() {
 		let amoType = $("input:radio[name='amoType']:checked").val();

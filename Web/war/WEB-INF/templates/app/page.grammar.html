@@ -58,25 +58,37 @@
 	</div>
 </div>
 
-<div class="row justify-content-end">
+<div class="row justify-content-end my-4">
   <button type="submit" class="btn btn-danger btn-lg">Пошук</button>
 </div>
 </form>
 
 <div class="row">
 	<div id="output" class="col-md-12"></div>
+	<div id="desc" class="col-md-12">
+		<#include "page.grammar.desc.html">
+	</div>
 </div>
 
 <script id="template-grammaroutput" type="text/x-jsrender">
   {{for lemmas}}
-    <div class="row" {{if ~root.reverse}}style="text-align: right"{{/if}}>
-      <div  style="width: 100%">
-      {{if meaning && ~root.reverse}}‘{{>meaning}}’&nbsp;&nbsp;{{/if}}
-      <a href="#" onClick="grammarService.loadDetails({{:pdgId}}); return false;">{{>output}}</a>
-      {{if meaning && !~root.reverse}}&nbsp;&nbsp;‘{{>meaning}}’{{/if}}
-      <span class="grtag">&ndash; {{>grammar}}</span>
-      </div>
-    </div>
+    {{if !~root.reverse}}
+     <div class="row">
+       <div style="width: 100%; font-size: 120%">
+       <a href="#" onClick="grammarService.loadDetails({{:pdgId}}); return false;">{{>output}}</a>
+       {{if meaning}}&nbsp;&nbsp;‘{{>meaning}}’{{/if}}
+       <span class="grtag">&ndash; {{>grammar}}</span>
+       </div>
+     </div>
+    {{else}}
+     <div class="row" style="text-align: right">
+       <div  style="width: 100%; font-size: 120%">
+       <span class="grtag">{{>grammar}} &ndash;</span>
+       {{if meaning}}‘{{>meaning}}’&nbsp;&nbsp;{{/if}}
+       <a href="#" onClick="grammarService.loadDetails({{:pdgId}}); return false;">{{>output}}</a>
+       </div>
+     </div>
+    {{/if}}
   {{/for}}
 </script>
 

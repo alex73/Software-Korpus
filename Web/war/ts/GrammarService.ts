@@ -41,6 +41,7 @@ class GrammarService {
   }
 
   search() {
+    $('#desc').hide();
     let rq: GrammarRequest = grammarui.collectFromScreen();
     window.location.hash = '#' + stringify(rq);
 

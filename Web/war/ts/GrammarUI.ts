@@ -22,7 +22,7 @@ class GrammarUI {
 		let r: GrammarRequest = new GrammarRequest();
 		
 		r.multiForm = (<HTMLInputElement>document.getElementById('grammarword-multiform')).checked;
-		r.word = (<HTMLInputElement>document.getElementById('grammarword-word')).value;
+		r.word = (<HTMLInputElement>document.getElementById('grammarword-word')).value.toLowerCase();
 		if ($('#grammar-show-grammardetails').is(":visible")) {
 			r.grammar = document.getElementById("grammarword-grammar").innerText;
 		}

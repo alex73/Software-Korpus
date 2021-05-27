@@ -136,3 +136,24 @@ table th {
 .grheaderdefault {
 	background: #c0c0c0;
 }
+
+#desc table {
+	width: 100%;
+}
+
+#desc table col {
+	width: 50%;
+}
+
+#desc table td {
+	padding: 0.5em;
+	border: 1px solid black;
+	vertical-align: top;
+}
+
+#desc img {
+	border: 1px solid black !important;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}

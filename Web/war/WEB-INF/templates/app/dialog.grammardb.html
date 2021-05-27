@@ -8,9 +8,10 @@
   <div class="modal-body">
     <div class="card mx-auto" style="width: fit-content;">
       <div class="card-header">
-        {{for details.catText}}
-        <div><span class="grheadertag">{{>key}}</span>: {{>value}}</div>
-        {{/for}}
+        <div style="color: #995731; font-style: italic; font-size:110%">
+        {{for details.catText}}{{if #index > 0}}, {{/if}}<span>{{>value}}</span>{{/for}}
+          <!--div><span class="grheadertag">{{>key}}</span>: {{>value}}</div-->
+        </div>
         {{if details.meaning}}
           <br/>Значэнне: {{>details.meaning}}
         {{/if}}
@@ -22,9 +23,10 @@
           {{else tag.match("^A0$") tmpl="#template-grammardb-prosta"}}
           {{else tag.match("^A.+$") tmpl="#template-grammardb-prymietnik"}}
           {{else tag.match("^P.+$") tmpl="#template-grammardb-dziejeprymietnik"}}
+          {{else tag.match("^M0.+$") tmpl="#template-grammardb-licebnik0"}}
+          {{else tag.match("^M.O.*$") tmpl="#template-grammardb-licebnikLik"}}
           {{else tag.match("^[MS]N.+$") tmpl="#template-grammardb-licebnikN"}}
           {{else tag.match("^[MS]A.+$") tmpl="#template-grammardb-prymietnik"}}
-          {{else tag.match("^M0.+$") tmpl="#template-grammardb-licebnik0"}}
           {{else tag.match("^S0.+$") tmpl="#template-grammardb-prosta"}}
           {{else tag.match("^V.P.+$") tmpl="#template-grammardb-dziejaslouP"}}
           {{else tag.match("^V.+$") tmpl="#template-grammardb-dziejaslouM"}}
@@ -60,6 +62,25 @@
 </script>
 
 <script id="template-grammardb-licebnikN" type="text/x-jsrender">
+  <table class="table-borders hspacing">
+    <tr><td class="grtagcenter">Склон</td><td> </td></tr>
+    <tr class="gr-p1"><td class="grtag">Н.</td><td class="grvalue">{{:~root.getter('Склон:N;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">Р.</td><td class="grvalue">{{:~root.getter('Склон:G;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">Д.</td><td class="grvalue">{{:~root.getter('Склон:D;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">В.</td><td class="grvalue">{{:~root.getter('Склон:A;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">Т.</td><td class="grvalue">{{:~root.getter('Склон:I;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p1"><td class="grtag">М.</td><td class="grvalue">{{:~root.getter('Склон:L;Лік:S',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">Н.</td><td class="grvalue">{{:~root.getter('Склон:N;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">Р.</td><td class="grvalue">{{:~root.getter('Склон:G;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">Д.</td><td class="grvalue">{{:~root.getter('Склон:D;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">В.</td><td class="grvalue">{{:~root.getter('Склон:A;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">Т.</td><td class="grvalue">{{:~root.getter('Склон:I;Лік:P',~v)}}</td></tr>
+    <tr class="gr-p2"><td class="grtag">М.</td><td class="grvalue">{{:~root.getter('Склон:L;Лік:P',~v)}}</td></tr>
+  </table>
+  {{> ~root.log(~v) }}
+</script>
+
+<script id="template-grammardb-licebnikLik" type="text/x-jsrender">
   <table class="table-borders hspacing">
     <tr><td class="grtagcenter">Лік</td><td class="grtagcenter">Склон</td><td> </td></tr>
     <tr class="gr-p1"><td class="grtag">адз.</td><td class="grtag">Н.</td><td class="grvalue">{{:~root.getter('Склон:N;Лік:S',~v)}}</td></tr>
