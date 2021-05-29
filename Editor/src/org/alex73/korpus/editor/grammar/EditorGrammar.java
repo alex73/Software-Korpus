@@ -15,7 +15,7 @@ import javax.xml.validation.SchemaFactory;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Wordlist;
 import org.alex73.korpus.base.GrammarDB2;
-import org.alex73.korpus.base.StaticGrammarFiller;
+import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.editor.core.Theme;
 
 public class EditorGrammar {
@@ -37,7 +37,7 @@ public class EditorGrammar {
 
     private List<Paradigm> docLevelParadigms = new ArrayList<>();
 
-    public EditorGrammar(GrammarDB2 db, StaticGrammarFiller staticFiller, String localGrammarFile) throws Exception {
+    public EditorGrammar(GrammarDB2 db, StaticGrammarFiller2 staticFiller, String localGrammarFile) throws Exception {
         filler = new EditorGrammarFiller(db, staticFiller, docLevelParadigms);
         this.localGrammarFile = localGrammarFile;
 

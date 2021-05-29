@@ -50,7 +50,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.ViewFactory;
 
 import org.alex73.korpus.base.GrammarDB2;
-import org.alex73.korpus.base.StaticGrammarFiller;
+import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyLineElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyWordElement;
@@ -69,11 +69,11 @@ public class MainController {
 
     public static EditorGrammar gr;
     private static GrammarDB2 db;
-    private static StaticGrammarFiller staticFiller;
+    private static StaticGrammarFiller2 staticFiller;
 
     public static void initGrammar(GrammarDB2 gr) {
         db = gr;
-        staticFiller = new StaticGrammarFiller(gr);
+        staticFiller = new StaticGrammarFiller2(gr);
     }
 
     public static void init() {

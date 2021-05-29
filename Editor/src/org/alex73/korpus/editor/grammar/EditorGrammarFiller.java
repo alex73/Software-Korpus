@@ -9,7 +9,7 @@ import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.GrammarDB2;
-import org.alex73.korpus.base.StaticGrammarFiller;
+import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.text.xml.P;
 import org.alex73.korpus.text.xml.Poetry;
@@ -20,10 +20,10 @@ import org.alex73.korpus.utils.StressUtils;
 
 public class EditorGrammarFiller {
     protected final GrammarDB2 db;
-    private final StaticGrammarFiller staticFiller;
+    private final StaticGrammarFiller2 staticFiller;
     private final List<Paradigm> newParadigms;
 
-    public EditorGrammarFiller(GrammarDB2 db, StaticGrammarFiller staticFiller, List<Paradigm> newParadigms) {
+    public EditorGrammarFiller(GrammarDB2 db, StaticGrammarFiller2 staticFiller, List<Paradigm> newParadigms) {
         this.db = db;
         this.staticFiller = staticFiller;
         this.newParadigms = newParadigms;

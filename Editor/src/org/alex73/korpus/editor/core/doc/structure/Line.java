@@ -33,7 +33,6 @@ import org.alex73.korpus.text.xml.O;
 import org.alex73.korpus.text.xml.OtherType;
 import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.Z;
-import org.alex73.korpus.utils.ItemHelper;
 
 /**
  * Сховішча для радку дакумэнту корпуса.
