@@ -252,6 +252,12 @@ $.views.converters("wordtail", function (val) {
 		return "";
 	}
 });
+$.views.converters("korpusname", function(val) {
+	return val.replace(/\|\|.+/g, '');
+});
+$.views.converters("korpusdesc", function(val) {
+	return val.replace(/.+\|\|/g, '');
+});
 
 var korpusui: KorpusUI = null;
 var korpusService: KorpusService = null;
@@ -265,3 +271,4 @@ function initializeKorpusPage() {
 	korpusui = new KorpusUI();
 	korpusService = new KorpusService();
 }
+

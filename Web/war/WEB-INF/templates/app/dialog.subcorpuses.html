@@ -1,8 +1,8 @@
 <script id="template-subcorpuses" type="text/x-jsrender">
 	{{for ~root.subcorpuses}}
 		<div>
-      <label><input type="checkbox" name="{{>key}}"> {{>key}}</label>
-      <div style="font-size: 80%" class="mb-3">{{>value}}</div>
+      <label><input type="checkbox" name="{{>key}}"> {{korpusname:value}}</label>
+      <div style="font-size: 80%" class="mb-3">{{korpusdesc:value}}</div>
 		</div>
 	{{/for}}
 </script>
