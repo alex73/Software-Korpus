@@ -2,20 +2,15 @@ package org.alex73.korpus.editor.core.doc.structure;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.alex73.korpus.text.xml.Content;
-import org.alex73.korpus.text.xml.ITextLineElement;
-import org.alex73.korpus.text.xml.InlineTag;
-import org.alex73.korpus.text.xml.O;
-import org.alex73.korpus.text.xml.P;
-import org.alex73.korpus.text.xml.Poetry;
-import org.alex73.korpus.text.xml.S;
-import org.alex73.korpus.text.xml.Se;
-import org.alex73.korpus.text.xml.Tag;
-import org.alex73.korpus.text.xml.W;
-import org.alex73.korpus.text.xml.Z;
+import org.alex73.korpus.editor.core.doc.KorpusDocument3;
+import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyLineElement;
+import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyRootElement;
+import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyWordElement;
+import org.alex73.korpus.text.elements.Paragraph;
+import org.alex73.korpus.text.elements.Sentence;
+import org.alex73.korpus.text.elements.Word;
 
 /**
  * Converts XMLText to list of lines for display in KorpusDocument.
@@ -24,10 +19,68 @@ public class XML2Lines {
 
     static final Pattern RE_TAG = Pattern.compile("##(.+?):(.+)");
 
+    private final KorpusDocument3 doc;
+    private MyRootElement root;
+    private MyLineElement currentLine;
+
+    public XML2Lines(KorpusDocument3 doc) {
+        this.doc = doc;
+    }
+
+    public MyRootElement xml2ui(List<Paragraph> paragraphs) {
+        root = doc.new MyRootElement();
+        for (Paragraph p : paragraphs) {
+            for (Sentence s : p.sentences) {
+                for (Word w : s.words) {
+                    if (w.lightNormalized != null) {
+                        WordItem it = new WordItem(w);
+                        MyWordElement elem = doc.new MyWordElement(getLine(), it);
+                        getLine().children.add(elem);
+                    }
+                    if (w.tail != null) {
+                        MyWordElement elem = doc.new MyWordElement(getLine(), new TailItem(w.tail));
+                        getLine().children.add(elem);
+                    }
+                }
+            }
+            flushLine();
+        }
+        return root;
+    }
+
+    protected MyLineElement getLine() {
+        if (currentLine == null) {
+            currentLine = doc.new MyLineElement(root);
+            root.children.add(currentLine);
+        }
+        return currentLine;
+    }
+
+    protected void flushLine() {
+        currentLine = null;
+    }
+
+    public List<Paragraph> extract() {
+        List<Paragraph> paragraphs = new ArrayList<>();
+        List<Sentence> sentences = new ArrayList<>();
+        List<Word> words = new ArrayList<>();
+        for (MyLineElement pd : doc.rootElem.children) {
+            for (MyWordElement el : pd.children) {
+                if (el.item instanceof WordItem) {
+                    WordItem it=(WordItem)el.item;
+                    words.add(it.exractWord());
+                }else {
+                    throw new RuntimeException("Unknown type");
+                }
+            }
+        }
+        return paragraphs;
+    }
+
     /**
      * Converts XML to UI lines.
      */
-    public static List<Line> convertToLines(Content content) {
+   /* public static List<Line> convertToLines(Content content) {
         List<Line> result = new ArrayList<>();
 
         for (Object line : content.getPOrTagOrPoetry()) {
@@ -62,12 +115,12 @@ public class XML2Lines {
             result.add(currentLine);
         }
         return result;
-    }
+    }*/
 
     /**
      * Converts poetry to lines.
      */
-    private static void parsePoetryParagraph(List<Object> pOrTag, List<Line> result) {
+  /*  private static void parsePoetryParagraph(List<Object> pOrTag, List<Line> result) {
         for (Object pt : pOrTag) {
             if (pt instanceof Tag) {
                 parseTag((Tag) pt, result);
@@ -95,22 +148,22 @@ public class XML2Lines {
                 throw new RuntimeException("Wrong tag");
             }
         }
-    }
+    }*/
 
     /**
      * Converts tag to line.
      */
-    private static void parseTag(Tag tag, List<Line> result) {
+  /*  private static void parseTag(Tag tag, List<Line> result) {
         Line currentLine = new Line();
         currentLine.add(new LongTagItem("##" + tag.getName() + ": " + tag.getValue()));
         currentLine.add(new S('\n'));
         result.add(currentLine);
-    }
+    }*/
 
     /**
      * Converts UI lines to XML.
      */
-    public static Content convertToXML(List<Line> lines) {
+  /*  public static Content convertToXML(List<Line> lines) {
         Content result = new Content();
 
         Poetry poetry = null;
@@ -125,8 +178,7 @@ public class XML2Lines {
         }
 
         for (Line li : lines) {
-            if (li.size() > 0 && li.get(li.size() - 1) instanceof S
-                    && "\n".equals(li.get(li.size() - 1).getText())) {
+            if (li.size() > 0 && li.get(li.size() - 1) instanceof S && "\n".equals(li.get(li.size() - 1).getText())) {
                 // remove newline at the end
                 li.remove(li.size() - 1);
             }
@@ -204,12 +256,12 @@ public class XML2Lines {
         }
 
         return result;
-    }
+    }*/
 
     /**
      * Check is poetry tag starts.
      */
-    static boolean isPoetryStart(Line li) {
+    /*static boolean isPoetryStart(Line li) {
         if (li.size() == 1 && li.get(0) instanceof LongTagItem) {
             String t = li.get(0).getText();
             Matcher m = RE_TAG.matcher(t);
@@ -220,12 +272,12 @@ public class XML2Lines {
         } else {
             return false;
         }
-    }
+    }*/
 
     /**
      * Check is poetry tag ends.
      */
-    static boolean isPoetryEnd(Line li) {
+    /*static boolean isPoetryEnd(Line li) {
         if (li.size() == 1 && li.get(0) instanceof LongTagItem) {
             String t = li.get(0).getText();
             Matcher m = RE_TAG.matcher(t);
@@ -236,12 +288,12 @@ public class XML2Lines {
         } else {
             return false;
         }
-    }
+    }*/
 
     /**
      * Converts text line to P.
      */
-    static P line2text(Line li) {
+  /*  static P line2text(Line li) {
         P r = new P();
         Se se = new Se();
         for (ITextLineElement item : li) {
@@ -266,5 +318,5 @@ public class XML2Lines {
             r.getSe().add(se);
         }
         return r;
-    }
+    }*/
 }

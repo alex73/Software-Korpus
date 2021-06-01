@@ -22,7 +22,6 @@
 
 package org.alex73.korpus.editor.core.doc.structure;
 
-import org.alex73.korpus.text.xml.ITextLineElement;
 import org.apache.commons.lang.StringUtils;
 
 public class LongTagItem implements ITextLineElement {

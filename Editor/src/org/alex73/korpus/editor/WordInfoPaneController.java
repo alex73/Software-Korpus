@@ -35,8 +35,9 @@ import javax.swing.JRadioButton;
 
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.korpus.belarusian.BelarusianTags;
+import org.alex73.korpus.editor.core.doc.structure.WordItem;
 import org.alex73.korpus.editor.ui.WordInfoPane;
-import org.alex73.korpus.text.xml.W;
+import org.alex73.korpus.text.elements.Word;
 
 public class WordInfoPaneController {
     public static void init() {
@@ -45,7 +46,7 @@ public class WordInfoPaneController {
 
     static Map<JRadioButton, Paradigm> paradigmsOnLemmas = new HashMap<>();
 
-    public static void show(W word) {
+    public static void show(Word word) {
         WordInfoPane p = UI.wordInfoPane;
 
         p.pLemma.removeAll();
@@ -54,9 +55,9 @@ public class WordInfoPaneController {
         if (word == null) {
             p.txtWord.setText("");
         } else {
-            p.txtWord.setText(word.getValue());
+            p.txtWord.setText(word.lightNormalized);
 
-            List<Paradigm> pa2 = MainController.gr.filler.getParadigms(word.getValue());
+            List<Paradigm> pa2 = MainController.gr.filler.getParadigms(word.lightNormalized);
             ButtonGroup rbGroupLemma = new ButtonGroup();
             for (Paradigm pa : pa2) {
                 JRadioButton rb = new JRadioButton(pa.getLemma());
@@ -79,15 +80,15 @@ public class WordInfoPaneController {
         p.repaint();
     }
 
-    static void fillLemmas(W word) {
+    static void fillLemmas(Word word) {
         WordInfoPane p = UI.wordInfoPane;
         p.pGrammar.removeAll();
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.anchor = GridBagConstraints.WEST;
-        if (word.getCat() != null) {
+        if (word.tags != null) {
             ButtonGroup rbGroupGrammar = new ButtonGroup();
-            for (String c : word.getCat().split("_")) {
+            for (String c : word.tags.split(";")) {
                 if (c.isEmpty()) {
                     continue;
                 }
@@ -133,10 +134,10 @@ public class WordInfoPaneController {
 
     static ActionListener lemmaClick = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-            W w = new W();
-            w.setValue(UI.wordInfoPane.txtWord.getText());
+            Word w = new Word();
+            w.lightNormalized = UI.wordInfoPane.txtWord.getText();
             Paradigm p = paradigmsOnLemmas.get(e.getSource());
-            MainController.gr.filler.fillFromPagadigm(w, p);
+            MainController.gr.filler.fillFromParadigm(w, p);
             fillLemmas(w);
 
             setSaveEnabled();
@@ -152,11 +153,12 @@ public class WordInfoPaneController {
     static ActionListener btnSave = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             WordInfoPane p = UI.wordInfoPane;
-            W w = new W();
-            w.setValue(p.txtWord.getText());
-            w.setLemma(getSelected(p.pLemma));
-            w.setCat(getSelected(p.pGrammar));
-            w.setManual(true);
+            Word w = new Word();
+            w.lightNormalized = p.txtWord.getText();
+            w.lemmas = getSelected(p.pLemma);
+            w.tags = getSelected(p.pGrammar);
+            w.manualGrammar = true;
+            w.type = null;
             MainController.setWordInfo(w);
             UI.editor.repaint();
         }

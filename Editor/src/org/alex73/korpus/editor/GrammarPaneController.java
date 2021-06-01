@@ -41,19 +41,19 @@ import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.korpus.belarusian.BelarusianTags;
 import org.alex73.korpus.belarusian.TagLetter;
 import org.alex73.korpus.editor.grammar.GrammarConstructor;
-import org.alex73.korpus.text.xml.W;
+import org.alex73.korpus.text.elements.Word;
 
 public class GrammarPaneController {
-    static W currentWord;
+    static Word currentWord;
     static Integer intoParadigmId;
     static boolean notRealUpdate = false;
 
-    public static synchronized void show(W word, Integer pdgId) {
+    public static synchronized void show(Word word, Integer pdgId) {
         currentWord = word;
         intoParadigmId = pdgId;
         notRealUpdate = true;
         try {
-            UI.grammarPane.txtWord.setText(word != null && word.getValue() != null ? word.getValue().replace('\u0301', '+') : "");
+            UI.grammarPane.txtWord.setText(word != null && word.lightNormalized != null ? word.lightNormalized.replace('\u0301', '+') : "");
             UI.grammarPane.txtLooksLike.setText("");
             updateInfo();
         } finally {
@@ -133,7 +133,7 @@ public class GrammarPaneController {
                     Paradigm p = parseXML();
                     MainController.gr.addDocLevelParadigm(p);
                     MainController.saveGrammar();
-                    MainController.gr.filler.fillFromPagadigm(currentWord, p);
+                    MainController.gr.filler.fillFromParadigm(currentWord, p);
                     UI.editor.repaint();
                     UI.grammarPane.outXML.setText("Захавана");
                 } catch (Exception ex) {

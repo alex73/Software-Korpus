@@ -27,12 +27,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.alex73.korpus.editor.MainController;
-import org.alex73.korpus.text.xml.ITextLineElement;
-import org.alex73.korpus.text.xml.InlineTag;
-import org.alex73.korpus.text.xml.O;
-import org.alex73.korpus.text.xml.OtherType;
-import org.alex73.korpus.text.xml.W;
-import org.alex73.korpus.text.xml.Z;
+import org.alex73.korpus.text.elements.Word.OtherType;
 
 /**
  * Сховішча для радку дакумэнту корпуса.
@@ -40,16 +35,16 @@ import org.alex73.korpus.text.xml.Z;
 @SuppressWarnings("serial")
 public class Line extends ArrayList<ITextLineElement> {
     public static void fillWordsInfo(Line line) {
-        for (Object item : line) {
-            if (item instanceof W) {
-                W w = (W) item;
-                if (w.getLemma() == null) {
-                    MainController.gr.filler.fill(w);
+        for (ITextLineElement item : line) {
+            if (item instanceof WordItem) {
+                WordItem wi = (WordItem) item;
+                if (wi.lemmas == null) {
+                    //TODO MainController.gr.filler.fill(wi);
                 }
             }
         }
     }
-    
+
     void splitAt(int offset) {
         int pos = 0;
         for (int i = 0; i < size(); i++) {
@@ -160,16 +155,16 @@ public class Line extends ArrayList<ITextLineElement> {
             // convert non-tags to words
             ITextLineElement currentItem = line.get(i);
             if (currentItem instanceof InlineTag) {
-                String text = ((InlineTag) currentItem).getValue();
+                String text = ((InlineTag) currentItem).text;
                 if (!RE_TAG.matcher(text).matches()) {
-                    currentItem = new W(text);
+                      currentItem =new WordItem(text);
                     line.set(i, currentItem);
                     modified = true;
                 }
             } else if (currentItem instanceof LongTagItem) {
                 String text = currentItem.getText();
                 if (!text.startsWith("##")) {
-                    currentItem = new W(text);
+                      currentItem =new WordItem(text);
                     line.set(i, currentItem);
                     modified = true;
                 }
@@ -178,8 +173,8 @@ public class Line extends ArrayList<ITextLineElement> {
         if (line.size() > 0) {
             // convert words to tags
             ITextLineElement currentItem = line.get(0);
-            if (currentItem instanceof W) {
-                String text = ((W) currentItem).getValue();
+            if (currentItem instanceof WordItem) {
+                String text = currentItem.getText();
                 if (text.startsWith("##")) {
                     currentItem = new LongTagItem(text);
                     line.set(0, currentItem);
@@ -199,8 +194,9 @@ public class Line extends ArrayList<ITextLineElement> {
             ITextLineElement currentItem = line.get(i);
             ITextLineElement nextItem = line.get(i + 1);
             ITextLineElement newItem = null;
-            if (currentItem instanceof W && nextItem instanceof W) {
-                newItem =  new W(currentItem.getText() + nextItem.getText());
+            if (currentItem instanceof WordItem && nextItem instanceof WordItem) {
+                WordItem wi=  new WordItem(currentItem.getText() + nextItem.getText());
+                newItem =wi;
             }
             if (newItem != null) {
                 line.remove(i);
@@ -213,19 +209,20 @@ public class Line extends ArrayList<ITextLineElement> {
         for (int i = 0; i < line.size() - 1; i++) {
             // split words and apostrophes
             ITextLineElement currentItem = line.get(i);
-            if (currentItem instanceof W) {
-                ITextLineElement newItem = null;
-                W w = (W) currentItem;
-                if (w.getValue().startsWith("'")) {
-                    newItem = new Z("'");
-                    w = (W) ItemHelper.splitRight(w, 1);
+            if (currentItem instanceof WordItem) {
+                WordItem w = (WordItem) currentItem;
+                if (w.lightNormalized.startsWith("'")) {
+                    TailItem                    newItem = new TailItem();
+                    newItem.text="'";
+                    w = (WordItem) ItemHelper.splitRight(w, 1);
                     line.set(i, w);
                     line.add(i, newItem);
                     modified = true;
                 }
-                if (w.getValue().endsWith("'")) {
-                    newItem = new Z("'");
-                    w = (W) ItemHelper.splitLeft(w, w.getValue().length() - 1);
+                if (w.lightNormalized.endsWith("'")) {
+                    TailItem                    newItem = new TailItem();
+                    newItem.text="'";
+                    w = (WordItem) ItemHelper.splitLeft(w, w.lightNormalized.length() - 1);
                     line.set(i, w);
                     line.add(i + 1, newItem);
                     i--;
@@ -235,29 +232,29 @@ public class Line extends ArrayList<ITextLineElement> {
         }
         for (int i = 0; i < line.size(); i++) {
             // split words by tags
-            Object currentItem = line.get(i);
-            if (currentItem instanceof W) {
-                String text = ((W) currentItem).getValue();
+            ITextLineElement currentItem = line.get(i);
+            if (currentItem instanceof WordItem) {
+                String text = currentItem.getText();
                 Matcher m = RE_TAG.matcher(text);
                 if (m.find()) {
                     String textBefore = text.substring(0, m.start());
                     String textIn = text.substring(m.start(), m.end());
                     String textAfter = text.substring(m.end());
-                    line.set(i, new W(textBefore));
+                    line.set(i, new WordItem(textBefore));
                     line.add(i + 1, new InlineTag(textIn));
-                    line.add(i + 2, new W(textAfter));
+                    line.add(i + 2, new WordItem(textAfter));
                     modified = true;
                 }
             }
         }
         for (int i = 0; i < line.size() - 1; i++) {
             // merge numbers
-            Object currentItem = line.get(i);
-            Object nextItem = line.get(i + 1);
-            if (currentItem instanceof W && nextItem instanceof W) {
-                if (RE_DIGITS.matcher(((W) currentItem).getValue()).matches()) {
-                    if (RE_DIGITS.matcher(((W) nextItem).getValue()).matches()) {
-                        W w = new W(((W) currentItem).getValue() + ((W) nextItem).getValue());
+            ITextLineElement currentItem = line.get(i);
+            ITextLineElement nextItem = line.get(i + 1);
+            if (currentItem instanceof WordItem && nextItem instanceof WordItem) {
+                if (RE_DIGITS.matcher( currentItem.getText()).matches()) {
+                    if (RE_DIGITS.matcher(nextItem.getText()).matches()) {
+                        WordItem w = new WordItem(currentItem.getText() + nextItem.getText());
                         line.remove(i);
                         line.remove(i);
                         line.add(i, w);
@@ -279,13 +276,19 @@ public class Line extends ArrayList<ITextLineElement> {
             char ch = line.charAt(currentPos);
             if (ch == LineSplitter.CH_SENT_SEPARATOR) {
                 String part = line.substring(partStart, currentPos);
-                result.add(new O(type, part));
+                WordItem wi=new WordItem();
+                wi.lightNormalized = part;
+                wi.type = type;
+                result.add(wi);
                 result.add(new SentenceSeparatorItem());
                 partStart = currentPos + 1;
             }
         }
         String part = line.substring(partStart, currentPos);
-        result.add(new O(type, part));
+        WordItem wi=new WordItem();
+        wi.lightNormalized = part;
+        wi.type = type;
+        result.add(wi);
 
         result.normalize();
         return result;

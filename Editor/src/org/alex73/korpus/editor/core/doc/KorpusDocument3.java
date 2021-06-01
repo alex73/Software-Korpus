@@ -40,17 +40,14 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleContext;
 
 import org.alex73.korpus.editor.UI;
+import org.alex73.korpus.editor.core.doc.structure.ITextLineElement;
 import org.alex73.korpus.editor.core.doc.structure.Line;
-import org.alex73.korpus.editor.core.doc.structure.LongTagItem;
 import org.alex73.korpus.editor.core.doc.structure.LineSplitter;
+import org.alex73.korpus.editor.core.doc.structure.LongTagItem;
+import org.alex73.korpus.editor.core.doc.structure.WordItem;
 import org.alex73.korpus.editor.core.doc.structure.XML2Lines;
-import org.alex73.korpus.text.xml.Header;
-import org.alex73.korpus.text.xml.ITextLineElement;
-import org.alex73.korpus.text.xml.InlineTag;
-import org.alex73.korpus.text.xml.O;
-import org.alex73.korpus.text.xml.OtherType;
-import org.alex73.korpus.text.xml.W;
-import org.alex73.korpus.text.xml.XMLText;
+import org.alex73.korpus.text.elements.Paragraph;
+import org.alex73.korpus.text.elements.Word.OtherType;
 
 /**
  * Рэдактар дакумэнту корпуса.
@@ -77,19 +74,19 @@ public class KorpusDocument3 extends AbstractDocument {
         ATTRS_DYJALEKT.addAttribute("OtherType", OtherType.DYJALEKT);
     }
 
-    MyRootElement rootElem;
+    public MyRootElement rootElem;
     public MARK_WORDS markType = MARK_WORDS.UNK_LEMMA;
 
-    private Header header;
+    //private Header header;
 
     private StringBuilder text = new StringBuilder(100000);
 
-    public KorpusDocument3(XMLText fs) throws Exception {
+    public KorpusDocument3(List<Paragraph> paragraphs) throws Exception {
         super(new GapContent(65536), new StyleContext());
 
-        header = fs.getHeader();
+        //header = fs.getHeader();
 
-        rootElem = new MyRootElement(XML2Lines.convertToLines(fs.getContent()));
+        rootElem = new XML2Lines(this).xml2ui(paragraphs);
 
         Content c = getContent();
         c.insertString(0, text.toString());
@@ -105,19 +102,8 @@ public class KorpusDocument3 extends AbstractDocument {
         addUndoableEditListener(UI.editorUndoManager);
     }
 
-    public XMLText extractText() {
-        List<Line> lines = new ArrayList<>();
-        for (MyLineElement pd : rootElem.children) {
-            Line line = new Line();
-            for (MyWordElement el : pd.children) {
-                line.add(el.item);
-            }
-            lines.add(line);
-        }
-        XMLText out = new XMLText();
-        out.setHeader(header);
-        out.setContent(XML2Lines.convertToXML(lines));
-        return out;
+    public List<Paragraph> extractText() {
+        return new XML2Lines(this).extract();
     }
 
     @Override
@@ -294,7 +280,7 @@ public class KorpusDocument3 extends AbstractDocument {
 
     public abstract class MyGroupElement<T extends AbstractElement> extends AbstractElement
             implements ElementChanger {
-        List<T> children = new ArrayList<>();
+        public List<T> children = new ArrayList<>();
 
         public MyGroupElement(Element parent) {
             super(parent, null);
@@ -374,12 +360,9 @@ public class KorpusDocument3 extends AbstractDocument {
         }
     }
 
-    protected class MyRootElement extends MyGroupElement<MyLineElement> {
-        public MyRootElement(List<Line> lines) {
+    public class MyRootElement extends MyGroupElement<MyLineElement> {
+        public MyRootElement() {
             super(null);
-            for (Line line : lines) {
-                children.add(new MyLineElement(this, line));
-            }
         }
 
         @Override
@@ -391,13 +374,6 @@ public class KorpusDocument3 extends AbstractDocument {
     public class MyLineElement extends MyGroupElement<MyWordElement> {
         public MyLineElement(Element parent) {
             super(parent);
-        }
-
-        public MyLineElement(Element parent, Line chs) {
-            super(parent);
-            for (ITextLineElement el : chs) {
-                children.add(new MyWordElement(this, el));
-            }
         }
 
         public Line extractItems() {
@@ -416,8 +392,6 @@ public class KorpusDocument3 extends AbstractDocument {
 
     public class MyWordElement extends AbstractElement {
         public final ITextLineElement item;
-        private transient boolean other;
-
         private transient Position p0;
         private transient Position p1;
         int p0v, p1v;
@@ -425,7 +399,6 @@ public class KorpusDocument3 extends AbstractDocument {
         public MyWordElement(Element parent, ITextLineElement item) {
             super(parent, null);
             this.item = item;
-            this.other =item instanceof O;
             p0v = text.length();
             text.append(item.getText());
             p1v = text.length();
@@ -434,58 +407,16 @@ public class KorpusDocument3 extends AbstractDocument {
         public MyWordElement(Element parent, int startOffset, ITextLineElement item) {
             super(parent, null);
             this.item = item;
-            this.other =item instanceof O;
             p0v = startOffset;
             p1v = startOffset + item.getText().length();
         }
 
-        public boolean isTag() {
-            return (item instanceof InlineTag) || (item instanceof LongTagItem);
-        }
-
-        public boolean isOther() {
-            return other;
-        }
-
-        public W getWordInfo() {
-            if (item instanceof W) {
-                return (W) item;
-            } else {
-                return null;
-            }
-        }
-
-        public void setWordInfo(W otherW) {
-            if (item instanceof W) {
-                W w = (W) item;
-                w.setCat(otherW.getCat());
-                w.setLemma(otherW.getLemma());
-                w.setManual(otherW.getManual());
-            } else {
-                throw new ClassCastException(
-                        "Trying to set word info into " + item.getClass().getSimpleName());
-            }
-        }
-
-        public boolean isMarked() {
-            W w = getWordInfo();
-            if (w == null) {
-                return false;
-            }
-            boolean marked = false;
-            switch (markType) {
-            case UNK_LEMMA:
-                marked = w.getLemma() == null;
-                break;
-            case AMAN_LEMMA:
-                marked = w.getLemma() != null && w.getLemma().contains("_");
-                break;
-            case AMAN_GRAM:
-                marked = w.getCat() != null && w.getCat().contains("_");
-                break;
-            }
-            return marked;
-        }
+        /*public MyInlineElement(Element parent, int startOffset) {
+            super(parent, null);
+            this.other =item instanceof O;
+            p0v = startOffset;
+            p1v = startOffset + item.getText().length();
+        }*/
 
         public void createPositions() {
             try {
@@ -498,6 +429,25 @@ public class KorpusDocument3 extends AbstractDocument {
 
         public String getElementText() throws BadLocationException {
             return getText(p0.getOffset(), p1.getOffset() - p0.getOffset());
+        }
+
+        public boolean isMarked() {
+            boolean marked = false;
+            if (item instanceof WordItem) {
+                WordItem wi = (WordItem) item;
+                switch (markType) {
+                case UNK_LEMMA:
+                    marked = wi.lemmas == null;
+                    break;
+                case AMAN_LEMMA:
+                    marked = wi.lemmas != null && wi.lemmas.indexOf(';') >= 0;
+                    break;
+                case AMAN_GRAM:
+                    marked = wi.tags != null && wi.tags.indexOf(';') >= 0;
+                    break;
+                }
+            }
+            return marked;
         }
 
         public String toString() {

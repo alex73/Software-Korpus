@@ -22,21 +22,14 @@
 
 package org.alex73.korpus.editor.core.doc.structure;
 
-import org.alex73.korpus.text.xml.ITextLineElement;
-import org.alex73.korpus.text.xml.O;
-import org.alex73.korpus.text.xml.S;
-import org.alex73.korpus.text.xml.W;
-
 public class ItemHelper {
 
     public static ITextLineElement splitLeft(ITextLineElement o, int pos) {
         String text = o.getText().substring(0, pos);
-        if (o instanceof W) {
-            return new W(text);
-        } else if (o instanceof S) {
-            return new S(text);
-        } else if (o instanceof O) {
-            return new O(((O) o).getType(), text);
+        if (o instanceof WordItem) {
+            return new WordItem(text);
+        } else if (o instanceof TailItem) {
+            return new TailItem(text);
         } else {
             throw new RuntimeException("Wrong object type");
         }
@@ -44,12 +37,10 @@ public class ItemHelper {
 
     public static ITextLineElement splitRight(ITextLineElement o, int pos) {
         String text = o.getText().substring(pos);
-        if (o instanceof W) {
-            return new W(text);
-        } else if (o instanceof S) {
-            return new S(text);
-        } else if (o instanceof O) {
-            return new O(((O) o).getType(), text);
+        if (o instanceof WordItem) {
+            return new WordItem(text);
+        } else if (o instanceof TailItem) {
+            return new TailItem(text);
         } else {
             throw new RuntimeException("Wrong object type");
         }

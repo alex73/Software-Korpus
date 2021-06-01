@@ -22,8 +22,6 @@
 
 package org.alex73.korpus.editor.core.doc.structure;
 
-import org.alex73.korpus.text.xml.ITextLineElement;
-
 public class SentenceSeparatorItem implements ITextLineElement {
     @Override
     public String getText() {

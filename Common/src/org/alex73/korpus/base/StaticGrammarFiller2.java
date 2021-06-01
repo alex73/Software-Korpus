@@ -30,20 +30,27 @@ public class StaticGrammarFiller2 {
         this.finder = finder;
     }
 
-    public void fill(List<Paragraph> content) {
-        for (Paragraph p : content) {
+    public void fillNonManual(List<Paragraph> content) {
+        content.parallelStream().forEach(p -> {
             for (Sentence se : p.sentences) {
                 for (Word w : se.words) {
-                    WordInfo wi = get(w.lightNormalized);
-                    if (wi == null) {
-                        wi = calculateWordInfo(w.lightNormalized);
-                        set(w.lightNormalized, wi);
-                    }
-                    w.lemmas = wi.lemmas;
-                    w.tags = wi.tags;
+                    fillNonManual(w);
                 }
             }
+        });
+    }
+
+    public void fillNonManual(Word w) {
+        if (w.manualGrammar) {
+            return;
         }
+        WordInfo wi = get(w.lightNormalized);
+        if (wi == null) {
+            wi = calculateWordInfo(w.lightNormalized);
+            set(w.lightNormalized, wi);
+        }
+        w.lemmas = wi.lemmas;
+        w.tags = wi.tags;
     }
 
     private WordInfo get(String word) {

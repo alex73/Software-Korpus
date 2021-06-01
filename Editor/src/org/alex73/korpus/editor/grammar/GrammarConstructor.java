@@ -68,13 +68,12 @@ public class GrammarConstructor {
         long be = System.currentTimeMillis();
         final Comparer comparer;
         String target;
-        String wordNormalized = preserveCase ? BelarusianWordNormalizer.normalizePreserveCase(word)
-                : BelarusianWordNormalizer.normalizeLowerCase(word);
+        String wordNormalized = BelarusianWordNormalizer.lightNormalized(word);
         if (looksLike.isEmpty()) {
             target = wordNormalized;
             comparer = eqEnds;
         } else {
-            target = BelarusianWordNormalizer.normalizePreserveCase(looksLike);
+            target = BelarusianWordNormalizer.lightNormalized(looksLike);
             comparer = eqEqual;
         }
         ed.getAllParadigms().parallelStream().forEach(p -> {

@@ -27,10 +27,6 @@ import java.util.regex.Pattern;
 
 import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.editor.MainController;
-import org.alex73.korpus.text.xml.InlineTag;
-import org.alex73.korpus.text.xml.S;
-import org.alex73.korpus.text.xml.W;
-import org.alex73.korpus.text.xml.Z;
 
 /**
  * Гэты код дзеліць радок на асобныя элемэнты.
@@ -53,7 +49,7 @@ public class LineSplitter {
     Line result = new Line();
     int partStart = 0;
     int currentPos;
-    SPLIT_MODE mode;
+    SPLIT_MODE mode	;
 
     public LineSplitter(String line) {
         this.line = line;
@@ -174,12 +170,12 @@ public class LineSplitter {
             String part = line.substring(partStart, currentPos);
             switch (mode) {
             case WORD:
-                W w=new W(part);
-                MainController.gr.filler.fill(w);
+                WordItem w=new WordItem(part);
+                MainController.gr.filler.fillNonManual(w);
                 result.add(w);
                 break;
             case SPACE:
-                result.add(new S(part));
+                result.add(new TailItem(part));
                 break;
             case TAG_SHORT:
                 result.add(new InlineTag(part));
@@ -210,9 +206,9 @@ public class LineSplitter {
                 } else {
                     flush();
                     if (ch == ' ') {
-                        result.add(new S(' '));
+                        result.add(new TailItem(" "));
                     } else {
-                        result.add(new Z(line.substring(currentPos, currentPos + 1)));
+                        result.add(new TailItem(line.substring(currentPos, currentPos + 1)));
                     }
                     partStart = currentPos + 1;
                     mode = SPLIT_MODE.SPACE;
@@ -230,9 +226,9 @@ public class LineSplitter {
                 } else {
                     flush();
                     if (ch == ' ') {
-                        result.add(new S(' '));
+                        result.add(new TailItem(" "));
                     } else {
-                        result.add(new Z(line.substring(currentPos, currentPos + 1)));
+                        result.add(new TailItem(line.substring(currentPos, currentPos + 1)));
                     }
                     partStart = currentPos + 1;
                     mode = SPLIT_MODE.SPACE;

@@ -34,7 +34,10 @@ import javax.swing.text.ParagraphView;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 
+import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyWordElement;
+import org.alex73.korpus.editor.core.doc.structure.LongTagItem;
 import org.alex73.korpus.editor.core.doc.structure.SentenceSeparatorItem;
+import org.alex73.korpus.editor.core.doc.structure.WordItem;
 
 public class KorpusDocumentViewFactory implements ViewFactory {
     static final Color TAG_BACKGROUND_COLOR = new Color(224, 224, 224);
@@ -57,43 +60,50 @@ public class KorpusDocumentViewFactory implements ViewFactory {
         public MyGlyphView(Element elem) {
             super(elem);
         }
+        
+        protected MyWordElement getCurrentElement() {
+            return (MyWordElement) getElement();
+        }
 
         @Override
         public Color getBackground() {
-            KorpusDocument3.MyWordElement wordElement = (KorpusDocument3.MyWordElement) getElement();
-            if (wordElement.isTag()) {
+            KorpusDocument3.MyWordElement wordElement = getCurrentElement();
+            if (wordElement.item instanceof LongTagItem) {
                 return TAG_BACKGROUND_COLOR;
-            }else if (wordElement.isOther()) {
-                return OTHER_BACKGROUND_COLOR;
+            } else if (wordElement.item instanceof WordItem) {
+                WordItem wi = (WordItem) wordElement.item;
+                if (wi.type != null) {
+                    return OTHER_BACKGROUND_COLOR;
+                }
             } else if (wordElement.item instanceof SentenceSeparatorItem) {
                 return SE_BACKGROUND_COLOR;
-            }else {
-                return super.getBackground();
             }
+            return super.getBackground();
         }
 
         @Override
         public void paint(Graphics g, Shape a) {
-            KorpusDocument3.MyWordElement wordElement = (KorpusDocument3.MyWordElement) getElement();
+            KorpusDocument3.MyWordElement wordElement = getCurrentElement();
             Rectangle r = a.getBounds();
 
             g.setColor(new Color(192, 192, 255));
             g.drawLine(r.x, r.y, r.x, r.y + r.height - 1);
 
-            boolean mark;
-            if (wordElement.getWordInfo() == null) {
-                mark = false;
-            } else if (wordElement.getWordInfo().isManual()) {
-                g.setColor(new Color(224, 255, 224));
-                g.fillRect(r.x, r.y, r.width, r.height);
-                mark = false;
-            } else {
-                mark = wordElement.isMarked();
-            }
-            if (mark) {
-                g.setColor(Color.RED);
-                int y = r.y + r.height - 1;
-                g.drawLine(r.x, y, r.x + r.width, y);
+            if (wordElement.item instanceof WordItem) {
+                WordItem wi = (WordItem)wordElement.item;
+                boolean mark;
+                if (wi.manualGrammar) {
+                    g.setColor(new Color(224, 255, 224));
+                    g.fillRect(r.x, r.y, r.width, r.height);
+                    mark = false;
+                } else {
+                    mark = wordElement.isMarked();
+                }
+                if (mark) {
+                    g.setColor(Color.RED);
+                    int y = r.y + r.height - 1;
+                    g.drawLine(r.x, y, r.x + r.width, y);
+                }
             }
 
             super.paint(g, a);
@@ -101,9 +111,9 @@ public class KorpusDocumentViewFactory implements ViewFactory {
 
         @Override
         public int getBreakWeight(int axis, float pos, float len) {
-            KorpusDocument3.MyWordElement wordElement = (KorpusDocument3.MyWordElement) getElement();
+            //KorpusDocument3.MyWordElement wordElement = getCurrentElement() ;
             int r;
-            if (axis == View.X_AXIS && !wordElement.isOther()) {
+            if (axis == View.X_AXIS) { // was && !other
                 checkPainter();
                 int p0 = getStartOffset();
                 int p1 = getGlyphPainter().getBoundedPosition(this, p0, pos, len);

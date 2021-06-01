@@ -131,7 +131,7 @@ public class PrepareCache3 {
         } else {
             // 2nd pass
             Collections.shuffle(content);
-            grFiller.fill(content);
+            grFiller.fillNonManual(content);
             textStat.add(textInfo, content);
             if (writeToLucene) {
                 lucene.addSentences(textInfo, content);

@@ -29,8 +29,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.nio.file.Files;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
@@ -50,18 +51,20 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.ViewFactory;
 
 import org.alex73.korpus.base.GrammarDB2;
+import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyLineElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyWordElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocumentViewFactory;
+import org.alex73.korpus.editor.core.doc.structure.ITextLineElement;
+import org.alex73.korpus.editor.core.doc.structure.WordItem;
 import org.alex73.korpus.editor.grammar.EditorGrammar;
-import org.alex73.korpus.text.TextGeneral;
-import org.alex73.korpus.text.TextIO;
-import org.alex73.korpus.text.TextPlain;
+import org.alex73.korpus.text.elements.Paragraph;
+import org.alex73.korpus.text.elements.Word;
 import org.alex73.korpus.text.parser.IProcess;
-import org.alex73.korpus.text.xml.W;
-import org.alex73.korpus.text.xml.XMLText;
+import org.alex73.korpus.text.parser.PtextFileWriter;
+import org.alex73.korpus.text.parser.TextFileParser;
 
 public class MainController {
     static final int[] FONT_SIZES = new int[] { 10, 12, 16, 20, 24, 30, 36, 44 };
@@ -69,11 +72,12 @@ public class MainController {
 
     public static EditorGrammar gr;
     private static GrammarDB2 db;
+    private static Map<String, String> headers;
     private static StaticGrammarFiller2 staticFiller;
 
     public static void initGrammar(GrammarDB2 gr) {
         db = gr;
-        staticFiller = new StaticGrammarFiller2(gr);
+        staticFiller = new StaticGrammarFiller2(new GrammarFinder(gr));
     }
 
     public static void init() {
@@ -148,8 +152,7 @@ public class MainController {
                 File bak = new File(getOutFile().getPath() + ".bak");
                 bak.delete();
                 getOutFile().renameTo(bak);
-                XMLText text = UI.doc.extractText();
-                TextIO.saveXML(getOutFile(), text);
+                PtextFileWriter.write(getOutFile(), headers, UI.doc.extractText());
                 UI.showInfo("Захавана ў " + getOutFile());
             } catch (Throwable ex) {
                 ex.printStackTrace();
@@ -255,7 +258,7 @@ public class MainController {
             int w = elParagraph.getElementIndex(caretPos);
             // to the end of paragraph
             for (w++; w < elParagraph.getElementCount(); w++) {
-                MyWordElement elWord = (MyWordElement) elParagraph.getElement(w);
+                MyWordElement elWord = elParagraph.getElement(w);
                 if (elWord.isMarked()) {
                     UI.editor.setCaretPosition(elWord.getStartOffset());
                     return;
@@ -265,7 +268,7 @@ public class MainController {
             for (p++; p < root.getElementCount(); p++) {
                 elParagraph = (MyLineElement) root.getElement(p);
                 for (w = 0; w < elParagraph.getElementCount(); w++) {
-                    MyWordElement elWord = (MyWordElement) elParagraph.getElement(w);
+                    MyWordElement elWord = elParagraph.getElement(w);
                     if (elWord.isMarked()) {
                         UI.editor.setCaretPosition(elWord.getStartOffset());
                         return;
@@ -280,42 +283,42 @@ public class MainController {
             baseFileName = f.getPath().replaceAll("\\.[a-z]+$", "");
 
             gr = new EditorGrammar(db, staticFiller, baseFileName + "-grammar.xml");
-
-            XMLText kDoc;
-            if (f.getName().endsWith(".xml")) {
-                InputStream in = new BufferedInputStream(new FileInputStream(f));
-                try {
-                    kDoc = TextIO.parseXML(in);
-                } finally {
-                    in.close();
+            List<Paragraph> paragraphs;
+            if (f.getName().endsWith(".ptext")) {
+                try (BufferedInputStream in = new BufferedInputStream(Files.newInputStream(f.toPath()))) {
+                    paragraphs=null;
+//                    PtextFileParser parser = new PtextFileParser(in, false, new IProcess() {
+//                        @Override
+//                        public void showStatus(String status) {
+//                        }
+//
+//                        @Override
+//                        public void reportError(String error, Throwable ex) {
+//                            throw new RuntimeException(error, ex);
+//                        }
+//                    });
                 }
             } else if (f.getName().endsWith(".text")) {
-                kDoc = new TextGeneral(f, new IProcess() {
-                    @Override
-                    public void showStatus(String status) {
-                    }
+                try (BufferedInputStream in = new BufferedInputStream(Files.newInputStream(f.toPath()))) {
+                    TextFileParser parser = new TextFileParser(in, false, new IProcess() {
+                        @Override
+                        public void showStatus(String status) {
+                        }
 
-                    @Override
-                    public void reportError(String error, Throwable ex) {
-                        throw new RuntimeException(error, ex);
-                    }
-                }).parse();
+                        @Override
+                        public void reportError(String error, Throwable ex) {
+                            throw new RuntimeException(error, ex);
+                        }
+                    });
+                    headers = parser.headers;
+                    paragraphs =parser.paragraphs;
+                }
             } else {
-                kDoc = new TextPlain(f, new IProcess() {
-                    @Override
-                    public void showStatus(String status) {
-                    }
-
-                    @Override
-                    public void reportError(String error, Throwable ex) {
-                        throw new RuntimeException(error, ex);
-                    }
-                }).parse();
+                throw new RuntimeException("Unknown file format");
             }
-            gr.filler.fill(kDoc);
-            TextIO.saveXML(new File(baseFileName + ".orig.xml"), kDoc);
+            gr.filler.fillNonManual(paragraphs);
 
-            UI.doc = new KorpusDocument3(kDoc);
+            UI.doc = new KorpusDocument3(paragraphs);
             final KorpusDocumentViewFactory viewFactory = new KorpusDocumentViewFactory();
             UI.editor.setEditorKit(new DefaultEditorKit() {
                 public ViewFactory getViewFactory() {
@@ -366,29 +369,40 @@ public class MainController {
     static void showWordInfos(int pos) {
         KorpusDocument3.MyLineElement par = (KorpusDocument3.MyLineElement) UI.doc.getParagraphElement(pos);
         int idxWord = par.getElementIndex(pos);
-        KorpusDocument3.MyWordElement word = (KorpusDocument3.MyWordElement) par.getElement(idxWord);
-        Integer pdgId = null;
-        try {
-            KorpusDocument3.MyWordElement wordNext = (KorpusDocument3.MyWordElement) par.getElement(idxWord + 1);
-            String textNext = wordNext.getElementText();
-            if (textNext.startsWith("~")) {
-                pdgId = Integer.parseInt(textNext.substring(1));
+        KorpusDocument3.MyWordElement word = par.getElement(idxWord);
+        if (word.item instanceof WordItem) {
+            WordItem wi = (WordItem) word.item;
+            Integer pdgId = null;
+            try {
+                KorpusDocument3.MyWordElement wordNext = par.getElement(idxWord + 1);
+                String textNext = wordNext.getElementText();
+                if (textNext.startsWith("~")) {
+                    pdgId = Integer.parseInt(textNext.substring(1));
+                }
+            } catch (Exception ex) {
             }
-        } catch (Exception ex) {
+            Word w = wi.exractWord();
+            WordInfoPaneController.show(w);
+            GrammarPaneController.show(w, pdgId);
         }
-        WordInfoPaneController.show(word.getWordInfo());
-        GrammarPaneController.show(word.getWordInfo(), pdgId);
     }
 
-    static void setWordInfo(W w) {
+    static void setWordInfo(Word w) {
         int pos = UI.editor.getCaretPosition();
         KorpusDocument3.MyLineElement par = (KorpusDocument3.MyLineElement) UI.doc.getParagraphElement(pos);
         int idxWord = par.getElementIndex(pos);
-        KorpusDocument3.MyWordElement word = (KorpusDocument3.MyWordElement) par.getElement(idxWord);
+        KorpusDocument3.MyWordElement word = par.getElement(idxWord);
         if (word == null) {
             return;
         }
-        word.setWordInfo(w);
+        if (word.item instanceof WordItem) {
+            WordItem wi = (WordItem) word.item;
+            wi.lightNormalized = w.lightNormalized;
+            wi.lemmas = w.lemmas;
+            wi.tags = w.tags;
+            wi.manualGrammar = w.manualGrammar;
+            wi.type = w.type;
+        }
         UI.editor.repaint();
     }
 }

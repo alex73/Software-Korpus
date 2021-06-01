@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Locale;
 
 import org.alex73.korpus.base.TextInfo;
-import org.alex73.korpus.utils.KorpusDateTime;
 
 public class TextOrder implements Comparator<TextInfo> {
     static final List<String> subcorpuses = Arrays.asList("teksty", "sajty", "wiki", "pieraklady", "nierazabranaje",
