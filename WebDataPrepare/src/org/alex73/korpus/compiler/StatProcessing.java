@@ -17,9 +17,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.alex73.korpus.base.TextInfo;
-import org.alex73.korpus.text.elements.Paragraph;
-import org.alex73.korpus.text.elements.Sentence;
-import org.alex73.korpus.text.elements.Word;
+import org.alex73.korpus.text.structure.corpus.Paragraph;
+import org.alex73.korpus.text.structure.corpus.Sentence;
+import org.alex73.korpus.text.structure.corpus.Word;
 import org.alex73.korpus.utils.StressUtils;
 
 public class StatProcessing {

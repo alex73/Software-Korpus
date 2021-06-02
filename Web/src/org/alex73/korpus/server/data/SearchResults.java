@@ -25,7 +25,7 @@ package org.alex73.korpus.server.data;
 import java.io.Serializable;
 
 import org.alex73.korpus.base.TextInfo;
-import org.alex73.korpus.text.elements.Paragraph;
+import org.alex73.korpus.text.structure.corpus.Paragraph;
 
 /**
  * DTO for results of search by corpus documents.

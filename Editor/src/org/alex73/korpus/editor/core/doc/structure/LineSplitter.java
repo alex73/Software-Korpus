@@ -27,6 +27,10 @@ import java.util.regex.Pattern;
 
 import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.editor.MainController;
+import org.alex73.korpus.text.structure.files.InlineTag;
+import org.alex73.korpus.text.structure.files.SentenceSeparatorItem;
+import org.alex73.korpus.text.structure.files.TailItem;
+import org.alex73.korpus.text.structure.files.WordItem;
 
 /**
  * Гэты код дзеліць радок на асобныя элемэнты.
@@ -36,7 +40,6 @@ public class LineSplitter {
     public static final Locale BEL = new Locale("be");
 
     public static final char CH_3DOTS = '\u2026';
-    public static final char CH_SENT_SEPARATOR = '�';
 
     protected static final Pattern RE_SPLIT_W = Pattern.compile("\\s+");
     protected static final Pattern RE_AMP = Pattern.compile("&(#([0-9]+)|([a-z]+));");
@@ -189,7 +192,7 @@ public class LineSplitter {
         mode = SPLIT_MODE.SPACE;
         for (currentPos = 0; currentPos < line.length(); currentPos++) {
             char ch = line.charAt(currentPos);
-            if (ch == CH_SENT_SEPARATOR) {
+            if (ch == SentenceSeparatorItem.SENTENCE_SEPARATOR_CHAR) {
                 flush();
                 result.add(new SentenceSeparatorItem());
                 partStart = currentPos + 1;

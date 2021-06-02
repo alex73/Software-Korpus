@@ -2,10 +2,11 @@ package org.alex73.korpus.parser;
 
 import static org.junit.Assert.assertEquals;
 
-import org.alex73.korpus.text.elements.Paragraph;
-import org.alex73.korpus.text.elements.Word;
 import org.alex73.korpus.text.parser.IProcess;
+import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.Splitter3;
+import org.alex73.korpus.text.structure.corpus.Paragraph;
+import org.alex73.korpus.text.structure.corpus.Word;
 import org.junit.Test;
 
 public class TestSplitter3 {
@@ -25,17 +26,19 @@ public class TestSplitter3 {
 
     @Test
     public void testText() {
-        p = new Splitter3(true, errors).parse("- Адно, слова... А: потым ? 123 мо'' 'ак з'ява");
+        p = PtextToKorpus.oneLine(new Splitter3(true, errors).parse("- Адно, слова... А: потым ? 123 мо'' 'ак з'ява"));
 
         nextW("", "- ");
         nextW("Адно", ", ");
-        nextW("слова", "... ");
+        nextW("слова", "...");
         endSentence();
 
+        nextW("", " ");
         nextW("А", ": ");
-        nextW("потым", " ? ");
+        nextW("потым", " ?");
         endSentence();
 
+        nextW("", " ");
         nextW("123", " ");
         nextW("мо", "'' '");
         nextW("ак", " ");

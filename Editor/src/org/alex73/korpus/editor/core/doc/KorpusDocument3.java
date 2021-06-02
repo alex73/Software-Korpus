@@ -40,14 +40,14 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleContext;
 
 import org.alex73.korpus.editor.UI;
-import org.alex73.korpus.editor.core.doc.structure.ITextLineElement;
 import org.alex73.korpus.editor.core.doc.structure.Line;
 import org.alex73.korpus.editor.core.doc.structure.LineSplitter;
-import org.alex73.korpus.editor.core.doc.structure.LongTagItem;
-import org.alex73.korpus.editor.core.doc.structure.WordItem;
 import org.alex73.korpus.editor.core.doc.structure.XML2Lines;
-import org.alex73.korpus.text.elements.Paragraph;
-import org.alex73.korpus.text.elements.Word.OtherType;
+import org.alex73.korpus.text.structure.corpus.Paragraph;
+import org.alex73.korpus.text.structure.corpus.Word.OtherType;
+import org.alex73.korpus.text.structure.files.ITextLineElement;
+import org.alex73.korpus.text.structure.files.TextLine;
+import org.alex73.korpus.text.structure.files.WordItem;
 
 /**
  * Рэдактар дакумэнту корпуса.
@@ -81,12 +81,12 @@ public class KorpusDocument3 extends AbstractDocument {
 
     private StringBuilder text = new StringBuilder(100000);
 
-    public KorpusDocument3(List<Paragraph> paragraphs) throws Exception {
+    public KorpusDocument3(List<TextLine> lines) throws Exception {
         super(new GapContent(65536), new StyleContext());
 
         //header = fs.getHeader();
 
-        rootElem = new XML2Lines(this).xml2ui(paragraphs);
+        rootElem = new XML2Lines(this).xml2ui(lines);
 
         Content c = getContent();
         c.insertString(0, text.toString());
@@ -117,6 +117,20 @@ public class KorpusDocument3 extends AbstractDocument {
             return null;
         } else {
             return rootElem.getElement(rootElem.getElementIndex(pos));
+        }
+    }
+
+    public List<MyLineElement> getParagraphs(int start, int end) {
+        if (rootElem == null) {
+            return null;
+        } else {
+            List<MyLineElement> r = new ArrayList<>();
+            int f = rootElem.getElementIndex(start);
+            int t = rootElem.getElementIndex(end);
+            for (int i = f; i <= t; i++) {
+                r.add(rootElem.getElement(i));
+            }
+            return r;
         }
     }
 
@@ -372,8 +386,9 @@ public class KorpusDocument3 extends AbstractDocument {
     }
 
     public class MyLineElement extends MyGroupElement<MyWordElement> {
-        public MyLineElement(Element parent) {
+        public MyLineElement(MyRootElement parent) {
             super(parent);
+            parent.children.add(this);
         }
 
         public Line extractItems() {
@@ -396,8 +411,9 @@ public class KorpusDocument3 extends AbstractDocument {
         private transient Position p1;
         int p0v, p1v;
 
-        public MyWordElement(Element parent, ITextLineElement item) {
+        public MyWordElement(MyLineElement parent, ITextLineElement item) {
             super(parent, null);
+            parent.children.add(this);
             this.item = item;
             p0v = text.length();
             text.append(item.getText());

@@ -32,8 +32,8 @@ import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.server.data.SearchParams;
 import org.alex73.korpus.server.data.WordRequest;
 import org.alex73.korpus.server.data.WordResult;
-import org.alex73.korpus.text.elements.Paragraph;
-import org.alex73.korpus.text.elements.Sentence;
+import org.alex73.korpus.text.structure.corpus.Paragraph;
+import org.alex73.korpus.text.structure.corpus.Sentence;
 import org.alex73.korpus.utils.SetUtils;
 import org.alex73.korpus.utils.StressUtils;
 

@@ -1,6 +1,6 @@
 package org.alex73.korpus.server.data;
 
-import org.alex73.korpus.text.elements.Word;
+import org.alex73.korpus.text.structure.corpus.Word;
 
 @SuppressWarnings("serial")
 public class WordResult extends Word {

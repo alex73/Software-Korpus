@@ -1,4 +1,4 @@
-package org.alex73.korpus.editor.core.doc.structure;
+package org.alex73.korpus.text.structure.files;
 
 public class TailItem implements ITextLineElement {
     public String text;

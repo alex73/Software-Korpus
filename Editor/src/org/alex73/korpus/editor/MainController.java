@@ -42,12 +42,10 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.swing.text.PlainDocument;
-import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.ViewFactory;
 
 import org.alex73.korpus.base.GrammarDB2;
@@ -57,14 +55,14 @@ import org.alex73.korpus.editor.core.doc.KorpusDocument3;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyLineElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyWordElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocumentViewFactory;
-import org.alex73.korpus.editor.core.doc.structure.ITextLineElement;
-import org.alex73.korpus.editor.core.doc.structure.WordItem;
 import org.alex73.korpus.editor.grammar.EditorGrammar;
-import org.alex73.korpus.text.elements.Paragraph;
-import org.alex73.korpus.text.elements.Word;
 import org.alex73.korpus.text.parser.IProcess;
 import org.alex73.korpus.text.parser.PtextFileWriter;
 import org.alex73.korpus.text.parser.TextFileParser;
+import org.alex73.korpus.text.structure.corpus.Word;
+import org.alex73.korpus.text.structure.corpus.Word.OtherType;
+import org.alex73.korpus.text.structure.files.TextLine;
+import org.alex73.korpus.text.structure.files.WordItem;
 
 public class MainController {
     static final int[] FONT_SIZES = new int[] { 10, 12, 16, 20, 24, 30, 36, 44 };
@@ -116,10 +114,10 @@ public class MainController {
         UI.editor.getActionMap().put("GoGrammar", actionGoGrammar);
 
         UI.mainWindow.mSetText.addActionListener(new SetActionListener(null));
-        UI.mainWindow.mSetOtherLanguage.addActionListener(new SetActionListener(KorpusDocument3.ATTRS_OTHER_LANGUAGE));
-        UI.mainWindow.mSetDigits.addActionListener(new SetActionListener(KorpusDocument3.ATTRS_DIGITS));
-        UI.mainWindow.mSetTrasianka.addActionListener(new SetActionListener(KorpusDocument3.ATTRS_TRASIANKA));
-        UI.mainWindow.mSetDyjalekt.addActionListener(new SetActionListener(KorpusDocument3.ATTRS_DYJALEKT));
+        UI.mainWindow.mSetOtherLanguage.addActionListener(new SetActionListener(OtherType.OTHER_LANGUAGE));
+        UI.mainWindow.mSetDigits.addActionListener(new SetActionListener(OtherType.NUMBER));
+        UI.mainWindow.mSetTrasianka.addActionListener(new SetActionListener(OtherType.TRASIANKA));
+        UI.mainWindow.mSetDyjalekt.addActionListener(new SetActionListener(OtherType.DYJALEKT));
     }
 
     static void createFontChanger(JMenu menu, ButtonGroup bg, Container container) {
@@ -200,22 +198,29 @@ public class MainController {
     };
 
     static class SetActionListener implements ActionListener {
-        private final SimpleAttributeSet attrs;
+        private final OtherType type;
 
-        public SetActionListener(SimpleAttributeSet attrs) {
-            this.attrs = attrs;
+        public SetActionListener(OtherType type) {
+            this.type = type;
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
             int p0 = UI.editor.getSelectionStart();
             int p1 = UI.editor.getSelectionEnd();
-            try {
-                String text = UI.doc.getText(p0, p1 - p0);
-                UI.doc.replace(p0, p1 - p0, text, attrs);
-            } catch (BadLocationException ex) {
-                throw new RuntimeException(ex);
+            List<MyLineElement> lines = UI.doc.getParagraphs(p0, p1);
+            for (MyLineElement line : lines) {
+                int f = line.getElementIndex(p0);
+                int t = line.getElementIndex(p1);
+                for (int i = f; i <= t; i++) {
+                    MyWordElement w = line.getElement(i);
+                    if (w.item instanceof WordItem) {
+                        WordItem wi = (WordItem) w.item;
+                        wi.type = this.type;
+                    }
+                }
             }
+            UI.editor.repaint();
         }
     };
 
@@ -283,10 +288,10 @@ public class MainController {
             baseFileName = f.getPath().replaceAll("\\.[a-z]+$", "");
 
             gr = new EditorGrammar(db, staticFiller, baseFileName + "-grammar.xml");
-            List<Paragraph> paragraphs;
+            List<TextLine> lines;
             if (f.getName().endsWith(".ptext")) {
                 try (BufferedInputStream in = new BufferedInputStream(Files.newInputStream(f.toPath()))) {
-                    paragraphs=null;
+                    lines=null;
 //                    PtextFileParser parser = new PtextFileParser(in, false, new IProcess() {
 //                        @Override
 //                        public void showStatus(String status) {
@@ -311,14 +316,14 @@ public class MainController {
                         }
                     });
                     headers = parser.headers;
-                    paragraphs =parser.paragraphs;
+                    lines =parser.lines;
                 }
             } else {
                 throw new RuntimeException("Unknown file format");
             }
-            gr.filler.fillNonManual(paragraphs);
+            gr.filler.fillNonManual(lines);
 
-            UI.doc = new KorpusDocument3(paragraphs);
+            UI.doc = new KorpusDocument3(lines);
             final KorpusDocumentViewFactory viewFactory = new KorpusDocumentViewFactory();
             UI.editor.setEditorKit(new DefaultEditorKit() {
                 public ViewFactory getViewFactory() {
@@ -381,9 +386,8 @@ public class MainController {
                 }
             } catch (Exception ex) {
             }
-            Word w = wi.exractWord();
-            WordInfoPaneController.show(w);
-            GrammarPaneController.show(w, pdgId);
+            WordInfoPaneController.show(wi);
+            GrammarPaneController.show(wi, pdgId);
         }
     }
 

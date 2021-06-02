@@ -4,9 +4,9 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-import org.alex73.korpus.text.elements.Paragraph;
-import org.alex73.korpus.text.elements.Sentence;
-import org.alex73.korpus.text.elements.Word;
+import org.alex73.korpus.text.structure.corpus.Paragraph;
+import org.alex73.korpus.text.structure.corpus.Sentence;
+import org.alex73.korpus.text.structure.corpus.Word;
 
 public class BinaryParagraphReader {
     private ByteArrayInputStream bytes;

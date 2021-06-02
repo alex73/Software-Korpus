@@ -41,14 +41,14 @@ import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.korpus.belarusian.BelarusianTags;
 import org.alex73.korpus.belarusian.TagLetter;
 import org.alex73.korpus.editor.grammar.GrammarConstructor;
-import org.alex73.korpus.text.elements.Word;
+import org.alex73.korpus.text.structure.files.WordItem;
 
 public class GrammarPaneController {
-    static Word currentWord;
+    static WordItem currentWord;
     static Integer intoParadigmId;
     static boolean notRealUpdate = false;
 
-    public static synchronized void show(Word word, Integer pdgId) {
+    public static synchronized void show(WordItem word, Integer pdgId) {
         currentWord = word;
         intoParadigmId = pdgId;
         notRealUpdate = true;

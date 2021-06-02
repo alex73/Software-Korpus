@@ -1,7 +1,7 @@
-package org.alex73.korpus.editor.core.doc.structure;
+package org.alex73.korpus.text.structure.files;
 
-import org.alex73.korpus.text.elements.Word;
-import org.alex73.korpus.text.elements.Word.OtherType;
+import org.alex73.korpus.text.structure.corpus.Word;
+import org.alex73.korpus.text.structure.corpus.Word.OtherType;
 
 public class WordItem implements ITextLineElement {
     public String lightNormalized;

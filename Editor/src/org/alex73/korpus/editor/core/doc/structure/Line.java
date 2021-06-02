@@ -27,7 +27,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.alex73.korpus.editor.MainController;
-import org.alex73.korpus.text.elements.Word.OtherType;
+import org.alex73.korpus.text.structure.corpus.Word.OtherType;
+import org.alex73.korpus.text.structure.files.ITextLineElement;
+import org.alex73.korpus.text.structure.files.InlineTag;
+import org.alex73.korpus.text.structure.files.LongTagItem;
+import org.alex73.korpus.text.structure.files.SentenceSeparatorItem;
+import org.alex73.korpus.text.structure.files.TailItem;
+import org.alex73.korpus.text.structure.files.WordItem;
 
 /**
  * Сховішча для радку дакумэнту корпуса.
@@ -274,7 +280,7 @@ public class Line extends ArrayList<ITextLineElement> {
         int currentPos;
         for (currentPos = 0; currentPos < line.length(); currentPos++) {
             char ch = line.charAt(currentPos);
-            if (ch == LineSplitter.CH_SENT_SEPARATOR) {
+            if (ch == SentenceSeparatorItem.SENTENCE_SEPARATOR_CHAR) {
                 String part = line.substring(partStart, currentPos);
                 WordItem wi=new WordItem();
                 wi.lightNormalized = part;

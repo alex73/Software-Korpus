@@ -8,6 +8,7 @@ import java.util.concurrent.Executor;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.compiler.PrepareCache3;
 import org.alex73.korpus.compiler.TextUtils;
+import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.TextFileParser;
 
 public class OcrTextParser extends BaseParser {
@@ -30,7 +31,7 @@ public class OcrTextParser extends BaseParser {
                         + file.getFileName().toString().replaceAll("^([0-9]+).+?$", "$1");
                 textInfo.source = "kamunikat.org";
                 TextUtils.fillFromHeaders(textInfo, doc.headers);
-                PrepareCache3.process(textInfo, doc.paragraphs);
+                PrepareCache3.process(textInfo, new PtextToKorpus(doc.lines).paragraphs);
             } catch (Exception ex) {
                 PrepareCache3.errors.reportError("Error parse " + file, ex);
             }

@@ -35,9 +35,9 @@ import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyWordElement;
-import org.alex73.korpus.editor.core.doc.structure.LongTagItem;
-import org.alex73.korpus.editor.core.doc.structure.SentenceSeparatorItem;
-import org.alex73.korpus.editor.core.doc.structure.WordItem;
+import org.alex73.korpus.text.structure.files.LongTagItem;
+import org.alex73.korpus.text.structure.files.SentenceSeparatorItem;
+import org.alex73.korpus.text.structure.files.WordItem;
 
 public class KorpusDocumentViewFactory implements ViewFactory {
     static final Color TAG_BACKGROUND_COLOR = new Color(224, 224, 224);

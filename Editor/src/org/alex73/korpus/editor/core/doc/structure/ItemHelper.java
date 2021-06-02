@@ -22,6 +22,10 @@
 
 package org.alex73.korpus.editor.core.doc.structure;
 
+import org.alex73.korpus.text.structure.files.ITextLineElement;
+import org.alex73.korpus.text.structure.files.TailItem;
+import org.alex73.korpus.text.structure.files.WordItem;
+
 public class ItemHelper {
 
     public static ITextLineElement splitLeft(ITextLineElement o, int pos) {

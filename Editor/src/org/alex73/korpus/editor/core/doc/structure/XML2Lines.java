@@ -8,9 +8,12 @@ import org.alex73.korpus.editor.core.doc.KorpusDocument3;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyLineElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyRootElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyWordElement;
-import org.alex73.korpus.text.elements.Paragraph;
-import org.alex73.korpus.text.elements.Sentence;
-import org.alex73.korpus.text.elements.Word;
+import org.alex73.korpus.text.structure.corpus.Paragraph;
+import org.alex73.korpus.text.structure.corpus.Sentence;
+import org.alex73.korpus.text.structure.corpus.Word;
+import org.alex73.korpus.text.structure.files.ITextLineElement;
+import org.alex73.korpus.text.structure.files.TextLine;
+import org.alex73.korpus.text.structure.files.WordItem;
 
 /**
  * Converts XMLText to list of lines for display in KorpusDocument.
@@ -21,43 +24,20 @@ public class XML2Lines {
 
     private final KorpusDocument3 doc;
     private MyRootElement root;
-    private MyLineElement currentLine;
 
     public XML2Lines(KorpusDocument3 doc) {
         this.doc = doc;
     }
 
-    public MyRootElement xml2ui(List<Paragraph> paragraphs) {
+    public MyRootElement xml2ui(List<TextLine> lines) {
         root = doc.new MyRootElement();
-        for (Paragraph p : paragraphs) {
-            for (Sentence s : p.sentences) {
-                for (Word w : s.words) {
-                    if (w.lightNormalized != null) {
-                        WordItem it = new WordItem(w);
-                        MyWordElement elem = doc.new MyWordElement(getLine(), it);
-                        getLine().children.add(elem);
-                    }
-                    if (w.tail != null) {
-                        MyWordElement elem = doc.new MyWordElement(getLine(), new TailItem(w.tail));
-                        getLine().children.add(elem);
-                    }
-                }
+        for (TextLine line : lines) {
+            MyLineElement currentLine = doc.new MyLineElement(root);
+            for (ITextLineElement it : line) {
+                doc.new MyWordElement(currentLine, it);
             }
-            flushLine();
         }
         return root;
-    }
-
-    protected MyLineElement getLine() {
-        if (currentLine == null) {
-            currentLine = doc.new MyLineElement(root);
-            root.children.add(currentLine);
-        }
-        return currentLine;
-    }
-
-    protected void flushLine() {
-        currentLine = null;
     }
 
     public List<Paragraph> extract() {

@@ -11,9 +11,10 @@ import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
-import org.alex73.korpus.text.elements.Paragraph;
-import org.alex73.korpus.text.elements.Sentence;
-import org.alex73.korpus.text.elements.Word;
+import org.alex73.korpus.text.structure.corpus.Paragraph;
+import org.alex73.korpus.text.structure.corpus.Sentence;
+import org.alex73.korpus.text.structure.corpus.Word;
+import org.alex73.korpus.text.structure.files.WordItem;
 import org.alex73.korpus.utils.SetUtils;
 
 public class StaticGrammarFiller2 {
@@ -41,9 +42,19 @@ public class StaticGrammarFiller2 {
     }
 
     public void fillNonManual(Word w) {
-        if (w.manualGrammar) {
+        if (w.manualGrammar && w.type != null) {
             return;
         }
+        WordInfo wi = get(w.lightNormalized);
+        if (wi == null) {
+            wi = calculateWordInfo(w.lightNormalized);
+            set(w.lightNormalized, wi);
+        }
+        w.lemmas = wi.lemmas;
+        w.tags = wi.tags;
+    }
+
+    public void fill(WordItem w) {
         WordInfo wi = get(w.lightNormalized);
         if (wi == null) {
             wi = calculateWordInfo(w.lightNormalized);

@@ -12,8 +12,9 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.compiler.PrepareCache3;
-import org.alex73.korpus.text.elements.Paragraph;
+import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.Splitter3;
+import org.alex73.korpus.text.structure.corpus.Paragraph;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -121,7 +122,7 @@ public class WikiParser extends BaseParser {
                         if (s.isEmpty()) {
                             if (ptext.length() > 0) {
                                 if (!ptext.toString().replace('\n', ' ').trim().isEmpty()) {
-                                    content.add(splitter.parse(ptext));
+                                    content.add(PtextToKorpus.oneLine(splitter.parse(ptext)));
                                 }
                                 ptext.setLength(0);
                             }
@@ -130,7 +131,7 @@ public class WikiParser extends BaseParser {
                         }
                     }
                     if (!ptext.toString().replace('\n', ' ').trim().isEmpty()) {
-                        content.add(splitter.parse(ptext));
+                        content.add(PtextToKorpus.oneLine(splitter.parse(ptext)));
                     }
                     if (!content.isEmpty()) {
                         PrepareCache3.process(textInfo, content);

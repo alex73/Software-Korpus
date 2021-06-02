@@ -16,6 +16,7 @@ import java.util.zip.ZipFile;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.compiler.PrepareCache3;
 import org.alex73.korpus.compiler.TextUtils;
+import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.TextFileParser;
 import org.apache.commons.io.IOUtils;
 
@@ -59,7 +60,7 @@ public class TextArchiveParser extends BaseParser {
                         if (textInfo.title == null) {
                             textInfo.title = "";
                         }
-                        PrepareCache3.process(textInfo, doc.paragraphs);
+                        PrepareCache3.process(textInfo, new PtextToKorpus(doc.lines).paragraphs);
                     } catch (Exception ex) {
                         PrepareCache3.errors.reportError("Error parse " + file + "!" + en.getName(), ex);
                     }

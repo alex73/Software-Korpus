@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.alex73.korpus.text.TextIO;
+import org.alex73.korpus.text.structure.files.LongTagItem;
+import org.alex73.korpus.text.structure.files.SentenceSeparatorItem;
 import org.alex73.korpus.text.xml.Content;
 import org.alex73.korpus.text.xml.ITextLineElement;
 import org.alex73.korpus.text.xml.InlineTag;

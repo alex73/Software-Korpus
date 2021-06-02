@@ -35,9 +35,9 @@ import javax.swing.JRadioButton;
 
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.korpus.belarusian.BelarusianTags;
-import org.alex73.korpus.editor.core.doc.structure.WordItem;
 import org.alex73.korpus.editor.ui.WordInfoPane;
-import org.alex73.korpus.text.elements.Word;
+import org.alex73.korpus.text.structure.corpus.Word;
+import org.alex73.korpus.text.structure.files.WordItem;
 
 public class WordInfoPaneController {
     public static void init() {
@@ -46,7 +46,7 @@ public class WordInfoPaneController {
 
     static Map<JRadioButton, Paradigm> paradigmsOnLemmas = new HashMap<>();
 
-    public static void show(Word word) {
+    public static void show(WordItem word) {
         WordInfoPane p = UI.wordInfoPane;
 
         p.pLemma.removeAll();
@@ -80,7 +80,7 @@ public class WordInfoPaneController {
         p.repaint();
     }
 
-    static void fillLemmas(Word word) {
+    static void fillLemmas(WordItem word) {
         WordInfoPane p = UI.wordInfoPane;
         p.pGrammar.removeAll();
         GridBagConstraints gbc = new GridBagConstraints();
@@ -134,7 +134,7 @@ public class WordInfoPaneController {
 
     static ActionListener lemmaClick = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-            Word w = new Word();
+            WordItem w = new WordItem();
             w.lightNormalized = UI.wordInfoPane.txtWord.getText();
             Paradigm p = paradigmsOnLemmas.get(e.getSource());
             MainController.gr.filler.fillFromParadigm(w, p);

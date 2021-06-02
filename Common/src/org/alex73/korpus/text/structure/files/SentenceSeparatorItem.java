@@ -20,12 +20,15 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
 
-package org.alex73.korpus.editor.core.doc.structure;
+package org.alex73.korpus.text.structure.files;
 
 public class SentenceSeparatorItem implements ITextLineElement {
+
+    public static final char SENTENCE_SEPARATOR_CHAR = '�';
+
     @Override
     public String getText() {
-        return "" + LineSplitter.CH_SENT_SEPARATOR;
+        return "" + SENTENCE_SEPARATOR_CHAR;
     }
 
     @Override

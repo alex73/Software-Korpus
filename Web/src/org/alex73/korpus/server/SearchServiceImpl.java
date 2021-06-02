@@ -30,7 +30,7 @@ import org.alex73.korpus.server.data.WordRequest;
 import org.alex73.korpus.server.data.WordResult;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
 import org.alex73.korpus.server.text.BinaryParagraphReader;
-import org.alex73.korpus.text.elements.Paragraph;
+import org.alex73.korpus.text.structure.corpus.Paragraph;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.BooleanQuery;
 

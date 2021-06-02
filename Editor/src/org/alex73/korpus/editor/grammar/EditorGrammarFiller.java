@@ -10,10 +10,9 @@ import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
-import org.alex73.korpus.editor.core.doc.structure.WordItem;
-import org.alex73.korpus.text.elements.Paragraph;
-import org.alex73.korpus.text.elements.Sentence;
-import org.alex73.korpus.text.elements.Word;
+import org.alex73.korpus.text.structure.files.ITextLineElement;
+import org.alex73.korpus.text.structure.files.TextLine;
+import org.alex73.korpus.text.structure.files.WordItem;
 import org.alex73.korpus.utils.SetUtils;
 
 public class EditorGrammarFiller {
@@ -51,30 +50,22 @@ public class EditorGrammarFiller {
     /**
      * Fills grammar for all words except manually choosed previously.
      */
-    public void fillNonManual(List<Paragraph> paragraphs) {
-        staticFiller.fillNonManual(paragraphs);
-        paragraphs.parallelStream().forEach(par->{
-            for (Sentence se : par.sentences) {
-                for (Word w : se.words) {
-                    if (w.manualGrammar) {
-                        continue;
-                    }
-                    newParadigms.stream().forEach(p -> fillFromParadigm(w, p));
+    public void fillNonManual(List<TextLine> lines) {
+        lines.parallelStream().forEach(line -> {
+            for (ITextLineElement it : line) {
+                if (it instanceof WordItem) {
+                    fillNonManual((WordItem) it);
                 }
             }
         });
     }
 
-    public void fillNonManual(WordItem w) {
-        if (w.manualGrammar) {
+    public void fillNonManual(WordItem wi) {
+        if (wi.manualGrammar || wi.type != null) {
             return;
         }
-        Word t = new Word();
-        t.lightNormalized = w.lightNormalized;
-        staticFiller.fillNonManual(t);
-        newParadigms.stream().forEach(p -> fillFromParadigm(t, p));
-        w.lemmas = t.lemmas;
-        w.tags = t.tags;
+        staticFiller.fill(wi);
+        newParadigms.stream().forEach(p -> fillFromParadigm(wi, p));
     }
 
     private boolean checkParadigm(String word, Paradigm p) {
@@ -94,7 +85,7 @@ public class EditorGrammarFiller {
     /**
      * Add grammar from specific paradigm if need.
      */
-    public void fillFromParadigm(Word w, Paradigm p) {
+    public void fillFromParadigm(WordItem w, Paradigm p) {
         p.getVariant().forEach(v -> {
             v.getForm().forEach(f -> {
                 if (f.getValue() == null || f.getValue().isEmpty()) {

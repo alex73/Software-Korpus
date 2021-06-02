@@ -11,8 +11,8 @@ import org.alex73.korpus.server.data.ClusterResults;
 import org.alex73.korpus.server.data.WordRequest;
 import org.alex73.korpus.server.data.WordResult;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
-import org.alex73.korpus.text.elements.Paragraph;
-import org.alex73.korpus.text.elements.Sentence;
+import org.alex73.korpus.text.structure.corpus.Paragraph;
+import org.alex73.korpus.text.structure.corpus.Sentence;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.BooleanQuery;
 

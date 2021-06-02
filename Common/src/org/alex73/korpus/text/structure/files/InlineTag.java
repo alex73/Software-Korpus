@@ -1,4 +1,4 @@
-package org.alex73.korpus.editor.core.doc.structure;
+package org.alex73.korpus.text.structure.files;
 
 import org.apache.commons.lang.StringUtils;
 
