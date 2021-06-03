@@ -22,25 +22,24 @@
 
 package org.alex73.korpus.editor.core.doc.structure;
 
-import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.alex73.korpus.editor.MainController;
 import org.alex73.korpus.text.structure.corpus.Word.OtherType;
 import org.alex73.korpus.text.structure.files.ITextLineElement;
 import org.alex73.korpus.text.structure.files.InlineTag;
 import org.alex73.korpus.text.structure.files.LongTagItem;
 import org.alex73.korpus.text.structure.files.SentenceSeparatorItem;
 import org.alex73.korpus.text.structure.files.TailItem;
+import org.alex73.korpus.text.structure.files.TextLine;
 import org.alex73.korpus.text.structure.files.WordItem;
 
 /**
  * Сховішча для радку дакумэнту корпуса.
  */
 @SuppressWarnings("serial")
-public class Line extends ArrayList<ITextLineElement> {
-    public static void fillWordsInfo(Line line) {
+public class Line {
+    public static void fillWordsInfo(TextLine line) {
         for (ITextLineElement item : line) {
             if (item instanceof WordItem) {
                 WordItem wi = (WordItem) item;
@@ -51,25 +50,25 @@ public class Line extends ArrayList<ITextLineElement> {
         }
     }
 
-    void splitAt(int offset) {
+    private static void splitAt(TextLine line, int offset) {
         int pos = 0;
-        for (int i = 0; i < size(); i++) {
-            ITextLineElement item = get(i);
+        for (int i = 0; i < line.size(); i++) {
+            ITextLineElement item = line.get(i);
             int len = item.getText().length();
             if (pos < offset && offset < pos + len) {
                 // inside item
                 ITextLineElement itLeft = ItemHelper.splitLeft(item, offset - pos);
                 ITextLineElement itRight = ItemHelper.splitRight(item, offset - pos);
-                remove(i);
-                add(i, itLeft);
-                add(i + 1, itRight);
+                line.remove(i);
+                line.add(i, itLeft);
+                line.add(i + 1, itRight);
                 break;
             }
             pos += len;
         }
     }
 
-    public int length() {
+    /*public int length() {
         int len = 0;
         for (int i = 0; i < size(); i++) {
             len += get(i).getText().length();
@@ -106,34 +105,34 @@ public class Line extends ArrayList<ITextLineElement> {
             pos += get(i).getText().length();
         }
         throw new RuntimeException("Invalid removeItemsAt");
-    }
+    }*/
 
-    public Line leftAt(int offset) {
-        splitAt(offset);
-        Line result = new Line();
+    public static TextLine leftAt(TextLine line, int offset) {
+        splitAt(line, offset);
+        TextLine result = new TextLine();
         int pos = 0;
-        for (int i = 0; i < size(); i++) {
+        for (int i = 0; i < line.size(); i++) {
             if (pos == offset) {
                 return result;
             }
-            result.add(get(i));
-            pos += get(i).getText().length();
+            result.add(line.get(i));
+            pos += line.get(i).getText().length();
         }
         throw new RuntimeException("Invalid leftAt");
     }
 
-    public Line rightAt(int offset) {
-        splitAt(offset);
-        Line result = null;
+    public static TextLine rightAt(TextLine line, int offset) {
+        splitAt(line, offset);
+        TextLine result = null;
         int pos = 0;
-        for (int i = 0; i < size(); i++) {
+        for (int i = 0; i < line.size(); i++) {
             if (pos == offset) {
-                result = new Line();
+                result = new TextLine();
             }
             if (result != null) {
-                result.add(get(i));
+                result.add(line.get(i));
             }
-            pos += get(i).getText().length();
+            pos += line.get(i).getText().length();
         }
         if (result == null) {
             throw new RuntimeException("Invalid rightAt");
@@ -141,21 +140,16 @@ public class Line extends ArrayList<ITextLineElement> {
         return result;
     }
 
-    public void normalize() {
-        while (mergeAndSplitItems(this))
+    public static void normalize(TextLine line) {
+        while (mergeAndSplitItems(line))
             ;
-        fillWordsInfo(this);
+        fillWordsInfo(line);
     }
 
-    @Override
-    public String toString() {
-        return super.toString() + " length=" + length();
-    }
-    
     static final Pattern RE_TAG = Pattern.compile("<.+?>");
     static final Pattern RE_DIGITS = Pattern.compile("[0-9]+");
     
-    public static boolean mergeAndSplitItems(Line line) {
+    public static boolean mergeAndSplitItems(TextLine line) {
         boolean modified = false;
         for (int i = 0; i < line.size(); i++) {
             // convert non-tags to words
@@ -274,8 +268,8 @@ public class Line extends ArrayList<ITextLineElement> {
     }
 
 
-    public static Line splitOther(String line, OtherType type) {
-        Line result=new Line();
+    public static TextLine splitOther(String line, OtherType type) {
+        TextLine result = new TextLine();
         int partStart=0;
         int currentPos;
         for (currentPos = 0; currentPos < line.length(); currentPos++) {
@@ -296,7 +290,7 @@ public class Line extends ArrayList<ITextLineElement> {
         wi.type = type;
         result.add(wi);
 
-        result.normalize();
+        normalize(result);
         return result;
     }
 }

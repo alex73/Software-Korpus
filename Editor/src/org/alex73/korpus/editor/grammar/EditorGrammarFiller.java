@@ -61,9 +61,6 @@ public class EditorGrammarFiller {
     }
 
     public void fillNonManual(WordItem wi) {
-        if (wi.manualGrammar || wi.type != null) {
-            return;
-        }
         staticFiller.fill(wi);
         newParadigms.stream().forEach(p -> fillFromParadigm(wi, p));
     }

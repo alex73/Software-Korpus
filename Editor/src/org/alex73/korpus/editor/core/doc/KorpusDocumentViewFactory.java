@@ -92,7 +92,7 @@ public class KorpusDocumentViewFactory implements ViewFactory {
             if (wordElement.item instanceof WordItem) {
                 WordItem wi = (WordItem)wordElement.item;
                 boolean mark;
-                if (wi.manualGrammar) {
+                if (wi.manualLemma != null || wi.manualTag != null) {
                     g.setColor(new Color(224, 255, 224));
                     g.fillRect(r.x, r.y, r.width, r.height);
                     mark = false;

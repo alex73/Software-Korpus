@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.ButtonGroup;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
@@ -57,23 +58,27 @@ public class WordInfoPaneController {
         } else {
             p.txtWord.setText(word.lightNormalized);
 
-            List<Paradigm> pa2 = MainController.gr.filler.getParadigms(word.lightNormalized);
-            ButtonGroup rbGroupLemma = new ButtonGroup();
-            for (Paradigm pa : pa2) {
-                JRadioButton rb = new JRadioButton(pa.getLemma());
-                rb.setToolTipText(pa.getPdgId() + "");
-                rb.setFont(p.pLemma.getFont());
-                rbGroupLemma.add(rb);
-                p.pLemma.add(rb);
-                rb.addActionListener(lemmaClick);
-                paradigmsOnLemmas.put(rb, pa);
+            if (word.type != null) {
+                p.pLemma.add(new JLabel(word.type.name()));
+                p.revalidate();
+            } else {
+                List<Paradigm> pa2 = MainController.gr.filler.getParadigms(word.lightNormalized);
+                ButtonGroup rbGroupLemma = new ButtonGroup();
+                for (Paradigm pa : pa2) {
+                    JRadioButton rb = new JRadioButton(pa.getLemma());
+                    rb.setName(pa.getLemma());
+                    rb.setFont(p.pLemma.getFont());
+                    rbGroupLemma.add(rb);
+                    p.pLemma.add(rb);
+                    rb.addActionListener(lemmaClick);
+                    paradigmsOnLemmas.put(rb, pa);
+                }
+                if (p.pLemma.getComponentCount() == 1) {
+                    ((JRadioButton) p.pLemma.getComponent(0)).setSelected(true);
+                    lemmaClick.actionPerformed(new ActionEvent(p.pLemma.getComponent(0), 0, null));
+                }
+                fillLemmas(word);
             }
-            if (p.pLemma.getComponentCount() == 1) {
-                ((JRadioButton) p.pLemma.getComponent(0)).setSelected(true);
-                lemmaClick.actionPerformed(new ActionEvent(p.pLemma.getComponent(0), 0, null));
-            }
-
-            fillLemmas(word);
         }
         setSaveEnabled();
         p.revalidate();
@@ -104,7 +109,7 @@ public class WordInfoPaneController {
                     outText = c + ":няправільны код";
                 }
                 JRadioButton rb = new JRadioButton("<html>" + outText + "</html>");
-                rb.setToolTipText(c);
+                rb.setName(c);
                 rb.setFont(p.pGrammar.getFont());
                 rbGroupGrammar.add(rb);
                 gbc.gridy = p.pGrammar.getComponentCount();
@@ -124,9 +129,12 @@ public class WordInfoPaneController {
 
     static String getSelected(JPanel panel) {
         for (int i = 0; i < panel.getComponentCount(); i++) {
+            if (!(panel.getComponent(i) instanceof JRadioButton)) {
+                return null;
+            }
             JRadioButton rb = (JRadioButton) panel.getComponent(i);
             if (rb.isSelected()) {
-                return rb.getToolTipText();
+                return rb.getName();
             }
         }
         return null;
@@ -153,13 +161,7 @@ public class WordInfoPaneController {
     static ActionListener btnSave = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             WordInfoPane p = UI.wordInfoPane;
-            Word w = new Word();
-            w.lightNormalized = p.txtWord.getText();
-            w.lemmas = getSelected(p.pLemma);
-            w.tags = getSelected(p.pGrammar);
-            w.manualGrammar = true;
-            w.type = null;
-            MainController.setWordInfo(w);
+            MainController.setWordInfo(getSelected(p.pLemma), getSelected(p.pGrammar));
             UI.editor.repaint();
         }
     };

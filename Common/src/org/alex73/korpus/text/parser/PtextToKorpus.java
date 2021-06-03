@@ -56,9 +56,8 @@ public class PtextToKorpus {
                     WordItem wi = (WordItem) w;
                     Word wo = new Word();
                     wo.lightNormalized = wi.lightNormalized;
-                    wo.lemmas = wi.lemmas;
-                    wo.tags = wi.tags;
-                    wo.manualGrammar = wi.manualGrammar;
+                    wo.lemmas = wi.manualLemma != null ? wi.manualLemma : wi.lemmas;
+                    wo.tags = wi.manualTag != null ? wi.manualTag : wi.tags;
                     wo.type = wi.type;
                     wo.tail = "";
                     words.add(wo);

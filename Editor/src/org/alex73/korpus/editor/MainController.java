@@ -57,8 +57,10 @@ import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyWordElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocumentViewFactory;
 import org.alex73.korpus.editor.grammar.EditorGrammar;
 import org.alex73.korpus.text.parser.IProcess;
+import org.alex73.korpus.text.parser.PtextFileParser;
 import org.alex73.korpus.text.parser.PtextFileWriter;
 import org.alex73.korpus.text.parser.TextFileParser;
+import org.alex73.korpus.text.parser.TextFileWriter;
 import org.alex73.korpus.text.structure.corpus.Word;
 import org.alex73.korpus.text.structure.corpus.Word.OtherType;
 import org.alex73.korpus.text.structure.files.TextLine;
@@ -151,6 +153,7 @@ public class MainController {
                 bak.delete();
                 getOutFile().renameTo(bak);
                 PtextFileWriter.write(getOutFile(), headers, UI.doc.extractText());
+                TextFileWriter.write(new File(baseFileName + ".baktext"), headers, UI.doc.extractText());
                 UI.showInfo("Захавана ў " + getOutFile());
             } catch (Throwable ex) {
                 ex.printStackTrace();
@@ -291,17 +294,18 @@ public class MainController {
             List<TextLine> lines;
             if (f.getName().endsWith(".ptext")) {
                 try (BufferedInputStream in = new BufferedInputStream(Files.newInputStream(f.toPath()))) {
-                    lines=null;
-//                    PtextFileParser parser = new PtextFileParser(in, false, new IProcess() {
-//                        @Override
-//                        public void showStatus(String status) {
-//                        }
-//
-//                        @Override
-//                        public void reportError(String error, Throwable ex) {
-//                            throw new RuntimeException(error, ex);
-//                        }
-//                    });
+                    PtextFileParser parser = new PtextFileParser(in, false, new IProcess() {
+                        @Override
+                        public void showStatus(String status) {
+                        }
+
+                        @Override
+                        public void reportError(String error, Throwable ex) {
+                            throw new RuntimeException(error, ex);
+                        }
+                    });
+                    headers = parser.headers;
+                    lines =parser.lines;
                 }
             } else if (f.getName().endsWith(".text")) {
                 try (BufferedInputStream in = new BufferedInputStream(Files.newInputStream(f.toPath()))) {
@@ -359,7 +363,7 @@ public class MainController {
     }
 
     static File getOutFile() {
-        return new File(baseFileName + ".xml");
+        return new File(baseFileName + ".ptext");
     }
 
     static CaretListener onWordChanged = new CaretListener() {
@@ -391,7 +395,7 @@ public class MainController {
         }
     }
 
-    static void setWordInfo(Word w) {
+    static void setWordInfo(String manualLemma, String manualTag) {
         int pos = UI.editor.getCaretPosition();
         KorpusDocument3.MyLineElement par = (KorpusDocument3.MyLineElement) UI.doc.getParagraphElement(pos);
         int idxWord = par.getElementIndex(pos);
@@ -401,11 +405,8 @@ public class MainController {
         }
         if (word.item instanceof WordItem) {
             WordItem wi = (WordItem) word.item;
-            wi.lightNormalized = w.lightNormalized;
-            wi.lemmas = w.lemmas;
-            wi.tags = w.tags;
-            wi.manualGrammar = w.manualGrammar;
-            wi.type = w.type;
+            wi.manualLemma = manualLemma;
+            wi.manualTag = manualTag;
         }
         UI.editor.repaint();
     }

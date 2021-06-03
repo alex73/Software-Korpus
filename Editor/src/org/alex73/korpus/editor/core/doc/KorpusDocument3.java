@@ -36,15 +36,13 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 import javax.swing.text.GapContent;
 import javax.swing.text.Position;
-import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleContext;
 
 import org.alex73.korpus.editor.UI;
 import org.alex73.korpus.editor.core.doc.structure.Line;
-import org.alex73.korpus.editor.core.doc.structure.LineSplitter;
 import org.alex73.korpus.editor.core.doc.structure.XML2Lines;
-import org.alex73.korpus.text.structure.corpus.Paragraph;
-import org.alex73.korpus.text.structure.corpus.Word.OtherType;
+import org.alex73.korpus.text.parser.IProcess;
+import org.alex73.korpus.text.parser.Splitter3;
 import org.alex73.korpus.text.structure.files.ITextLineElement;
 import org.alex73.korpus.text.structure.files.TextLine;
 import org.alex73.korpus.text.structure.files.WordItem;
@@ -57,22 +55,6 @@ public class KorpusDocument3 extends AbstractDocument {
     public enum MARK_WORDS {
         UNK_LEMMA, AMAN_LEMMA, AMAN_GRAM
     };
-
-    public static final SimpleAttributeSet ATTRS_OTHER_LANGUAGE;
-    public static final SimpleAttributeSet ATTRS_DIGITS;
-    public static final SimpleAttributeSet ATTRS_TRASIANKA;
-    public static final SimpleAttributeSet ATTRS_DYJALEKT;
-
-    static {
-        ATTRS_OTHER_LANGUAGE = new SimpleAttributeSet();
-        ATTRS_OTHER_LANGUAGE.addAttribute("OtherType", OtherType.OTHER_LANGUAGE);
-        ATTRS_DIGITS = new SimpleAttributeSet();
-        ATTRS_DIGITS.addAttribute("OtherType", OtherType.NUMBER);
-        ATTRS_TRASIANKA = new SimpleAttributeSet();
-        ATTRS_TRASIANKA.addAttribute("OtherType", OtherType.TRASIANKA);
-        ATTRS_DYJALEKT = new SimpleAttributeSet();
-        ATTRS_DYJALEKT.addAttribute("OtherType", OtherType.DYJALEKT);
-    }
 
     public MyRootElement rootElem;
     public MARK_WORDS markType = MARK_WORDS.UNK_LEMMA;
@@ -102,7 +84,7 @@ public class KorpusDocument3 extends AbstractDocument {
         addUndoableEditListener(UI.editorUndoManager);
     }
 
-    public List<Paragraph> extractText() {
+    public List<TextLine> extractText() {
         return new XML2Lines(this).extract();
     }
 
@@ -153,15 +135,17 @@ public class KorpusDocument3 extends AbstractDocument {
                     DocumentEvent.EventType.INSERT);
 
             String[] newStrs = splitInserted(str);
-            List<Line> newLines = new ArrayList<>();
+            List<TextLine> newLines = new ArrayList<>();
             for (int i = 0; i < newStrs.length; i++) {
-                Line line;
-                OtherType type = a == null ? null : (OtherType) a.getAttribute("OtherType");
-                if (a==null) {
-                    line = new LineSplitter(newStrs[i]).splitParagraph();
-                }else {
-                    line = Line.splitOther(newStrs[i], type);
-                }
+                TextLine line = new Splitter3(false, new IProcess() {
+                    @Override
+                    public void showStatus(String status) {
+                    }
+
+                    @Override
+                    public void reportError(String error, Throwable ex) {
+                    }
+                }).parse(newStrs[i]);
                 newLines.add(line);
             }
 
@@ -178,11 +162,11 @@ public class KorpusDocument3 extends AbstractDocument {
             }
             int pOffset = rootElem.getElement(pIndex).getStartOffset();
             rootElem.removeChildren(pIndex, oldParagraphs);
-            Line oldLine = oldParagraphs[oldParagraphs.length - 1].extractItems();
-            Line prevLine = oldParagraphs.length == 1 ? null : oldParagraphs[0].extractItems();
+            TextLine oldLine = oldParagraphs[oldParagraphs.length - 1].extractItems();
+            TextLine prevLine = oldParagraphs.length == 1 ? null : oldParagraphs[0].extractItems();
 
-            Line lineLeft = oldLine.leftAt(offsetInOldLine);
-            Line lineRight = oldLine.rightAt(offsetInOldLine);
+            TextLine lineLeft = Line.leftAt(oldLine, offsetInOldLine);
+            TextLine lineRight = Line.rightAt(oldLine, offsetInOldLine);
             lineLeft.addAll(newLines.get(0));
             newLines.set(0, lineLeft);
             newLines.get(newLines.size() - 1).addAll(lineRight);
@@ -234,17 +218,17 @@ public class KorpusDocument3 extends AbstractDocument {
             int pOffset = rootElem.getElement(pIndexStart).getStartOffset();
             rootElem.removeChildren(pIndexStart, oldParagraphs);
 
-            List<Line> lines = new ArrayList<>();
+            List<TextLine> lines = new ArrayList<>();
             for (MyLineElement p : oldParagraphs) {
                 lines.add(p.extractItems());
             }
-            Line oldLine = lines.get(0).leftAt(offs - pOffset);
-            lines.set(0, lines.get(0).rightAt(offs - pOffset));
+            TextLine oldLine =Line.leftAt(lines.get(0), offs - pOffset);
+            lines.set(0, Line.rightAt(lines.get(0), offs - pOffset));
             int removeCount = len;
             for (int i = 0; i < lines.size() - 1; i++) {
-                removeCount -= lines.get(i).length();
+                removeCount -= lines.get(i).size();
             }
-            oldLine.addAll(lines.get(lines.size() - 1).rightAt(removeCount));
+            oldLine.addAll(Line.rightAt(lines.get(lines.size() - 1), removeCount));
             lines.clear();
             lines.add(oldLine);
 
@@ -262,13 +246,13 @@ public class KorpusDocument3 extends AbstractDocument {
         }
     }
 
-    MyLineElement[] recreateParagraphs(List<Line> newLines, int pOffset, int pIndex) {
+    MyLineElement[] recreateParagraphs(List<TextLine> newLines, int pOffset, int pIndex) {
         int startOffset = 0;
 
         MyLineElement[] newParagraphs = new MyLineElement[newLines.size()];
         for (int i = 0; i < newParagraphs.length; i++) {
-            Line newLine = newLines.get(i);
-            newLine.normalize();
+            TextLine newLine = newLines.get(i);
+            Line.normalize(newLine);
 
             MyLineElement p = newParagraphs[i] = new MyLineElement(rootElem);
 
@@ -388,11 +372,10 @@ public class KorpusDocument3 extends AbstractDocument {
     public class MyLineElement extends MyGroupElement<MyWordElement> {
         public MyLineElement(MyRootElement parent) {
             super(parent);
-            parent.children.add(this);
         }
 
-        public Line extractItems() {
-            Line result = new Line();
+        public TextLine extractItems() {
+            TextLine result = new TextLine();
             for (int i = 0; i < children.size(); i++) {
                 result.add(children.get(i).item);
             }
@@ -413,7 +396,6 @@ public class KorpusDocument3 extends AbstractDocument {
 
         public MyWordElement(MyLineElement parent, ITextLineElement item) {
             super(parent, null);
-            parent.children.add(this);
             this.item = item;
             p0v = text.length();
             text.append(item.getText());

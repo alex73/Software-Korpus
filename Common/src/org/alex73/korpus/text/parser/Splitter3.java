@@ -78,7 +78,6 @@ public class Splitter3 {
             }
         }
         closeWord();
-        closeSentence();
 
         return result;
     }

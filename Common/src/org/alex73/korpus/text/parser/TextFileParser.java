@@ -12,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.alex73.korpus.text.structure.files.LongTagItem;
+import org.alex73.korpus.text.structure.files.TailItem;
 import org.alex73.korpus.text.structure.files.TextLine;
 
 /**
@@ -37,8 +38,10 @@ public class TextFileParser {
 
             String s;
             while ((s = rd.readLine()) != null) {
-                s = s.trim();
-                if (s.isEmpty()) {
+                if (s.trim().isEmpty()) {
+                    TextLine line = new TextLine();
+                    line.add(new TailItem("\n"));
+                    lines.add(line);
                     continue;
                 }
                 if (s.startsWith("##")) {
@@ -56,6 +59,7 @@ public class TextFileParser {
                     continue;
                 }
                 TextLine p = splitter.parse(s);
+                p.add(new TailItem("\n"));
                 lines.add(p);
             }
         } catch (Exception ex) {

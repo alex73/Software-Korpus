@@ -24,7 +24,7 @@ package org.alex73.korpus.text.structure.files;
 
 public class SentenceSeparatorItem implements ITextLineElement {
 
-    public static final char SENTENCE_SEPARATOR_CHAR = '�';
+    public static final char SENTENCE_SEPARATOR_CHAR = '\u21A4';//'�';
 
     @Override
     public String getText() {

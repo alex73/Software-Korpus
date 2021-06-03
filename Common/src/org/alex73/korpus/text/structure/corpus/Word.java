@@ -13,6 +13,5 @@ public class Word implements Serializable {
     public String lemmas; // like 'word1;word2'
     public String tags; // like 'V12;N34'. We can't store db tags here because UI should display data by
                         // usual tags
-    public boolean manualGrammar;
     public OtherType type;
 }

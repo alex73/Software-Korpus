@@ -42,9 +42,6 @@ public class StaticGrammarFiller2 {
     }
 
     public void fillNonManual(Word w) {
-        if (w.manualGrammar && w.type != null) {
-            return;
-        }
         WordInfo wi = get(w.lightNormalized);
         if (wi == null) {
             wi = calculateWordInfo(w.lightNormalized);
