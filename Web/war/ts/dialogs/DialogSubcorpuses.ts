@@ -20,6 +20,7 @@ class DialogSubcorpuses {
 			}
 		});
 		document.getElementById('inputFilterCorpus').innerText = subcorpuses.length == 0 ? "teksty" : subcorpuses.join(';');
+		korpusui.showSubcorpusNames();
 		DialogSubcorpuses.showInputFilterDependsOnSubcorpus();
 		$('#dialog-subcorpuses').modal('hide');
 	}

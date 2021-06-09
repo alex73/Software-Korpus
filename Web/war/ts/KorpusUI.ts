@@ -138,6 +138,13 @@ class KorpusUI {
 
 		return requestedParams;
 	}
+	showSubcorpusNames() {
+		let subcorpuses: string[] = KorpusUI.separatedStringToArray(document.getElementById('inputFilterCorpus').innerText);
+		let cn = {};
+		korpusService.initial.subcorpuses.map(kv => cn[kv.key] = kv.value.replace(/\|\|.+/g, ''));
+		subcorpuses = subcorpuses.map(id => cn[id]);
+		document.getElementById('inputFilterCorpusNames').innerText = subcorpuses.join(', ');
+	}
 	restoreToScreen(mode: string, data: BaseParams) {
 		this.switchMode(mode);
 		(<HTMLInputElement>document.getElementById('inputFilterYearWrittenFrom')).value = data && data.textStandard && data.textStandard.yearWrittenFrom ? data.textStandard.yearWrittenFrom : "";
@@ -145,6 +152,7 @@ class KorpusUI {
 		(<HTMLInputElement>document.getElementById('inputFilterYearPublishedFrom')).value = data && data.textStandard && data.textStandard.yearPublishedFrom ? data.textStandard.yearPublishedFrom : "";
 		(<HTMLInputElement>document.getElementById('inputFilterYearPublishedTo')).value = data && data.textStandard && data.textStandard.yearPublishedTo ? data.textStandard.yearPublishedTo : "";
 		document.getElementById('inputFilterCorpus').innerText = data && data.textStandard && data.textStandard.subcorpuses ? data.textStandard.subcorpuses.join(';') : "teksty";
+		this.showSubcorpusNames();
 		document.getElementById('inputFilterAuthor').innerText = data && data.textStandard && data.textStandard.authors ? data.textStandard.authors.join(';') : "Усе";
 		document.getElementById('inputFilterSource').innerText = data && data.textStandard && data.textStandard.sources ? data.textStandard.sources.join(';') : "Усе";
 		document.getElementById('inputFilterStyle').innerText = data && data.textStandard && data.textStandard.stylegenres ? data.textStandard.stylegenres.join(';') : "Усе";
