@@ -113,7 +113,7 @@ public class GrammarConstructor {
         }
         // get best
         PVW best = scores.get(scores.size() - 1).get(0);
-        out.append(String.format("%d%s/%s/%s (супадзенне па %d літарам)", best.p.getPdgId(), best.v.getId(), best.p.getTag(), best.p.getLemma(), scores.size()));
+        out.append(String.format("%d%s/%s/%s (супадзенне па %d літарах)", best.p.getPdgId(), best.v.getId(), best.p.getTag(), best.p.getLemma(), scores.size()));
         Paradigm result = constructParadigm(wordNormalized, best.p, best.v, best.w);
         long af = System.currentTimeMillis();
         System.out.println("Looks like exec time: " + (af - be) + "ms");

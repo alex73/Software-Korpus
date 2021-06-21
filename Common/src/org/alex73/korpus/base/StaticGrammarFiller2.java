@@ -41,21 +41,31 @@ public class StaticGrammarFiller2 {
         });
     }
 
-    public void fillNonManual(Word w) {
-        WordInfo wi = get(w.lightNormalized);
-        if (wi == null) {
-            wi = calculateWordInfo(w.lightNormalized);
-            set(w.lightNormalized, wi);
+    private void fillNonManual(Word w) {
+        WordInfo wi;
+        if (w.lemmas == null && w.tags == null) {
+            wi = get(w.lightNormalized);
+            if (wi == null) {
+                wi = calculateWordInfo(w.lightNormalized, null, null);
+                set(w.lightNormalized, wi);
+            }
+        } else {
+            wi = calculateWordInfo(w.lightNormalized, w.lemmas, w.tags);
         }
         w.lemmas = wi.lemmas;
         w.tags = wi.tags;
     }
 
     public void fill(WordItem w) {
-        WordInfo wi = get(w.lightNormalized);
-        if (wi == null) {
-            wi = calculateWordInfo(w.lightNormalized);
-            set(w.lightNormalized, wi);
+        WordInfo wi;
+        if (w.manualLemma == null && w.manualTag == null) {
+            wi = get(w.lightNormalized);
+            if (wi == null) {
+                wi = calculateWordInfo(w.lightNormalized, null, null);
+                set(w.lightNormalized, wi);
+            }
+        } else {
+            wi = calculateWordInfo(w.lightNormalized, w.manualLemma, w.manualTag);
         }
         w.lemmas = wi.lemmas;
         w.tags = wi.tags;
@@ -79,7 +89,7 @@ public class StaticGrammarFiller2 {
         }
     }
 
-    private WordInfo calculateWordInfo(String word) {
+    private WordInfo calculateWordInfo(String word, String manualLemma, String manualTag) {
         StringBuilder lemmas = new StringBuilder();
         StringBuilder dbTags = new StringBuilder();
         for (Paradigm p : finder.getParadigms(word)) {
@@ -88,9 +98,16 @@ public class StaticGrammarFiller2 {
                     if (f.getValue().isEmpty()) {
                         continue;
                     }
+                    if (manualLemma != null && !p.getLemma().equals(manualLemma)) {
+                        continue;
+                    }
                     if (BelarusianWordNormalizer.equals(f.getValue(), word)) {
+                        String fTag = SetUtils.tag(p, v, f);
+                        if (manualTag != null && !manualTag.equals(fTag)) {
+                            continue;
+                        }
                         add(lemmas, p.getLemma());
-                        add(dbTags, SetUtils.tag(p, v, f));
+                        add(dbTags, fTag);
                     }
                 }
             }

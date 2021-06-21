@@ -44,6 +44,7 @@ public class WordInfoPane extends javax.swing.JPanel {
         jLabel1 = new javax.swing.JLabel();
         txtWord = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
+        btnReset = new javax.swing.JButton();
         btnSave = new javax.swing.JButton();
         pLemma = new javax.swing.JPanel();
         pGrammar = new javax.swing.JPanel();
@@ -59,8 +60,8 @@ public class WordInfoPane extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(jLabel1, gridBagConstraints);
 
-        txtWord.setColumns(10);
         txtWord.setEditable(false);
+        txtWord.setColumns(10);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
@@ -77,10 +78,18 @@ public class WordInfoPane extends javax.swing.JPanel {
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(jLabel2, gridBagConstraints);
 
+        btnReset.setText("Пераабраць");
+        btnReset.setEnabled(false);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        add(btnReset, gridBagConstraints);
+
         btnSave.setText("Захаваць");
         btnSave.setEnabled(false);
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         add(btnSave, gridBagConstraints);
@@ -107,6 +116,7 @@ public class WordInfoPane extends javax.swing.JPanel {
         add(pGrammar, gridBagConstraints);
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    public javax.swing.JButton btnReset;
     public javax.swing.JButton btnSave;
     public javax.swing.JLabel jLabel1;
     public javax.swing.JLabel jLabel2;
