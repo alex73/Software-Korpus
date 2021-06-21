@@ -53,7 +53,13 @@ public class GrammarPaneController {
         intoParadigmId = pdgId;
         notRealUpdate = true;
         try {
-            UI.grammarPane.txtWord.setText(word != null && word.lightNormalized != null ? word.lightNormalized.replace('\u0301', '+') : "");
+            if (word == null) {
+                UI.grammarPane.txtWord.setText("");
+            } else if (word.normalized != null) {
+                UI.grammarPane.txtWord.setText(word.normalized.replace('\u0301', '+'));
+            } else {
+                UI.grammarPane.txtWord.setText(word.lightNormalized.replace('\u0301', '+'));
+            }
             UI.grammarPane.txtLooksLike.setText("");
             updateInfo();
         } finally {

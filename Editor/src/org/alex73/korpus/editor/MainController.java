@@ -395,7 +395,7 @@ public class MainController {
         }
     }
 
-    static void setWordInfo(String manualLemma, String manualTag) {
+    static void setWordInfo(String manualLemma, String manualTag, String normalized) {
         int pos = UI.editor.getCaretPosition();
         KorpusDocument3.MyLineElement par = (KorpusDocument3.MyLineElement) UI.doc.getParagraphElement(pos);
         int idxWord = par.getElementIndex(pos);
@@ -407,6 +407,10 @@ public class MainController {
             WordItem wi = (WordItem) word.item;
             wi.manualLemma = manualLemma;
             wi.manualTag = manualTag;
+            normalized = normalized.trim();
+            wi.normalized = normalized.isEmpty() ? null : normalized;
+            GrammarPaneController.show(wi, null);
+            MainController.gr.filler.fillNonManual(wi);
         }
         UI.editor.repaint();
     }

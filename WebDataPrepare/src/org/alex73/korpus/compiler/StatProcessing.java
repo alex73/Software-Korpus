@@ -56,7 +56,7 @@ public class StatProcessing {
             for (Sentence se : p.sentences) {
                 for (Word w : se.words) {
                     String[] lemmas = w.lemmas == null || w.lemmas.isEmpty() ? null : RE_SPLIT.split(w.lemmas);
-                    todo.forEach(s -> s.addWord(w.lightNormalized, lemmas));
+                    todo.forEach(s -> s.addWord(w.normalized, lemmas));
                 }
             }
         }

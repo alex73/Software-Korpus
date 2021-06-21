@@ -24,10 +24,11 @@ public class PtextFileWriter {
     protected static final char MAX_CONTROL_CHAR = '\u21FF';
     protected static final char SENTENCE_SEPARATOR = '\u21B3';
     protected static final char START_WORD = '\u21B7';
+    protected static final char START_WORD_NORMALIZED = '\u21B6';
     protected static final char START_WORD_LEMMA = '\u21F8';
     protected static final char START_WORD_TAG = '\u21FB';
     protected static final char START_WORD_TYPE = '\u21F9';
-    protected static final char START_TAIL = '\u21B6';
+    protected static final char START_TAIL = '\u21D2';
     protected static final char START_LONG_TAG = '\u21C5';
     protected static final char START_SHORT_TAG = '\u21C4';
 
@@ -40,6 +41,9 @@ public class PtextFileWriter {
                     if (it instanceof WordItem) {
                         WordItem wi = (WordItem) it;
                         write(wr, START_WORD, wi.lightNormalized);
+                        if (wi.normalized != null) {
+                            write(wr, START_WORD_NORMALIZED, wi.normalized);
+                        }
                         if (wi.manualLemma != null) {
                             write(wr, START_WORD_LEMMA, wi.manualLemma);
                         }

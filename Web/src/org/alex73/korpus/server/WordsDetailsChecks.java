@@ -136,7 +136,7 @@ public class WordsDetailsChecks {
      * Is the word corresponds with parameter ?
      */
     public static boolean isOneWordMatchsParam(WordRequest wordParam, WordResult wordResult) {
-        if (wordResult.lightNormalized == null) {
+        if (wordResult.normalized == null) {
             return false;
         }
         if (wordParam.word != null && !wordParam.word.trim().isEmpty()) {
@@ -158,13 +158,13 @@ public class WordsDetailsChecks {
             } else {
                 // concrete form
                 if (needWildcardRegexp(wordParam.word)) {
-                    if (wordResult.lightNormalized == null) {
+                    if (wordResult.normalized == null) {
                         return false;
                     }
-                    if (!getWildcardRegexp(wordParam.word).matcher(StressUtils.unstress(wordResult.lightNormalized)).matches()) {
+                    if (!getWildcardRegexp(wordParam.word).matcher(StressUtils.unstress(wordResult.normalized)).matches()) {
                         return false;
                     }
-                } else if (!BelarusianWordNormalizer.equals(wordParam.word, wordResult.lightNormalized)) {
+                } else if (!BelarusianWordNormalizer.equals(wordParam.word, wordResult.normalized)) {
                     return false;
                 }
             }

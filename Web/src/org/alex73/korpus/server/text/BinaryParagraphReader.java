@@ -25,7 +25,8 @@ public class BinaryParagraphReader {
             p.sentences[i].words = new Word[in.readShort()];
             for (int j = 0; j < p.sentences[i].words.length; j++) {
                 Word w = new Word();
-                w.lightNormalized = readString();
+                w.source = readString();
+                w.normalized = readString();
                 w.lemmas = readString();
                 w.tags = readString();
                 w.tail = readString();

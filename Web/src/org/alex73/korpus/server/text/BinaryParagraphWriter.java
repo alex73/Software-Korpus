@@ -20,7 +20,8 @@ public class BinaryParagraphWriter {
             for (Sentence se : p.sentences) {
                 checkWriteShort(se.words.length, "Too many words in sentence: ");
                 for (Word w : se.words) {
-                    writeString(w.lightNormalized);
+                    writeString(w.source);
+                    writeString(w.normalized);
                     writeString(w.lemmas);
                     writeString(w.tags);
                     writeString(w.tail);

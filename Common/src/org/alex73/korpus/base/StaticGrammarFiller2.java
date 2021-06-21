@@ -44,13 +44,13 @@ public class StaticGrammarFiller2 {
     private void fillNonManual(Word w) {
         WordInfo wi;
         if (w.lemmas == null && w.tags == null) {
-            wi = get(w.lightNormalized);
+            wi = get(w.normalized);
             if (wi == null) {
-                wi = calculateWordInfo(w.lightNormalized, null, null);
-                set(w.lightNormalized, wi);
+                wi = calculateWordInfo(w.normalized, null, null);
+                set(w.normalized, wi);
             }
         } else {
-            wi = calculateWordInfo(w.lightNormalized, w.lemmas, w.tags);
+            wi = calculateWordInfo(w.normalized, w.lemmas, w.tags);
         }
         w.lemmas = wi.lemmas;
         w.tags = wi.tags;
@@ -58,14 +58,15 @@ public class StaticGrammarFiller2 {
 
     public void fill(WordItem w) {
         WordInfo wi;
+        String expected = w.normalized != null ? w.normalized : w.lightNormalized;
         if (w.manualLemma == null && w.manualTag == null) {
-            wi = get(w.lightNormalized);
+            wi = get(expected);
             if (wi == null) {
-                wi = calculateWordInfo(w.lightNormalized, null, null);
-                set(w.lightNormalized, wi);
+                wi = calculateWordInfo(expected, null, null);
+                set(expected, wi);
             }
         } else {
-            wi = calculateWordInfo(w.lightNormalized, w.manualLemma, w.manualTag);
+            wi = calculateWordInfo(expected, w.manualLemma, w.manualTag);
         }
         w.lemmas = wi.lemmas;
         w.tags = wi.tags;

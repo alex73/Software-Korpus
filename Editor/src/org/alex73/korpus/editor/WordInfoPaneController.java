@@ -31,6 +31,8 @@ import java.util.Map;
 import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.korpus.belarusian.BelarusianTags;
@@ -56,15 +58,19 @@ public class WordInfoPaneController {
         paradigmsOnLemmas.clear();
         if (word == null) {
             p.txtWord.setText("");
+            p.txtNormal.setText("");
             currentWord = null;
         } else {
             p.txtWord.setText(word.lightNormalized);
+            p.txtNormal.setText(word.normalized != null ? word.normalized : "");
             currentWord = new WordItem();
             currentWord.lightNormalized = word.lightNormalized;
+            currentWord.normalized = word.normalized;
             currentWord.manualLemma = word.manualLemma;
             currentWord.manualTag = word.manualTag;
             currentWord.type = word.type;
             showLemmasAndTags();
+            p.txtNormal.getDocument().addDocumentListener(docListener);
         }
         setButtonsEnabled();
         p.revalidate();
@@ -170,7 +176,7 @@ public class WordInfoPaneController {
 
     static ActionListener btnSave = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-            MainController.setWordInfo(currentWord.manualLemma, currentWord.manualTag);
+            MainController.setWordInfo(currentWord.manualLemma, currentWord.manualTag, UI.wordInfoPane.txtNormal.getText());
             changed = false;
         }
     };
@@ -180,6 +186,22 @@ public class WordInfoPaneController {
             currentWord.manualTag = null;
             changed = true;
             showLemmasAndTags();
+            setButtonsEnabled();
+        }
+    };
+    static DocumentListener docListener = new DocumentListener() {
+        public void changedUpdate(DocumentEvent e) {
+            changed = true;
+            setButtonsEnabled();
+        }
+
+        public void insertUpdate(DocumentEvent e) {
+            changed = true;
+            setButtonsEnabled();
+        }
+
+        public void removeUpdate(DocumentEvent e) {
+            changed = true;
             setButtonsEnabled();
         }
     };

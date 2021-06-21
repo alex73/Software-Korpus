@@ -25,7 +25,7 @@ public class PtextFileParser {
     private int pos;
     private TextLine line;
     private StringBuilder str = new StringBuilder();
-    private String wLightNormalized, wManualLemma, wManualTag;
+    private String wLightNormalized, wNormalized, wManualLemma, wManualTag;
     private OtherType wType;
 
     public PtextFileParser(InputStream in, boolean headersOnly, IProcess errors) {
@@ -68,6 +68,9 @@ public class PtextFileParser {
                         case PtextFileWriter.START_WORD:
                             flushWord();
                             wLightNormalized = readString();
+                            break;
+                        case PtextFileWriter.START_WORD_NORMALIZED:
+                            wNormalized = readString();
                             break;
                         case PtextFileWriter.START_WORD_LEMMA:
                             wManualLemma = readString();
@@ -118,6 +121,7 @@ public class PtextFileParser {
         if (wLightNormalized != null) {
             WordItem w = new WordItem();
             w.lightNormalized = wLightNormalized;
+            w.normalized = wNormalized;
             w.manualLemma = wManualLemma;
             w.manualTag = wManualTag;
             w.type = wType;

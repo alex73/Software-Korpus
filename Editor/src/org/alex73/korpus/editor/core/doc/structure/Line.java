@@ -164,7 +164,7 @@ public class Line {
             } else if (currentItem instanceof LongTagItem) {
                 String text = currentItem.getText();
                 if (!text.startsWith("##")) {
-                      currentItem =new WordItem(text);
+                    currentItem = new WordItem(text);
                     line.set(i, currentItem);
                     modified = true;
                 }
@@ -212,16 +212,16 @@ public class Line {
             if (currentItem instanceof WordItem) {
                 WordItem w = (WordItem) currentItem;
                 if (w.lightNormalized.startsWith("'")) {
-                    TailItem                    newItem = new TailItem();
-                    newItem.text="'";
+                    TailItem newItem = new TailItem();
+                    newItem.text = "'";
                     w = (WordItem) ItemHelper.splitRight(w, 1);
                     line.set(i, w);
                     line.add(i, newItem);
                     modified = true;
                 }
                 if (w.lightNormalized.endsWith("'")) {
-                    TailItem                    newItem = new TailItem();
-                    newItem.text="'";
+                    TailItem newItem = new TailItem();
+                    newItem.text = "'";
                     w = (WordItem) ItemHelper.splitLeft(w, w.lightNormalized.length() - 1);
                     line.set(i, w);
                     line.add(i + 1, newItem);

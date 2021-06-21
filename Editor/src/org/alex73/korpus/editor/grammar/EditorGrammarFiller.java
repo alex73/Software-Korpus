@@ -83,12 +83,13 @@ public class EditorGrammarFiller {
      * Add grammar from specific paradigm if need.
      */
     public void fillFromParadigm(WordItem w, Paradigm p) {
+        String expected = w.normalized != null ? w.normalized : w.lightNormalized;
         p.getVariant().forEach(v -> {
             v.getForm().forEach(f -> {
                 if (f.getValue() == null || f.getValue().isEmpty()) {
                     return;
                 }
-                if (BelarusianWordNormalizer.equals(f.getValue(), w.lightNormalized)) {
+                if (BelarusianWordNormalizer.equals(f.getValue(), expected)) {
                     w.lemmas = addIfNeed(w.lemmas, p.getLemma());
                     w.tags = addIfNeed(w.tags, SetUtils.tag(p, v, f));
                 }

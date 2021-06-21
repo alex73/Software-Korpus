@@ -55,7 +55,8 @@ public class PtextToKorpus {
                 } else if (w instanceof WordItem) {
                     WordItem wi = (WordItem) w;
                     Word wo = new Word();
-                    wo.lightNormalized = wi.lightNormalized;
+                    wo.normalized = wi.normalized != null ? wi.normalized : wi.lightNormalized;
+                    wo.source = wi.normalized != null ? wi.lightNormalized : null;
                     wo.lemmas = wi.manualLemma != null ? wi.manualLemma : wi.lemmas;
                     wo.tags = wi.manualTag != null ? wi.manualTag : wi.tags;
                     wo.type = wi.type;
@@ -71,7 +72,8 @@ public class PtextToKorpus {
                         }
                     } else {
                         Word wo = new Word();
-                        wo.lightNormalized = "";
+                        wo.source = null;
+                        wo.normalized = "";
                         wo.tail = w.getText();
                         words.add(wo);
                     }

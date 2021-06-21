@@ -99,7 +99,7 @@ public class ClusterServiceImpl {
         String[] wordsAfter;
 
         public Result(Sentence w, int pos, int beforeCount, int afterCount) {
-            word = w.words[pos].lightNormalized;
+            word = w.words[pos].normalized;
             if (word == null) {
                 word = "";
             }
@@ -107,11 +107,11 @@ public class ClusterServiceImpl {
             wordsAfter = new String[afterCount];
 
             for (int i = pos - 1, count = 0; i >= 0 && count < beforeCount; i--) {
-                wordsBefore[beforeCount - count - 1] = w.words[i].lightNormalized;
+                wordsBefore[beforeCount - count - 1] = w.words[i].normalized;
                 count++;
             }
             for (int i = pos + 1, count = 0; i < w.words.length && count < afterCount; i++) {
-                wordsAfter[count] = w.words[i].lightNormalized;
+                wordsAfter[count] = w.words[i].normalized;
                 count++;
             }
         }

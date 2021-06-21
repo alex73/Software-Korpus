@@ -104,7 +104,7 @@ public class LuceneDriverWrite extends LuceneFields {
             lemmas.clear();
             for (Sentence se : p.sentences) {
                 for (Word w : se.words) {
-                    String wc = BelarusianWordNormalizer.superNormalized(w.lightNormalized);
+                    String wc = BelarusianWordNormalizer.superNormalized(w.normalized);
                     values.add(wc);
                     if (w.tags != null && !w.tags.isEmpty()) {
                         for (String t : w.tags.split(";")) {
