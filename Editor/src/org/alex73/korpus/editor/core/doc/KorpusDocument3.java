@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.UndoableEditEvent;
@@ -175,7 +176,7 @@ public class KorpusDocument3 extends AbstractDocument {
             }
 
             e.addEdit(getContent().insertString(offs, str));
-
+            normalize(newLines, offs - pOffset, str.length());
             MyLineElement[] newParagraphs = recreateParagraphs(newLines, pOffset, pIndex);
 
             e.addEdit(new MyUndo(rootElem, pIndex, oldParagraphs, newParagraphs));
@@ -222,7 +223,7 @@ public class KorpusDocument3 extends AbstractDocument {
             for (MyLineElement p : oldParagraphs) {
                 lines.add(p.extractItems());
             }
-            TextLine oldLine =Line.leftAt(lines.get(0), offs - pOffset);
+            TextLine oldLine = Line.leftAt(lines.get(0), offs - pOffset);
             lines.set(0, Line.rightAt(lines.get(0), offs - pOffset));
             int removeCount = len;
             for (int i = 0; i < lines.size() - 1; i++) {
@@ -233,7 +234,7 @@ public class KorpusDocument3 extends AbstractDocument {
             lines.add(oldLine);
 
             e.addEdit(getContent().remove(offs, len));
-
+            normalize(lines, offs - pOffset, 0);
             MyLineElement[] newParagraphs = recreateParagraphs(lines, pOffset, pIndexStart);
 
             e.addEdit(new MyUndo(rootElem, pIndexStart, oldParagraphs, newParagraphs));
@@ -246,13 +247,149 @@ public class KorpusDocument3 extends AbstractDocument {
         }
     }
 
+    public void markOneWord(int offs, int len) throws Exception {
+        if (len<0) {
+            throw new Exception("Няправільная пазнака");
+        }
+        writeLock();
+        try {
+            DefaultDocumentEvent e = new DefaultDocumentEvent(offs, len, DocumentEvent.EventType.CHANGE);
+
+            int pIndexStart = rootElem.getElementIndex(offs);
+            int pIndexEnd = rootElem.getElementIndex(offs + len);
+            if (pIndexStart!=pIndexEnd) {
+                throw new Exception("Пазначана некалькі радкоў - слова можна вызначыць толькі ў адным радку");
+            }
+
+            MyLineElement[] oldParagraph = new MyLineElement[1];
+            int pOffset = rootElem.getElement(pIndexStart).getStartOffset();
+            rootElem.removeChildren(pIndexStart, oldParagraph);
+
+            TextLine line = oldParagraph[0].extractItems();
+
+            TextLine oldLeftLine = Line.leftAt(line, offs - pOffset);
+            line = Line.rightAt(line, offs - pOffset);
+            TextLine oldRightLine = Line.rightAt(line, len);
+            line = Line.leftAt(line, len);
+            String word = line.stream().map(l -> l.getText()).collect(Collectors.joining());
+            line = new TextLine();
+            line.addAll(oldLeftLine);
+            line.add(new WordItem(word));
+            line.addAll(oldRightLine);
+
+            List<TextLine> lines = new ArrayList<>();
+            lines.add(line);
+
+            MyLineElement[] newParagraph = recreateParagraphs(lines, pOffset, pIndexStart);
+
+            e.addEdit(new MyUndo(rootElem, pIndexStart, oldParagraph, newParagraph));
+
+            e.end();
+            fireChangedUpdate(e);
+            fireUndoableEditUpdate(new UndoableEditEvent(this, e));
+        } finally {
+            writeUnlock();
+        }
+    }
+
+    public void markAuto(int offs, int len) throws Exception {
+        if (len<0) {
+            throw new Exception("Няправільная пазнака");
+        }
+        writeLock();
+        try {
+            DefaultDocumentEvent e = new DefaultDocumentEvent(offs, len, DocumentEvent.EventType.CHANGE);
+
+            int pIndexStart = rootElem.getElementIndex(offs);
+            int pIndexEnd = rootElem.getElementIndex(offs + len);
+
+            MyLineElement[] oldParagraphs = new MyLineElement[pIndexEnd - pIndexStart + 1];
+            int pOffset = rootElem.getElement(pIndexStart).getStartOffset();
+            rootElem.removeChildren(pIndexStart, oldParagraphs);
+
+            List<TextLine> lines = new ArrayList<>();
+            for (MyLineElement p : oldParagraphs) {
+                lines.add(p.extractItems());
+            }
+
+            normalize(lines, offs - pOffset, len);
+            MyLineElement[] newParagraphs = recreateParagraphs(lines, pOffset, pIndexStart);
+
+            e.addEdit(new MyUndo(rootElem, pIndexStart, oldParagraphs, newParagraphs));
+
+            e.end();
+            fireChangedUpdate(e);
+            fireUndoableEditUpdate(new UndoableEditEvent(this, e));
+        } finally {
+            writeUnlock();
+        }
+    }
+
+    void normalize(List<TextLine> newLines, int offset, int length) {
+        // check left border
+        if (Line.length(newLines.get(0)) < offset) {
+            throw new RuntimeException("Wrong lines");
+        }
+        int withoutLast = 0;
+        for (int i = 0; i < newLines.size() - 1; i++) {
+            withoutLast += Line.length(newLines.get(i));
+        }
+        // check right border
+        int posLast = offset + length - withoutLast;
+        if (posLast < 0) {
+            throw new RuntimeException("Wrong lines");
+        }
+        if (Line.length(newLines.get(newLines.size() - 1)) < posLast) {
+            throw new RuntimeException("Wrong lines");
+        }
+        if (newLines.size() > 1) {
+            // normalize first line
+            TextLine b = Line.leftAt(newLines.get(0), offset);
+            TextLine a = Line.rightAt(newLines.get(0), offset);
+            if (!b.isEmpty()) {
+                a.add(0, b.remove(b.size() - 1));
+            }
+            Line.normalize(a);
+            b.addAll(a);
+            newLines.set(0, b);
+            // normalize last line
+            b = Line.leftAt(newLines.get(newLines.size() - 1), posLast);
+            a = Line.rightAt(newLines.get(newLines.size() - 1), posLast);
+            if (!a.isEmpty()) {
+                b.add(a.remove(0));
+            }
+            Line.normalize(b);
+            b.addAll(a);
+            newLines.set(newLines.size() - 1, b);
+            // normalize middle lines
+            for (int i = 1; i < newLines.size() - 1; i++) {
+                Line.normalize(newLines.get(i));
+            }
+        } else {
+            // only one line
+            TextLine b = Line.leftAt(newLines.get(0), offset);
+            TextLine a = Line.rightAt(newLines.get(0), offset);
+            TextLine m = Line.leftAt(a, length);
+            a = Line.rightAt(a, length);
+            if (!b.isEmpty()) {
+                m.add(0, b.remove(b.size() - 1));
+            }
+            if (!a.isEmpty()) {
+                m.add(a.remove(0));
+            }
+            Line.normalize(m);
+            b.addAll(m);
+            b.addAll(a);
+            newLines.set(0, b);
+        }
+    }
+
     MyLineElement[] recreateParagraphs(List<TextLine> newLines, int pOffset, int pIndex) {
         int startOffset = 0;
 
         MyLineElement[] newParagraphs = new MyLineElement[newLines.size()];
         for (int i = 0; i < newParagraphs.length; i++) {
             TextLine newLine = newLines.get(i);
-            Line.normalize(newLine);
 
             MyLineElement p = newParagraphs[i] = new MyLineElement(rootElem);
 

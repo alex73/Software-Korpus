@@ -68,15 +68,15 @@ public class Line {
         }
     }
 
-    /*public int length() {
+    public static int length(TextLine line) {
         int len = 0;
-        for (int i = 0; i < size(); i++) {
-            len += get(i).getText().length();
+        for (int i = 0; i < line.size(); i++) {
+            len += line.get(i).getText().length();
         }
         return len;
     }
 
-    public void insertItemAt(int offset, ITextLineElement newItem) {
+    /*public void insertItemAt(int offset, ITextLineElement newItem) {
         int pos = 0;
         for (int i = 0; i <= size(); i++) {
             if (pos == offset) {

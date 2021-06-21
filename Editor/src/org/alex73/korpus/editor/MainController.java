@@ -61,7 +61,6 @@ import org.alex73.korpus.text.parser.PtextFileParser;
 import org.alex73.korpus.text.parser.PtextFileWriter;
 import org.alex73.korpus.text.parser.TextFileParser;
 import org.alex73.korpus.text.parser.TextFileWriter;
-import org.alex73.korpus.text.structure.corpus.Word;
 import org.alex73.korpus.text.structure.corpus.Word.OtherType;
 import org.alex73.korpus.text.structure.files.TextLine;
 import org.alex73.korpus.text.structure.files.WordItem;
@@ -120,6 +119,8 @@ public class MainController {
         UI.mainWindow.mSetDigits.addActionListener(new SetActionListener(OtherType.NUMBER));
         UI.mainWindow.mSetTrasianka.addActionListener(new SetActionListener(OtherType.TRASIANKA));
         UI.mainWindow.mSetDyjalekt.addActionListener(new SetActionListener(OtherType.DYJALEKT));
+        UI.mainWindow.mSetWordManual.addActionListener(new WordManualActionListener());
+        UI.mainWindow.mSetWordAuto.addActionListener(new WordAutoActionListener());
     }
 
     static void createFontChanger(JMenu menu, ButtonGroup bg, Container container) {
@@ -227,6 +228,33 @@ public class MainController {
         }
     };
 
+    static class WordManualActionListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int p0 = UI.editor.getSelectionStart();
+            int p1 = UI.editor.getSelectionEnd();
+            try {
+                UI.doc.markOneWord(p0, p1 - p0);
+            } catch (Exception ex) {
+                UI.showError(ex.getMessage());
+            }
+            UI.editor.repaint();
+        }
+    };
+    static class WordAutoActionListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int p0 = UI.editor.getSelectionStart();
+            int p1 = UI.editor.getSelectionEnd();
+            try {
+                UI.doc.markAuto(p0, p1 - p0);
+            } catch (Exception ex) {
+                UI.showError(ex.getMessage());
+            }
+            UI.editor.repaint();
+        }
+    };
+
     static class FontChanger implements ActionListener {
         private final Container c;
         private final int size;
@@ -305,7 +333,7 @@ public class MainController {
                         }
                     });
                     headers = parser.headers;
-                    lines =parser.lines;
+                    lines = parser.lines;
                 }
             } else if (f.getName().endsWith(".text")) {
                 try (BufferedInputStream in = new BufferedInputStream(Files.newInputStream(f.toPath()))) {

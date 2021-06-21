@@ -59,6 +59,9 @@ public class MainWindow extends javax.swing.JFrame {
         mSetDigits = new javax.swing.JMenuItem();
         mSetTrasianka = new javax.swing.JMenuItem();
         mSetDyjalekt = new javax.swing.JMenuItem();
+        jSeparator4 = new javax.swing.JPopupMenu.Separator();
+        mSetWordManual = new javax.swing.JMenuItem();
+        mSetWordAuto = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         mUnk1 = new javax.swing.JRadioButtonMenuItem();
         mUnk2 = new javax.swing.JRadioButtonMenuItem();
@@ -79,7 +82,7 @@ public class MainWindow extends javax.swing.JFrame {
 
         jMenu1.setText("Тэксты");
 
-        mFileOpen.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
+        mFileOpen.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         mFileOpen.setText("Адчыніць...");
         mFileOpen.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -88,7 +91,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
         jMenu1.add(mFileOpen);
 
-        mFileSave.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
+        mFileSave.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         mFileSave.setText("Захаваць");
         mFileSave.setEnabled(false);
         jMenu1.add(mFileSave);
@@ -101,11 +104,11 @@ public class MainWindow extends javax.swing.JFrame {
 
         menuEdit.setText("Рэдагаваньне");
 
-        mUndo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Z, java.awt.event.InputEvent.CTRL_MASK));
+        mUndo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Z, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         mUndo.setText("Адрабіць");
         menuEdit.add(mUndo);
 
-        mRedo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Y, java.awt.event.InputEvent.CTRL_MASK));
+        mRedo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Y, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         mRedo.setText("Узнавіць");
         menuEdit.add(mRedo);
         menuEdit.add(jSeparator3);
@@ -124,6 +127,13 @@ public class MainWindow extends javax.swing.JFrame {
 
         mSetDyjalekt.setText("Дыялектнае");
         menuEdit.add(mSetDyjalekt);
+        menuEdit.add(jSeparator4);
+
+        mSetWordManual.setText("Пазначанае - слова");
+        menuEdit.add(mSetWordManual);
+
+        mSetWordAuto.setText("Пазначанае - аўтаматычна");
+        menuEdit.add(mSetWordAuto);
 
         jMenuBar1.add(menuEdit);
 
@@ -242,6 +252,7 @@ public class MainWindow extends javax.swing.JFrame {
     public javax.swing.JPopupMenu.Separator jSeparator1;
     public javax.swing.JPopupMenu.Separator jSeparator2;
     public javax.swing.JPopupMenu.Separator jSeparator3;
+    public javax.swing.JPopupMenu.Separator jSeparator4;
     public javax.swing.JMenuItem mFileClose;
     public javax.swing.JMenuItem mFileOpen;
     public javax.swing.JMenuItem mFileSave;
@@ -255,6 +266,8 @@ public class MainWindow extends javax.swing.JFrame {
     public javax.swing.JMenuItem mSetOtherLanguage;
     public javax.swing.JMenuItem mSetText;
     public javax.swing.JMenuItem mSetTrasianka;
+    public javax.swing.JMenuItem mSetWordAuto;
+    public javax.swing.JMenuItem mSetWordManual;
     public javax.swing.JMenuItem mUndo;
     public javax.swing.JRadioButtonMenuItem mUnk1;
     public javax.swing.JRadioButtonMenuItem mUnk2;

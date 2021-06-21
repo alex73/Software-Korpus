@@ -95,6 +95,18 @@
                 <Property name="text" type="java.lang.String" value="&#x414;&#x44b;&#x44f;&#x43b;&#x435;&#x43a;&#x442;&#x43d;&#x430;&#x435;"/>
               </Properties>
             </MenuItem>
+            <MenuItem class="javax.swing.JPopupMenu$Separator" name="jSeparator4">
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="mSetWordManual">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="&#x41f;&#x430;&#x437;&#x43d;&#x430;&#x447;&#x430;&#x43d;&#x430;&#x435; - &#x441;&#x43b;&#x43e;&#x432;&#x430;"/>
+              </Properties>
+            </MenuItem>
+            <MenuItem class="javax.swing.JMenuItem" name="mSetWordAuto">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="&#x41f;&#x430;&#x437;&#x43d;&#x430;&#x447;&#x430;&#x43d;&#x430;&#x435; - &#x430;&#x45e;&#x442;&#x430;&#x43c;&#x430;&#x442;&#x44b;&#x447;&#x43d;&#x430;"/>
+              </Properties>
+            </MenuItem>
           </SubComponents>
         </Menu>
         <Menu class="javax.swing.JMenu" name="jMenu2">
