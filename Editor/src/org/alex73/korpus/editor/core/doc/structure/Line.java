@@ -198,6 +198,10 @@ public class Line {
                 WordItem wi=  new WordItem(currentItem.getText() + nextItem.getText());
                 newItem =wi;
             }
+            if (currentItem instanceof TailItem && nextItem instanceof TailItem) {
+                TailItem wi=  new TailItem(currentItem.getText() + nextItem.getText());
+                newItem =wi;
+            }
             if (newItem != null) {
                 line.remove(i);
                 line.remove(i);

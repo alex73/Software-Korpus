@@ -110,6 +110,21 @@ public class BelarusianWordNormalizer {
         return str.toString();
     }
 
+    /**
+     * Нармалізацыя, але дапускае зорачкі - для пошуку некалькіх.
+     */
+    public static String lightNormalizedWithStars(CharSequence word) {
+        StringBuilder str = new StringBuilder();
+        for (int i = 0; i < word.length(); i++) {
+            char c = word.charAt(i);
+            c = c < LITENORMALIZE.length ? LITENORMALIZE[c] : 0;
+            if (c > 0) {
+                str.append(c);
+            }
+        }
+        return str.toString();
+    }
+
     public static String superNormalized(String word) {
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < word.length(); i++) {

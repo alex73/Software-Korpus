@@ -3,7 +3,9 @@ package org.alex73.korpus.editor.grammar;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -19,15 +21,15 @@ import org.alex73.korpus.utils.SetUtils;
 import org.alex73.korpus.utils.StressUtils;
 
 public class GrammarConstructor {
+    public static final int MAX_RESULTS = 20;
+
     public final EditorGrammar ed;
     public List<List<PVW>> scores = new ArrayList<>();
 
     public interface Comparer {
         /**
-         * @param target
-         *            - normalized word
-         * @param comparable
-         *            - normalized word
+         * @param target     - normalized word
+         * @param comparable - normalized word
          */
         int getScore(String target, String comparable);
     }
@@ -63,19 +65,21 @@ public class GrammarConstructor {
         }
     };
 
-    public Paradigm getLooksLike(String word, String looksLike, boolean preserveCase, boolean checkForms, String tagMask, StringBuilder out,
+    public List<PVW> getLooksLike(String word, String filter, boolean preserveCase, String tagMask,
             Integer skipParadigmId) {
         long be = System.currentTimeMillis();
         final Comparer comparer;
         String target;
-        String wordNormalized = BelarusianWordNormalizer.lightNormalized(word);
-        if (looksLike.isEmpty()) {
-            target = wordNormalized;
-            comparer = eqEnds;
+        boolean checkForms = true;
+        Pattern reFilter;
+        target = BelarusianWordNormalizer.lightNormalized(word);
+        String strFilter = BelarusianWordNormalizer.lightNormalizedWithStars(filter);
+        if (!strFilter.isEmpty() && strFilter.contains("*")) {
+            reFilter = Pattern.compile(strFilter.replace("+", "\\+").replace("*", ".*"));
         } else {
-            target = BelarusianWordNormalizer.lightNormalized(looksLike);
-            comparer = eqEqual;
+            reFilter = null;
         }
+        comparer = eqEnds;
         ed.getAllParadigms().parallelStream().forEach(p -> {
             if (skipParadigmId != null && skipParadigmId.intValue() == p.getPdgId()) {
                 return;
@@ -84,8 +88,17 @@ public class GrammarConstructor {
                 if (!isTagLooksLikeMask(SetUtils.tag(p, v), tagMask)) {
                     return;
                 }
+                if (reFilter != null) {
+                    if (!reFilter.matcher(v.getLemma()).matches()) {
+                        continue;
+                    }
+                } else if (!strFilter.isEmpty()) {
+                    if (!strFilter.equals(v.getLemma())) {
+                        continue;
+                    }
+                }
                 if (v.getForm().isEmpty()) {
-                    continue;
+                    continue; // неразгорнутыя
                 }
                 if (checkForms) {
                     for (Form f : v.getForm()) {
@@ -100,9 +113,9 @@ public class GrammarConstructor {
         });
 
         if (scores.isEmpty()) {
-            return null;
+            return Collections.emptyList();
         }
-        List<String> dump=new ArrayList<>();
+        List<String> dump = new ArrayList<>();
         for (int i = 0, idx = scores.size() - 1; idx > 0 && i <= 4; idx--, i++) {
             if (!scores.get(idx).isEmpty()) {
                 dump.add("=== " + target + " found with score=" + (idx + 1) + " ===");
@@ -112,11 +125,21 @@ public class GrammarConstructor {
             }
         }
         // get best
-        PVW best = scores.get(scores.size() - 1).get(0);
-        out.append(String.format("%d%s/%s/%s (супадзенне па %d літарах)", best.p.getPdgId(), best.v.getId(), best.p.getTag(), best.p.getLemma(), scores.size()));
-        Paradigm result = constructParadigm(wordNormalized, best.p, best.v, best.w);
+        // PVW best = scores.get(scores.size() - 1).get(0);
+//        out.append(String.format("%d%s/%s/%s (супадзенне па %d літарах)", best.p.getPdgId(), best.v.getId(), best.p.getTag(), best.p.getLemma(), scores.size()));
         long af = System.currentTimeMillis();
         System.out.println("Looks like exec time: " + (af - be) + "ms");
+
+        // Paradigm result = constructParadigm(wordNormalized, best.p, best.v, best.w);
+        List<PVW> result = new ArrayList<>();
+        for (int p = scores.size() - 1; p >= 0; p--) {
+            if (result.size() > 20) {
+                break;
+            }
+            List<PVW> result1 = scores.get(p);
+            Collections.sort(result1, (a, b) -> Integer.compare(a.p.getPdgId(), b.p.getPdgId()));
+            result.addAll(result1);
+        }
         return result;
     }
 
@@ -132,8 +155,14 @@ public class GrammarConstructor {
             while (scores.size() < score) {
                 scores.add(new ArrayList<>());
             }
-            if (scores.get(score - 1).size() < 10) {
-                scores.get(score - 1).add(d);
+            List<PVW> scored = scores.get(score - 1);
+            if (scored.size() < MAX_RESULTS) {
+                for (PVW ex : scored) {
+                    if (ex.equalsPV(d)) {
+                        return;
+                    }
+                }
+                scored.add(d);
             }
         }
     }
@@ -195,12 +224,10 @@ public class GrammarConstructor {
      * 
      * 3. otherwise, the same syll from word end if paradigm has stress
      * 
-     * @param word
-     *            - normalized word
-     * @param ratedForm
-     *            - normalized word (from grammar db)
+     * @param word      - normalized word
+     * @param ratedForm - normalized word (from grammar db)
      */
-    Paradigm constructParadigm(String word, Paradigm p, Variant v, String ratedForm) {
+    public Paradigm constructParadigm(String word, Paradigm p, Variant v, String ratedForm) {
         int eq = eqEnds.getScore(word, ratedForm);
 
         Paradigm result = new Paradigm();
@@ -255,9 +282,13 @@ public class GrammarConstructor {
         return result;
     }
 
-    static class PVW {
-        Paradigm p;
-        Variant v;
-        String w;
+    public static class PVW {
+        public Paradigm p;
+        public Variant v;
+        public String w;
+
+        public boolean equalsPV(PVW oth) {
+            return p == oth.p && v == oth.v;
+        }
     }
 }

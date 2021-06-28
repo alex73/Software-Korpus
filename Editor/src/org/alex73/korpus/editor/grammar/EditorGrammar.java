@@ -1,9 +1,13 @@
 package org.alex73.korpus.editor.grammar;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +16,9 @@ import javax.xml.bind.Marshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
+import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
+import org.alex73.corpus.paradigm.Variant;
 import org.alex73.corpus.paradigm.Wordlist;
 import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.base.StaticGrammarFiller2;
@@ -42,14 +48,14 @@ public class EditorGrammar {
         this.localGrammarFile = localGrammarFile;
 
         File f = new File(localGrammarFile);
-        if (f.exists()) {
+/*        if (f.exists()) {
             try (InputStream in = new BufferedInputStream(new FileInputStream(localGrammarFile), 65536)) {
                 Wordlist words = (Wordlist) CONTEXT.createUnmarshaller().unmarshal(in);
                 for (Paradigm p : words.getParadigm()) {
                     addDocLevelParadigm(p);
                 }
             }
-        }
+        }*/
     }
 
     public List<Paradigm> getAllParadigms() {
@@ -60,27 +66,61 @@ public class EditorGrammar {
         return r;
     }
 
-    public  void addDocLevelParadigm(Paradigm p) {
+    public void addDocLevelParadigm(Paradigm p) {
         synchronized (docLevelParadigms) {
             docLevelParadigms.add(p);
         }
     }
 
+    public void addParadigm(Paradigm p) throws Exception {
+        try (BufferedWriter wr = Files.newBufferedWriter(Paths.get(localGrammarFile), StandardOpenOption.APPEND, StandardOpenOption.CREATE)) {
+            wr.write("=====");
+            wr.write("\n");
+            Marshaller m = CONTEXT.createMarshaller();
+            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            m.setProperty(Marshaller.JAXB_FRAGMENT, true);
+            m.marshal(p, wr);
+        }
+    }
+
+    public void addVariant(Variant v, int pdgId) throws Exception {
+        try (BufferedWriter wr = Files.newBufferedWriter(Paths.get(localGrammarFile), StandardOpenOption.APPEND, StandardOpenOption.CREATE)) {
+            wr.write("===== " + pdgId);
+            wr.write("\n");
+            Marshaller m = CONTEXT.createMarshaller();
+            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            m.setProperty(Marshaller.JAXB_FRAGMENT, true);
+            m.marshal(v, wr);
+        }
+    }
+
+    public void addForms(List<Form> forms, int pdgId, String variantId) throws Exception {
+        try (BufferedWriter wr = Files.newBufferedWriter(Paths.get(localGrammarFile), StandardOpenOption.APPEND, StandardOpenOption.CREATE)) {
+            wr.write("===== " + pdgId + variantId);
+            wr.write("\n");
+            Marshaller m = CONTEXT.createMarshaller();
+            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            m.setProperty(Marshaller.JAXB_FRAGMENT, true);
+            for (Form f : forms) {
+                m.marshal(f, wr);
+            }
+        }
+    }
+
     /*
-     * public void fillWordInfoParadigms(W w, String word, Paradigm[] paradigms)
-     * { Set<String> lemmas = new TreeSet<>(); Set<String> cats = new
-     * TreeSet<>(); if (paradigms != null) { for (Paradigm p : paradigms) {
+     * public void fillWordInfoParadigms(W w, String word, Paradigm[] paradigms) {
+     * Set<String> lemmas = new TreeSet<>(); Set<String> cats = new TreeSet<>(); if
+     * (paradigms != null) { for (Paradigm p : paradigms) {
      * lemmas.add(p.getLemma()); boolean foundForm = false; for(Variant
      * v:p.getVariant()) { for (Form f : v.getForm()) { if
-     * (word.equals(f.getValue())) { cats.add(p.getTag() + f.getTag());
-     * foundForm = true; } }} if (!foundForm) { // the same find, but without
-     * stress and lowercase String uw =
-     * BelarusianWordNormalizer.normalize(word); for(Variant v:p.getVariant()) {
-     * for (Form f : v.getForm()) { if
+     * (word.equals(f.getValue())) { cats.add(p.getTag() + f.getTag()); foundForm =
+     * true; } }} if (!foundForm) { // the same find, but without stress and
+     * lowercase String uw = BelarusianWordNormalizer.normalize(word); for(Variant
+     * v:p.getVariant()) { for (Form f : v.getForm()) { if
      * (uw.equals(BelarusianWordNormalizer.normalize(f.getValue()))) {
      * cats.add(p.getTag() + f.getTag()); } }} } } }
-     * w.setLemma(SetUtils.set2string(lemmas));
-     * w.setCat(SetUtils.set2string(cats)); }
+     * w.setLemma(SetUtils.set2string(lemmas)); w.setCat(SetUtils.set2string(cats));
+     * }
      */
 
     /**

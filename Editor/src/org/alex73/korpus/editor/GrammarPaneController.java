@@ -284,8 +284,8 @@ public class GrammarPaneController {
             if (likeLemma) {
                 checkForms = false;
             }
-            Paradigm p = grConstr.getLooksLike(word, looksLike, preserveCase, checkForms, grammar, like, intoParadigmId);
-            if (intoParadigmId != null) {
+           Paradigm p = null;//grConstr.getLooksLike(word, looksLike, preserveCase, checkForms, grammar, like, intoParadigmId);
+            //if (intoParadigmId != null) {
                 /*Paradigm pInto = grConstr.ed.filler.gr.getAllParadigms().stream()
                         .filter(pa -> pa.getPdgId() == intoParadigmId.intValue()).findFirst().get();
 
@@ -293,8 +293,8 @@ public class GrammarPaneController {
                 pInto.getVariant().get(0).getForm().clear();
                 pInto.getVariant().get(0).getForm().addAll(p.getVariant().get(0).getForm());
                 p = pInto;*/
-                throw new RuntimeException();
-            }
+                //throw new RuntimeException();
+            //}
             if (p != null) {
                 p.setTheme(theme);
                 try {

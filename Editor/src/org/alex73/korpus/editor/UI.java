@@ -31,9 +31,11 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Locale;
 
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.undo.UndoManager;
@@ -41,6 +43,7 @@ import javax.swing.undo.UndoManager;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3;
 import org.alex73.korpus.editor.ui.ErrorDialog;
 import org.alex73.korpus.editor.ui.GrammarPane;
+import org.alex73.korpus.editor.ui.GrammarPane2;
 import org.alex73.korpus.editor.ui.MainWindow;
 import org.alex73.korpus.editor.ui.ProgressPane;
 import org.alex73.korpus.editor.ui.WordInfoPane;
@@ -61,6 +64,7 @@ public class UI {
     static ProgressPane mainProgress;
     public static WordInfoPane wordInfoPane;
     public static GrammarPane grammarPane;
+    public static DockablePane dockWordInfo;
 
     public static void init() throws Exception {
         mainWindow = new MainWindow();
@@ -93,8 +97,10 @@ public class UI {
         });
         mainWindow.getContentPane().add(desktop, BorderLayout.CENTER);
 
+        DockableScrollPane pane;
+        DockablePane pane2;
         editor = new JEditorPane();
-        DockableScrollPane pane = new DockableScrollPane("EDITOR", "Тэкст", editor, false);
+        pane = new DockableScrollPane("EDITOR", "Тэкст", editor, false);
         pane.setComponentOrientation(ComponentOrientation.getOrientation(Locale.getDefault()));
         pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         pane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -104,17 +110,15 @@ public class UI {
 
         wordInfoPane = new WordInfoPane();
         wordInfoPane.setMinimumSize(new Dimension(100, 100));
-        pane = new DockableScrollPane("WORD_INFO", "Зьвесткі пра слова", wordInfoPane, true);
-        pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        desktop.addDockable(pane);
+        dockWordInfo = new DockablePane("WORD_INFO", "Зьвесткі пра слова", wordInfoPane, true);
+        desktop.addDockable(dockWordInfo);
         WordInfoPaneController.init();
 
-        grammarPane = new GrammarPane();
-        grammarPane.setMinimumSize(new Dimension(100, 100));
-        pane = new DockableScrollPane("GRAMMAR_DB", "Граматычная база", grammarPane, true);
-        pane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        desktop.addDockable(pane);
-        GrammarPaneController.init();
+        GrammarPaneController2.ui = new GrammarPane2();
+        GrammarPaneController2.ui.setMinimumSize(new Dimension(100, 100));
+        pane2 = new DockablePane("GRAMMAR_DB", "Граматычная база", GrammarPaneController2.ui, true);
+        desktop.addDockable(pane2);
+        GrammarPaneController2.init();
 
         MainController.init();
 
@@ -172,8 +176,34 @@ public class UI {
         }
 
         /** Creates a new instance of DockableScrollBox */
-        public DockableScrollPane(String key, String name, Component view, boolean detouchable) {
+        public DockableScrollPane(String key, String name, JComponent view, boolean detouchable) {
             super(view);
+            dockKey = new DockKey(key, name, null, null, DockingConstants.HIDE_BOTTOM);
+            dockKey.setFloatEnabled(detouchable);
+        }
+
+        public DockKey getDockKey() {
+            return dockKey;
+        }
+
+        public Component getComponent() {
+            return this;
+        }
+    }
+    
+    @SuppressWarnings("serial")
+    public static class DockablePane extends JPanel implements Dockable {
+        DockKey dockKey;
+
+        /** Updates the name of the docking pane. */
+        public void setName(String name) {
+            dockKey.setName(name);
+        }
+
+        /** Creates a new instance of DockableScrollBox */
+        public DockablePane(String key, String name, Component view, boolean detouchable) {
+            setLayout(new BorderLayout());
+            add(view, BorderLayout.CENTER);
             dockKey = new DockKey(key, name, null, null, DockingConstants.HIDE_BOTTOM);
             dockKey.setFloatEnabled(detouchable);
         }

@@ -57,11 +57,11 @@ public class WordInfoPaneController {
         p.pGrammar.removeAll();
         paradigmsOnLemmas.clear();
         if (word == null) {
-            p.txtWord.setText("");
+            UI.dockWordInfo.getDockKey().setName("");
             p.txtNormal.setText("");
             currentWord = null;
         } else {
-            p.txtWord.setText(word.lightNormalized);
+            UI.dockWordInfo.getDockKey().setName("Звесткі пра слова: "+word.lightNormalized);
             p.txtNormal.setText(word.normalized != null ? word.normalized : "");
             currentWord = new WordItem();
             currentWord.lightNormalized = word.lightNormalized;
@@ -71,7 +71,10 @@ public class WordInfoPaneController {
             currentWord.type = word.type;
             showLemmasAndTags();
             p.txtNormal.getDocument().addDocumentListener(docListener);
+
+            GrammarPaneController2.show(word.normalized != null ? word.normalized : word.lightNormalized);
         }
+        changed = false;
         setButtonsEnabled();
         p.revalidate();
         p.repaint();
@@ -114,6 +117,8 @@ public class WordInfoPaneController {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1;
         if (currentWord.tags != null) {
             ButtonGroup rbGroupGrammar = new ButtonGroup();
             for (String c : currentWord.tags.split(";")) {
@@ -132,6 +137,7 @@ public class WordInfoPaneController {
                     outText = c + ":няправільны код";
                 }
                 JRadioButton rb = new JRadioButton("<html>" + outText + "</html>");
+                rb.setToolTipText(rb.getText());
                 rb.setName(c);
                 rb.setFont(p.pGrammar.getFont());
                 if (c.equals(currentWord.manualTag)) {
@@ -150,8 +156,13 @@ public class WordInfoPaneController {
 
     static void setButtonsEnabled() {
         WordInfoPane p = UI.wordInfoPane;
-        p.btnSave.setEnabled(changed);
-        p.btnReset.setEnabled(currentWord.manualLemma != null || currentWord.manualTag != null);
+        if (currentWord!=null) {
+            p.btnSave.setEnabled(changed);
+            p.btnReset.setEnabled(currentWord.manualLemma != null || currentWord.manualTag != null);
+        } else {
+            p.btnSave.setEnabled(false);
+            p.btnReset.setEnabled(false);
+        }
     }
 
     static ActionListener lemmaClick = new ActionListener() {
@@ -177,7 +188,6 @@ public class WordInfoPaneController {
     static ActionListener btnSave = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             MainController.setWordInfo(currentWord.manualLemma, currentWord.manualTag, UI.wordInfoPane.txtNormal.getText());
-            changed = false;
         }
     };
     static ActionListener btnReset = new ActionListener() {

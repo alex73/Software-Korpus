@@ -268,7 +268,7 @@ public class MainController {
             Font font = UI.mainWindow.getFont();
             font = new Font(font.getFamily(), font.getStyle(), size);
             setFont(c, font);
-            GrammarPaneController.applyFont();
+            GrammarPaneController2.applyFont();
         }
     };
 
@@ -318,7 +318,7 @@ public class MainController {
         try {
             baseFileName = f.getPath().replaceAll("\\.[a-z]+$", "");
 
-            gr = new EditorGrammar(db, staticFiller, baseFileName + "-grammar.xml");
+            gr = new EditorGrammar(db, staticFiller, baseFileName + "-grammar.txt");
             List<TextLine> lines;
             if (f.getName().endsWith(".ptext")) {
                 try (BufferedInputStream in = new BufferedInputStream(Files.newInputStream(f.toPath()))) {
@@ -419,7 +419,8 @@ public class MainController {
             } catch (Exception ex) {
             }
             WordInfoPaneController.show(wi);
-            GrammarPaneController.show(wi, pdgId);
+        } else {
+            WordInfoPaneController.show(null);
         }
     }
 
@@ -437,8 +438,8 @@ public class MainController {
             wi.manualTag = manualTag;
             normalized = normalized.trim();
             wi.normalized = normalized.isEmpty() ? null : normalized;
-            GrammarPaneController.show(wi, null);
             MainController.gr.filler.fillNonManual(wi);
+            WordInfoPaneController.show(wi);
         }
         UI.editor.repaint();
     }

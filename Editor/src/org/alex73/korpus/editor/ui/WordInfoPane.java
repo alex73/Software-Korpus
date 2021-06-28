@@ -41,55 +41,35 @@ public class WordInfoPane extends javax.swing.JPanel {
     private void initComponents() {
         java.awt.GridBagConstraints gridBagConstraints;
 
-        jLabel1 = new javax.swing.JLabel();
-        txtWord = new javax.swing.JTextField();
-        btnSave = new javax.swing.JButton();
+        jPanel1 = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         txtNormal = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
-        btnReset = new javax.swing.JButton();
         pLemma = new javax.swing.JPanel();
+        jScrollPane1 = new javax.swing.JScrollPane();
         pGrammar = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
+        btnSave = new javax.swing.JButton();
+        btnReset = new javax.swing.JButton();
 
         setFocusable(false);
-        setLayout(new java.awt.GridBagLayout());
+        setLayout(new java.awt.BorderLayout());
 
-        jLabel1.setText("Слова:");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jLabel1, gridBagConstraints);
+        jPanel1.setLayout(new java.awt.GridBagLayout());
 
-        txtWord.setEditable(false);
-        txtWord.setColumns(10);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(txtWord, gridBagConstraints);
-
-        btnSave.setText("Захаваць");
-        btnSave.setEnabled(false);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(btnSave, gridBagConstraints);
-
-        jLabel3.setText("Шукаць як:");
+        jLabel3.setText("Форма ў базе:");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 1;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jLabel3, gridBagConstraints);
+        jPanel1.add(jLabel3, gridBagConstraints);
 
+        txtNormal.setColumns(15);
         txtNormal.setToolTipText("Толькі для выпадку нестандартнага напісання, накшталт \"мн-о-о-о-га\"");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridy = 1;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(txtNormal, gridBagConstraints);
+        jPanel1.add(txtNormal, gridBagConstraints);
 
         jLabel2.setText("Лема:");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -97,47 +77,52 @@ public class WordInfoPane extends javax.swing.JPanel {
         gridBagConstraints.gridy = 2;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(jLabel2, gridBagConstraints);
-
-        btnReset.setText("Пераабраць");
-        btnReset.setEnabled(false);
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 2;
-        gridBagConstraints.gridy = 2;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(btnReset, gridBagConstraints);
+        jPanel1.add(jLabel2, gridBagConstraints);
 
         pLemma.setFocusable(false);
         pLemma.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEADING, 0, 0));
         gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 3;
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 2;
         gridBagConstraints.gridwidth = 3;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(pLemma, gridBagConstraints);
+        jPanel1.add(pLemma, gridBagConstraints);
 
+        add(jPanel1, java.awt.BorderLayout.PAGE_START);
+
+        jScrollPane1.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+        pGrammar.setMinimumSize(new java.awt.Dimension(100, 100));
         pGrammar.setLayout(new java.awt.GridBagLayout());
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.gridy = 4;
-        gridBagConstraints.gridwidth = 3;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.weighty = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        add(pGrammar, gridBagConstraints);
+        jScrollPane1.setViewportView(pGrammar);
+
+        add(jScrollPane1, java.awt.BorderLayout.CENTER);
+
+        jPanel2.setBorder(javax.swing.BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        jPanel2.setLayout(new java.awt.BorderLayout());
+
+        btnSave.setText("Захаваць");
+        btnSave.setEnabled(false);
+        jPanel2.add(btnSave, java.awt.BorderLayout.EAST);
+
+        btnReset.setText("Пераабраць");
+        btnReset.setEnabled(false);
+        jPanel2.add(btnReset, java.awt.BorderLayout.WEST);
+
+        add(jPanel2, java.awt.BorderLayout.PAGE_END);
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JButton btnReset;
     public javax.swing.JButton btnSave;
-    public javax.swing.JLabel jLabel1;
     public javax.swing.JLabel jLabel2;
     public javax.swing.JLabel jLabel3;
+    public javax.swing.JPanel jPanel1;
+    public javax.swing.JPanel jPanel2;
+    public javax.swing.JScrollPane jScrollPane1;
     public javax.swing.JPanel pGrammar;
     public javax.swing.JPanel pLemma;
     public javax.swing.JTextField txtNormal;
-    public javax.swing.JTextField txtWord;
     // End of variables declaration//GEN-END:variables
 }
