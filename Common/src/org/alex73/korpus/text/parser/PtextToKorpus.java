@@ -79,6 +79,9 @@ public class PtextToKorpus {
                     }
                 }
             }
+            if (mode == BLOCK_MODE.ONE_LINE) {
+                flushParagraph();
+            }
         }
         flushParagraph();
     }
@@ -89,7 +92,7 @@ public class PtextToKorpus {
         List<Paragraph> r = new PtextToKorpus(lines).paragraphs;
         switch (r.size()) {
         case 0:
-            return new Paragraph();
+            return null;
         case 1:
             return r.get(0);
         default:

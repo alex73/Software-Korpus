@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+	<JarScanner>
+		<JarScanFilter tldSkip="*" tldScan="" pluggabilitySkip="*" pluggabilityScan="" />
+	</JarScanner>
+
+	<Parameter name="SOURCE_DIR" value="/dataRO/Palicka/" override="false" />
+	<Parameter name="CACHE_DIR" value="/data/preview/cache/" override="false" />
+	<Parameter name="UPLOAD_DIR" value="/data/preview/Palicka-upload/" override="false" />
+	<Parameter name="DOWNLOAD_ALLOW_ORIGIN" value="http://knihi.com" override="false" />
+	<Parameter name="PREVIEW_ALLOW_ORIGIN" value="http://knihi.com" override="false" />
+</Context>

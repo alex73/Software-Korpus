@@ -10,7 +10,7 @@
       <div class="modal-body" onClick="new PopoverWord(event);">
         {{for detailsText.sentences}}
           <span>
-            {{for words}}<span wlemma="{{>lemmas}}" wcat="{{>tags}}" {{if requestedWord}}class="wordFound"{{/if}}>{{>getOutput()}}</span>{{wordtail:tail}}{{/for}}
+            {{for words}}<span wlemma="{{>lemmas}}" wcat="{{>tags}}" {{if requestedWord}}class="wordFound"{{/if}}>{{>normalized}}</span>{{wordtail:tail}}{{/for}}
           </span>
         {{/for}}
       </div>

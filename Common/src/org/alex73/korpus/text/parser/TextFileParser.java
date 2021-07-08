@@ -48,7 +48,7 @@ public class TextFileParser {
                     TextLine p;
                     int pos = s.indexOf(':');
                     String after = s.substring(pos + 1).trim();
-                    if (after.equals("begin") || after.equals("end")) {
+                    if (after.equals("begin") || after.equals("end") || s.startsWith("##Page:")) {
                         p = new TextLine();
                         p.add(new LongTagItem(s));
                     } else {

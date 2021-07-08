@@ -1,5 +1,6 @@
 package org.alex73.korpus.compiler.parsers;
 
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -60,7 +61,9 @@ public class WikiParser extends BaseParser {
             throw new Exception("Unknown filename: " + file);
         }
 
-        try (InputStream in = new BZip2CompressorInputStream(new FileInputStream(file.toFile()))) {
+        try (InputStream in = file.getFileName().endsWith(".bz2")
+                ? new BZip2CompressorInputStream(new FileInputStream(file.toFile()))
+                : new BufferedInputStream(new FileInputStream(file.toFile()))) {
             FACTORY.newSAXParser().parse(in, new DefaultHandler() {
                 String pageTitle;
                 StringBuilder str = new StringBuilder();
@@ -122,7 +125,10 @@ public class WikiParser extends BaseParser {
                         if (s.isEmpty()) {
                             if (ptext.length() > 0) {
                                 if (!ptext.toString().replace('\n', ' ').trim().isEmpty()) {
-                                    content.add(PtextToKorpus.oneLine(splitter.parse(ptext)));
+                                    Paragraph par = PtextToKorpus.oneLine(splitter.parse(ptext));
+                                    if (par != null) {
+                                        content.add(par);
+                                    }
                                 }
                                 ptext.setLength(0);
                             }

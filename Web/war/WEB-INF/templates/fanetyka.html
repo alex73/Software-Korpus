@@ -43,6 +43,14 @@
 </form>
 <div id="out">
 </div>
+<br/>
+<br/>
+Тут можна праслухаць IPA:
+<textarea id="text2" class="form-control" rows="3" style="font-size: 150%"></textarea>
+
+<button id="play" class="btn btn-danger btn-lg">Граць</button><br/><br/>
+<audio controls/>
+
 </div>
 <script>
 	var forvoword = '';
@@ -50,6 +58,26 @@
 		var win = window.open("https://forvo.com/word/"+forvoword+"/#be", '_blank');
 		win.focus();
 	}
+	$("#play").click(function() {
+		fetch('fanplay', {
+		      method: 'POST',
+		      headers: {
+		        'Content-Type': 'text/plain; charset=UTF-8'
+		      },
+		      body: $('#text2').val()
+		    })
+		      .then(r => {
+		        if (!r.ok) {
+		        	alert("Памылка: " + r.status + " " + r.statusText);
+		        } else {
+		          r.text().then(data => {
+		            $("audio").attr('src', 'data:audio/wav;base64,'+data);
+		            $("audio")[0].play();
+		          });
+		        }
+		      })
+		      .catch(err => alert("Памылка: " + err));
+	});
 	function req() {
 		let arg = $('#text').val();
 		if (!arg.includes(' ')) {

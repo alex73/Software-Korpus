@@ -13,7 +13,7 @@ public class ParserFactory {
         parsers.add(new Pair("teksty:.+\\.list", TextParser.class));
         parsers.add(new Pair("teksty:.+\\.text", TextParser.class));
         parsers.add(new Pair("teksty:.+\\.(jpg|gif|png)", NullParser.class));
-        parsers.add(new Pair("wiki:.+\\.xml\\.bz2", WikiParser.class));
+        parsers.add(new Pair("wiki:.+\\.xml(\\.bz2)?", WikiParser.class));
         parsers.add(new Pair("sajty:.+\\.zip\\.headers", NullParser.class));
         parsers.add(new Pair("sajty:.+\\.zip", TextArchiveParser.class));
     }
