@@ -96,9 +96,6 @@ public class PtextFileWriter {
             if (c >= MIN_CONTROL_CHAR && c <= MAX_CONTROL_CHAR) {
                 throw new RuntimeException("Illegal char in text: " + str);
             }
-            if (c == '\n') {
-                throw new RuntimeException("New line char");
-            }
         }
     }
 }

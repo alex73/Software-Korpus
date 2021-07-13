@@ -80,6 +80,7 @@ public class EditorGrammar {
             m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             m.setProperty(Marshaller.JAXB_FRAGMENT, true);
             m.marshal(p, wr);
+            wr.write("\n");
         }
     }
 
@@ -91,6 +92,7 @@ public class EditorGrammar {
             m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             m.setProperty(Marshaller.JAXB_FRAGMENT, true);
             m.marshal(v, wr);
+            wr.write("\n");
         }
     }
 
@@ -103,6 +105,7 @@ public class EditorGrammar {
             m.setProperty(Marshaller.JAXB_FRAGMENT, true);
             for (Form f : forms) {
                 m.marshal(f, wr);
+                wr.write("\n");
             }
         }
     }

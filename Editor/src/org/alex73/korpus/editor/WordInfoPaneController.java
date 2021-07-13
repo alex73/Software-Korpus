@@ -156,9 +156,10 @@ public class WordInfoPaneController {
 
     static void setButtonsEnabled() {
         WordInfoPane p = UI.wordInfoPane;
-        if (currentWord!=null) {
+        if (currentWord != null) {
             p.btnSave.setEnabled(changed);
-            p.btnReset.setEnabled(currentWord.manualLemma != null || currentWord.manualTag != null);
+            p.btnReset.setEnabled(currentWord.manualLemma != null || currentWord.manualTag != null
+                    || !p.txtNormal.getText().trim().isEmpty());
         } else {
             p.btnSave.setEnabled(false);
             p.btnReset.setEnabled(false);
@@ -194,6 +195,7 @@ public class WordInfoPaneController {
         public void actionPerformed(ActionEvent e) {
             currentWord.manualLemma = null;
             currentWord.manualTag = null;
+            UI.wordInfoPane.txtNormal.setText("");
             changed = true;
             showLemmasAndTags();
             setButtonsEnabled();

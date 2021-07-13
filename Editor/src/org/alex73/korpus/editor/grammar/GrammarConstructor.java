@@ -65,8 +65,7 @@ public class GrammarConstructor {
         }
     };
 
-    public List<PVW> getLooksLike(String word, String filter, boolean preserveCase, String tagMask,
-            Integer skipParadigmId) {
+    public List<PVW> getLooksLike(String word, String filter, String tagMask, Integer skipParadigmId) {
         long be = System.currentTimeMillis();
         final Comparer comparer;
         String target;
@@ -227,13 +226,16 @@ public class GrammarConstructor {
      * @param word      - normalized word
      * @param ratedForm - normalized word (from grammar db)
      */
-    public Paradigm constructParadigm(String word, Paradigm p, Variant v, String ratedForm) {
+    public Paradigm constructParadigm(String word, Paradigm p, Variant v, String ratedForm, boolean preserveCase) {
         int eq = eqEnds.getScore(word, ratedForm);
 
         Paradigm result = new Paradigm();
         result.setTag(p.getTag());
 
         String lemma = constructWord(word, ratedForm, eq, v.getLemma());
+        if (!preserveCase) {
+            lemma = lemma.toLowerCase();
+        }
 
         result.setLemma(lemma);
         Variant rv = new Variant();
@@ -244,6 +246,9 @@ public class GrammarConstructor {
             Form rf = new Form();
             rf.setTag(f.getTag());
             String fword = constructWord(word, ratedForm, eq, f.getValue());
+            if (!preserveCase) {
+                fword = fword.toLowerCase();
+            }
             rf.setValue(fword);
             rv.getForm().add(rf);
         }

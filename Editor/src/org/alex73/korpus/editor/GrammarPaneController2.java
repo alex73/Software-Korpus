@@ -39,6 +39,7 @@ public class GrammarPaneController2 {
 
     static String currentWord;
     static boolean notRealUpdate = false;
+    static String constructedParadigmTag, constructedVariantTag;
 
     public static synchronized void show(String word) {
         currentWord = word;
@@ -111,9 +112,11 @@ public class GrammarPaneController2 {
         if (notRealUpdate) {
             return;
         }
+        boolean visible2 = false;
         if (ui.rbAddParadigm.isSelected()) {
             ui.txtTo.setVisible(false);
             ui.scrollTo.setVisible(false);
+            visible2 = true;
         } else {
             ui.txtTo.setVisible(true);
             ui.scrollTo.setVisible(true);
@@ -122,7 +125,12 @@ public class GrammarPaneController2 {
             }
             updaterTo = new UpdaterTo();
             updaterTo.execute();
+            visible2 = ui.tableTo.getSelectedRow() >= 0;
         }
+        ui.panelSave.setVisible(visible2);
+        ui.panelInput.setVisible(visible2);
+        ui.listScroll.setVisible(visible2);
+        ui.outScroll.setVisible(visible2);
     }
 
     static UpdaterTo updaterTo;
@@ -152,7 +160,9 @@ public class GrammarPaneController2 {
         boolean someFormsOnly = ui.rbAddForm.isSelected();
         PVW basedOn = ((Model) ui.tableFound.getModel()).rows.get(r);
         Paradigm p = new GrammarConstructor(MainController.gr).constructParadigm(currentWord, basedOn.p, basedOn.v,
-                basedOn.w);
+                basedOn.w, ui.cbPreserveCase.isSelected());
+        constructedParadigmTag = basedOn.p.getTag();
+        constructedVariantTag = basedOn.v.getTag();
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.gridy = 0;
@@ -253,15 +263,20 @@ public class GrammarPaneController2 {
                 }
                 PVW row = ((Model) ui.tableTo.getModel()).rows.get(ui.tableTo.getSelectedRow());
                 newVariant.setLemma(newVariant.getForm().get(0).getValue());
+                newVariant.setTag(constructedVariantTag);
                 MainController.gr.addVariant(newVariant, row.p.getPdgId());
             } else {
                 Paradigm p = new Paradigm();
                 p.getVariant().add(newVariant);
                 newVariant.setId("a");
                 newVariant.setLemma(newVariant.getForm().get(0).getValue());
+                newVariant.setTag(constructedVariantTag);
                 p.setLemma(newVariant.getLemma());
+                p.setTag(constructedParadigmTag);
                 MainController.gr.addParadigm(p);
             }
+            JOptionPane.showMessageDialog(UI.mainWindow, "Змены захаваныя", "Паведамленне",
+                    JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(UI.mainWindow, "Памылка запісу файла: " + ex.getMessage(), "Памылка",
                     JOptionPane.ERROR_MESSAGE);
@@ -270,20 +285,18 @@ public class GrammarPaneController2 {
 
     static class UpdaterList extends SwingWorker<List<PVW>, Void> {
         String word, grammar, theme, looksLike;
-        boolean preserveCase;
         GrammarConstructor grConstr;
 
         public UpdaterList() {
             grammar = ui.txtGrammar.getText().toUpperCase();
             looksLike = ui.txtLike.getText();
             word = currentWord;
-            preserveCase = ui.cbPreserveCase.isSelected();
         }
 
         @Override
         protected List<PVW> doInBackground() throws Exception {
             grConstr = new GrammarConstructor(MainController.gr);
-            return grConstr.getLooksLike(word, looksLike, preserveCase, grammar, null);
+            return grConstr.getLooksLike(word, looksLike, grammar, null);
         }
 
         @Override
@@ -371,6 +384,15 @@ public class GrammarPaneController2 {
                     } else {
                         ui.tableTo.setRowSelectionInterval(0, 0);
                     }
+                    ui.panelSave.setVisible(true);
+                    ui.panelInput.setVisible(true);
+                    ui.listScroll.setVisible(true);
+                    ui.outScroll.setVisible(true);
+                } else {
+                    ui.panelSave.setVisible(false);
+                    ui.panelInput.setVisible(false);
+                    ui.listScroll.setVisible(false);
+                    ui.outScroll.setVisible(false);
                 }
                 constructForms();
             } catch (CancellationException ex) {
