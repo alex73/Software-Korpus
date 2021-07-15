@@ -53,9 +53,6 @@ public class PrepareCache3 {
         if (output == null) {
             throw new Exception("--output not defined");
         }
-        if (grammardb == null) {
-            throw new Exception("--grammardb not defined");
-        }
 
         INPUT = Paths.get(input);
         OUTPUT = Paths.get(output);
@@ -63,7 +60,10 @@ public class PrepareCache3 {
 
         // read texts and sort
         LOG.info("1st pass...");
+        long be = System.currentTimeMillis();
         new FilesReader().run(INPUT, errors, true);
+        long af = System.currentTimeMillis();
+        LOG.info("1st pass time: " + (af - be) + "ms");
         errorsList.clear();
 
         luceneOpen(OUTPUT);
@@ -74,12 +74,16 @@ public class PrepareCache3 {
             LOG.info("Loading GrammarDB...");
             gr = GrammarDB2.initializeFromDir(grammardb);
         } else {
+            LOG.warn("GrammarDB will not be loaded !!!");
             gr = GrammarDB2.empty();
         }
         grFiller = new StaticGrammarFiller2(new GrammarFinder(gr));
 
         LOG.info("2nd pass...");
+        be = System.currentTimeMillis();
         new FilesReader().run(INPUT, errors, false);
+        af = System.currentTimeMillis();
+        LOG.info("2st pass time: " + (af - be) + "ms");
         LOG.info("Finishing...");
         luceneClose();
         textStat.write(OUTPUT);

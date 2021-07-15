@@ -52,5 +52,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/slf4j-api-1.7.25.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/trove4j-1.0.20190514.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/slf4j-simple-1.7.25.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v9.0"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
