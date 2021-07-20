@@ -186,6 +186,7 @@
         <xs:element name="Note" minOccurs="0" maxOccurs="unbounded" type="xs:string" />
         <xs:element ref="Slounik" minOccurs="0" maxOccurs="unbounded" />
         <xs:element ref="Form" maxOccurs="unbounded" minOccurs="0" />
+        <xs:element name="Morph" minOccurs="0" maxOccurs="unbounded" type="xs:string" />
       </xs:sequence>
       <xs:attribute name="id" type="latin_char" use="optional"/>
       <xs:attribute name="lemma" type="xs:string" use="required" />
