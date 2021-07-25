@@ -63,11 +63,11 @@ public class Fanietycny extends FutureBaseServlet {
         }
 
         public String getIpa() {
-            return new FanetykaText(word.replace('+', '´')).ipa;
+            return new FanetykaText(KorpusApplication.instance.morphFinder, word.replace('+', '´')).ipa;
         }
 
         public String getSkola() {
-            return new FanetykaText(word.replace('+', '´')).skola;
+            return new FanetykaText(KorpusApplication.instance.morphFinder, word.replace('+', '´')).skola;
         }
 
         @Override

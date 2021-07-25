@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.alex73.fanetyka.impl.FanetykaText;
+import org.alex73.korpus.server.KorpusApplication;
 import org.apache.commons.io.IOUtils;
 
 @SuppressWarnings("serial")
@@ -23,7 +24,7 @@ public class Conv2 extends HttpServlet {
                 text = IOUtils.toString(reader);
             }
 
-            FanetykaText f = new FanetykaText(text.replace('+', '´').replaceAll("[-‒‒–]", "-"));
+            FanetykaText f = new FanetykaText(KorpusApplication.instance.morphFinder, text.replace('+', '´').replaceAll("[-‒‒–]", "-"));
 
             resp.setContentType("text/html; charset=UTF-8");
             String o ="<div>Вынікі канвертавання (IPA):</div><div style='font-size: 150%'>"+ f.ipa.replace("\n", "<br/>") + "</div><br/><div>Школьная транскрпцыя:</div><div style='font-size: 150%'>" + f.skola.replace("\n", "<br/>")+"</div>";
