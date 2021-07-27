@@ -24,7 +24,7 @@ public class Conv2 extends HttpServlet {
                 text = IOUtils.toString(reader);
             }
 
-            FanetykaText f = new FanetykaText(KorpusApplication.instance.morphFinder, text.replace('+', '´').replaceAll("[-‒‒–]", "-"));
+            FanetykaText f = new FanetykaText(KorpusApplication.instance.grFinder, text.replace('+', '´').replaceAll("[-‒‒–]", "-"));
 
             resp.setContentType("text/html; charset=UTF-8");
             String o ="<div>Вынікі канвертавання (IPA):</div><div style='font-size: 150%'>"+ f.ipa.replace("\n", "<br/>") + "</div><br/><div>Школьная транскрпцыя:</div><div style='font-size: 150%'>" + f.skola.replace("\n", "<br/>")+"</div>";

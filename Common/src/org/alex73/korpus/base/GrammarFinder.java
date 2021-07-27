@@ -2,7 +2,9 @@ package org.alex73.korpus.base;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.alex73.corpus.paradigm.Paradigm;
@@ -12,13 +14,14 @@ public class GrammarFinder implements IGrammarFinder {
     private static final int HASHTABLE_SIZE = 256 * 1024;
     private static final Paradigm[] EMPTY = new Paradigm[0];
     private final Paradigm[][] table;
+    private final Map<String,String> morph = new HashMap<>();
 
     public GrammarFinder(GrammarDB2 gr) {
+        long be = System.currentTimeMillis();
         final List<List<Paradigm>> prepare = new ArrayList<>(HASHTABLE_SIZE);
         for (int i = 0; i < HASHTABLE_SIZE; i++) {
             prepare.add(new ArrayList<>());
         }
-        long be = System.currentTimeMillis();
         gr.getAllParadigms().parallelStream().forEach(p -> {
             p.getVariant().forEach(v -> {
                 putToPrepare(v.getLemma(), prepare, p);
@@ -26,6 +29,9 @@ public class GrammarFinder implements IGrammarFinder {
                     if (f.getValue() != null && !f.getValue().isEmpty()) {
                         putToPrepare(f.getValue(), prepare, p);
                     }
+                });
+                v.getMorph().forEach(m -> {
+                    putToMorph(m);
                 });
             });
         });
@@ -45,6 +51,16 @@ public class GrammarFinder implements IGrammarFinder {
                 }
             }
             list.add(p);
+        }
+    }
+
+    private void putToMorph(String m) {
+        String key = m.replace("-", "").replace('ґ', 'г').toLowerCase();
+        synchronized (morph) {
+            String prev = morph.put(key, m);
+            if (!prev.equals(m)) {
+                throw new RuntimeException("Different morph for " + key + ": " + m + " / " + prev);
+            }
         }
     }
 
@@ -74,5 +90,9 @@ public class GrammarFinder implements IGrammarFinder {
 
     public Stream<Paradigm[]> getSimilarGroups() {
         return Arrays.stream(table).filter(r -> r != null);
+    }
+
+    public String getMorph(String word) {
+        return morph.get(word.replace('ґ', 'г').toLowerCase());
     }
 }

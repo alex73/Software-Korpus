@@ -29,7 +29,9 @@ public class ExportDatabase {
         List<String> list2008 = new ArrayList<>();
         List<String> temp1 = new ArrayList<>();
         List<String> temp2 = new ArrayList<>();
+        List<String> temp3 = new ArrayList<>();
 
+        System.out.println("Збор слоў...");
         db.getAllParadigms().forEach(p -> {
             List<String> result = new ArrayList<>();
             for (Variant v : p.getVariant()) {
@@ -47,21 +49,28 @@ public class ExportDatabase {
                     temp1.add(StressUtils.unstress(f.getValue()) + "\t" + StressUtils.unstress(v.getLemma()) + "\t"
                             + tag.charAt(0));
                     temp2.add(StressUtils.unstress(f.getValue()));
+                    temp3.add(f.getValue().replace('+', '\u0301'));
                 }
             }
             list2008.addAll(result);
         });
 
-        duplicateU(list2008);
-        duplicateU(temp1);
-        duplicateU(temp2);
-        List<String> list2008uniq = temp1.stream().sorted(BE).distinct().collect(Collectors.toList());
-        List<String> list2008uniq1 = temp2.stream().sorted(BE).distinct().collect(Collectors.toList());
+        System.out.println("Апрацоўка спісаў...");
+        duplicateU(list2008, false);
+        duplicateU(temp1, true);
+        duplicateU(temp2, true);
+        duplicateU(temp2, true);
+        System.out.println("Сартаванне спісаў...");
+        List<String> list2008flc = temp1.stream().sorted(BE).distinct().collect(Collectors.toList());
+        List<String> list2008uniq = temp2.stream().sorted(BE).distinct().collect(Collectors.toList());
+        List<String> list2008uniqStress = temp3.stream().sorted(BE).distinct().collect(Collectors.toList());
 
         FileUtils.writeLines(new File("slovy-2008-z_naciskami_i_razdialicielami.txt"), "UTF-8", list2008);
+        FileUtils.writeLines(new File("slovy-2008-forma+lemma+cascinamovy.txt"), "UTF-8", list2008flc);
         FileUtils.writeLines(new File("slovy-2008-uniq.txt"), "UTF-8", list2008uniq);
-        FileUtils.writeLines(new File("slovy-2008-uniq1.txt"), "UTF-8", list2008uniq1);
+        FileUtils.writeLines(new File("slovy-2008-uniq-stress.txt"), "UTF-8", list2008uniqStress);
 
+        System.out.println("Фільтраванне базы - што не паказваем...");
         db.getAllParadigms().parallelStream().forEach(p -> {
             for (Variant v : p.getVariant()) {
                 if (v.getForm().isEmpty()) {
@@ -77,6 +86,7 @@ public class ExportDatabase {
         FileUtils.deleteDirectory(new File("/data/gits/GrammarDB/noshow/"));
         GrammarDBSaver.sortAndStore(db, "/data/gits/GrammarDB/noshow/");
 
+        System.out.println("Фільтраванне базы для праверкі правапісу...");
         db = GrammarDB2.initializeFromDir("/data/gits/GrammarDB");
         db.getAllParadigms().parallelStream().forEach(p -> {
             for (Variant v : p.getVariant()) {
@@ -92,6 +102,7 @@ public class ExportDatabase {
         FileUtils.deleteDirectory(new File("/data/gits/GrammarDB/spell/"));
         GrammarDBSaver.sortAndStore(db, "/data/gits/GrammarDB/spell/");
 
+        System.out.println("Фільтраванне базы для паказу...");
         db = GrammarDB2.initializeFromDir("/data/gits/GrammarDB");
         db.getAllParadigms().parallelStream().forEach(p -> {
             for (Variant v : p.getVariant()) {
@@ -108,10 +119,15 @@ public class ExportDatabase {
         GrammarDBSaver.sortAndStore(db, "/data/gits/GrammarDB/show/");
     }
 
-    static void duplicateU(List<String> words) {
+    static void duplicateU(List<String> words, boolean addToEnd) {
         for (int i = 0; i < words.size(); i++) {
             if (words.get(i).startsWith("у")) {
-                words.add(i + 1, "ў" + words.get(i).substring(1));
+                String neww = "ў" + words.get(i).substring(1);
+                if (addToEnd) {
+                    words.add(neww);
+                } else {
+                    words.add(i + 1, neww);
+                }
             }
         }
     }
