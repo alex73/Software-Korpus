@@ -17,7 +17,7 @@ import org.alex73.korpus.utils.StressUtils;
 import org.apache.commons.io.FileUtils;
 
 /**
- * Экспартуе звесткі для праверкі правапіса.
+ * Экспартуе звесткі для праверкі правапісу.
  */
 public class ExportDatabase {
     static final Collator BE = Collator.getInstance(new Locale("be"));

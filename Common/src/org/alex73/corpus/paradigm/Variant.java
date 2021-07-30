@@ -25,6 +25,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element ref="{}Slounik" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element ref="{}Form" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="Morph" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element ref="{}Fan" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="id" type="{}latin_char" />
  *       &lt;attribute name="lemma" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -46,7 +47,8 @@ import javax.xml.bind.annotation.XmlType;
     "note",
     "slounik",
     "form",
-    "morph"
+    "morph",
+    "fan"
 })
 @XmlRootElement(name = "Variant")
 public class Variant {
@@ -59,6 +61,8 @@ public class Variant {
     protected List<Form> form;
     @XmlElement(name = "Morph")
     protected List<String> morph;
+    @XmlElement(name = "Fan")
+    protected List<Fan> fan;
     @XmlAttribute(name = "id")
     protected String id;
     @XmlAttribute(name = "lemma", required = true)
@@ -190,6 +194,35 @@ public class Variant {
             morph = new ArrayList<String>();
         }
         return this.morph;
+    }
+
+    /**
+     * Gets the value of the fan property.
+     * 
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the fan property.
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getFan().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link Fan }
+     * 
+     * 
+     */
+    public List<Fan> getFan() {
+        if (fan == null) {
+            fan = new ArrayList<Fan>();
+        }
+        return this.fan;
     }
 
     /**

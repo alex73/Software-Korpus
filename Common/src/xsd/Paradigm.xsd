@@ -187,6 +187,7 @@
         <xs:element ref="Slounik" minOccurs="0" maxOccurs="unbounded" />
         <xs:element ref="Form" maxOccurs="unbounded" minOccurs="0" />
         <xs:element name="Morph" minOccurs="0" maxOccurs="unbounded" type="xs:string" />
+        <xs:element ref="Fan" maxOccurs="unbounded" minOccurs="0" />
       </xs:sequence>
       <xs:attribute name="id" type="latin_char" use="optional"/>
       <xs:attribute name="lemma" type="xs:string" use="required" />
@@ -237,6 +238,20 @@
           <xs:attribute name="comment" type="xs:string" use="optional">
             <xs:annotation>
               <xs:documentation>Камэнтар</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Fan">
+    <!-- у Variant -->
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="s" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Слова</xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>

@@ -54,6 +54,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link Fan }
+     * 
+     */
+    public Fan createFan() {
+        return new Fan();
+    }
+
+    /**
      * Create an instance of {@link Paradigm }
      * 
      */
