@@ -76,8 +76,15 @@ class GrammarService {
   }
   loadDetails(pdgId: number) {
     grammarui.showStatus("Шукаем...");
+    
+    let url;
+    if ((<HTMLInputElement>document.getElementById("grammarword-full")).checked) {
+        url = "rest/grammar/detailsFull/" + pdgId;
+    } else {
+        url = "rest/grammar/details/" + pdgId;
+    }
 
-    fetch("rest/grammar/details/" + pdgId)
+    fetch(url)
       .then(r => {
         if (!r.ok) {
           grammarui.showError("Памылка пошуку: " + r.status + " " + r.statusText);
@@ -99,4 +106,5 @@ class GrammarRequest {
   public outputGrammar: string; // адмысловая форма
   public orderReverse: boolean; // адваротны парадак
   public outputGrouping: boolean; // групаваць
+  public fullDatabase: boolean; // шукаць па ўсёй базе, не звяртаючы ўвагу на фільтры
 }

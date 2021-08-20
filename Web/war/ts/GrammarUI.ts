@@ -35,6 +35,7 @@ class GrammarUI {
 		if ($('#grammar-show-grouping').is(":visible")) {
 			r.outputGrouping = (<HTMLInputElement>document.getElementById("inputGrouping")).checked;
 		}
+        r.fullDatabase = (<HTMLInputElement>document.getElementById("grammarword-full")).checked;
 		return r;
 	}
 	restoreToScreen(data: GrammarRequest) {
@@ -55,6 +56,10 @@ class GrammarUI {
 				$("#inputOrderReverse").prop('checked', true);
 				this.showExtended = true;
 			}
+            if (data.fullDatabase) {
+                $('#grammar-show-all').show();
+                $("#grammarword-full").prop('checked', true);
+            }
 			this.visibilityChange();
 		}
 		let gr = this;
@@ -147,4 +152,9 @@ var dialogGrammarDB: DialogGrammarDB = null;
 function initializeGrammarPage() {
 	grammarui = new GrammarUI();
 	grammarService = new GrammarService();
+    document.onkeydown = function(e) {
+        if (e.key == 'F2') {
+            $('#grammar-show-all').show();
+        }
+    };
 }

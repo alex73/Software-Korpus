@@ -101,6 +101,7 @@ public class GrammarServiceImpl {
         public String outputGrammar;
         public boolean orderReverse;
         public boolean outputGrouping;
+        public boolean fullDatabase;
     }
 
     @Path("search")
@@ -154,10 +155,10 @@ public class GrammarServiceImpl {
             }
             Stream<LemmaInfo> output;
             if (rq.word == null || WordsDetailsChecks.needWildcardRegexp(rq.word)) {
-                output = StreamSupport.stream(new SearchWidlcards(rq.word, reGrammar, rq.multiForm, reOutputGrammar),
+                output = StreamSupport.stream(new SearchWidlcards(rq.word, reGrammar, rq.multiForm, rq.fullDatabase, reOutputGrammar),
                         false);
             } else {
-                output = searchExact(rq.word, reGrammar, rq.multiForm, reOutputGrammar);
+                output = searchExact(rq.word, reGrammar, rq.multiForm, rq.fullDatabase, reOutputGrammar);
             }
             result.output = output.limit(Settings.GRAMMAR_SEARCH_RESULT_PAGE).collect(Collectors.toList());
 
@@ -230,16 +231,19 @@ public class GrammarServiceImpl {
         private final Pattern re;
         private final Pattern reGrammar;
         private final boolean multiform;
+        private final boolean fullDatabase;
         private final Pattern reOutputGrammar;
         private final LinkedList<LemmaInfo> buffer = new LinkedList<>();
         private final List<Paradigm> data;
         private int dataPos;
 
-        public SearchWidlcards(String word, Pattern reGrammar, boolean multiform, Pattern reOutputGrammar) {
+        public SearchWidlcards(String word, Pattern reGrammar, boolean multiform, boolean fullDatabase,
+                Pattern reOutputGrammar) {
             super(Long.MAX_VALUE, 0);
             this.re = word == null ? null : WordsDetailsChecks.getWildcardRegexp(word.trim());
             this.reGrammar = reGrammar;
             this.multiform = multiform;
+            this.fullDatabase = fullDatabase;
             this.reOutputGrammar = reOutputGrammar;
             data = getApp().gr.getAllParadigms();
         }
@@ -250,7 +254,7 @@ public class GrammarServiceImpl {
                 Paradigm p = data.get(dataPos);
                 dataPos++;
                 createLemmaInfoFromParadigm(p, s -> re == null || re.matcher(StressUtils.unstress(s)).matches(),
-                        multiform, reOutputGrammar, reGrammar, buffer);
+                        multiform, fullDatabase, reOutputGrammar, reGrammar, buffer);
             }
             if (buffer.isEmpty()) {
                 return false;
@@ -260,22 +264,24 @@ public class GrammarServiceImpl {
         }
     }
 
-    private Stream<LemmaInfo> searchExact(String word, Pattern reGrammar, boolean multiform, Pattern reOutputGrammar) {
+    private Stream<LemmaInfo> searchExact(String word, Pattern reGrammar, boolean multiform, boolean fullDatabase,
+            Pattern reOutputGrammar) {
         String normWord = BelarusianWordNormalizer.lightNormalized(word.trim());
         Paradigm[] data = getApp().grFinder.getParadigms(normWord);
         List<LemmaInfo> result = new ArrayList<>();
         for (Paradigm p : data) {
-            createLemmaInfoFromParadigm(p, s -> BelarusianWordNormalizer.equals(normWord, s), multiform,
+            createLemmaInfoFromParadigm(p, s -> BelarusianWordNormalizer.equals(normWord, s), multiform, fullDatabase,
                     reOutputGrammar, reGrammar, result);
         }
         return result.stream();
     }
 
-    private void createLemmaInfoFromParadigm(Paradigm p, Predicate<String> checkWord, boolean multiform,
+    private void createLemmaInfoFromParadigm(Paradigm p, Predicate<String> checkWord, boolean multiform, boolean fullDatabase,
             Pattern reOutputGrammar, Pattern reGrammar, List<LemmaInfo> result) {
         Set<String> found = new TreeSet<>();
         for (Variant v : p.getVariant()) {
-            List<Form> forms = FormsReadyFilter.getAcceptedForms(FormsReadyFilter.MODE.SHOW, p, v);
+            List<Form> forms = fullDatabase ? v.getForm()
+                    : FormsReadyFilter.getAcceptedForms(FormsReadyFilter.MODE.SHOW, p, v);
             if (forms == null) {
                 return;
             }
@@ -341,7 +347,24 @@ public class GrammarServiceImpl {
         try {
             for (Paradigm p : getApp().gr.getAllParadigms()) {
                 if (p.getPdgId() == pdgId) {
-                    return conv(p);
+                    return conv(p, false);
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw ex;
+        }
+        return null;
+    }
+
+    @Path("detailsFull/{id}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public LemmaInfo.LemmaParadigm getLemmaFullDetails(@PathParam("id") long pdgId) throws Exception {
+        try {
+            for (Paradigm p : getApp().gr.getAllParadigms()) {
+                if (p.getPdgId() == pdgId) {
+                    return conv(p, true);
                 }
             }
         } catch (Exception ex) {
@@ -379,10 +402,11 @@ public class GrammarServiceImpl {
         }
     }
 
-    LemmaInfo.LemmaParadigm conv(Paradigm p) {
+    LemmaInfo.LemmaParadigm conv(Paradigm p, boolean fullDatabase) {
         LemmaInfo.LemmaParadigm r = new LemmaInfo.LemmaParadigm();
         for (Variant v : p.getVariant()) {
-            List<Form> forms = FormsReadyFilter.getAcceptedForms(FormsReadyFilter.MODE.SHOW, p, v);
+            List<Form> forms = fullDatabase ? v.getForm()
+                    : FormsReadyFilter.getAcceptedForms(FormsReadyFilter.MODE.SHOW, p, v);
             if (forms == null) {
                 continue;
             }
