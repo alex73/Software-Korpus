@@ -27,7 +27,6 @@ import org.alex73.korpus.belarusian.BelarusianTags;
 import org.alex73.korpus.belarusian.TagLetter;
 import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.base.GrammarFinder;
-import org.alex73.korpus.base.GrammarMorphFinder;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.server.data.GrammarInitial;
 import org.alex73.korpus.server.data.GrammarInitial.GrammarLetter;
@@ -47,7 +46,6 @@ public class KorpusApplication extends Application {
     private List<String> textInfos;
     public GrammarDB2 gr;
     public GrammarFinder grFinder;
-    public GrammarMorphFinder morphFinder;
     public GrammarInitial grammarInitial;
     InitialData searchInitial;
 
@@ -100,7 +98,6 @@ public class KorpusApplication extends Application {
                 processKorpus = new LuceneFilter(korpusCache);
                 System.out.println("Lucene initialized");
             }
-            morphFinder = new GrammarMorphFinder(gr);
 
             prepareInitial();
             System.out.println("Initialization finished. Used memory: " + getUsedMemory());

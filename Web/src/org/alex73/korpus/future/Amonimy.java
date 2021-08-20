@@ -95,7 +95,7 @@ public class Amonimy extends FutureBaseServlet {
         case HRAFY:
             return StressUtils.unstress(s.toLowerCase());
         case FONY:
-            return new FanetykaText(KorpusApplication.instance.morphFinder, s.replace('+', '´')).ipa;
+            return new FanetykaText(KorpusApplication.instance.grFinder, s.replace('+', '´')).ipa;
         }
         return null;
     }
