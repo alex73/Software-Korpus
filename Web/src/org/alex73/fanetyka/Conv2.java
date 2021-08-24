@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.alex73.fanetyka.impl.FanetykaText;
 import org.alex73.korpus.server.KorpusApplication;
-import org.apache.commons.io.IOUtils;
 
 @SuppressWarnings("serial")
 @WebServlet(urlPatterns = "/fan")
@@ -19,9 +18,9 @@ public class Conv2 extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
-            String text;
+            String text = "";
             try (BufferedReader reader = req.getReader()) {
-                text = IOUtils.toString(reader);
+                text += reader.readLine() + "\n";
             }
 
             FanetykaText f = new FanetykaText(KorpusApplication.instance.grFinder, text.replace('+', '´').replaceAll("[-‒‒–]", "-"));

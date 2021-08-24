@@ -19,8 +19,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SuppressWarnings("serial")
@@ -39,14 +37,14 @@ public class ConvPlay extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
-            String text;
+            String text = "";
             try (BufferedReader reader = req.getReader()) {
-                text = IOUtils.toString(reader);
+                text = reader.readLine() + "\n";
             }
 
             String template;
             try (InputStream in = this.getClass().getResourceAsStream("req.template")) {
-                template = IOUtils.toString(in);
+                template = new String(in.readAllBytes());
             }
 
             text = "<speak><phoneme alphabet=\"ipa\" ph=\"" + text + "\">невядомыя фанемы</phoneme></speak>";

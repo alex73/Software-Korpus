@@ -38,6 +38,7 @@ import javax.swing.text.Element;
 import javax.swing.text.GapContent;
 import javax.swing.text.Position;
 import javax.swing.text.StyleContext;
+import javax.swing.tree.TreeNode;
 
 import org.alex73.korpus.editor.UI;
 import org.alex73.korpus.editor.core.doc.structure.Line;
@@ -463,11 +464,11 @@ public class KorpusDocument3 extends AbstractDocument {
         }
 
         @Override
-        public Enumeration<T> children() {
+        public Enumeration<TreeNode> children() {
             if (children.size() == 0)
                 return null;
 
-            return new Vector<T>(children).elements();
+            return new Vector<TreeNode>(children).elements();
         }
 
         @Override
@@ -626,7 +627,7 @@ public class KorpusDocument3 extends AbstractDocument {
             return false;
         }
 
-        public Enumeration<AbstractElement> children() {
+        public Enumeration<TreeNode> children() {
             return null;
         }
     }

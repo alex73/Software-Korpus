@@ -7,18 +7,17 @@ import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
 import org.languagetool.Languages;
 import org.languagetool.rules.RuleMatch;
-import org.languagetool.tools.RuleMatchAsXmlSerializer;
 
 @WebServlet(name = "GrammarChecker", urlPatterns = { "/check" })
-public class GrammarCheckServlet extends javax.servlet.http.HttpServlet {
+public class GrammarCheckServlet extends HttpServlet {
     static final Charset UTF8 = Charset.forName("UTF-8");
 
     Language langOfficial;
@@ -39,7 +38,7 @@ public class GrammarCheckServlet extends javax.servlet.http.HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
-            String[] params = IOUtils.toString(req.getInputStream(), UTF8).split("&");
+            String[] params = new String(req.getInputStream().readAllBytes(), UTF8).split("&");
             String text = null;
 
             for (String p : params) {

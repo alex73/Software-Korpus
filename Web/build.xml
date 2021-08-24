@@ -14,7 +14,7 @@
 		<mkdir dir="build/classes" />
 		<javac srcdir="src:../Common/src" includes="**" encoding="utf-8" destdir="build/classes" nowarn="true" debug="true" debuglevel="lines,vars,source">
 			<classpath>
-				<fileset dir="war/WEB-INF/lib" includes="**/*.jar"/>
+				<fileset dir="libs/" includes="**/*.jar"/>
 				<fileset dir="lib-compile" includes="**/*.jar"/>
 				<fileset dir="../Common/lib/" includes="*.jar" />
 				<fileset dir="../Common/lib/kryo-serialization/" includes="*.jar" />
@@ -36,19 +36,29 @@
 			<arg value="war/app.js"/>
 		</exec>
 	</target>
-	
+
 	<target name="war" depends="js,javac" description="Create a war file">
-		<war destfile="build/korpus.war" basedir="war" needxmlfile="false" excludes="logs/**, **/lib/sources/**">
-			<zipfileset dir="build/classes/" prefix="WEB-INF/classes/" />
-			<zipfileset dir="../Common/lib/" prefix="WEB-INF/lib/" includes="*.jar" />
-		</war>
 		<copy todir="build/war">
-			<fileset dir="war"/>
+			<fileset dir="war" />
 		</copy>
-		<copy file="build/war/WEB-INF/templates/grammar1.html" tofile="build/war/WEB-INF/templates/index.html" overwrite="true" />
-		<war destfile="build/grammar1.war" basedir="build/war" needxmlfile="false" excludes="logs/**, **/lib/sources/**">
+		<copy todir="build/war/WEB-INF/lib">
+			<regexpmapper from="^(.+/)?([^/]+)$" to="\2" />
+			<fileset dir="libs/">
+				<include name="**/*.jar" />
+			</fileset>
+			<fileset dir="../Common/lib/">
+				<include name="**/*.jar" />
+			</fileset>
+		</copy>
+		<war destfile="build/korpus.war" basedir="build/war" needxmlfile="false">
 			<zipfileset dir="build/classes/" prefix="WEB-INF/classes/" />
-			<zipfileset dir="../Common/lib/" prefix="WEB-INF/lib/" includes="*.jar" />
+		</war>
+		<copy todir="build/gwar">
+			<fileset dir="build/war" />
+		</copy>
+		<copy file="build/gwar/WEB-INF/templates/grammar1.html" tofile="build/gwar/WEB-INF/templates/index.html" overwrite="true" />
+		<war destfile="build/grammar1.war" basedir="build/gwar" needxmlfile="false">
+			<zipfileset dir="build/classes/" prefix="WEB-INF/classes/" />
 		</war>
 	</target>
 

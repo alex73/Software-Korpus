@@ -1,0 +1,36 @@
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+//    implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.5'
+//    implementation 'jakarta.ws.rs:jakarta.ws.rs-api:2.1.6'
+//    implementation 'org.glassfish.jersey.inject:jersey-hk2:2.34'
+//    implementation 'org.glassfish.jersey.containers:jersey-container-servlet:2.34'
+//    implementation 'org.glassfish.jersey.core:jersey-server:2.34'
+//    implementation 'org.glassfish.jersey.media:jersey-media-json-jackson:2.34'
+//    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.12.4'
+//    implementation 'org.freemarker:freemarker:2.3.31'
+//    implementation 'org.apache.logging.log4j:log4j-web:2.14.1'
+//    implementation 'org.apache.lucene:lucene-core:8.9.0'
+//    implementation 'org.apache.lucene:lucene-queries:8.9.0'
+//    implementation 'org.languagetool:languagetool-core:5.4'
+}
+
+task deleteJars(type: Delete) {
+    delete fileTree('deps') {
+        include '**/*'
+    }
+}
+task downloadJars(type: Copy) {
+   into 'deps/'
+   from configurations.runtimeClasspath
+}
+
+task deps {
+    dependsOn 'deleteJars'
+    dependsOn 'downloadJars'
+    tasks.findByName('downloadJars').mustRunAfter 'deleteJars'
+}

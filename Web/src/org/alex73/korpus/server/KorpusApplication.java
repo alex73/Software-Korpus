@@ -23,11 +23,11 @@ import javax.ws.rs.core.Application;
 
 import org.alex73.korpus.base.DBTagsGroups;
 import org.alex73.korpus.base.DBTagsGroups.KeyValue;
-import org.alex73.korpus.belarusian.BelarusianTags;
-import org.alex73.korpus.belarusian.TagLetter;
 import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.base.TextInfo;
+import org.alex73.korpus.belarusian.BelarusianTags;
+import org.alex73.korpus.belarusian.TagLetter;
 import org.alex73.korpus.server.data.GrammarInitial;
 import org.alex73.korpus.server.data.GrammarInitial.GrammarLetter;
 import org.alex73.korpus.server.data.InitialData;

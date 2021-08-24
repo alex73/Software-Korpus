@@ -1,9 +1,7 @@
 package org.alex73.korpus.server.html;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.net.URL;
 import java.util.Map;
 import java.util.TreeMap;
 

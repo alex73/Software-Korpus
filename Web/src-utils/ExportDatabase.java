@@ -1,4 +1,5 @@
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,6 @@ import org.alex73.korpus.base.GrammarDBSaver;
 import org.alex73.korpus.belarusian.FormsReadyFilter;
 import org.alex73.korpus.utils.SetUtils;
 import org.alex73.korpus.utils.StressUtils;
-import org.apache.commons.io.FileUtils;
 
 /**
  * Экспартуе звесткі для праверкі правапісу.
@@ -65,10 +65,10 @@ public class ExportDatabase {
         List<String> list2008uniq = temp2.stream().sorted(BE).distinct().collect(Collectors.toList());
         List<String> list2008uniqStress = temp3.stream().sorted(BE).distinct().collect(Collectors.toList());
 
-        FileUtils.writeLines(new File("slovy-2008-z_naciskami_i_razdialicielami.txt"), "UTF-8", list2008);
-        FileUtils.writeLines(new File("slovy-2008-forma+lemma+cascinamovy.txt"), "UTF-8", list2008flc);
-        FileUtils.writeLines(new File("slovy-2008-uniq.txt"), "UTF-8", list2008uniq);
-        FileUtils.writeLines(new File("slovy-2008-uniq-stress.txt"), "UTF-8", list2008uniqStress);
+        Files.write(Paths.get("slovy-2008-z_naciskami_i_razdialicielami.txt"), list2008);
+        Files.write(Paths.get("slovy-2008-forma+lemma+cascinamovy.txt"), list2008flc);
+        Files.write(Paths.get("slovy-2008-uniq.txt"), list2008uniq);
+        Files.write(Paths.get("slovy-2008-uniq-stress.txt"), list2008uniqStress);
 
         System.out.println("Фільтраванне базы - што не паказваем...");
         db.getAllParadigms().parallelStream().forEach(p -> {
@@ -83,7 +83,7 @@ public class ExportDatabase {
             }
         });
         removeEmpty(db.getAllParadigms());
-        FileUtils.deleteDirectory(new File("/data/gits/GrammarDB/noshow/"));
+        Files.delete(Paths.get("/data/gits/GrammarDB/noshow/"));
         GrammarDBSaver.sortAndStore(db, "/data/gits/GrammarDB/noshow/");
 
         System.out.println("Фільтраванне базы для праверкі правапісу...");
@@ -99,7 +99,7 @@ public class ExportDatabase {
             }
         });
         removeEmpty(db.getAllParadigms());
-        FileUtils.deleteDirectory(new File("/data/gits/GrammarDB/spell/"));
+        Files.delete(Paths.get("/data/gits/GrammarDB/spell/"));
         GrammarDBSaver.sortAndStore(db, "/data/gits/GrammarDB/spell/");
 
         System.out.println("Фільтраванне базы для паказу...");
@@ -115,7 +115,7 @@ public class ExportDatabase {
             }
         });
         removeEmpty(db.getAllParadigms());
-        FileUtils.deleteDirectory(new File("/data/gits/GrammarDB/show/"));
+        Files.delete(Paths.get("/data/gits/GrammarDB/show/"));
         GrammarDBSaver.sortAndStore(db, "/data/gits/GrammarDB/show/");
     }
 

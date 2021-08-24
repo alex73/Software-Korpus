@@ -4,54 +4,39 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="src" path="src-utils"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Korpus-Common"/>
-	<classpathentry kind="lib" path="lib-compile/servlet-api.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/freemarker-2.3.30.jar" sourcepath="/data/src/freemarker-2.3.30-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/lucene-core-8.7.0.jar" sourcepath="/data/src/lucene-8.7.0.zip"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/lucene-queries-8.7.0.jar" sourcepath="/data/src/lucene-8.7.0.zip"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-annotations-2.11.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-core-2.10.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-databind-2.10.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="war/WEB-INF/lib/jackson-module-jaxb-annotations-2.10.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jakarta.activation-api-1.2.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jakarta.annotation-api-1.3.5.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jakarta.inject-2.6.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jakarta.validation-api-2.0.2.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jakarta.ws.rs-api-2.1.6.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jakarta.xml.bind-api-2.3.2.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-client-2.32.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-common-2.32.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-container-servlet-2.32.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-container-servlet-core-2.32.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-entity-filtering-2.32.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-hk2-2.32.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-media-jaxb-2.32.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-media-json-jackson-2.32.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-server-2.32.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/hk2-api-2.6.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/hk2-locator-2.6.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/hk2-utils-2.6.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/aopalliance-repackaged-2.6.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/javassist-3.25.0-GA.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-api-2.14.0.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-core-2.14.0.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/log4j-web-2.14.0.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/osgi-resource-locator-1.0.3.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-io-2.8.0.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-lang3-3.11.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/commons-logging-1.2.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/failureaccess-1.0.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/guava-28.1-jre.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/hppc-0.8.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/languagetool-core-5.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/morfologik-fsa-2.1.7.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/morfologik-fsa-builders-2.1.7.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/morfologik-speller-2.1.7.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/morfologik-stemming-2.1.7.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/segment-2.0.1.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/slf4j-api-1.7.25.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/trove4j-1.0.20190514.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/slf4j-simple-1.7.25.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v9.0"/>
+	<classpathentry kind="lib" path="libs/org.apache.lucene/lucene-core-8.9.0.jar"/>
+	<classpathentry kind="lib" path="libs/org.apache.lucene/lucene-queries-8.9.0.jar"/>
+	<classpathentry kind="lib" path="libs/org.freemarker/freemarker-2.3.31.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/aopalliance-repackaged-2.6.1.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/hk2-api-2.6.1.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/hk2-locator-2.6.1.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/hk2-utils-2.6.1.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jackson-annotations-2.12.2.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jackson-core-2.12.2.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jackson-databind-2.12.2.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jackson-module-jaxb-annotations-2.12.2.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jakarta.activation-api-1.2.1.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jakarta.annotation-api-1.3.5.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jakarta.inject-2.6.1.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jakarta.validation-api-2.0.2.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jakarta.ws.rs-api-2.1.6.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jakarta.xml.bind-api-2.3.2.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/javassist-3.25.0-GA.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jersey-client-2.34.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jersey-common-2.34.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jersey-container-servlet-2.34.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jersey-container-servlet-core-2.34.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jersey-entity-filtering-2.34.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jersey-hk2-2.34.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jersey-media-json-jackson-2.34.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jersey-server-2.34.jar"/>
+	<classpathentry kind="lib" path="libs/org.glassfish.jersey/osgi-resource-locator-1.0.3.jar"/>
+	<classpathentry kind="lib" path="libs/org.languagetool/languagetool-core-5.4.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
