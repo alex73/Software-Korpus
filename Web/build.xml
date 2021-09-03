@@ -37,6 +37,13 @@
 		</exec>
 	</target>
 
+	<target name="fastwar">
+		<war destfile="build/korpus.war" basedir="build/war" needxmlfile="false">
+			<zipfileset dir="classes/" prefix="WEB-INF/classes/" />
+			<zipfileset dir="../Common/classes/" prefix="WEB-INF/classes/" />
+		</war>
+	</target>
+
 	<target name="war" depends="js,javac" description="Create a war file">
 		<copy todir="build/war">
 			<fileset dir="war" />

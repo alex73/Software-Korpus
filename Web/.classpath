@@ -9,7 +9,6 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v9.0"/>
 	<classpathentry exported="true" kind="lib" path="libs/org.apache.lucene/lucene-core-8.9.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/org.apache.lucene/lucene-queries-8.9.0.jar"/>
 	<classpathentry kind="lib" path="libs/org.freemarker/freemarker-2.3.31.jar"/>
@@ -38,5 +37,7 @@
 	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jersey-server-2.34.jar"/>
 	<classpathentry kind="lib" path="libs/org.glassfish.jersey/osgi-resource-locator-1.0.3.jar"/>
 	<classpathentry kind="lib" path="libs/org.languagetool/languagetool-core-5.4.jar"/>
+	<classpathentry kind="lib" path="lib-compile/jakarta.servlet-api-4.0.4.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Jetty"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
