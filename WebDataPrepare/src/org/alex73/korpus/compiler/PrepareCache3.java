@@ -183,7 +183,7 @@ public class PrepareCache3 {
     public static IProcess errors = new IProcess() {
         @Override
         public synchronized void showStatus(String status) {
-            // System.out.println(status);
+            System.out.println(status);
         }
 
         @Override

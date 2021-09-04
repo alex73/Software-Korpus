@@ -61,7 +61,7 @@ public class WikiParser extends BaseParser {
             throw new Exception("Unknown filename: " + file);
         }
 
-        try (InputStream in = file.getFileName().endsWith(".bz2")
+        try (InputStream in = file.toString().endsWith(".bz2")
                 ? new BZip2CompressorInputStream(new FileInputStream(file.toFile()))
                 : new BufferedInputStream(new FileInputStream(file.toFile()))) {
             FACTORY.newSAXParser().parse(in, new DefaultHandler() {
