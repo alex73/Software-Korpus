@@ -1,7 +1,10 @@
+import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -83,7 +86,7 @@ public class ExportDatabase {
             }
         });
         removeEmpty(db.getAllParadigms());
-        Files.delete(Paths.get("/data/gits/GrammarDB/noshow/"));
+        deleteDirectory(Paths.get("/data/gits/GrammarDB/noshow/"));
         GrammarDBSaver.sortAndStore(db, "/data/gits/GrammarDB/noshow/");
 
         System.out.println("Фільтраванне базы для праверкі правапісу...");
@@ -99,7 +102,7 @@ public class ExportDatabase {
             }
         });
         removeEmpty(db.getAllParadigms());
-        Files.delete(Paths.get("/data/gits/GrammarDB/spell/"));
+        deleteDirectory(Paths.get("/data/gits/GrammarDB/spell/"));
         GrammarDBSaver.sortAndStore(db, "/data/gits/GrammarDB/spell/");
 
         System.out.println("Фільтраванне базы для паказу...");
@@ -115,8 +118,18 @@ public class ExportDatabase {
             }
         });
         removeEmpty(db.getAllParadigms());
-        Files.delete(Paths.get("/data/gits/GrammarDB/show/"));
+        deleteDirectory(Paths.get("/data/gits/GrammarDB/show/"));
         GrammarDBSaver.sortAndStore(db, "/data/gits/GrammarDB/show/");
+    }
+
+    static void deleteDirectory(Path d) throws IOException {
+        Files.walk(d).sorted(Comparator.reverseOrder()).forEach(p -> {
+            try {
+                Files.delete(p);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
     }
 
     static void duplicateU(List<String> words, boolean addToEnd) {
