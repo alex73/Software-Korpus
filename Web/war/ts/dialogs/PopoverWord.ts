@@ -17,7 +17,7 @@ class PopoverWord extends BasePopover {
 		let o: string = "";
 		if (lemma) {
 			let lemmas: string[] = lemma.split(';');
-			o += '<b>Лема</b>:&nbsp;' + lemmas.join(', ');
+			o += '<b>Пачатковая форма</b>:&nbsp;' + lemmas.join(', ');
 		}
 		if (cat) {
 			o += '<br/><b>Граматыка</b>:';

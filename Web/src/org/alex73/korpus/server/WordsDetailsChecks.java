@@ -161,7 +161,8 @@ public class WordsDetailsChecks {
                     if (wordResult.normalized == null) {
                         return false;
                     }
-                    if (!getWildcardRegexp(wordParam.word).matcher(StressUtils.unstress(wordResult.normalized)).matches()) {
+                    if (!getWildcardRegexp(wordParam.word)
+                            .matcher(StressUtils.unstress(wordResult.normalized.toLowerCase())).matches()) {
                         return false;
                     }
                 } else if (!BelarusianWordNormalizer.equals(wordParam.word, wordResult.normalized)) {
@@ -235,7 +236,7 @@ public class WordsDetailsChecks {
     public static Pattern getWildcardRegexp(String wildcardWord) {
         Pattern p = WILDCARD_REGEXPS.get().get(wildcardWord);
         if (p == null) {
-            p = Pattern.compile(wildcardWord.replace("+", "").replace("*", ".*").replace('?', '.'));
+            p = Pattern.compile(wildcardWord.toLowerCase().replace("+", "").replace("*", ".*").replace('?', '.'));
             WILDCARD_REGEXPS.get().put(wildcardWord, p);
         }
         return p;

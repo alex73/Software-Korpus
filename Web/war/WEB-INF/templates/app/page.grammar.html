@@ -5,41 +5,53 @@
 <div class="card">
 	<div class="card-body">
 		<div class="row">
-			<div class="col-sm-12 col-lg-6">
-				<div class="form-inline form-group my-1">
-					<label><span class="inputword-lemma-prompt">Слова</span>
-						<input id="grammarword-word" type="text" placeholder="уводзіць тут" class="form-control ml-2 w-100" name="wordText">
-					</label>
-				</div>
-				<div class="form-group form-inline my-1">
-					<label class="radio-inline">
-						<input id="grammarword-firstform" type="radio" name="wordForm" class="form-control mr-2" checked> Па пачатковай форме
-					</label>
-				</div>
-				<div class="form-group form-inline my-1">
-					<label class="radio-inline">
-						<input id="grammarword-multiform" type="radio" name="wordForm" class="form-control mr-2"> Па ўсіх формах
-					</label>
-				</div>
-				<div id="grammar-show-grammardetails" class="form-inline form-group my-1 word-select">
-					<span id="grammarword-grammar" class="d-none wordgram-grammar-string"></span>
-					<label>Удакладніць граматыку
-						<a href="#" id="grammarword-grammarshow" class="form-control wordgram-display ml-2"
-							onClick="dialogWordGrammar = DialogWordGrammar.createParadigmTagsDialog(this, document.getElementById('grammarword-multiform').checked); return false;">---</a>
-					</label>
-				</div>
-                <div id="grammar-show-all" class="form-inline form-group my-1" style="display: none">
-                    <label>
-                        <input id="grammarword-full" type="checkbox" name="wordForm" class="form-control mr-2"> Шукаць па ўсёй базе
-                    </label>
+            <div class="col-sm-12 col-lg-6">
+                <div class="form-row">
+                    <div class="form-inline form-group my-1">
+                        <label class="inputword-lemma-prompt">Слова</label>
+                        <input id="grammarword-word" type="text" placeholder="уводзіць тут" class="form-control ml-2 w-50" name="wordText">
+                    </div>
                 </div>
-				<div class="form-group form-inline my-1">
-					&nbsp;
-				</div>
-				<div id="grammar-show-reset" class="form-group form-inline my-1" style="display: none">
-					<button type="button" class="btn btn-secondary btn-sm form-control" onClick="grammarui.resetControls();">Скінуць налады пошуку</button>
-				</div>
-			</div>
+                <div class="form-row">
+                    <div class="form-group form-inline my-1">
+                    <label class="radio-inline">
+                        <input id="grammarword-firstform" type="radio" name="wordForm" class="form-control mr-2" checked>
+                        Па пачатковай форме</label>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group form-inline my-1">
+                    <label class="radio-inline">
+                        <input id="grammarword-multiform" type="radio" name="wordForm" class="form-control mr-2">
+                        Па ўсіх формах</label>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div id="grammar-show-grammardetails" class="form-inline form-group my-1 word-select">
+                        <span id="grammarword-grammar" class="d-none wordgram-grammar-string"></span>
+                        <label>Удакладніць граматыку</label>
+                        <a href="#" id="grammarword-grammarshow" class="form-control wordgram-display ml-2"
+                            onClick="dialogWordGrammar = DialogWordGrammar.createParadigmTagsDialog(this, document.getElementById('grammarword-multiform').checked); return false;">---</a>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div id="grammar-show-all" class="form-inline form-group my-1" style="display: none">
+                        <label><input id="grammarword-full" type="checkbox" name="wordForm" class="form-control mr-2">
+                        Шукаць па ўсёй базе</label>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group form-inline my-1">
+                        &nbsp;
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div id="grammar-show-reset" class="form-group form-inline my-1" style="display: none">
+                        <button type="button" class="btn btn-secondary btn-sm form-control"
+                            onClick="grammarui.resetControls();">Скінуць налады пошуку</button>
+                    </div>
+                </div>
+            </div>
 			<div class="col-sm-12 col-lg-6">
 				<div id="grammar-show-order" class="form-inline my-1" style="display: none">
 					Парадак:

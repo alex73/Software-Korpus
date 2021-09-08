@@ -38,6 +38,9 @@
 	</target>
 
 	<target name="fastwar">
+		<copy todir="build/war">
+			<fileset dir="war" />
+		</copy>
 		<war destfile="build/korpus.war" basedir="build/war" needxmlfile="false">
 			<zipfileset dir="classes/" prefix="WEB-INF/classes/" />
 			<zipfileset dir="../Common/classes/" prefix="WEB-INF/classes/" />

@@ -79,7 +79,7 @@ class KorpusUI {
 		}
 	}
 	static lemmaChange(type: string, cb: HTMLInputElement) {
-		cb.closest('.' + type).querySelector("." + type + "-lemma-prompt").textContent = cb.checked ? "Лема" : "Слова";
+		cb.closest('.' + type).querySelector("." + type + "-lemma-prompt").textContent = cb.checked ? "Пачатковая форма" : "Слова";
 	}
 	hideStatusError() {
 		$('#status').hide();
@@ -165,7 +165,7 @@ class KorpusUI {
 						let w = this.addWord('inputword');
 						(<HTMLInputElement>w.querySelector("input[type='text']")).value = wdata.word ? wdata.word : "";
 						(<HTMLInputElement>w.querySelector("input[type='checkbox']")).checked = wdata.allForms;
-						(<HTMLElement>w.querySelector(".inputword-lemma-prompt")).textContent = wdata.allForms ? "Лема" : "Слова";
+						(<HTMLElement>w.querySelector(".inputword-lemma-prompt")).textContent = wdata.allForms ? "Пачатковая форма" : "Слова";
 						(<HTMLElement>w.querySelector(".wordgram-grammar-string")).innerText = wdata.grammar ? wdata.grammar : "";
 						DialogWordGrammar.wordGrammarToText(wdata.grammar, w.querySelector(".wordgram-display"));
 					});
@@ -182,7 +182,7 @@ class KorpusUI {
 					let w: HTMLElement = this.addWord('inputword');
 					(<HTMLInputElement>w.querySelector("input[type='text']")).value = cp.word.word ? cp.word.word : "";
 					(<HTMLInputElement>w.querySelector("input[type='checkbox']")).checked = cp.word.allForms;
-					(<HTMLElement>w.querySelector(".inputword-lemma-prompt")).textContent = cp.word.allForms ? "Лема" : "Слова";
+					(<HTMLElement>w.querySelector(".inputword-lemma-prompt")).textContent = cp.word.allForms ? "Пачатковая форма" : "Слова";
 					(<HTMLElement>w.querySelector(".wordgram-grammar-string")).innerText = cp.word.grammar ? cp.word.grammar : "";
 					DialogWordGrammar.wordGrammarToText(cp.word.grammar, w.querySelector(".wordgram-display"));
 				}
