@@ -43,6 +43,7 @@ public class LemmaInfo {
 
     public static class LemmaVariant {
         public String id;
+        public String tag;
         public List<LemmaForm> forms = new ArrayList<>();
     }
 

@@ -1,22 +1,23 @@
 <script id="template-grammardb" type="text/x-jsrender">
   <div class="modal-header">
-    <h4 class="modal-title pull-left">{{>details.lemma}}</h4>
+    <h4 class="modal-title pull-left">{{>details.lemma}}
+      {{if details.meaning}}
+        : {{>details.meaning}}
+      {{/if}}
+    </h4>
       <button type="button" class="close pull-right" aria-label="Close" onClick="dialogGrammarDB.onClose()">
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
   <div class="modal-body">
+   {{for details.variants itemVar="~v"}}
     <div class="card mx-auto" style="width: fit-content;">
       <div class="card-header">
         <div style="color: #995731; font-style: italic; font-size:110%">
-        {{for details.catText}}{{if #index > 0}}, {{/if}}<span>{{>value}}</span>{{/for}}
+        {{for catText}}{{if #index > 0}}, {{/if}}<span>{{>value}}</span>{{/for}}
           <!--div><span class="grheadertag">{{>key}}</span>: {{>value}}</div-->
         </div>
-        {{if details.meaning}}
-          <br/>Значэнне: {{>details.meaning}}
-        {{/if}}
       </div>
-      {{for details.variants itemVar="~v"}}
         <div class="card-body">
           {{if tag.match("^N.....5$") tmpl="#template-grammardb-prymietnik"}}
           {{else tag.match("^N.+$") tmpl="#template-grammardb-nazounik"}}
@@ -35,8 +36,8 @@
           {{else tmpl="#template-grammardb-other"}}
           {{/if}}
         </div>
-      {{/for}}
     </div>
+    {{/for}}
   </div>
 </script>
 

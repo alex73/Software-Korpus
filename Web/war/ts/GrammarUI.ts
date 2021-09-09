@@ -126,13 +126,12 @@ class OutGrammarParadigm {
     public lemma: string;
     public meaning: string;
     public variants: OutGrammarVariant[];
-
-    public catText: KeyValue[];
-    public subtree: { [key:string]:GrammarLetter; };
 }
 
 class OutGrammarVariant {
     public tag: string;
+    public catText: KeyValue[];
+    public subtree: { [key:string]:GrammarLetter; };
     public forms: OutGrammarForm[];
     public catnames: string[];
     public sourceForms: LemmaForm[];

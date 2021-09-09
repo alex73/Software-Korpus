@@ -404,22 +404,24 @@ public class GrammarServiceImpl {
 
     LemmaInfo.LemmaParadigm conv(Paradigm p, boolean fullDatabase) {
         LemmaInfo.LemmaParadigm r = new LemmaInfo.LemmaParadigm();
+        r.lemma = StressUtils.combineAccute(p.getLemma());
+        r.tag = p.getTag();
+        r.meaning = p.getMeaning();
         for (Variant v : p.getVariant()) {
             List<Form> forms = fullDatabase ? v.getForm()
                     : FormsReadyFilter.getAcceptedForms(FormsReadyFilter.MODE.SHOW, p, v);
             if (forms == null) {
                 continue;
             }
-            r.lemma = StressUtils.combineAccute(p.getLemma());
-            r.tag = p.getTag();
-            r.meaning = p.getMeaning();
             LemmaInfo.LemmaVariant rv = new LemmaInfo.LemmaVariant();
+            rv.id = v.getId();
+            rv.tag = v.getTag();
             r.variants.add(rv);
             for (Form f : forms) {
                 LemmaInfo.LemmaForm rf = new LemmaInfo.LemmaForm();
                 rf.value = StressUtils.combineAccute(f.getValue());
                 rf.tag = f.getTag();
-				rf.options = f.getOptions() != null ? f.getOptions().name() : null;
+                rf.options = f.getOptions() != null ? f.getOptions().name() : null;
                 rv.forms.add(rf);
             }
         }

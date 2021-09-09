@@ -95,18 +95,18 @@ class DialogGrammarDB {
 		let r: OutGrammarParadigm = new OutGrammarParadigm();
 		r.lemma = p.lemma;
 		r.meaning = p.meaning;
-		let skip: string[] = Grammar.getSkipParts(grammarService.initial, p.tag);
-		r.catText = Grammar.parseCode(grammarService.initial, p.tag).filter(kv => skip.indexOf(kv.key) < 0);
-		r.subtree = Grammar.subtree(p.tag, grammarService.initial.grammarTree);
 		r.variants = [];
 		for (let v of p.variants) {
 			let rv: OutGrammarVariant = new OutGrammarVariant();
-			rv.tag = p.tag;
+            rv.tag = (p.tag != null ? p.tag : "") + (v.tag != null ? v.tag : "");
+            let skip: string[] = Grammar.getSkipParts(grammarService.initial, rv.tag);
+            rv.catText = Grammar.parseCode(grammarService.initial, rv.tag).filter(kv => skip.indexOf(kv.key) < 0);
+            rv.subtree = Grammar.subtree(rv.tag, grammarService.initial.grammarTree);
 			rv.forms = [];
 			rv.catnames = [];
 
 			for (let f of v.forms) {
-				let gr = r.subtree;
+				let gr = rv.subtree;
 				for (let c of f.tag.split('')) {
 					if (gr) {
 						let g = gr[c];
@@ -133,7 +133,7 @@ class DialogGrammarDB {
 				rf.data = [];
 				rf.colspan = [];
 
-				let gr = r.subtree;
+				let gr = rv.subtree;
 				for (let c of f.tag.split('')) {
 					if (gr) {
 						let g = gr[c];

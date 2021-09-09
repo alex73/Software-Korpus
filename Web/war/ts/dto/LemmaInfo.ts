@@ -19,6 +19,7 @@ class LemmaParadigm {
 
 class LemmaVariant {
     public id: string;
+    public tag: string;
     public forms: LemmaForm[];
 }
 
