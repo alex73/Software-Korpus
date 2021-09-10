@@ -16,22 +16,23 @@ import org.alex73.korpus.text.structure.files.WordItem;
 
 public class PtextToKorpus {
     enum BLOCK_MODE {
-        ONE_LINE, POETRY
+        ONE_LINE, EMPTY_LINE_SEPARATOR
     };
 
     public final List<Paragraph> paragraphs = new ArrayList<>();
     private final List<Sentence> sentences = new ArrayList<>();
     private final List<Word> words = new ArrayList<>();
-    private BLOCK_MODE mode = BLOCK_MODE.ONE_LINE;
+    private BLOCK_MODE mode;
     private int page;
 
-    public PtextToKorpus(List<TextLine> lines) {
+    public PtextToKorpus(List<TextLine> lines, boolean splitEachLine) {
+        mode = splitEachLine ? BLOCK_MODE.ONE_LINE : BLOCK_MODE.EMPTY_LINE_SEPARATOR;
         for (TextLine line : lines) {
-            if (line.isEmpty()) {
+            if (line.isEmpty() || line.size() == 1 && line.get(0).getText().isBlank()) {
                 switch (mode) {
                 case ONE_LINE:
                     continue;
-                case POETRY:
+                case EMPTY_LINE_SEPARATOR:
                     flushParagraph();
                     continue;
                 default:
@@ -42,7 +43,7 @@ public class PtextToKorpus {
                 if (w instanceof InlineTag) {
                 } else if (w instanceof LongTagItem) {
                     if ("##Poetry:begin".equals(w.getText())) {
-                        mode = BLOCK_MODE.POETRY;
+                        mode = BLOCK_MODE.EMPTY_LINE_SEPARATOR;
                     } else if ("##Poetry:end".equals(w.getText())) {
                         flushParagraph();
                         mode = BLOCK_MODE.ONE_LINE;
@@ -89,7 +90,7 @@ public class PtextToKorpus {
     public static Paragraph oneLine(TextLine line) {
         List<TextLine> lines = new ArrayList<>();
         lines.add(line);
-        List<Paragraph> r = new PtextToKorpus(lines).paragraphs;
+        List<Paragraph> r = new PtextToKorpus(lines, true).paragraphs;
         switch (r.size()) {
         case 0:
             return null;

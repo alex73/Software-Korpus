@@ -60,7 +60,7 @@ public class TextArchiveParser extends BaseParser {
                         if (textInfo.title == null) {
                             textInfo.title = "";
                         }
-                        PrepareCache3.process(textInfo, new PtextToKorpus(doc.lines).paragraphs);
+                        PrepareCache3.process(textInfo, new PtextToKorpus(doc.lines, true).paragraphs);
                     } catch (Exception ex) {
                         PrepareCache3.errors.reportError("Error parse " + file + "!" + en.getName(), ex);
                     }

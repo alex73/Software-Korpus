@@ -31,7 +31,7 @@ public class OcrTextParser extends BaseParser {
                         + file.getFileName().toString().replaceAll("^([0-9]+).+?$", "$1");
                 textInfo.source = "kamunikat.org";
                 TextUtils.fillFromHeaders(textInfo, doc.headers);
-                PrepareCache3.process(textInfo, new PtextToKorpus(doc.lines).paragraphs);
+                PrepareCache3.process(textInfo, new PtextToKorpus(doc.lines, false).paragraphs);
             } catch (Exception ex) {
                 PrepareCache3.errors.reportError("Error parse " + file, ex);
             }

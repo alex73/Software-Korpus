@@ -161,7 +161,6 @@ public class PrepareCache3 {
         // write to json
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setSerializationInclusion(Include.NON_NULL);
-        System.out.println(textInfos.size());
         try (BufferedWriter wr = Files.newBufferedWriter(OUTPUT.resolve("texts.jsons"))) {
             for (TextInfo ti : textInfos) {
                 wr.write(objectMapper.writeValueAsString(ti));

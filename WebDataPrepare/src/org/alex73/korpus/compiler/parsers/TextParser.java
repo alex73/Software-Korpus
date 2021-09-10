@@ -52,7 +52,7 @@ public class TextParser extends BaseParser {
                     textInfo.subcorpus = "pieraklady";
                 }
                 fixAuthors(textInfo);
-                PrepareCache3.process(textInfo, new PtextToKorpus(doc.lines).paragraphs);
+                PrepareCache3.process(textInfo, new PtextToKorpus(doc.lines, true).paragraphs);
             } catch (Exception ex) {
                 PrepareCache3.errors.reportError("Error parse " + file, ex);
             }

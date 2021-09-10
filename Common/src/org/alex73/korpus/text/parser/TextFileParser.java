@@ -17,6 +17,7 @@ import org.alex73.korpus.text.structure.files.TextLine;
 
 /**
  * Parser for palicka-like text files.
+ * It parses only line-by-line. See PtextToKorpus for poetry and 'empy-line-separator' modes.
  */
 public class TextFileParser {
     private static Pattern RE_TAG = Pattern.compile("##([A-Za-z0-9]+):?(.*)");
