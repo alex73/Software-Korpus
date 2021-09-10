@@ -23,7 +23,10 @@ import org.alex73.korpus.text.structure.corpus.Word;
 import org.alex73.korpus.utils.StressUtils;
 
 public class StatProcessing {
+    // stat by subcorpuses,styles,genres
     private final Map<String, StatInfo> stats = new HashMap<>();
+    // authors by lemmas
+    private final Map<String, Set<String>> authorsByLemmas = new HashMap<>();
 
     public void add(TextInfo textInfo, List<Paragraph> content) {
         StatInfo subcorpusInfo = getStatInfo(textInfo.subcorpus);
@@ -46,7 +49,7 @@ public class StatProcessing {
         } else {
             todo.add(getStatInfo(textInfo.subcorpus + "._"));
         }
-        todo.forEach(s -> {
+        todo.parallelStream().forEach(s -> {
             synchronized (s) {
                 s.texts++;
             }
@@ -56,9 +59,30 @@ public class StatProcessing {
             for (Sentence se : p.sentences) {
                 for (Word w : se.words) {
                     String[] lemmas = w.lemmas == null || w.lemmas.isEmpty() ? null : RE_SPLIT.split(w.lemmas);
-                    todo.forEach(s -> s.addWord(w.normalized, lemmas));
+                    todo.parallelStream().forEach(s -> s.addWord(w.normalized, lemmas));
+                    if (lemmas != null && textInfo.authors != null && textInfo.authors.length > 0) {
+                        for (String lemma : lemmas) {
+                            for (String author : textInfo.authors) {
+                                addAuthorByLemma(lemma, author);
+                            }
+                        }
+                    }
                 }
             }
+        }
+    }
+
+    private void addAuthorByLemma(String lemma, String author) {
+        Set<String> authors;
+        synchronized (authorsByLemmas) {
+            authors = authorsByLemmas.get(lemma);
+            if (authors == null) {
+                authors = new HashSet<>();
+                authorsByLemmas.put(lemma, authors);
+            }
+        }
+        synchronized (authors) {
+            authors.add(author);
         }
     }
 
@@ -73,9 +97,12 @@ public class StatProcessing {
 
     public synchronized void write(Path dir) throws Exception {
         for (Map.Entry<String, StatInfo> en : stats.entrySet()) {
-            en.getValue().writeFormsFreq(dir.resolve("stat.formsfreq." + en.getKey().replace('/', '_') + ".tab"));
-            en.getValue().writeLemmasFreq(dir.resolve("stat.lemmasfreq." + en.getKey().replace('/', '_') + ".tab"));
-            en.getValue().writeUnknownFreq(dir.resolve("stat.unknownfreq." + en.getKey().replace('/', '_') + ".tab"));
+            en.getValue().writeFormsFreq(
+                    dir.resolve(("stat.formsfreq." + en.getKey().replace('/', '_') + ".tab").replace("..", ".")));
+            en.getValue().writeLemmasFreq(
+                    dir.resolve(("stat.lemmasfreq." + en.getKey().replace('/', '_') + ".tab").replace("..", ".")));
+            en.getValue().writeUnknownFreq(
+                    dir.resolve(("stat.unknownfreq." + en.getKey().replace('/', '_') + ".tab").replace("..", ".")));
         }
 
         List<String> stat = new ArrayList<>();
@@ -92,6 +119,12 @@ public class StatProcessing {
             stat.add("words." + en.getKey() + "=" + en.getValue().words);
         }
         Files.write(dir.resolve("stat.properties"), stat);
+
+        List<String> lemmas = new ArrayList<>(authorsByLemmas.keySet());
+        Collections.sort(lemmas, BE);
+        lemmas = lemmas.stream().map(le -> le + '=' + String.join(";", authorsByLemmas.get(le)))
+                .collect(Collectors.toList());
+        Files.write(dir.resolve("lemma-authors.list"), lemmas);
     }
 
     private static final Collator BE = Collator.getInstance(new Locale("be"));
@@ -155,20 +188,20 @@ public class StatProcessing {
             }
         }
 
-        void writeFormsFreq(Path f) throws Exception {
+        synchronized void writeFormsFreq(Path f) throws Exception {
             List<String> list = byForm.entrySet().stream().sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
                     .map(en -> en.toString()).collect(Collectors.toList());
             Files.write(f, list);
         }
 
-        void writeUnknownFreq(Path f) throws Exception {
+        synchronized void writeUnknownFreq(Path f) throws Exception {
             List<String> list = byUnknown.entrySet().stream()
                     .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue())).map(en -> en.toString())
                     .collect(Collectors.toList());
             Files.write(f, list);
         }
 
-        void writeLemmasFreq(Path f) throws Exception {
+        synchronized void writeLemmasFreq(Path f) throws Exception {
             List<String> list = byLemma.values().stream().sorted((a, b) -> Integer.compare(b.intCount, a.intCount))
                     .map(s -> s.para + "\t" + s.intCount + "\t" + s.valuesCount).collect(Collectors.toList());
             Files.write(f, list);

@@ -5,6 +5,7 @@ class DialogGrammarDB {
 			getter: this.getter,
 			log: this.log
 		}));
+        $('[data-toggle="tooltip"]').tooltip();
 		this.hideBlock('tr.gr-p1');
 		this.hideBlock('tr.gr-p2');
 		this.hideBlock('tr.gr-p3');
@@ -17,7 +18,6 @@ class DialogGrammarDB {
 	hideBlock(cls:string) {
 		var hide = true;
 		$(cls).each((idx,e) => {
-			console.log(e.outerHTML+'= has '+($(e).find('w').length));
 			if ($(e).find('w').length) {
 				hide = false;
 			}
@@ -104,6 +104,13 @@ class DialogGrammarDB {
             rv.subtree = Grammar.subtree(rv.tag, grammarService.initial.grammarTree);
 			rv.forms = [];
 			rv.catnames = [];
+            rv.dictionaries = [];
+            for(let sl of grammarService.initial.slouniki) {
+                if (v.dictionaries.indexOf(sl.name) >= 0) {
+                    rv.dictionaries.push(sl);
+                }
+            }
+            rv.authors = v.authors;
 
 			for (let f of v.forms) {
 				let gr = rv.subtree;

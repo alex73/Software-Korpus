@@ -17,6 +17,21 @@
         {{for catText}}{{if #index > 0}}, {{/if}}<span>{{>value}}</span>{{/for}}
           <!--div><span class="grheadertag">{{>key}}</span>: {{>value}}</div-->
         </div>
+        {{if dictionaries}}
+        <div>
+          {{for dictionaries}}
+            <span class="badge badge-info" data-toggle="tooltip" data-placement="bottom" title="{{>desc}}">{{>name}}</span>
+          {{/for}}
+        </div>
+        {{/if}}
+        {{if authors}}
+        <div>
+          {{for authors}}
+            <a class="badge badge-secondary" data-toggle="tooltip" data-placement="bottom" target="_blank"
+            title="Націсніце на імя каб знайсці ўжыванні" href='korpus.html#search:{"textStandard":{"authors":["{{>}}"]},"words":[{"word":"{{>~root.details.lemma}}","allForms":true}]}'>{{>}}</a>
+          {{/for}}
+        </div>
+        {{/if}}
       </div>
         <div class="card-body">
           {{if tag.match("^N.....5$") tmpl="#template-grammardb-prymietnik"}}

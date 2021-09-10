@@ -3,6 +3,12 @@ class GrammarInitial {
   public grammarWordTypes: KeyValue[];
   public grammarWordTypesGroups: { [key: string]: DBTagsGroups; };
   public skipGrammar: { [key: string]: string[]; };
+  public slouniki: GrammarDict[];
+}
+
+class GrammarDict {
+    public name: string;
+    public desc: string;
 }
 
 class GrammarLetter {

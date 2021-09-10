@@ -416,16 +416,33 @@ public class GrammarServiceImpl {
             LemmaInfo.LemmaVariant rv = new LemmaInfo.LemmaVariant();
             rv.id = v.getId();
             rv.tag = v.getTag();
+            rv.dictionaries.addAll(SetUtils.getSlouniki(v.getSlouniki()).keySet());
+            rv.authors = createAuthorsList(p.getLemma());
             r.variants.add(rv);
             for (Form f : forms) {
                 LemmaInfo.LemmaForm rf = new LemmaInfo.LemmaForm();
                 rf.value = StressUtils.combineAccute(f.getValue());
                 rf.tag = f.getTag();
                 rf.options = f.getOptions() != null ? f.getOptions().name() : null;
+                rv.dictionaries.addAll(SetUtils.getSlouniki(f.getSlouniki()).keySet());
                 rv.forms.add(rf);
             }
         }
         return r;
+    }
+
+    List<String> createAuthorsList(String lemma) {
+        Set<String> authors = getApp().authorsByLemmas.get(lemma);
+        if (authors == null) {
+            return Collections.emptyList();
+        }
+        for (Set<String> authorsGroup : getApp().authorsGroups) {
+            List<String> r = authorsGroup.stream().filter(authors::contains).collect(Collectors.toList());
+            if (!r.isEmpty()) {
+                return r;
+            }
+        }
+        return authors.stream().limit(10).collect(Collectors.toList());
     }
 
     String revert(String s) {

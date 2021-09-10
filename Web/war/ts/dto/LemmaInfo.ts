@@ -21,6 +21,8 @@ class LemmaVariant {
     public id: string;
     public tag: string;
     public forms: LemmaForm[];
+    public dictionaries: string[];
+    public authors: string[];
 }
 
 class LemmaForm {

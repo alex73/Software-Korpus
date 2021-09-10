@@ -136,6 +136,8 @@ class OutGrammarVariant {
     public catnames: string[];
     public sourceForms: LemmaForm[];
     public sourceFormsUsageCount: number[];
+    public dictionaries: GrammarDict[];
+    public authors: string[];
 }
 
 class OutGrammarForm {

@@ -16,11 +16,18 @@ public class GrammarInitial {
     public List<KeyValue> grammarWordTypes;
     public Map<Character, DBTagsGroups> grammarWordTypesGroups;
     public Map<Character, Set<String>> skipGrammar;
+    public List<GrammarDict> slouniki;
 
     @JsonInclude(Include.NON_NULL)
     public static class GrammarLetter {
         public String name;
         public String desc;
         public Map<Character, GrammarLetter> ch;
+    }
+
+    @JsonInclude(Include.NON_NULL)
+    public static class GrammarDict {
+        public String name;
+        public String desc;
     }
 }

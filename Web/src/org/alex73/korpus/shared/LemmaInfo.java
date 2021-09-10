@@ -24,6 +24,8 @@ package org.alex73.korpus.shared;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * DTO for grammar database search results.
@@ -45,6 +47,8 @@ public class LemmaInfo {
         public String id;
         public String tag;
         public List<LemmaForm> forms = new ArrayList<>();
+        public Set<String> dictionaries = new TreeSet<>();
+        public List<String> authors = new ArrayList<>();
     }
 
     public static class LemmaForm {

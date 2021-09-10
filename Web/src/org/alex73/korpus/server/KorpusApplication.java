@@ -6,13 +6,18 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.annotation.PreDestroy;
@@ -36,10 +41,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ApplicationPath("rest")
 public class KorpusApplication extends Application {
-    public String korpusCache = System.getProperty("KORPUS_CACHE");
-    public String grammarDb = System.getProperty("GRAMMAR_DB");
-    public String configDir = System.getProperty("CONFIG_DIR");
-    public String noKorpus = System.getProperty("NOKORPUS");
+    public String korpusCache;
+    public String grammarDb;
+    public String configDir;
 
     List<String> settings;
     Properties stat;
@@ -48,6 +52,8 @@ public class KorpusApplication extends Application {
     public GrammarFinder grFinder;
     public GrammarInitial grammarInitial;
     InitialData searchInitial;
+    public Map<String, Set<String>> authorsByLemmas;
+    public List<Set<String>> authorsGroups;
 
     LuceneFilter processKorpus;
 
@@ -60,30 +66,22 @@ public class KorpusApplication extends Application {
         try {
             InitialContext context = new InitialContext();
             Context xmlNode = (Context) context.lookup("java:comp/env");
-            if (korpusCache == null) {
-                korpusCache = (String) xmlNode.lookup("KORPUS_CACHE");
-            }
-            if (grammarDb == null) {
-                grammarDb = (String) xmlNode.lookup("GRAMMAR_DB");
-            }
+            korpusCache = (String) xmlNode.lookup("KORPUS_CACHE");
+            grammarDb = (String) xmlNode.lookup("GRAMMAR_DB");
+            configDir = (String) xmlNode.lookup("CONFIG_DIR");
             if (configDir == null) {
-                configDir = (String) xmlNode.lookup("CONFIG_DIR");
-            }
-            if (configDir == null) {
-                System.err.println("CONFIG_DIR is not defined");
-                return;
+                throw new Exception("CONFIG_DIR is not defined");
             }
             if (korpusCache == null) {
-                System.err.println("KORPUS_DIR is not defined");
-                return;
+                throw new Exception("KORPUS_DIR is not defined");
             }
             if (grammarDb == null) {
-                System.err.println("GRAMMAR_DB is not defined");
-                return;
+                throw new Exception("GRAMMAR_DB is not defined");
             }
             settings = Files.readAllLines(Paths.get(configDir + "/settings.ini"));
             stat = loadSettings(korpusCache + "/stat.properties");
             readTextInfos();
+            loadAuthorsGroups();
 
             if (!grammarDb.isEmpty()) {
                 gr = GrammarDB2.initializeFromDir(grammarDb);
@@ -94,19 +92,17 @@ public class KorpusApplication extends Application {
                     + getUsedMemory());
             grFinder = new GrammarFinder(gr);
             System.out.println("GrammarDB indexed. Used memory: " + getUsedMemory());
-            if (!"yes".equals(noKorpus)) {
-                processKorpus = new LuceneFilter(korpusCache);
-                System.out.println("Lucene initialized");
-            }
+            processKorpus = new LuceneFilter(korpusCache);
+            System.out.println("Lucene initialized");
 
-            prepareInitial();
+            prepareInitialGrammar();
+            prepareInitialKorpus();
             System.out.println("Initialization finished. Used memory: " + getUsedMemory());
         } catch (Throwable ex) {
-            System.err.println("startup");
+            System.err.println("Startup error");
             ex.printStackTrace();
             throw new ExceptionInInitializerError(ex);
         }
-        // packages("org.alex73.korpus.server");
     }
 
     private String getUsedMemory() {
@@ -117,7 +113,7 @@ public class KorpusApplication extends Application {
         return Math.round((runtime.totalMemory() - runtime.freeMemory()) / 1024.0 / 1024.0) + "mb";
     }
 
-    void prepareInitial() throws Exception {
+    void prepareInitialGrammar() throws Exception {
         grammarInitial = new GrammarInitial();
         grammarInitial.grammarTree = new TreeMap<>();
         grammarInitial.grammarTree = addGrammar(BelarusianTags.getInstance().getRoot());
@@ -133,7 +129,20 @@ public class KorpusApplication extends Application {
                 grammarInitial.skipGrammar.put(part, vs);
             }
         }
+        grammarInitial.slouniki=new ArrayList<>();
+        for(String d:Files.readAllLines(Paths.get(grammarDb+"/slouniki.list"))) {
+            GrammarInitial.GrammarDict dict = new GrammarInitial.GrammarDict();
+            int p = d.indexOf('=');
+            if (p < 0 || !d.substring(0, p).matches("[a-z0-9]+")) {
+                throw new Exception("Wrong dictionary name format: " + d);
+            }
+            dict.name = d.substring(0, p);
+            dict.desc = d.substring(p + 1);
+            grammarInitial.slouniki.add(dict);
+        }
+    }
 
+    void prepareInitialKorpus() throws Exception {
         searchInitial = new InitialData();
         searchInitial.subcorpuses = new ArrayList<>();
         searchInitial.authors = new TreeMap<>();
@@ -164,6 +173,39 @@ public class KorpusApplication extends Application {
 
     protected void readTextInfos() throws Exception {
         textInfos = Files.readAllLines(Paths.get(korpusCache + "/texts.jsons"));
+
+        authorsByLemmas = new HashMap<>();
+        for (String s : Files.readAllLines(Paths.get(korpusCache + "/lemma-authors.list"))) {
+            int p = s.indexOf('=');
+            if (p < 0) {
+                throw new Exception("Wrong line: " + s);
+            }
+            String lemma = s.substring(0, p);
+            String[] authorsList = s.substring(p + 1).split(";");
+            Set<String> authors = authorsByLemmas.get(lemma);
+            if (authors == null) {
+                authors = new HashSet<>();
+                authorsByLemmas.put(lemma, authors);
+            }
+            for (String a : authorsList) {
+                authors.add(a);
+            }
+        }
+    }
+
+    protected void loadAuthorsGroups() throws Exception {
+        authorsGroups = new ArrayList<>();
+        Set<String> currentGroup = new TreeSet<>(Collator.getInstance(new Locale("be")));
+        for (String s : Files.readAllLines(Paths.get(configDir + "/authors-groups.list"))) {
+            s = s.trim();
+            if (s.isEmpty() && !currentGroup.isEmpty()) {
+                authorsGroups.add(new TreeSet<>(currentGroup));
+                currentGroup.clear();
+            }
+        }
+        if (!currentGroup.isEmpty()) {
+            authorsGroups.add(new TreeSet<>(currentGroup));
+        }
     }
 
     public TextInfo getTextInfo(int pos) {
