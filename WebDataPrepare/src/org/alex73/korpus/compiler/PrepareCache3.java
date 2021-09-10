@@ -28,6 +28,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class PrepareCache3 {
     private static final Logger LOG = LoggerFactory.getLogger(PrepareCache3.class);
 
+    public static final String PARALLEL_COUNT = "32";
+    public static final int LUCENE_BUFFER_MB = 8 * 1024;
+
     public static final boolean writeToLucene = true;
     public static Path INPUT;
     public static Path OUTPUT;
@@ -66,7 +69,7 @@ public class PrepareCache3 {
         LOG.info("1st pass time: " + (af - be) + "ms");
         errorsList.clear();
 
-        luceneOpen(OUTPUT);
+        luceneOpen(OUTPUT, LUCENE_BUFFER_MB);
         textPositionsBySourceFile = calcTextsPositions();
 
         GrammarDB2 gr;
@@ -83,7 +86,7 @@ public class PrepareCache3 {
         be = System.currentTimeMillis();
         new FilesReader().run(INPUT, errors, false);
         af = System.currentTimeMillis();
-        LOG.info("2st pass time: " + (af - be) + "ms");
+        LOG.info("2st pass time: " + ((af - be) / 1000 / 60) + "min");
         LOG.info("Finishing...");
         luceneClose();
         textStat.write(OUTPUT);
@@ -106,9 +109,9 @@ public class PrepareCache3 {
         return null;
     }
 
-    static void luceneOpen(Path dir) throws Exception {
+    static void luceneOpen(Path dir, int bufferSizeMb) throws Exception {
         FileUtils.deleteDirectory(dir.toFile());
-        lucene = new LuceneDriverWrite(dir.toString());
+        lucene = new LuceneDriverWrite(dir.toString(), bufferSizeMb);
     }
 
     static void luceneClose() throws Exception {

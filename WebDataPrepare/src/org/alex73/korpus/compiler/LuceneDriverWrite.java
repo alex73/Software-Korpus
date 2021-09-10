@@ -34,10 +34,10 @@ public class LuceneDriverWrite extends LuceneFields {
 
     protected Document docSentence;
 
-    public LuceneDriverWrite(String rootDir) throws Exception {
+    public LuceneDriverWrite(String rootDir, int bufferSizeMb) throws Exception {
         IndexWriterConfig config = new IndexWriterConfig();
         config.setOpenMode(OpenMode.CREATE);
-        config.setRAMBufferSizeMB(16384);
+        config.setRAMBufferSizeMB(bufferSizeMb);
         config.setIndexSort(new Sort(new SortField(fieldTextID.name(), SortField.Type.INT)));
 
         dir = new NIOFSDirectory(Paths.get(rootDir));
