@@ -27,6 +27,8 @@ public class KorpusDateTime {
     static Pattern RE_DATE3 = Pattern.compile("([0-9]{4})\\-([0-9]{2})\\-([0-9]{2})");
     static Pattern RE_MONTH1 = Pattern.compile(
             "(студзень|люты|сакавік|красавік|травень|май|чэрвень|ліпень|жнівень|верасень|кастрычнік|лістапад|снежань)\\s+([0-9]{4})");
+    static Pattern RE_MONTH2 = Pattern.compile("([0-9]{2})\\.([0-9]{4})");
+    static Pattern RE_MONTH3 = Pattern.compile("([0-9]{2})\\.([0-9]{4})\\-([0-9]{2})\\.([0-9]{4})");
     static Pattern RE_DATETIME = Pattern.compile(
             "([0-9]{4})\\-([0-9]{2})\\-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(\\.[0-9]{3})?([\\-+]([0-9]{2}):([0-9]{2}))?");
     static List<String> months = Arrays.asList("студзень", "люты", "сакавік", "красавік", "травень", "май", "чэрвень",
@@ -35,14 +37,12 @@ public class KorpusDateTime {
     private List<Pair> pairs = new ArrayList<>();
 
     public KorpusDateTime(String date) {
-        for (String y : date.split(";")) {
+        for (String y : date.split("[;,]")) {
             y = y.trim();
             if (y.endsWith("?")) {
                 y = y.substring(0, y.length() - 1);
             }
-            if (y.startsWith("[") && y.endsWith("]")) {
-                y = y.substring(1, y.length() - 1);
-            }
+            y = y.replace("[", "").replace("]", "");
             Matcher m;
             XMLGregorianCalendar d1, d2;
             if (y.indexOf('T') > 0 && RE_DATETIME.matcher(y).matches()) {
@@ -77,6 +77,15 @@ public class KorpusDateTime {
                 d1 = DTFACTORY.newXMLGregorianCalendarDate(Integer.parseInt(m.group(2)), months.indexOf(m.group(1)) + 1,
                         DatatypeConstants.FIELD_UNDEFINED, DatatypeConstants.FIELD_UNDEFINED);
                 d2 = d1;
+            } else if ((m = RE_MONTH2.matcher(y)).matches()) {
+                d1 = DTFACTORY.newXMLGregorianCalendarDate(Integer.parseInt(m.group(2)), Integer.parseInt(m.group(1)),
+                        DatatypeConstants.FIELD_UNDEFINED, DatatypeConstants.FIELD_UNDEFINED);
+                d2 = d1;
+            } else if ((m = RE_MONTH3.matcher(y)).matches()) {
+                d1 = DTFACTORY.newXMLGregorianCalendarDate(Integer.parseInt(m.group(2)), Integer.parseInt(m.group(1)),
+                        DatatypeConstants.FIELD_UNDEFINED, DatatypeConstants.FIELD_UNDEFINED);
+                d2 = DTFACTORY.newXMLGregorianCalendarDate(Integer.parseInt(m.group(4)), Integer.parseInt(m.group(3)),
+                        DatatypeConstants.FIELD_UNDEFINED, DatatypeConstants.FIELD_UNDEFINED);
             } else {
                 throw new RuntimeException("Wrong date format: " + date);
             }
