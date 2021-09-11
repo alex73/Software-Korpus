@@ -137,7 +137,8 @@ class OutGrammarVariant {
     public sourceForms: LemmaForm[];
     public sourceFormsUsageCount: number[];
     public dictionaries: GrammarDict[];
-    public authors: string[];
+    public authors: Author[];
+    public authorsOther: number;
 }
 
 class OutGrammarForm {

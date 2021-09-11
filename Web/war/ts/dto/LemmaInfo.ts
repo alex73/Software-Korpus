@@ -22,11 +22,17 @@ class LemmaVariant {
     public tag: string;
     public forms: LemmaForm[];
     public dictionaries: string[];
-    public authors: string[];
+    public authors: Author[];
+    public authorsOther: number;
 }
 
 class LemmaForm {
     public tag: string;
     public value: string;
     public options: string;
+}
+
+class Author {
+    public name: string;
+    public displayName: string;
 }

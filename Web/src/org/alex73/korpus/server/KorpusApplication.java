@@ -6,18 +6,15 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import javax.annotation.PreDestroy;
@@ -35,6 +32,7 @@ import org.alex73.korpus.belarusian.BelarusianTags;
 import org.alex73.korpus.belarusian.TagLetter;
 import org.alex73.korpus.server.data.GrammarInitial;
 import org.alex73.korpus.server.data.GrammarInitial.GrammarLetter;
+import org.alex73.korpus.shared.LemmaInfo;
 import org.alex73.korpus.server.data.InitialData;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,7 +51,7 @@ public class KorpusApplication extends Application {
     public GrammarInitial grammarInitial;
     InitialData searchInitial;
     public Map<String, Set<String>> authorsByLemmas;
-    public List<Set<String>> authorsGroups;
+    public List<LemmaInfo.Author> authors;
 
     LuceneFilter processKorpus;
 
@@ -81,7 +79,7 @@ public class KorpusApplication extends Application {
             settings = Files.readAllLines(Paths.get(configDir + "/settings.ini"));
             stat = loadSettings(korpusCache + "/stat.properties");
             readTextInfos();
-            loadAuthorsGroups();
+            loadAuthors();
 
             if (!grammarDb.isEmpty()) {
                 gr = GrammarDB2.initializeFromDir(grammarDb);
@@ -193,18 +191,29 @@ public class KorpusApplication extends Application {
         }
     }
 
-    protected void loadAuthorsGroups() throws Exception {
-        authorsGroups = new ArrayList<>();
-        Set<String> currentGroup = new TreeSet<>(Collator.getInstance(new Locale("be")));
+    protected void loadAuthors() throws Exception {
+        Set<String> lemmasAuthors = authorsByLemmas.values().stream().flatMap(a -> a.stream())
+                .collect(Collectors.toSet());
+        Set<String> uniqAuthors = new HashSet<>();
+        authors = new ArrayList<>();
         for (String s : Files.readAllLines(Paths.get(configDir + "/authors-groups.list"))) {
-            s = s.trim();
-            if (s.isEmpty() && !currentGroup.isEmpty()) {
-                authorsGroups.add(new TreeSet<>(currentGroup));
-                currentGroup.clear();
+            if (s.isBlank()) {
+                continue;
             }
-        }
-        if (!currentGroup.isEmpty()) {
-            authorsGroups.add(new TreeSet<>(currentGroup));
+            int p = s.indexOf('=');
+            if (p < 0) {
+                throw new Exception("Wrong author: " + s);
+            }
+            LemmaInfo.Author a = new LemmaInfo.Author();
+            a.name = s.substring(0, p).trim();
+            a.displayName = s.substring(p + 1).trim();
+            if (!uniqAuthors.add(a.displayName)) {
+                throw new Exception("Author already defined: " + a.displayName);
+            }
+            if (!lemmasAuthors.contains(a.name)) {
+                System.err.println("Author '" + a.name + "' not used in corpus");
+            }
+            authors.add(a);
         }
     }
 

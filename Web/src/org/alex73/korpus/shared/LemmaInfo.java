@@ -48,12 +48,18 @@ public class LemmaInfo {
         public String tag;
         public List<LemmaForm> forms = new ArrayList<>();
         public Set<String> dictionaries = new TreeSet<>();
-        public List<String> authors = new ArrayList<>();
+        public List<Author> authors = new ArrayList<>();
+        public int authorsOther;
     }
 
     public static class LemmaForm {
         public String tag;
         public String value;
         public String options;
+    }
+
+    public static class Author {
+        public String name;
+        public String displayName;
     }
 }

@@ -26,6 +26,7 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -417,7 +418,7 @@ public class GrammarServiceImpl {
             rv.id = v.getId();
             rv.tag = v.getTag();
             rv.dictionaries.addAll(SetUtils.getSlouniki(v.getSlouniki()).keySet());
-            rv.authors = createAuthorsList(p.getLemma());
+            createAuthorsList(p.getLemma(), rv);
             r.variants.add(rv);
             for (Form f : forms) {
                 LemmaInfo.LemmaForm rf = new LemmaInfo.LemmaForm();
@@ -431,18 +432,31 @@ public class GrammarServiceImpl {
         return r;
     }
 
-    List<String> createAuthorsList(String lemma) {
-        Set<String> authors = getApp().authorsByLemmas.get(lemma);
-        if (authors == null) {
-            return Collections.emptyList();
+    void createAuthorsList(String lemma, LemmaInfo.LemmaVariant rv) {
+        Set<String> origAuthors = getApp().authorsByLemmas.get(lemma);
+        if (origAuthors == null) {
+            return;
         }
-        for (Set<String> authorsGroup : getApp().authorsGroups) {
-            List<String> r = authorsGroup.stream().filter(authors::contains).collect(Collectors.toList());
-            if (!r.isEmpty()) {
-                return r;
+        Set<String> authors = new TreeSet<>(origAuthors);
+        rv.authors = new ArrayList<>();
+        for (LemmaInfo.Author author : getApp().authors) {
+            if (rv.authors.size() >= 15) {
+                break;
+            }
+            if (authors.remove(author.name)) {
+                rv.authors.add(author);
             }
         }
-        return authors.stream().limit(10).collect(Collectors.toList());
+        for (Iterator<String> it = authors.iterator(); it.hasNext();) {
+            if (rv.authors.size() >= 15) {
+                break;
+            }
+            LemmaInfo.Author a = new LemmaInfo.Author();
+            a.name = it.next();
+            a.displayName = a.name;
+            rv.authors.add(a);
+        }
+        rv.authorsOther = authors.size();
     }
 
     String revert(String s) {

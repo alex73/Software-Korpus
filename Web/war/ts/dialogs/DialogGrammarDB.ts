@@ -111,6 +111,7 @@ class DialogGrammarDB {
                 }
             }
             rv.authors = v.authors;
+            rv.authorsOther = v.authorsOther;
 
 			for (let f of v.forms) {
 				let gr = rv.subtree;
