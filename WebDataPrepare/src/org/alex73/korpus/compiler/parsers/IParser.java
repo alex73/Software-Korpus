@@ -1,7 +1,7 @@
 package org.alex73.korpus.compiler.parsers;
 
-import java.util.concurrent.Executor;
+import org.alex73.korpus.compiler.BaseParallelProcessor;
 
 public interface IParser {
-    void parse(Executor queue, boolean headersOnly) throws Exception;
+    void parse(BaseParallelProcessor processor, boolean headersOnly) throws Exception;
 }

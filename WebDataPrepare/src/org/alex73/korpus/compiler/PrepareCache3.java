@@ -1,55 +1,44 @@
 package org.alex73.korpus.compiler;
 
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.base.StaticGrammarFiller2;
-import org.alex73.korpus.base.TextInfo;
+import org.alex73.korpus.compiler.parsers.AuthorsUtil;
 import org.alex73.korpus.text.parser.IProcess;
-import org.alex73.korpus.text.structure.corpus.Paragraph;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class PrepareCache3 {
     private static final Logger LOG = LoggerFactory.getLogger(PrepareCache3.class);
 
-    public static final String PARALLEL_COUNT = "32";
-    public static final int LUCENE_BUFFER_MB = 8 * 1024;
-
+    public static final String PARALLEL_COUNT = "4";
+    public static final boolean processStat = true;
     public static final boolean writeToLucene = true;
+
     public static Path INPUT;
     public static Path OUTPUT;
-    static StaticGrammarFiller2 grFiller;
-    static LuceneDriverWrite lucene;
-    public static List<TextInfo> textInfos = Collections.synchronizedList(new ArrayList<>());
+    public static String grammarDbPath;
+
     public static Map<String, Integer> textPositionsBySourceFile;
 
-    static StatProcessing textStat = new StatProcessing();
     static List<String> errorsList = new ArrayList<>();
 
     static volatile Exception exception;
 
     public static void main(String[] args) throws Exception {
-        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "32");
+        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", PARALLEL_COUNT);
 
         String input = getKey("input", args);
         String output = getKey("output", args);
-        String grammardb = getKey("grammardb", args);
+        grammarDbPath = getKey("grammardb", args);
         if (input == null) {
             throw new Exception("--input not defined");
         }
@@ -59,37 +48,76 @@ public class PrepareCache3 {
 
         INPUT = Paths.get(input);
         OUTPUT = Paths.get(output);
-        FileUtils.deleteDirectory(OUTPUT.toFile());
+
+        try {
+            run();
+        } catch (Throwable ex) {
+            ex.printStackTrace();
+            System.exit(1); // force exit if main thread dead
+        }
+    }
+
+    static void run() throws Exception {
+        if (Files.exists(OUTPUT)) {
+            Files.list(OUTPUT).forEach(p -> {
+                try {
+                    Files.delete(p);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+        }
+        Files.createDirectories(OUTPUT);
 
         // read texts and sort
         LOG.info("1st pass...");
         long be = System.currentTimeMillis();
-        new FilesReader().run(INPUT, errors, true);
+
+        AuthorsUtil.init(INPUT);
+
+        ProcessHeaders h1 = new ProcessHeaders();
+        ProcessFileParser p1 = new ProcessFileParser();
+        FilesReader r1 = new FilesReader(INPUT, true, p1);
+        r1.finish(60);
+        p1.finish(5);
+        h1.finish(1);
         long af = System.currentTimeMillis();
-        LOG.info("1st pass time: " + (af - be) + "ms");
+        LOG.info("1st pass time: " + ((af - be) / 1000) + "s");
         errorsList.clear();
 
-        luceneOpen(OUTPUT, LUCENE_BUFFER_MB);
-        textPositionsBySourceFile = calcTextsPositions();
+        textPositionsBySourceFile = ProcessHeaders.calcTextsPositions(OUTPUT.resolve("texts.jsons"));
 
         GrammarDB2 gr;
-        if (grammardb != null) {
+        if (grammarDbPath != null) {
             LOG.info("Loading GrammarDB...");
-            gr = GrammarDB2.initializeFromDir(grammardb);
+            gr = GrammarDB2.initializeFromDir(grammarDbPath);
         } else {
             LOG.warn("GrammarDB will not be loaded !!!");
+            Thread.sleep(5000);
             gr = GrammarDB2.empty();
         }
-        grFiller = new StaticGrammarFiller2(new GrammarFinder(gr));
+        StaticGrammarFiller2 grFiller = new StaticGrammarFiller2(new GrammarFinder(gr));
+
+        int maxMemoryMB = (int) (Runtime.getRuntime().maxMemory() / 1024 / 1024);
 
         LOG.info("2nd pass...");
         be = System.currentTimeMillis();
-        new FilesReader().run(INPUT, errors, false);
+        ProcessStat stat = new ProcessStat(processStat);
+        ProcessLuceneWriter lucene = new ProcessLuceneWriter(writeToLucene, OUTPUT.toString(), maxMemoryMB - 8192);
+        ProcessPrepareLucene prepareLucene = new ProcessPrepareLucene(lucene);
+        ProcessTexts t2 = new ProcessTexts(grFiller, prepareLucene, stat);
+        ProcessFileParser p2 = new ProcessFileParser();
+        FilesReader r2 = new FilesReader(INPUT, false, p2);
+        r2.finish(3 * 60);
+        p2.finish(10);
+        t2.finish(10);
+        LOG.info("Finishing stats...");
+        stat.finish(OUTPUT);
+        prepareLucene.finish(1);
+        LOG.info("Finishing lucene...");
+        lucene.finish(30);
         af = System.currentTimeMillis();
         LOG.info("2st pass time: " + ((af - be) / 1000 / 60) + "min");
-        LOG.info("Finishing...");
-        luceneClose();
-        textStat.write(OUTPUT);
 
         Collections.sort(errorsList);
         Files.write(OUTPUT.resolve("errors.txt"), errorsList);
@@ -107,79 +135,6 @@ public class PrepareCache3 {
             }
         }
         return null;
-    }
-
-    static void luceneOpen(Path dir, int bufferSizeMb) throws Exception {
-        FileUtils.deleteDirectory(dir.toFile());
-        lucene = new LuceneDriverWrite(dir.toString(), bufferSizeMb);
-    }
-
-    static void luceneClose() throws Exception {
-        lucene.shutdown();
-        lucene = null;
-    }
-
-    public static void process(TextInfo textInfo, List<Paragraph> content) throws Exception {
-        if (textInfo.sourceFilePath == null) {
-            throw new RuntimeException("sourceFilePath нявызначаны");
-        }
-        if (textInfo.subcorpus == null) {
-            throw new RuntimeException("subcorpus нявызначаны ў " + textInfo.sourceFilePath);
-        }
-        if (textInfo.title == null) {
-            throw new RuntimeException("title нявызначаны ў " + textInfo.sourceFilePath);
-        }
-        textInfo.creationTimeLatest();
-        textInfo.publicationTimeLatest();
-
-        if (lucene == null) {
-            // 1st pass - just remember TextInfo
-            textInfos.add(textInfo);
-        } else {
-            // 2nd pass
-            Collections.shuffle(content);
-            grFiller.fillNonManual(content);
-            textStat.add(textInfo, content);
-            if (writeToLucene) {
-                lucene.addSentences(textInfo, content);
-            }
-        }
-    }
-
-    static Map<String, Integer> calcTextsPositions() throws Exception {
-        LOG.info("Sorting {} text infos...", textInfos.size());
-        // sort
-        Collections.sort(textInfos, new TextOrder());
-
-        LOG.info("Storing text positions...");
-        // remember positions
-        Map<String, Integer> result = new HashMap<>();
-        for (int i = 0; i < textInfos.size(); i++) {
-            if (result.put(textInfos.get(i).sourceFilePath, i) != null) {
-                throw new Exception("Text " + textInfos.get(i).sourceFilePath + " produced twice !!!");
-            }
-        }
-
-        LOG.info("Writing texts infos to file...");
-        // write to json
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setSerializationInclusion(Include.NON_NULL);
-        try (BufferedWriter wr = Files.newBufferedWriter(OUTPUT.resolve("texts.jsons"))) {
-            for (TextInfo ti : textInfos) {
-                wr.write(objectMapper.writeValueAsString(ti));
-                wr.write('\n');
-            }
-        }
-
-        textInfos = null;
-
-        return result;
-    }
-
-    static void writeStat(String dir, Properties stat) throws Exception {
-        FileOutputStream o = new FileOutputStream(dir + "/stat.properties");
-        stat.store(o, null);
-        o.close();
     }
 
     public static IProcess errors = new IProcess() {

@@ -22,8 +22,6 @@
 
 package org.alex73.korpus.text.structure.files;
 
-import org.apache.commons.lang.StringUtils;
-
 public class LongTagItem implements ITextLineElement {
     private String text;
 
@@ -44,7 +42,7 @@ public class LongTagItem implements ITextLineElement {
     public boolean equals(Object obj) {
         if (obj instanceof LongTagItem) {
             LongTagItem o = (LongTagItem) obj;
-            return StringUtils.equals(o.text, text);
+            return text.equals(o.text);
         } else {
             return false;
         }

@@ -1,7 +1,8 @@
 package org.alex73.korpus.compiler.parsers;
 
 import java.nio.file.Path;
-import java.util.concurrent.Executor;
+
+import org.alex73.korpus.compiler.BaseParallelProcessor;
 
 public class OcrDjvuParser extends BaseParser {
     public OcrDjvuParser(String subcorpus, Path file) {
@@ -9,6 +10,6 @@ public class OcrDjvuParser extends BaseParser {
     }
 
     @Override
-    public void parse(Executor queue, boolean headersOnly) throws Exception {
+    public void parse(BaseParallelProcessor queue, boolean headersOnly) throws Exception {
     }
 }

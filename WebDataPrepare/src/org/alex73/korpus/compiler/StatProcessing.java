@@ -13,6 +13,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -49,17 +53,13 @@ public class StatProcessing {
         } else {
             todo.add(getStatInfo(textInfo.subcorpus + "._"));
         }
-        todo.parallelStream().forEach(s -> {
-            synchronized (s) {
-                s.texts++;
-            }
-        });
+        todo.forEach(s -> s.texts.incrementAndGet());
 
         for (Paragraph p : content) {
             for (Sentence se : p.sentences) {
                 for (Word w : se.words) {
                     String[] lemmas = w.lemmas == null || w.lemmas.isEmpty() ? null : RE_SPLIT.split(w.lemmas);
-                    todo.parallelStream().forEach(s -> s.addWord(w.normalized, lemmas));
+                    todo.forEach(s -> s.addWord(w.normalized, lemmas));
                     if (lemmas != null && textInfo.authors != null && textInfo.authors.length > 0) {
                         for (String lemma : lemmas) {
                             for (String author : textInfo.authors) {
@@ -115,8 +115,8 @@ public class StatProcessing {
             }
         }
         for (Map.Entry<String, StatInfo> en : stats.entrySet()) {
-            stat.add("texts." + en.getKey() + "=" + en.getValue().texts);
-            stat.add("words." + en.getKey() + "=" + en.getValue().words);
+            stat.add("texts." + en.getKey() + "=" + en.getValue().texts.intValue());
+            stat.add("words." + en.getKey() + "=" + en.getValue().words.intValue());
         }
         Files.write(dir.resolve("stat.properties"), stat);
 
@@ -136,67 +136,84 @@ public class StatProcessing {
     private static final Pattern RE_SPLIT = Pattern.compile(";");
 
     private static class StatInfo {
-        public int texts, words;
+        public AtomicInteger texts = new AtomicInteger();
+        public AtomicInteger words = new AtomicInteger();
         private final Map<String, ParadigmStat> byLemma = new HashMap<>();
-        private final Map<String, Integer> byForm = new HashMap<>();
-        private final Map<String, Integer> byUnknown = new HashMap<>();
+        private final Map<String, AtomicInteger> byForm = new HashMapSyncInit<>() {
+            @Override
+            public AtomicInteger init() {
+                return new AtomicInteger();
+            }
+        };
+        private final Map<String, AtomicInteger> byUnknown = new HashMapSyncInit<>() {
+            @Override
+            public AtomicInteger init() {
+                return new AtomicInteger();
+            }
+        };
         final Set<String> authors = Collections.synchronizedSet(new HashSet<>());
         final Set<String> sources = Collections.synchronizedSet(new HashSet<>());
 
-        synchronized void addWord(String value, String[] lemmas) {
-            words++;
-            String formKey = StressUtils.unstress(value).toLowerCase();
-            if (!formKey.isEmpty()) {
-                if (formKey.charAt(0) == 'ў') {
-                    formKey = 'у' + formKey.substring(1);
+        void addWord(String value, String[] lemmas) {
+            words.incrementAndGet();
+
+            String normalizedValue = StressUtils.unstress(value).toLowerCase();
+            if (!normalizedValue.isEmpty()) {
+                if (normalizedValue.charAt(0) == 'ў') {
+                    normalizedValue = 'у' + normalizedValue.substring(1);
                 }
-                Integer fc = byForm.get(formKey);
-                fc = fc == null ? 1 : fc.intValue() + 1;
-                byForm.put(formKey, fc);
+            }
+
+            if (!normalizedValue.isEmpty()) {
+                byForm.get(normalizedValue).incrementAndGet();
             }
             if (lemmas == null) {
-                // TODO адкидаць пустыя словы, нумары, лацінку, 
-                if (formKey.isEmpty()) {
+                // TODO адкідаць пустыя словы, нумары, лацінку,
+                if (normalizedValue.isEmpty()) {
                     return;
                 }
-                for (int i = 0; i < formKey.length(); i++) {
-                    char c = formKey.charAt(i);
+                for (int i = 0; i < normalizedValue.length(); i++) {
+                    char c = normalizedValue.charAt(i);
                     if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z')) {
                         return;
                     }
                 }
-                Integer fc = byUnknown.get(formKey);
-                fc = fc == null ? 1 : fc.intValue() + 1;
-                byUnknown.put(formKey, fc);
+                byUnknown.get(normalizedValue).incrementAndGet();
             } else {
                 float part = 1.0f / lemmas.length;
                 for (String lemma : lemmas) {
                     if (lemma.isEmpty()) {
                         continue;
                     }
-                    ParadigmStat ps = byLemma.get(lemma);
-                    if (ps == null) {
-                        ps = new ParadigmStat();
-                        ps.para = lemma;
-                        byLemma.put(lemma, ps);
+                    ParadigmStat ps;
+                    synchronized (byLemma) {
+                        ps = byLemma.get(lemma);
+                        if (ps == null) {
+                            ps = new ParadigmStat();
+                            ps.para = lemma;
+                            byLemma.put(lemma, ps);
+                        }
                     }
-                    ps.intCount++;
-                    ps.floatCount += part;
-                    Integer prev = ps.valuesCount.get(value);
-                    ps.valuesCount.put(value, prev == null ? 1 : prev.intValue() + 1);
+                    synchronized (ps) {
+                        ps.intCount++;
+                        ps.floatCount += part;
+                        Integer prev = ps.valuesCount.get(normalizedValue);
+                        ps.valuesCount.put(normalizedValue, prev == null ? 1 : prev.intValue() + 1);
+                    }
                 }
             }
         }
 
         synchronized void writeFormsFreq(Path f) throws Exception {
-            List<String> list = byForm.entrySet().stream().sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
-                    .map(en -> en.toString()).collect(Collectors.toList());
+            List<String> list = byForm.entrySet().stream()
+                    .sorted((a, b) -> Integer.compare(b.getValue().get(), a.getValue().get())).map(en -> en.toString())
+                    .collect(Collectors.toList());
             Files.write(f, list);
         }
 
         synchronized void writeUnknownFreq(Path f) throws Exception {
             List<String> list = byUnknown.entrySet().stream()
-                    .sorted((a, b) -> Integer.compare(b.getValue(), a.getValue())).map(en -> en.toString())
+                    .sorted((a, b) -> Integer.compare(b.getValue().get(), a.getValue().get())).map(en -> en.toString())
                     .collect(Collectors.toList());
             Files.write(f, list);
         }
@@ -213,5 +230,39 @@ public class StatProcessing {
         int intCount;
         float floatCount;
         Map<String, Integer> valuesCount = new TreeMap<>();
+    }
+
+    public abstract static class HashMapSyncInit<K, V> extends HashMap<K, V> {
+        private ReadWriteLock lock = new ReentrantReadWriteLock();
+        private Lock rd = lock.readLock();
+        private Lock wr = lock.writeLock();
+
+        public abstract V init();
+
+        @Override
+        public V get(Object key) {
+            rd.lock();
+            V result = super.get(key);
+            rd.unlock();
+            if (result == null) {
+                wr.lock();
+                result = super.get(key);
+                if (result == null) {
+                    result = init();
+                    super.put((K) key, (V) result);
+                }
+                wr.unlock();
+            }
+            return result;
+        }
+
+        public synchronized V oldget(Object key) {
+            V result = super.get(key);
+            if (result == null) {
+                result = init();
+                super.put((K) key, (V) result);
+            }
+            return result;
+        }
     }
 }

@@ -9,12 +9,14 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.alex73.korpus.base.TextInfo;
+import org.alex73.korpus.compiler.BaseParallelProcessor;
 import org.alex73.korpus.compiler.PrepareCache3;
+import org.alex73.korpus.compiler.ProcessHeaders;
+import org.alex73.korpus.compiler.ProcessTexts;
 import org.alex73.korpus.compiler.TextUtils;
 import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.TextFileParser;
@@ -26,7 +28,7 @@ public class TextArchiveParser extends BaseParser {
     }
 
     @Override
-    public void parse(Executor queue, boolean headersOnly) throws Exception {
+    public void parse(BaseParallelProcessor queue, boolean headersOnly) throws Exception {
         Path headersFile = Paths.get(file.toString() + ".headers");
         Map<String, String> commonHeaders;
         if (Files.exists(headersFile)) {
@@ -48,21 +50,21 @@ public class TextArchiveParser extends BaseParser {
                 try (InputStream in = new BufferedInputStream(zip.getInputStream(en))) {
                     data = IOUtils.toByteArray(in);
                 }
-                queue.execute(() -> {
-                    try {
-                        TextFileParser doc = new TextFileParser(new ByteArrayInputStream(data), headersOnly,
-                                PrepareCache3.errors);
-                        TextInfo textInfo = new TextInfo();
-                        TextUtils.fillFromHeaders(textInfo, doc.headers);
-                        TextUtils.fillFromHeaders(textInfo, commonHeaders);
-                        textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + en.getName();
-                        textInfo.subcorpus = subcorpus;
-                        if (textInfo.title == null) {
-                            textInfo.title = "";
-                        }
-                        PrepareCache3.process(textInfo, new PtextToKorpus(doc.lines, true).paragraphs);
-                    } catch (Exception ex) {
-                        PrepareCache3.errors.reportError("Error parse " + file + "!" + en.getName(), ex);
+                queue.run(() -> {
+                    TextFileParser doc = new TextFileParser(new ByteArrayInputStream(data), headersOnly,
+                            PrepareCache3.errors);
+                    TextInfo textInfo = new TextInfo();
+                    TextUtils.fillFromHeaders(textInfo, doc.headers);
+                    TextUtils.fillFromHeaders(textInfo, commonHeaders);
+                    textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + en.getName();
+                    textInfo.subcorpus = subcorpus;
+                    if (textInfo.title == null) {
+                        textInfo.title = "";
+                    }
+                    if (headersOnly) {
+                        ProcessHeaders.process(textInfo);
+                    } else {
+                        ProcessTexts.process(textInfo, new PtextToKorpus(doc.lines, true).paragraphs);
                     }
                 });
             }

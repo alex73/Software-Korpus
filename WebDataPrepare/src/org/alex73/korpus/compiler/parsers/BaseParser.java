@@ -1,7 +1,8 @@
 package org.alex73.korpus.compiler.parsers;
 
 import java.nio.file.Path;
-import java.util.concurrent.Executor;
+
+import org.alex73.korpus.compiler.BaseParallelProcessor;
 
 public abstract class BaseParser implements IParser {
     static final int BUFFER = 256 * 1024;
@@ -14,5 +15,5 @@ public abstract class BaseParser implements IParser {
         this.file = file;
     }
 
-    public abstract void parse(Executor queue, boolean headersOnly) throws Exception;
+    public abstract void parse(BaseParallelProcessor queue, boolean headersOnly) throws Exception;
 }

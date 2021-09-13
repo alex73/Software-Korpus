@@ -6,13 +6,15 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.SAXParserFactory;
 
 import org.alex73.korpus.base.TextInfo;
+import org.alex73.korpus.compiler.BaseParallelProcessor;
 import org.alex73.korpus.compiler.PrepareCache3;
+import org.alex73.korpus.compiler.ProcessHeaders;
+import org.alex73.korpus.compiler.ProcessTexts;
 import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.Splitter3;
 import org.alex73.korpus.text.structure.corpus.Paragraph;
@@ -48,7 +50,7 @@ public class WikiParser extends BaseParser {
     }
 
     @Override
-    public void parse(Executor queue, boolean headersOnly) throws Exception {
+    public void parse(BaseParallelProcessor queue, boolean headersOnly) throws Exception {
         this.headersOnly = headersOnly;
 
         if (file.getFileName().toString().startsWith("bewiki-")) {
@@ -91,60 +93,59 @@ public class WikiParser extends BaseParser {
         }
     }
 
-    protected void process(Executor queue, String inTitle, String inText) {
-        queue.execute(() -> {
-            try {
-                String title = inTitle.trim();
-                String text = inText.trim();
-                for (String st : SKIP_TITLE_MARKERS) {
-                    if (title.startsWith(st)) {
-                        return;
-                    }
+    protected void process(BaseParallelProcessor queue, String inTitle, String inText) {
+        queue.run(() -> {
+            String title = inTitle.trim();
+            String text = inText.trim();
+            for (String st : SKIP_TITLE_MARKERS) {
+                if (title.startsWith(st)) {
+                    return;
                 }
-                for (String st : SKIP_TEXT_MARKERS) {
-                    if (text.startsWith(st)) {
-                        return;
-                    }
+            }
+            for (String st : SKIP_TEXT_MARKERS) {
+                if (text.startsWith(st)) {
+                    return;
                 }
+            }
 
-                TextInfo textInfo = new TextInfo();
-                textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + inTitle;
-                textInfo.source = source;
-                textInfo.subcorpus = subcorpus;
-                textInfo.url = urlPrefix + title;
-                textInfo.title = title;
-                if (headersOnly) {
-                    PrepareCache3.process(textInfo, null);
-                } else {
-                    text = SKIP_TEXT_RE_KAT.matcher(text).replaceAll("");
-                    List<Paragraph> content = new ArrayList<>();
-                    StringBuilder ptext = new StringBuilder();
-                    Splitter3 splitter = new Splitter3(false, PrepareCache3.errors);
-                    for (String s : text.split("\n")) {
-                        s = s.trim();
-                        if (s.isEmpty()) {
-                            if (ptext.length() > 0) {
-                                if (!ptext.toString().replace('\n', ' ').trim().isEmpty()) {
-                                    Paragraph par = PtextToKorpus.oneLine(splitter.parse(ptext));
-                                    if (par != null) {
-                                        content.add(par);
-                                    }
+            TextInfo textInfo = new TextInfo();
+            textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + inTitle;
+            textInfo.source = source;
+            textInfo.subcorpus = subcorpus;
+            textInfo.url = urlPrefix + title;
+            textInfo.title = title;
+            if (headersOnly) {
+                ProcessHeaders.process(textInfo);
+            } else {
+                text = SKIP_TEXT_RE_KAT.matcher(text).replaceAll("");
+                List<Paragraph> content = new ArrayList<>();
+                StringBuilder ptext = new StringBuilder();
+                Splitter3 splitter = new Splitter3(false, PrepareCache3.errors);
+                for (String s : text.split("\n")) {
+                    s = s.trim();
+                    if (s.isEmpty()) {
+                        if (ptext.length() > 0) {
+                            if (!ptext.toString().replace('\n', ' ').trim().isEmpty()) {
+                                Paragraph par = PtextToKorpus.oneLine(splitter.parse(ptext));
+                                if (par != null) {
+                                    content.add(par);
                                 }
-                                ptext.setLength(0);
                             }
-                        } else {
-                            ptext.append(s).append('\n');
+                            ptext.setLength(0);
                         }
-                    }
-                    if (!ptext.toString().replace('\n', ' ').trim().isEmpty()) {
-                        content.add(PtextToKorpus.oneLine(splitter.parse(ptext)));
-                    }
-                    if (!content.isEmpty()) {
-                        PrepareCache3.process(textInfo, content);
+                    } else {
+                        ptext.append(s).append('\n');
                     }
                 }
-            } catch (Exception ex) {
-                PrepareCache3.errors.reportError("Error parse " + file + "!" + inTitle, ex);
+                if (!ptext.toString().replace('\n', ' ').trim().isEmpty()) {
+                    Paragraph p = PtextToKorpus.oneLine(splitter.parse(ptext));
+                    if (p != null) {
+                        content.add(p);
+                    }
+                }
+                if (!content.isEmpty()) {
+                    ProcessTexts.process(textInfo, content);
+                }
             }
         });
     }
