@@ -23,7 +23,6 @@ class LemmaVariant {
     public forms: LemmaForm[];
     public dictionaries: string[];
     public authors: Author[];
-    public authorsOther: number;
 }
 
 class LemmaForm {

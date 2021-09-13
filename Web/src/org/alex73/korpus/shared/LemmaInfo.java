@@ -49,7 +49,6 @@ public class LemmaInfo {
         public List<LemmaForm> forms = new ArrayList<>();
         public Set<String> dictionaries = new TreeSet<>();
         public List<Author> authors = new ArrayList<>();
-        public int authorsOther;
     }
 
     public static class LemmaForm {

@@ -36,20 +36,21 @@
           {{else tmpl="#template-grammardb-other"}}
           {{/if}}
         </div>
-      {{if dictionaries || authors || authorsOther > 0}}
+      {{if dictionaries || authors}}
         <div class="card-footer">
           <div>
           {{for dictionaries}}
-            <span class="badge badge-info" data-toggle="tooltip" data-placement="bottom" title="{{>desc}}">{{>name}}</span>
+            <span class="badge badge-info" data-toggle="tooltip" data-placement="top" title="{{>desc}}">{{>name}}</span>
           {{/for}}
           </div>
           <div>
           {{for authors}}
-            <a class="badge badge-secondary" data-toggle="tooltip" data-placement="bottom" target="_blank"
+            <a class="badge badge-secondary" data-toggle="tooltip" data-placement="top" target="_blank"
             title="Націсніце на імя каб знайсці ўжыванні" href='korpus.html#search:{"textStandard":{"authors":["{{>name}}"]},"words":[{"word":"{{>~root.details.lemma}}","allForms":true}]}'>{{>displayName}}</a>
           {{/for}}
-          {{if authorsOther > 0}}
-            <span class="badge badge-secondary">+{{>authorsOther}}</span>
+          {{if authorsOtherCount > 0}}
+            <span class="badge badge-secondary" data-toggle="tooltip" data-placement="top"
+            title="{{>authorsOtherList}}">+{{>authorsOtherCount}}</span>
           {{/if}}
           </div>
         </div>

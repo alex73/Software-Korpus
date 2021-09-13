@@ -110,8 +110,12 @@ class DialogGrammarDB {
                     rv.dictionaries.push(sl);
                 }
             }
-            rv.authors = v.authors;
-            rv.authorsOther = v.authorsOther;
+            rv.authors = v.authors.slice(0, 15);
+            rv.authorsOtherCount = v.authors.slice(15).length;
+            rv.authorsOtherList = v.authors.slice(15, 60).map(a => a.displayName).join(", ");
+            if (v.authors.length > 60) {
+                rv.authorsOtherList += ", ...";
+            }
 
 			for (let f of v.forms) {
 				let gr = rv.subtree;

@@ -138,7 +138,8 @@ class OutGrammarVariant {
     public sourceFormsUsageCount: number[];
     public dictionaries: GrammarDict[];
     public authors: Author[];
-    public authorsOther: number;
+    public authorsOtherCount: number;
+    public authorsOtherList: string;
 }
 
 class OutGrammarForm {

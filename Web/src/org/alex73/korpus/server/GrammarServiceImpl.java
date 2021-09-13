@@ -26,7 +26,6 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -437,26 +436,13 @@ public class GrammarServiceImpl {
         if (origAuthors == null) {
             return;
         }
+
         Set<String> authors = new TreeSet<>(origAuthors);
-        rv.authors = new ArrayList<>();
         for (LemmaInfo.Author author : getApp().authors) {
-            if (rv.authors.size() >= 15) {
-                break;
-            }
             if (authors.remove(author.name)) {
                 rv.authors.add(author);
             }
         }
-        for (Iterator<String> it = authors.iterator(); it.hasNext();) {
-            if (rv.authors.size() >= 15) {
-                break;
-            }
-            LemmaInfo.Author a = new LemmaInfo.Author();
-            a.name = it.next();
-            a.displayName = a.name;
-            rv.authors.add(a);
-        }
-        rv.authorsOther = authors.size();
     }
 
     String revert(String s) {
