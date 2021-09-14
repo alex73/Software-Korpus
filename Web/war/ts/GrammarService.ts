@@ -65,6 +65,8 @@ class GrammarService {
               grammarui.showOutput(rq.grammar, rq.orderReverse && !rq.outputGrouping);
               if (this.result.output.length > 0) {
                 grammarui.hideStatusError();
+              } else if (this.result.hasMultiformResult) {
+                grammarui.showError("Нічога не знойдзена, але ёсць такое слова сярод формаў. Паспрабуйце пашукаць па ўсіх формах.");
               } else {
                 grammarui.showError("Нічога не знойдзена");
               }

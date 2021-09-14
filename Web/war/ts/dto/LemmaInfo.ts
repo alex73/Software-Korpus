@@ -2,6 +2,7 @@ class GrammarSearchResult {
 	public error: string;
 	public hasDuplicateParadigms: boolean;
 	public output: LemmaInfo[];
+    public hasMultiformResult: boolean;
 }
 class LemmaInfo {
     public pdgId: number;

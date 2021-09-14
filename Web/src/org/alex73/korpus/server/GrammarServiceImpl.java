@@ -219,6 +219,16 @@ public class GrammarServiceImpl {
                     }
                 });
             }
+
+            if (result.output.isEmpty()) { // nothing found
+                if (rq.word != null && rq.grammar == null && !rq.multiForm
+                        && !WordsDetailsChecks.needWildcardRegexp(rq.word)) {// simple word search
+                    Stream<LemmaInfo> output2 = searchExact(rq.word, null, true, rq.fullDatabase, null);
+                    if (output2.anyMatch(p -> true)) {
+                        result.hasMultiformResult = true;
+                    }
+                }
+            }
             System.out.println("<< Result: " + result.output.size());
             return result;
         } catch (Throwable ex) {
