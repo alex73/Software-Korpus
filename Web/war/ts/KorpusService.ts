@@ -11,6 +11,11 @@ class SearchResult {
 	public hasMore: boolean;
 }
 
+class SearchTotalResult {
+    public error: string;
+    public totalCount: number;
+}
+
 class SentencesRequest {
 	public params: SearchParams;
 	public list: number[];
@@ -36,6 +41,7 @@ class KorpusService {
 	public requestedParamsCluster: ClusterParams = null;
 	public latestMark: LatestMark = null;
 	public hasMore: boolean = false;
+    public totalCount: number = 0;
 
 	public pages: number[][];
 	public currentPage: number;
@@ -101,6 +107,7 @@ class KorpusService {
 		this.resultCluster = null;
 		this.latestMark = null;
 		this.hasMore = false;
+        this.totalCount = 0;
 
 		if (this.requestedTypeSearch == 'cluster') {
 			this.searchCluster();
@@ -191,6 +198,41 @@ class KorpusService {
 			pos.scrollIntoView();
 		}
 	}
+    requestTotalCount() {
+        if (this.totalCount != 0) {
+            return;
+        }
+        this.totalCount = -1;
+        $('.place-calc a').tooltip('dispose');
+        $('.place-calc a').replaceWith('<img src="icons/process.svg"/>');
+        let rq: SearchRequest = new SearchRequest();
+        rq.params = this.requestedParams;
+        fetch('rest/korpus/searchTotalCount', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(rq)
+        })
+            .then(r => {
+                $('.place-calc img').replaceWith('');
+                if (!r.ok) {
+                    korpusui.showError("Памылка пошуку: " + r.status + " " + r.statusText);
+                } else {
+                    r.json().then(json => {
+                        let rs: SearchTotalResult = json;
+                        if (rs.error != null) {
+                            korpusui.showError("Памылка: " + rs.error);
+                            return;
+                        }
+                        this.totalCount = rs.totalCount;
+                        korpusui.hideStatusError();
+                        korpusui.showOutput();
+                    });
+                }
+            })
+            .catch(err => korpusui.showError("Памылка: " + err));
+    }
 	requestPageDetails(page: number) {
 		let list: number[] = this.pages[page];
 		korpusui.showStatus("Падрабязнасці...");

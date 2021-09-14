@@ -1,19 +1,50 @@
-<script id="template-output" type="text/x-jsrender">
+<script id="template-output-page1" type="text/x-jsrender">
+  <li class="page-item {{if ~root.currentPage == ~idx}}active{{/if}}" onClick="korpusService.requestPage({{:~idx}}); return false;">
+    <a class="page-link" href="#">{{:~idx+1}}</a>
+  </li>
+</script>
+<script id="template-output-page1-skip" type="text/x-jsrender">
+  <li class="page-item disabled"><a class="page-link" href="#" aria-disabled="true">...</a></li>
+</script>
+
+<script id="template-output-paging" type="text/x-jsrender">
 {{if pages}}
 <nav aria-label="Page navigation" class="mt-4">
   <ul class="pagination">
-    {{for pages}}
-      <li class="page-item {{if ~root.currentPage == #index}}active{{/if}}" onClick="korpusService.requestPage({{:#index}}); return false;">
-        <a class="page-link" href="#">{{:(#index+1)}}</a>
-      </li>
-    {{/for}}
+    {{if ~root.currentPage < 6}}
+      {{for start=0 end=~root.currentPage+1 itemVar="~idx"}}  {{include tmpl="#template-output-page1"/}}  {{/for}}
+    {{else}}
+      {{for start=0 end=2 itemVar="~idx"}}  {{include tmpl="#template-output-page1"/}}  {{/for}}
+      {{include tmpl="#template-output-page1-skip"/}}
+      {{for start=~root.currentPage-2 end=~root.currentPage+1 itemVar="~idx"}}  {{include tmpl="#template-output-page1"/}}  {{/for}}
+    {{/if}}
+    {{if ~root.pages.length-~root.currentPage < 7}}
+      {{for start=~root.currentPage+1 end=~root.pages.length itemVar="~idx"}}  {{include tmpl="#template-output-page1"/}}  {{/for}}
+    {{else}}
+      {{for start=~root.currentPage+1 end=~root.currentPage+3 itemVar="~idx"}}  {{include tmpl="#template-output-page1"/}}  {{/for}}
+      {{include tmpl="#template-output-page1-skip"/}}
+      {{for start=~root.pages.length-2 end=~root.pages.length itemVar="~idx"}}  {{include tmpl="#template-output-page1"/}}  {{/for}}
+    {{/if}}
     {{if hasMore}}
       <li class="page-item" onClick="korpusService.requestPage(-1); return false;">
         <a class="page-link" href="#"><span aria-hidden="true">Далей &raquo;</span></a>
       </li>
     {{/if}}
+    {{if ~root.currentPage >= 2 && hasMore && totalCount == 0}}
+    <li class="ml-3 place-calc">
+      <a class="badge badge-light" href="#" onClick="korpusService.requestTotalCount(); return false;"
+        data-toggle="tooltip" data-placement="bottom" title="Падлічыць колькі вынікаў агулам">?</a>
+    </li>
+    {{/if}}
   </ul>
 </nav>
+{{/if}}
+</script>
+
+<script id="template-output" type="text/x-jsrender">
+{{include ~root tmpl="#template-output-paging"/}}
+{{if totalCount > 0}}
+<div>Агульная колькасць вынікаў: {{>totalCount}}</div>
 {{/if}}
 
 {{if resultSearch}}
@@ -26,24 +57,7 @@
 <#include "output.cluster.html">
 {{/if}}
 
-{{if pages}}
-<nav aria-label="Page navigation" class="mt-4">
-  <ul class="pagination">
-    {{* window.outputPageNumber = 0;}}
-    {{for pages}}
-      <li class="page-item {{if ~root.currentPage == #index}}active{{/if}}" onClick="korpusService.requestPage({{*:outputPageNumber}}); return false;">
-        <a class="page-link" href="#">{{*:outputPageNumber+1}}</a>
-      </li>
-      {{* outputPageNumber++; }}
-    {{/for}}
-    {{if hasMore}}
-      <li class="page-item" onClick="korpusService.requestPage(-1); return false;">
-        <a class="page-link" href="#"><span aria-hidden="true">Далей &raquo;</span></a>
-      </li>
-    {{/if}}
-  </ul>
-</nav>
-{{/if}}
+{{include ~root tmpl="#template-output-paging"/}}
 </script>
 
 <div id="popoverWord" style="visibility: hidden; display: block; position: absolute;" class="popover in popover-top top" onBlur="popoverWordHide();">

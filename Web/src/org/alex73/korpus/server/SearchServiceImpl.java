@@ -26,6 +26,7 @@ import org.alex73.korpus.server.data.LatestMark;
 import org.alex73.korpus.server.data.SearchParams;
 import org.alex73.korpus.server.data.SearchResult;
 import org.alex73.korpus.server.data.SearchResults;
+import org.alex73.korpus.server.data.SearchTotalResult;
 import org.alex73.korpus.server.data.WordRequest;
 import org.alex73.korpus.server.data.WordResult;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
@@ -141,7 +142,76 @@ public class SearchServiceImpl {
             return result;
         }
     }
-    
+
+    @Path("searchTotalCount")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public SearchTotalResult searchTotalCount(SearchRequest rq) throws Exception {
+        LOGGER.info(">> Request total count from " + request.getRemoteAddr());
+        SearchParams params = rq.params;
+        for (WordRequest w : params.words) {
+            if (w.word != null) {
+                w.word = BelarusianWordNormalizer.lightNormalized(w.word);
+            }
+        }
+        try {
+            WordsDetailsChecks.reset();
+            boolean enoughComplex = false;
+            for (WordRequest w : params.words) {
+                if (!WordsDetailsChecks.isTooSimpleWord(w)) {
+                    enoughComplex = true;
+                    break;
+                }
+            }
+            if (!enoughComplex) {
+                LOGGER.info("<< Request too simple");
+                throw new RuntimeException(ServerError.REQUIEST_TOO_SIMPLE);
+            }
+            for (WordRequest w : params.words) {
+                if (w.allForms) {
+                    findAllLemmas(w);
+                    if (w.lemmas.length == 0) {
+                        throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
+                    }
+                }
+            }
+
+            BooleanQuery.Builder query = new BooleanQuery.Builder();
+            LuceneFilter process = getApp().processKorpus;
+            process.addKorpusTextFilter(query, params.textStandard);
+            for (WordRequest w : params.words) {
+                process.addWordFilter(query, w);
+            }
+
+            List<Integer> found = process.search(query.build(), new LatestMark(), Settings.KORPUS_SEARCH_TOTAL_MAX_COUNT,
+                    new LuceneDriverRead.DocFilter<Integer>() {
+                        public Integer processDoc(int docID) {
+                            try {
+                                Document doc = getApp().processKorpus.getSentence(docID);
+                                Paragraph text = restoreText(doc);
+                                if (WordsDetailsChecks.isAllowed(params.wordsOrder, params.words, text)) {
+                                    return docID;
+                                } else {
+                                    return null;
+                                }
+                            } catch (Exception ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        }
+                    });
+            SearchTotalResult result = new SearchTotalResult();
+            result.totalCount = found.size();
+            LOGGER.info("<< Result: found: " + result.totalCount);
+            return result;
+        } catch (Throwable ex) {
+            LOGGER.log(Level.SEVERE, "<< Result error", ex);
+            SearchTotalResult result = new SearchTotalResult();
+            result.error = ex.getMessage();
+            return result;
+        }
+    }
+
     @Path("cluster")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)

@@ -200,8 +200,10 @@ class KorpusUI {
 			resultSearch: korpusService.resultSearch,
 			resultKwic: korpusService.resultKwic,
 			resultCluster: korpusService.resultCluster,
-			visitedList: this.visitedList
-		}));
+			visitedList: this.visitedList,
+            totalCount: korpusService.totalCount
+        }));
+        $('[data-toggle="tooltip"]').tooltip();
 	}
 	static separatedStringToArray(v: string): string[] {
 		if (!v || v == 'Усе') {
