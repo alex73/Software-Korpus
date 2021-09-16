@@ -9,8 +9,8 @@ import java.util.Locale;
 import org.alex73.korpus.base.TextInfo;
 
 public class TextOrder implements Comparator<TextInfo> {
-    static final List<String> subcorpuses = Arrays.asList("teksty", "sajty", "wiki", "pieraklady", "nierazabranaje",
-            "telegram");
+    static final List<String> subcorpuses = Arrays.asList("teksty", "kankardans", "sajty", "wiki", "pieraklady",
+            "nierazabranaje", "telegram");
     static final Collator BE = Collator.getInstance(new Locale("be"));
 
     @Override
@@ -38,6 +38,9 @@ public class TextOrder implements Comparator<TextInfo> {
                 break;
             case "telegram":
                 c = telegram.compare(o1, o2);
+                break;
+            case "kankardans":
+                c = kankardans.compare(o1, o2);
                 break;
             default:
                 throw new RuntimeException("Unknown subcorpus: " + o1.subcorpus);
@@ -83,6 +86,9 @@ public class TextOrder implements Comparator<TextInfo> {
             c = BE.compare(o1.title, o2.title);
         }
         return c;
+    };
+    Comparator<TextInfo> kankardans = (o1, o2) -> {
+        return Integer.compare(o1.textOrder, o2.textOrder);
     };
     Comparator<TextInfo> sajty = (o1, o2) -> {
         // першыя - найбольш познія. не пазначана дата - на канец

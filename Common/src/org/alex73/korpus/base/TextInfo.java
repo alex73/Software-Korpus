@@ -34,6 +34,7 @@ public class TextInfo implements Serializable {
     public String url;
     public String[] authors;
     public String title;
+    public transient int textOrder;
     public String[] translators;
     public String lang, langOrig;
     public String[] styleGenres;
