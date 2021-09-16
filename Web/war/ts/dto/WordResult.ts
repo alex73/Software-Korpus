@@ -19,5 +19,6 @@ class Sentence {
 }
 
 class Paragraph {
+  public page: number;
   public sentences: Sentence[];
 }

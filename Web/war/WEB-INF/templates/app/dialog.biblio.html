@@ -52,6 +52,11 @@
     <b>Час першай публікацыі:</b> {{> doc.publicationTime}}
   </div>
   {{/if}}
+  {{if page > 0}}
+  <div>
+    <b>Старонка:</b> {{> page}}
+  </div>
+  {{/if}}
 </script>
 
 <div id="dialog-biblio" style="visibility: hidden; display: block; position: absolute;" class="popover in popover-top top" tabindex="0" onBlur="this.style.visibility = 'hidden'">

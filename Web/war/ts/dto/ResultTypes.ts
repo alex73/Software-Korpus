@@ -7,6 +7,7 @@ class SearchResults {
       this.docId = o.docId;
       this.doc = o.doc;
       this.text = new Paragraph();
+      this.text.page = o.text.page;
       this.text.sentences = o.text.sentences;
     }
 }
