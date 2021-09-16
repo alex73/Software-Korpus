@@ -21,5 +21,7 @@ function roundnum(v: number): string {
         return "~" + f.format(v / 1000) + " тыс.";
     } else if (v < 990000000) {
         return "~" + f.format(v / 1000000) + " млн.";
+    } else {
+        return "~" + f.format(v / 1000000000) + " млрд.";
     }
 }
