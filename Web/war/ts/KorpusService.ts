@@ -88,9 +88,13 @@ class KorpusService {
 			data = null;
 		}
 		korpusui.restoreToScreen(mode, data);
+        $('#output').html($.templates("#template-korpus-stat").render({
+            initialData: korpusService.initial
+        }));
 	}
 
 	search() {
+        $('#desc').hide();
 		this.requestedTypeSearch = korpusui.getMode();
 		if (this.requestedTypeSearch == 'cluster') {
 			this.requestedParamsCluster = korpusui.collectFromScreenCluster();

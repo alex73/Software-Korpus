@@ -32,8 +32,8 @@ import org.alex73.korpus.belarusian.BelarusianTags;
 import org.alex73.korpus.belarusian.TagLetter;
 import org.alex73.korpus.server.data.GrammarInitial;
 import org.alex73.korpus.server.data.GrammarInitial.GrammarLetter;
-import org.alex73.korpus.shared.LemmaInfo;
 import org.alex73.korpus.server.data.InitialData;
+import org.alex73.korpus.shared.LemmaInfo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -127,8 +127,8 @@ public class KorpusApplication extends Application {
                 grammarInitial.skipGrammar.put(part, vs);
             }
         }
-        grammarInitial.slouniki=new ArrayList<>();
-        for(String d:Files.readAllLines(Paths.get(grammarDb+"/slouniki.list"))) {
+        grammarInitial.slouniki = new ArrayList<>();
+        for (String d : Files.readAllLines(Paths.get(grammarDb + "/slouniki.list"))) {
             GrammarInitial.GrammarDict dict = new GrammarInitial.GrammarDict();
             int p = d.indexOf('=');
             if (p < 0 || !d.substring(0, p).matches("[a-z0-9]+")) {
@@ -167,6 +167,39 @@ public class KorpusApplication extends Application {
         }
         loadStyleGenres();
         searchInitial.grammar = grammarInitial;
+        searchInitial.stat = new ArrayList<>();
+        InitialData.Stat s = new InitialData.Stat();
+        s.name = "Агулам";
+        s.texts = Integer.parseInt(stat.getProperty("texts.", "0"));
+        s.words = Integer.parseInt(stat.getProperty("words.", "0"));
+        searchInitial.stat.add(s);
+        for (KeyValue k : searchInitial.subcorpuses) {
+            s = new InitialData.Stat();
+            s.name = "&nbsp;&nbsp;&nbsp;&nbsp;" + k.value.replaceAll("\\|\\|.+", "");
+            s.texts = Integer.parseInt(stat.getProperty("texts." + k.key, "0"));
+            s.words = Integer.parseInt(stat.getProperty("words." + k.key, "0"));
+            searchInitial.stat.add(s);
+            switch (k.key) {
+            case "teksty":
+                searchInitial.styleGenresParts.stream().map(st -> st.replaceAll("/.+", "")).distinct().forEach(st -> {
+                    InitialData.Stat s2 = new InitialData.Stat();
+                    s2.name = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + st;
+                    s2.texts = Integer.parseInt(stat.getProperty("texts." + k.key + "." + st, "0"));
+                    s2.words = Integer.parseInt(stat.getProperty("words." + k.key + "." + st, "0"));
+                    searchInitial.stat.add(s2);
+                });
+                break;
+            case "sajty":
+                Arrays.asList(stat.getProperty("sources.sajty", "").split(";")).forEach(sa -> {
+                    InitialData.Stat s2 = new InitialData.Stat();
+                    s2.name = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + sa;
+                    s2.texts = Integer.parseInt(stat.getProperty("texts." + k.key + "." + sa, "0"));
+                    s2.words = Integer.parseInt(stat.getProperty("words." + k.key + "." + sa, "0"));
+                    searchInitial.stat.add(s2);
+                });
+                break;
+            }
+        }
     }
 
     protected void readTextInfos() throws Exception {

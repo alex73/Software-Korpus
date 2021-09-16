@@ -1,0 +1,16 @@
+<script id="template-korpus-stat" type="text/x-jsrender">
+  <table class="table table-sm hspacing d-flex justify-content-center">
+    <tr>
+      <th></th>
+      <th>Тэкстаў</th>
+      <th>Слоў</th>
+    </tr>
+    {{for initialData.stat}}
+      <tr>
+        <td>{{:name}}</td>
+        <td class="text-right" title="{{:texts}}">{{roundnum:texts}}</td>
+        <td class="text-right" title="{{:words}}">{{roundnum:words}}</td>
+      </tr>
+    {{/for}}
+  </table>
+</script>

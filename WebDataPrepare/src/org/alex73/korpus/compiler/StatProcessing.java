@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -46,12 +47,16 @@ public class StatProcessing {
         List<StatInfo> todo = new ArrayList<>();
         todo.add(getStatInfo(""));
         todo.add(getStatInfo(textInfo.subcorpus));
-        if (textInfo.styleGenres != null && textInfo.styleGenres.length > 0) {
-            for (String s : textInfo.styleGenres) {
-                todo.add(getStatInfo(textInfo.subcorpus + "." + s));
+        switch (textInfo.subcorpus) {
+        case "teksty":
+            if (textInfo.styleGenres != null) {
+                Arrays.asList(textInfo.styleGenres).stream().map(s -> s.replaceAll("/.+", "")).sorted().distinct()
+                        .forEach(s -> todo.add(getStatInfo(textInfo.subcorpus + "." + s)));
             }
-        } else {
-            todo.add(getStatInfo(textInfo.subcorpus + "._"));
+            break;
+        case "sajty":
+            todo.add(getStatInfo(textInfo.subcorpus + "." + textInfo.source));
+            break;
         }
         todo.forEach(s -> s.texts.incrementAndGet());
 

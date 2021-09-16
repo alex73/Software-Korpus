@@ -16,4 +16,11 @@ public class InitialData {
     public List<String> styleGenresParts;
     public Map<String, List<String>> styleGenres;
     public GrammarInitial grammar;
+    public List<Stat> stat;
+
+    public static class Stat {
+        public String name;
+        public int texts;
+        public int words;
+    }
 }

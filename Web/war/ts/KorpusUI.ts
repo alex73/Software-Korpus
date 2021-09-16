@@ -238,6 +238,7 @@ class KorpusUI {
 }
 
 $.views.settings.allowCode(true);
+$.views.converters("roundnum", roundnum);
 $.views.converters("json", function (val) {
 	return JSON.stringify(val);
 });
