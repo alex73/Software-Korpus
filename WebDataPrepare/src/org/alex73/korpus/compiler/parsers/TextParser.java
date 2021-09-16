@@ -9,9 +9,9 @@ import org.alex73.korpus.compiler.BaseParallelProcessor;
 import org.alex73.korpus.compiler.PrepareCache3;
 import org.alex73.korpus.compiler.ProcessHeaders;
 import org.alex73.korpus.compiler.ProcessTexts;
-import org.alex73.korpus.compiler.TextUtils;
 import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.TextFileParser;
+import org.alex73.korpus.utils.KorpusDateTime;
 
 public class TextParser extends BaseParser {
 
@@ -27,10 +27,12 @@ public class TextParser extends BaseParser {
             TextInfo textInfo = new TextInfo();
             textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString();
             textInfo.subcorpus = subcorpus;
-            TextUtils.fillFromHeaders(textInfo, doc.headers);
+            textInfo.title = doc.headers.get("Title");
+            textInfo.lang = doc.headers.get("Lang");
             if ("bel".equals(textInfo.lang)) {
                 textInfo.lang = null;
             }
+            textInfo.langOrig = doc.headers.get("LangOrig");
             if ("bel".equals(textInfo.langOrig)) {
                 textInfo.langOrig = null;
             }
@@ -42,6 +44,19 @@ public class TextParser extends BaseParser {
                 // корпус перакладаў
                 textInfo.subcorpus = "pieraklady";
             }
+            String s;
+            if ((s = doc.headers.get("Authors")) != null) {
+                textInfo.authors = trims(s.split(";"));
+            }
+            if ((s = doc.headers.get("StyleGenre")) != null) {
+                textInfo.styleGenres = trims(s.split("[;]"));
+            }
+            textInfo.edition = doc.headers.get("Edition");
+            textInfo.creationTime = doc.headers.get("CreationYear");
+            new KorpusDateTime(textInfo.creationTime);
+            textInfo.publicationTime = doc.headers.get("PublicationYear");
+            new KorpusDateTime(textInfo.publicationTime);
+
             AuthorsUtil.fixAuthors(textInfo);
             if (headersOnly) {
                 ProcessHeaders.process(textInfo);

@@ -17,7 +17,6 @@ import org.alex73.korpus.compiler.BaseParallelProcessor;
 import org.alex73.korpus.compiler.PrepareCache3;
 import org.alex73.korpus.compiler.ProcessHeaders;
 import org.alex73.korpus.compiler.ProcessTexts;
-import org.alex73.korpus.compiler.TextUtils;
 import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.TextFileParser;
 import org.apache.commons.io.IOUtils;
@@ -54,10 +53,13 @@ public class TextArchiveParser extends BaseParser {
                     TextFileParser doc = new TextFileParser(new ByteArrayInputStream(data), headersOnly,
                             PrepareCache3.errors);
                     TextInfo textInfo = new TextInfo();
-                    TextUtils.fillFromHeaders(textInfo, doc.headers);
-                    TextUtils.fillFromHeaders(textInfo, commonHeaders);
                     textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + en.getName();
                     textInfo.subcorpus = subcorpus;
+                    textInfo.source = commonHeaders.get("Source");
+                    String s;
+                    if ((s = doc.headers.get("StyleGenre")) != null) {
+                        textInfo.styleGenres = trims(s.split("[;]"));
+                    }
                     if (textInfo.title == null) {
                         textInfo.title = "";
                     }

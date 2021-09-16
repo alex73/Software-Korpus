@@ -28,20 +28,20 @@ import org.alex73.korpus.utils.KorpusDateTime;
 
 @SuppressWarnings("serial")
 public class TextInfo implements Serializable {
-    public transient String sourceFilePath;
-    public String subcorpus;
-    public String source;
-    public String url;
-    public String[] authors;
-    public String title;
-    public transient int textOrder;
-    public String[] translators;
-    public String lang, langOrig;
-    public String[] styleGenres;
-    public String edition;
-    public String details;
-    public String file;
-    public String creationTime, publicationTime;
+    public transient String sourceFilePath; // ID зыходнага файлу
+    public String subcorpus; // падкорпус
+    public String source; // крыніца: толькі для сайтаў і неразабраных
+    public String url; // спасылка на знешні сайт, калі ёсць
+    public String[] authors; // аўтары
+    public String title; // назва: заўсёды
+    public transient int textOrder; // толькі каб адсартаваць тэксты ў канкардансе
+    public String[] translators; // перакладчыкі
+    public String lang, langOrig; // мова тэксту, мова зыходнага тэксту
+    public String[] styleGenres; // стылі і жанры
+    public String edition; // выданне
+    public String details; // дэталі
+    public String file; // файл на зыходнай старонцы
+    public String creationTime, publicationTime; // дата стварэння і публікацыі
 
     private transient Long creationTimeLatest, creationTimeEarliest;
     private transient Long publicationTimeLatest, publicationTimeEarliest;

@@ -35,7 +35,7 @@ class DialogSubcorpuses {
 		let subcorpuses: string[] = KorpusUI.separatedStringToArray(document.getElementById('inputFilterCorpus').innerText);
 		if (subcorpuses) {
 			$('#inputFilterAuthorShow').hide();
-			$('#inputFilterStyleShow').show();
+			$('#inputFilterStyleShow').hide();
 			$('#inputFilterSourceShow').hide();
 			$('#inputFilterYearWrittenShow').hide();
 			$('#inputFilterYearPublishedShow').hide();
@@ -46,10 +46,12 @@ class DialogSubcorpuses {
 				$('#inputFilterYearPublishedShow').show();
 			}
 			if (subcorpuses.indexOf('sajty') >= 0) {
-				$('#inputFilterStyleShow').show();
 				$('#inputFilterSourceShow').show();
 				$('#inputFilterYearPublishedShow').show();
 			}
+            if (subcorpuses.indexOf('nierazabranaje') >= 0) {
+                $('#inputFilterSourceShow').show();
+            }
 		} else {
 			$('#inputFilterAuthorShow').show();
 			$('#inputFilterStyleShow').show();

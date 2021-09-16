@@ -9,7 +9,6 @@ import org.alex73.korpus.compiler.BaseParallelProcessor;
 import org.alex73.korpus.compiler.PrepareCache3;
 import org.alex73.korpus.compiler.ProcessHeaders;
 import org.alex73.korpus.compiler.ProcessTexts;
-import org.alex73.korpus.compiler.TextUtils;
 import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.TextFileParser;
 
@@ -27,10 +26,11 @@ public class OcrTextParser extends BaseParser {
             TextInfo textInfo = new TextInfo();
             textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString();
             textInfo.subcorpus = subcorpus;
-            textInfo.url = "https://kamunikat.org/?pubid="
-                    + file.getFileName().toString().replaceAll("^([0-9]+).+?$", "$1");
-            textInfo.source = "kamunikat.org";
-            TextUtils.fillFromHeaders(textInfo, doc.headers);
+            textInfo.url = doc.headers.get("URL");
+            textInfo.file = doc.headers.get("File");
+            textInfo.source = doc.headers.get("Source");
+            textInfo.title = doc.headers.get("Title");
+            textInfo.details = doc.headers.get("Details");
             if (headersOnly) {
                 ProcessHeaders.process(textInfo);
             } else {
