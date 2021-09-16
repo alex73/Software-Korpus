@@ -123,13 +123,15 @@ public class ExportDatabase {
     }
 
     static void deleteDirectory(Path d) throws IOException {
-        Files.walk(d).sorted(Comparator.reverseOrder()).forEach(p -> {
-            try {
-                Files.delete(p);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
+        if (Files.exists(d)) {
+            Files.walk(d).sorted(Comparator.reverseOrder()).forEach(p -> {
+                try {
+                    Files.delete(p);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+        }
     }
 
     static void duplicateU(List<String> words, boolean addToEnd) {
