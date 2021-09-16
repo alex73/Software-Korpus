@@ -17,6 +17,13 @@ public class GrammarInitial {
     public Map<Character, DBTagsGroups> grammarWordTypesGroups;
     public Map<Character, Set<String>> skipGrammar;
     public List<GrammarDict> slouniki;
+    public List<Stat> stat;
+
+    public static class Stat {
+        public String title;
+        public int paradigmCount;
+        public int formCount;
+    }
 
     @JsonInclude(Include.NON_NULL)
     public static class GrammarLetter {

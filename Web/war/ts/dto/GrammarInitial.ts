@@ -4,6 +4,13 @@ class GrammarInitial {
   public grammarWordTypesGroups: { [key: string]: DBTagsGroups; };
   public skipGrammar: { [key: string]: string[]; };
   public slouniki: GrammarDict[];
+  public stat: GrammarInitialStat;
+}
+
+class GrammarInitialStat {
+    public title: string;
+    public paradigmCount: number;
+    public formCount: number;
 }
 
 class GrammarDict {

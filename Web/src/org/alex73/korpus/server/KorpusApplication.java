@@ -23,6 +23,7 @@ import javax.naming.InitialContext;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
+import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.DBTagsGroups;
 import org.alex73.korpus.base.DBTagsGroups.KeyValue;
 import org.alex73.korpus.base.GrammarDB2;
@@ -34,6 +35,7 @@ import org.alex73.korpus.server.data.GrammarInitial;
 import org.alex73.korpus.server.data.GrammarInitial.GrammarLetter;
 import org.alex73.korpus.server.data.InitialData;
 import org.alex73.korpus.shared.LemmaInfo;
+import org.alex73.korpus.utils.SetUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -138,6 +140,37 @@ public class KorpusApplication extends Application {
             dict.desc = d.substring(p + 1);
             grammarInitial.slouniki.add(dict);
         }
+        grammarInitial.stat = new ArrayList<>();
+        GrammarInitial.Stat grStatTotal = new GrammarInitial.Stat();
+        grStatTotal.title = "Агулам";
+        grammarInitial.stat.add(grStatTotal);
+        Map<Character, GrammarInitial.Stat> grStats = new TreeMap<>();
+        for (TagLetter.OneLetterInfo li : BelarusianTags.getInstance().getRoot().letters) {
+            GrammarInitial.Stat gs = new GrammarInitial.Stat();
+            gs.title = "&nbsp;&nbsp;&nbsp;&nbsp;" + li.description;
+            grammarInitial.stat.add(gs);
+            grStats.put(li.letter, gs);
+        }
+        gr.getAllParadigms().parallelStream().forEach(p -> {
+            int formsInParadigm = p.getVariant().stream().mapToInt(v -> v.getForm().size()).sum();
+            synchronized (grStatTotal) {
+                grStatTotal.paradigmCount++;
+                grStatTotal.formCount += formsInParadigm;
+            }
+            p.getVariant().stream().map(v -> SetUtils.tag(p, v).charAt(0)).sorted().distinct().forEach(c -> {
+                GrammarInitial.Stat st = grStats.get(c);
+                synchronized (st) {
+                    st.paradigmCount++;
+                }
+            });
+            for (Variant v : p.getVariant()) {
+                char c = SetUtils.tag(p, v).charAt(0);
+                GrammarInitial.Stat st = grStats.get(c);
+                synchronized (st) {
+                    st.formCount += v.getForm().size();
+                }
+            }
+        });
     }
 
     void prepareInitialKorpus() throws Exception {

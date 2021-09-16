@@ -38,10 +38,14 @@ class GrammarService {
       data = null;
     }
     grammarui.restoreToScreen(data);
+    $('#grammarStat').html($.templates("#template-grammar-stat").render({
+        initial: this.initial
+    }));
   }
 
   search() {
     $('#desc').hide();
+    $('#grammarStat').hide();
     let rq: GrammarRequest = grammarui.collectFromScreen();
     window.location.hash = '#' + stringify(rq);
 

@@ -89,7 +89,7 @@ class KorpusService {
 		}
 		korpusui.restoreToScreen(mode, data);
         $('#output').html($.templates("#template-korpus-stat").render({
-            initialData: korpusService.initial
+            initialData: this.initial
         }));
 	}
 

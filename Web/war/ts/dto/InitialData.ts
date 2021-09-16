@@ -5,10 +5,10 @@ class InitialData {
     public styleGenresParts: string[];
     public styleGenres: { [key:string]:string[]; };
     public grammar: GrammarInitial;
-    public stat: Stat[];
+    public stat: InitialDataStat[];
 }
 
-class Stat {
+class InitialDataStat {
     public name: string;
     public texts: number;
     public words: number;

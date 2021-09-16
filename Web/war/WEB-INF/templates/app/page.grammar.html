@@ -81,10 +81,15 @@
 </form>
 
 <div class="row">
-	<div id="output" class="col-md-12"></div>
-	<div id="desc" class="col-md-12">
-		<#include "page.grammar.desc.html">
-	</div>
+    <div id="output" class="col-md-12"></div>
+</div>
+<div class="row">
+    <div id="desc" class="col-md-12">
+        <#include "page.grammar.desc.html">
+    </div>
+</div>
+<div class="row">
+    <div id="grammarStat" class="col-md-12"></div>
 </div>
 
 <script id="template-grammaroutput" type="text/x-jsrender">
@@ -109,5 +114,6 @@
   {{/for}}
 </script>
 
+<#include "page.grammar.stat.html">
 <#include "dialog.wordgrammar.html">
 <#include "dialog.grammardb.html">

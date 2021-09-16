@@ -1,0 +1,16 @@
+<script id="template-grammar-stat" type="text/x-jsrender">
+  <table class="table table-sm hspacing d-flex justify-content-center">
+    <tr>
+      <th>Часціна мовы</th>
+      <th>Парадыгм</th>
+      <th>Словаформ</th>
+    </tr>
+    {{for initial.stat}}
+      <tr>
+        <td>{{:title}}</td>
+        <td class="text-right text-nowrap" title="{{:paradigmCount}}">{{roundnum:paradigmCount}}</td>
+        <td class="text-right text-nowrap" title="{{:formCount}}">{{roundnum:formCount}}</td>
+      </tr>
+    {{/for}}
+  </table>
+</script>
