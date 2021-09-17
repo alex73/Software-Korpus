@@ -13,6 +13,10 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
+    
+    <script type="text/javascript" src="https://www.languagetool.org/js/jquery-1.7.0.min.js"></script>
+    <script type="text/javascript" src="https://www.languagetool.org/online-check/tiny_mce/tiny_mce.js"></script>
+    <script type="text/javascript" src="https://www.languagetool.org/online-check/tiny_mce/plugins/atd-tinymce/editor_plugin2.js"></script>
   </head>
 
   <body>
@@ -24,260 +28,86 @@
       </div>
     </nav>
 
-    <div class="container">
-<div style="font-size: 2em;text-align: center;">Праверка правапісу</div>
+<div class="container">
+    <div style="font-size: 2em;text-align: center;">Праверка правапісу</div>
 
-<form name="checkform" onSubmit="doit(); return false;">
-<div style="border: 1px solid #ced4da; border-radius: .25rem;">
-      <textarea id="checktext" rows="10" style="border: none">Напішыце нешта</textarea>
+    <form name="checkform" action="http://community.languagetool.org" method="post">
+        <div id="checktextpara" style="border: 1px solid #ced4da; border-radius: .25rem;">
+            <textarea id="checktext" name="text" style="width: 100%" rows="10">Напішыце тут нешта</textarea>
+        </div>
+
+        <div>
+            <select name="lang" id="lang" style="display: none">
+                <option value="be">Belarusian</option>
+            </select>
+            <div class="row justify-content-end my-4">
+            <button type="submit" name="_action_checkText" class="btn btn-danger btn-lg" onClick="doit();return false;">Спраўдзіць</button>
+            </div>
+            <div id="feedbackMessage"></div>
+            <div id="feedbackErrorMessage" style="color: red;"></div>
+        </div>
+    </form>
 </div>
-<div id="feedbackMessage"></div>
-<div id="feedbackErrorMessage" style="color: red"></div>
-		<div class="row justify-content-end my-4">
-			<button type="submit" name="_action_checkText" class="btn btn-danger btn-lg">Спраўдзіць</button>
-		</div>
-</form>
-    </div>
 
- <script type="text/javascript" src="js/spell/tiny_mce/tiny_mce.js"></script>
-  <script type="text/javascript" src="js/spell/tiny_mce/plugins/atd-tinymce/editor_plugin.js?v2014013"></script>
-    <script type="text/javascript">
-   tinyMCE.init({
-       mode : "textareas",
-       plugins: "AtD,paste",
-
-       //Keeps Paste Text feature active until user deselects the Paste as Text button
-       paste_text_sticky : true,
-       //select pasteAsPlainText on startup
-       setup : function(ed) {
-           ed.onInit.add(function(ed) {
-               ed.pasteAsPlainText = true;
-               afterInit();
-              // doit();  // check immediately when entering the page
-           });
-           ed.onKeyDown.add(function(ed, e) {
-               if (e.ctrlKey && e.keyCode == 13) {  // Ctrl+Return
-                   doit();
-                   tinymce.dom.Event.cancel(e);
-               } else if (e.keyCode == 27) {   // Escape
-                   // doesn't work in firefox, the re-init in turnOffFullScreenView()
-                   // might clash with event handling:
-                   if ($('form#checkform').hasClass('fullscreen')) {
-                       setTimeout(turnOffFullScreenView, 100);  // use timeout to prevent problems on Firefox
-                   }
-               }
-           });
-           // remove any 'no errors found' message:
-           ed.onKeyUp.add(function(ed, e) {
-               $('#feedbackMessage').html('');
-           });
-           ed.onPaste.add(function(ed, e) {
-               $('#feedbackMessage').html('');
-           });
-       },
-
-       /* translations: */
-       languagetool_i18n_no_errors :
-          {
-           'be': "Памылак ня знойдзена"
-          },
-       languagetool_i18n_explain :
-          {
-           'be': 'Падрабязьней...'
-          },
-       languagetool_i18n_ignore_once :
-          {
-           'be': 'Ігнараваць гэтую памылку'
-          },
-       languagetool_i18n_rule_implementation :
-          {
-           'be': 'Апісаньне правіла'
-          },
-       /*languagetool_i18n_ignore_all :
-          {
-           'be': 'Ігнараваць памылкі такога кшталту'
-          },*/
-
-       languagetool_i18n_current_lang :    function() { return "be"/*document.checkform.lang.value;*/ },
-       /* the URL of your proxy file: */
-       languagetool_rpc_url                 : "check",
-       /* edit this file to customize how LanguageTool shows errors: */
-       
-       languagetool_css_url                 : "js/spell/tiny_mce/plugins/atd-tinymce/css/content.css?v3",
-       /* this stuff is a matter of preference: */
-       theme                              : "advanced",
-       theme_advanced_buttons1            : "",
-       theme_advanced_buttons2            : "",
-       theme_advanced_buttons3            : "",
-       theme_advanced_toolbar_location    : "none",
-       theme_advanced_toolbar_align       : "left",
-       theme_advanced_statusbar_location  : "bottom",  // activated so we have a resize button
-       theme_advanced_path                : false,     // don't display path in status bar
-       theme_advanced_resizing            : true,
-       theme_advanced_resizing_use_cookie : false,
-       /* disable the gecko spellcheck since AtD provides one */
-       gecko_spellcheck                   : false
-   });
-
-    function fullscreen_toggle() {
-      if ($('form#checkform').hasClass('fullscreen')) {
-        turnOffFullScreenView();
-      } else {
-        turnOnFullScreenView();
-      }
-      return false;
-    }
-
-   function turnOffFullScreenView() {
-       // re-init the editor - this way we lose the error markers, but it's needed
-       // to get proper position of the context menu:
-       // source: http://stackoverflow.com/questions/4651676/how-do-i-remove-tinymce-and-then-re-add-it
-       tinymce.EditorManager.execCommand('mceRemoveControl',true, 'checktext');
-       tinymce.EditorManager.execCommand('mceAddControl', true, 'checktext');
-       $('form#checkform').removeClass('fullscreen');
-       $('body').removeClass('fullscreen');
-       $('iframe#checktext_ifr').height(400);
-       tinymce.execCommand('mceFocus', false, 'checktext');
-   }
-
-   function turnOnFullScreenView() {
-       tinymce.EditorManager.execCommand('mceRemoveControl',true, 'checktext');
-       tinymce.EditorManager.execCommand('mceAddControl', true, 'checktext');
-       $('body').addClass('fullscreen');
-       $('form#checkform').addClass('fullscreen');
-       $('iframe#checktext_ifr').height( $(window).height() - $('#editor_controls').outerHeight() - $('#handle').outerHeight() );
-       tinymce.execCommand('mceFocus', false, 'checktext');
-   }
-
-var copyInstalled = false;
-
-   function doit() {
-        if (!copyInstalled) {
-            // замена апострафа на лацінкавы для капіявання навонкі
-            var iframedoc = document.getElementById('checktext_ifr').contentDocument;
-            iframedoc.addEventListener('copy', function(e) {
-              var text = iframedoc.getSelection()+"";
-              if ($('#autoreplace').is(':checked')) {
-                text = autoreplaceapo(text);
-              }
-              e.clipboardData.setData('text/plain', text);
-              e.preventDefault();
-            });
-            copyInstalled = true;
-        }
-
-       document.checkform._action_checkText.disabled = true;
-       var langCode;
-       if ($('#classic_button').hasClass('active')) {
-          langCode = 'be_classic'; /*document.checkform.lang.value;*/
-       } else {
-          langCode = 'be_official';
-       }
-       /*if (document.checkform.subLang && document.checkform.subLang.value) {
-           langCode = langCode.replace(/-..$/, "")  // en-US -> en 
-               + "-" + document.checkform.subLang.value;
-       }*/
-       var text = tinyMCE.activeEditor.getContent({format : 'html'});
-       
-       if ($('#autoreplace').is(':checked')) {
-         text = autoreplace(text);
-       }
-       
-       tinyMCE.activeEditor.setContent(text, {format : 'html'});
-       
-       tinyMCE.activeEditor.execCommand('mceWritingImprovementTool', langCode);
-   }
-   
-   function autoreplace(text) {
-     text = text.replace(/&nbsp;/g, ' ');
-     text = text.replace(/\s+/g, ' ');
-     text = text.replace(/ \./g, '.');
-     text = text.replace(/ ,/g, ',');
-     text = text.replace(/ ;/g, ';');
-     text = text.replace(/ \?/g, '?');
-     text = text.replace(/ \!/g, '!');
-
-     text = text.replace(/ - /g, ' – ');
-     text = text.replace(/--/g, '–');
-     text = text.replace(/—/g, '–');
-     text = text.replace(/&mdash;/g, '–');
-
-     text = text.replace(/“/g, '«');
-     text = text.replace(/&ldquo;/g, '«');
-     text = text.replace(/”/g, '»');
-     text = text.replace(/&rdquo;/g, '»');
-
-     text = text.replace(/„/g, '«');
-     text = text.replace(/&bdquo;/g, '«');
-     text = text.replace(/‟/g, '»');
-
-     text = text.replace(/'/g, '\u02bc'); // лацінкавы апостраф -> U+02BC
-     text = text.replace(/’/g, '\u02bc'); // 2019 апостраф -> U+02BC
-
-     var was = false;
-     for(var i=0; i<text.length; i++) {
-       if (text.charAt(i) == '"') {
-         if (was) {
-           text = text.substring(0, i)+"»"+text.substring(i+1);
-         } else {
-           text = text.substring(0, i)+"«"+text.substring(i+1);
-         }
-         was = !was;
-       }
-     }
-
-     text = text.replace(/\?\.\.\./g, '?..');
-     text = text.replace(/\!\.\.\./g, '!..');
-     text = text.replace(/\?\!\.\.\./g, '?!.');
-     text = text.replace(/\!\?\.\.\./g, '!?.');
-
-     text = text.replace(/\.»/g, '».');
-     text = text.replace(/,»/g, '»,');
-     text = text.replace(/–,/g, ', –');
-     text = text.replace(/-,/g, ', –');
-     text = text.replace(/,–/g, ', –');
-     text = text.replace(/,-/g, ', –');
-
-     return text;
-   }
-   function autoreplaceapo(text) {
-     return text.replace('\u02bc', "'"); // на лацінскавы апостраф
-   }
-
-   $(function(){
-    $(window).resize(function(){
-      if ($('form#checkform').hasClass('fullscreen')) {
-        $('iframe#checktext_ifr').height( $(window).height() - $('#editor_controls').outerHeight() );
-      }
-    });
-   });
-
-   function afterInit() {
-	   	$('#checktext_tbl').width('100%');
-   }
-   </script>
-
-    <script type="text/javascript" src="css/spell/lib/dropkick/jquery.dropkick.js"></script>
-
-    <script type="text/javascript">
-        function resize_buttons(){
-            var max_height = 0;
-            $('.button_container .title').each(function(){
-                $(this).height('auto');
-                if ($(this).height() > max_height) {
-                    max_height = $(this).height();
-                }
-            });
-            $('.button_container .title').height(max_height);
-        }
-        $(function(){
-            $(window).resize(function(){
-                resize_buttons();
-            });
-            resize_buttons();
-        });
-    </script>
-
+<script language="javascript" type="text/javascript">  
+  tinyMCE.init({
+     mode : "textareas",
+     plugins : "AtD,paste",
+     paste_text_sticky : true,
+     setup : function(ed) {
+         ed.onInit.add(function(ed) {
+             ed.pasteAsPlainText = true;
+         });
+     },  
+     /* translations: */
+     languagetool_i18n_no_errors : {
+         // "No errors were found.":
+         "be": "Памылак не знойдзена"
+     },
+     languagetool_i18n_explain : {
+         // "Explain..." - shown if there is an URL with a detailed description:
+         "be": "Падрабязней..."
+     },
+     languagetool_i18n_ignore_once : {
+         // "Ignore this error":
+         "be": "Ігнараваць гэтую памылку"
+     },
+     languagetool_i18n_ignore_all : {
+         // "Ignore this kind of error":
+         "be": "Ігнараваць памылкі такога кшталту"
+     },
+     languagetool_i18n_rule_implementation : {
+         // "Rule implementation":
+         "be": "Правіла"
+     },
+ 
+     languagetool_i18n_current_lang     : function() { return document.checkform.lang.value; },
+     /* The URL of your LanguageTool server.
+        If you use your own server here and it's not running on the same domain 
+        as the text form, make sure the server gets started with '--allow-origin ...' 
+        and use 'https://your-server/v2/check' as URL: */
+     languagetool_rpc_url                 : "https://languagetool.org/api/v2/check",
+     /* edit this file to customize how LanguageTool shows errors: */
+     languagetool_css_url : "https://www.languagetool.org/online-check/tiny_mce/plugins/atd-tinymce/css/content.css",
+     /* this stuff is a matter of preference: */
+     theme                              : "advanced",
+     theme_advanced_buttons1            : "",
+     theme_advanced_buttons2            : "",
+     theme_advanced_buttons3            : "",
+     theme_advanced_toolbar_location    : "none",
+     theme_advanced_toolbar_align       : "left",
+     theme_advanced_statusbar_location  : "bottom",
+     theme_advanced_path                : false,
+     theme_advanced_resizing            : true,
+     theme_advanced_resizing_use_cookie : false,
+     gecko_spellcheck                   : false
+  });
+ 
+  function doit() {
+     var langCode = document.checkform.lang.value;
+     tinyMCE.activeEditor.execCommand("mceWritingImprovementTool", langCode);
+  }
+</script>
 
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
