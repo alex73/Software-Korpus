@@ -12,11 +12,9 @@ function fulltrim(s: string): string {
 }
 
 function roundnum(v: number): string {
-    let f = new Intl.NumberFormat('be', { maximumSignificantDigits: 2 })
-    if (v <= 100) {
+    let f = new Intl.NumberFormat('be', { maximumSignificantDigits: 3 })
+    if (v < 1000) {
         return v.toString();
-    } else if (v < 900) {
-        return "~" + f.format(v);;
     } else if (v < 990000) {
         return "~" + f.format(v / 1000) + " тыс.";
     } else if (v < 990000000) {
