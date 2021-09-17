@@ -10,6 +10,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletResponse;
 
+import org.alex73.korpus.server.KorpusApplication;
+
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -18,6 +20,10 @@ import freemarker.template.TemplateExceptionHandler;
 @SuppressWarnings("serial")
 public class FutureBaseServlet extends HttpServlet {
     private Configuration cfg;
+
+    protected KorpusApplication getApp() {
+        return KorpusApplication.instance;
+    }
 
     @Override
     public void init(ServletConfig config) throws ServletException {

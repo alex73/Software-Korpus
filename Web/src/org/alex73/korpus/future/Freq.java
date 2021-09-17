@@ -19,8 +19,7 @@ public class Freq extends FutureBaseServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         int count = Integer.parseInt(req.getPathInfo().substring(1));
 
-        String korpusDir = System.getProperty("KORPUS_DIR");
-        List<String> frequences = Files.readAllLines(Paths.get(korpusDir + "/Korpus-cache/stat.formsfreq..tab"));
+        List<String> frequences = Files.readAllLines(Paths.get(getApp().korpusCache + "/stat.formsfreq.tab"));
         frequences = frequences.subList(0, Math.min(frequences.size(), count));
         List<Pair> data = frequences.stream().map(line -> new Pair(line)).collect(Collectors.toList());
 

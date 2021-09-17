@@ -53,6 +53,9 @@ public class Amonimy extends FutureBaseServlet {
                 }
                 for (Form f : forms) {
                     String key = getKey(amoType, f.getValue());
+                    if (key == null) {
+                        continue; // TODO shouldn't be
+                    }
                     KeyDetails newDetail = new KeyDetails(p, v, StressUtils.combineAccute(f.getValue()));
                     synchronized (detailsByKey) {
                         PreRow details = detailsByKey.get(key);
@@ -95,7 +98,11 @@ public class Amonimy extends FutureBaseServlet {
         case HRAFY:
             return StressUtils.unstress(s.toLowerCase());
         case FONY:
-            return new FanetykaText(KorpusApplication.instance.grFinder, s.replace('+', '´')).ipa;
+            try {
+                return new FanetykaText(KorpusApplication.instance.grFinder, s.replace('+', '´')).ipa;
+            } catch (Exception ex) {
+                return null;
+            }
         }
         return null;
     }

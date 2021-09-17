@@ -84,7 +84,8 @@ class GrammarService {
     grammarui.showStatus("Шукаем...");
     
     let url;
-    if ((<HTMLInputElement>document.getElementById("grammarword-full")).checked) {
+    let elemFull: HTMLInputElement = <HTMLInputElement>document.getElementById("grammarword-full");
+    if (elemFull != null && elemFull.checked) {
         url = "rest/grammar/detailsFull/" + pdgId;
     } else {
         url = "rest/grammar/details/" + pdgId;
