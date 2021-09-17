@@ -27,8 +27,8 @@ public class GrammarCheckServlet extends HttpServlet {
     public void init() throws ServletException {
         super.init();
         try {
-            Languages.getOrAddLanguageByClassName(Belarusian.class.getName());
-            ltOfficial = new JLanguageTool(new Belarusian());
+            Languages.getOrAddLanguageByClassName(org.languagetool.language.Belarusian.class.getName());
+            ltOfficial = new JLanguageTool(new org.languagetool.language.Belarusian());
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new ServletException(ex);

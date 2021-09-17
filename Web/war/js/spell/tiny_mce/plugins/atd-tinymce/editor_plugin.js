@@ -836,7 +836,7 @@ AtDCore.prototype.isIE = function() {
             {
                plugin.editor.setProgressState(0);
                document.checkform._action_checkText.disabled = false;
-               var errorMessage = "<div id='severeError'>Памылка: немагчыма даслаць запыт на\n" + o.url + ": " + type + "/" + req.status + "<br/>Спраўдзіце ці добра працуе сетка/сервер.</div>";
+               var errorMessage = "<div id='severeError'>Памылка: немагчыма даслаць запыт: " + type + "/" + req.status + "<br/>Спраўдзіце ці добра працуе сетка і сервер.</div>";
                $('#feedbackErrorMessage').html(errorMessage);
             }
          });
