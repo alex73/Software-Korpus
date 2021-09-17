@@ -37,6 +37,5 @@
 	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/jersey-hk2-2.34.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/jersey-server-2.34.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/osgi-resource-locator-1.0.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="libs/org.languagetool/languagetool-core-5.4.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

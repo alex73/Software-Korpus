@@ -1,8 +1,0 @@
-fsa.dict.separator=_
-fsa.dict.encoding=utf-8
-fsa.dict.encoder=suffix
-fsa.dict.license=CC BY-SA 4.0
-fsa.dict.author=Aleś Bułojčyk <alex73mail@gmail.com>
-fsa.dict.speller.locale=be
-fsa.dict.speller.replacement-pairs=ў щ,і и,' ъ,ў ŷ,ў ý,ў ȳ
-fsa.dict.speller.equivalent-chars=а a,е e,і i,о o,с c,х x,М M,Т T,Р H,Н H,К K,В B
