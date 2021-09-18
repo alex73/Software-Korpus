@@ -12,7 +12,7 @@
 				<fileset dir="lib" includes="**/*.jar" />
 				<pathelement location="../Web/build/classes" />
 				<fileset dir="../Common/lib/" includes="**/*.jar" />
-				<fileset dir="../Web/war/WEB-INF/lib/" includes="**/*.jar" />
+				<fileset dir="../Web/libs/" includes="**/*.jar" />
 			</classpath>
 		</javac>
 		<copy todir="build/classes">
@@ -29,9 +29,10 @@
 				<pathelement location="../Web/build/classes" />
 				<fileset dir="lib/" includes="**/*.jar" />
 				<fileset dir="../Common/lib/" includes="**/*.jar" />
-				<fileset dir="../Web/war/WEB-INF/lib/" includes="**/*.jar" />
+				<fileset dir="../Web/libs/" includes="**/*.jar" />
 			</classpath>
-			<jvmarg value="-Xmx7g"/>
+			<jvmarg line="-Xmx22g -XX:+CrashOnOutOfMemoryError -XX:OnError='echo zzzz' -XX:+ShowMessageBoxOnError"/>
+			<arg line="--input=/home/alex/Korpus-texts --output=/home/alex/Korpus-cache --grammardb=/home/alex/gits/GrammarDB"/>
 		</java>
 	</target>
 </project>

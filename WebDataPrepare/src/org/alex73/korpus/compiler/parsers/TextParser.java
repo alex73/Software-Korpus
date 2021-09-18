@@ -11,7 +11,6 @@ import org.alex73.korpus.compiler.ProcessHeaders;
 import org.alex73.korpus.compiler.ProcessTexts;
 import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.TextFileParser;
-import org.alex73.korpus.utils.KorpusDateTime;
 
 public class TextParser extends BaseParser {
 
@@ -46,16 +45,14 @@ public class TextParser extends BaseParser {
             }
             String s;
             if ((s = doc.headers.get("Authors")) != null) {
-                textInfo.authors = trims(s.split(";"));
+                textInfo.authors = splitAndTrim(s);
             }
             if ((s = doc.headers.get("StyleGenre")) != null) {
-                textInfo.styleGenres = trims(s.split("[;]"));
+                textInfo.styleGenres = splitAndTrim(s);
             }
             textInfo.edition = doc.headers.get("Edition");
-            textInfo.creationTime = doc.headers.get("CreationYear");
-            new KorpusDateTime(textInfo.creationTime);
-            textInfo.publicationTime = doc.headers.get("PublicationYear");
-            new KorpusDateTime(textInfo.publicationTime);
+            textInfo.creationTime = getAndCheckYears(doc.headers.get("CreationYear"));
+            textInfo.publicationTime = getAndCheckYears(doc.headers.get("PublicationYear"));
 
             AuthorsUtil.fixAuthors(textInfo);
             if (headersOnly) {

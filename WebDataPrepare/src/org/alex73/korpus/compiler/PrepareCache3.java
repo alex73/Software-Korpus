@@ -49,12 +49,13 @@ public class PrepareCache3 {
         INPUT = Paths.get(input);
         OUTPUT = Paths.get(output);
 
+        BaseParallelProcessor.startStat();
         try {
             run();
         } catch (Throwable ex) {
             ex.printStackTrace();
-            System.exit(1); // force exit if main thread dead
         }
+        BaseParallelProcessor.stopStat();
     }
 
     static void run() throws Exception {

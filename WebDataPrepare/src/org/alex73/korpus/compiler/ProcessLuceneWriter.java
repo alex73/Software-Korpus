@@ -29,6 +29,7 @@ public class ProcessLuceneWriter extends BaseParallelProcessor {
         defaultThreadPriority = Thread.MAX_PRIORITY;
         IndexWriterConfig config = new IndexWriterConfig();
         config.setOpenMode(OpenMode.CREATE);
+        System.out.println("Lucene will use " + bufferSizeMb + "mb");
         config.setRAMBufferSizeMB(bufferSizeMb);
         config.setUseCompoundFile(false);
         config.setIndexSort(new Sort(new SortField(fields.fieldTextID.name(), SortField.Type.INT)));

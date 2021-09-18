@@ -1,5 +1,7 @@
 package org.alex73.korpus.compiler;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
@@ -13,8 +15,52 @@ public abstract class BaseParallelProcessor {
     protected final ThreadPoolExecutor executor;
     private boolean queueFilled;
     public int defaultThreadPriority = Thread.NORM_PRIORITY;
+    private static List<BaseParallelProcessor> instances = new ArrayList<>();
+    private static Thread statThread;
+
+    public static void startStat() {
+        statThread = new Thread() {
+            public void run() {
+                while (true) {
+                    try {
+                        Thread.sleep(30000);
+                    } catch (InterruptedException ex) {
+                        break;
+                    }
+                    StringBuilder o = new StringBuilder();
+                    o.append("==================\n");
+                    synchronized (instances) {
+                        for (BaseParallelProcessor p : instances) {
+                            o.append(p.getClass().getSimpleName() + ":");
+                            o.append(" threads " + p.executor.getActiveCount() + "/" + p.executor.getMaximumPoolSize());
+                            LinkedBlockingQueue<Runnable> q = (LinkedBlockingQueue<Runnable>) p.executor.getQueue();
+                            int qrem = q.remainingCapacity();
+                            int qsize = q.size();
+                            o.append(" queue " + qsize + "/" + (qrem + qsize));
+                            if (p.executor.isShutdown()) {
+                                o.append(" - shutdown");
+                            }
+                            o.append("\n");
+                        }
+                    }
+                    o.append("==================\n");
+                    System.out.print(o);
+                }
+            }
+        };
+        statThread.start();
+    }
+
+    public static void stopStat() {
+        if (statThread != null) {
+            statThread.interrupt();
+        }
+    }
 
     public BaseParallelProcessor(int threadsNumber, int queueLength) {
+        synchronized (instances) {
+            instances.add(this);
+        }
         executor = new ThreadPoolExecutor(1, threadsNumber, 1, TimeUnit.MINUTES,
                 new LinkedBlockingQueue<Runnable>(queueLength), new NamedThreadFactory(getClass().getSimpleName()),
                 new WaitPolicy(1, TimeUnit.HOURS));
@@ -24,7 +70,7 @@ public abstract class BaseParallelProcessor {
         executor.execute(() -> {
             try {
                 runnable.run();
-            } catch (Exception ex) {
+            } catch (Throwable ex) {
                 ex.printStackTrace();
             }
         });
@@ -33,10 +79,9 @@ public abstract class BaseParallelProcessor {
     public void finish(int minutes) throws Exception {
         executor.shutdown();
         executor.awaitTermination(minutes, TimeUnit.MINUTES);
-        int thLoad = executor.getLargestPoolSize();
-        int thMax = executor.getMaximumPoolSize();
-        System.out.println(getClass().getSimpleName() + " stat: " + thLoad + "/" + thMax + " threads, queue "
-                + (queueFilled ? "was blocked" : "was not blocked"));
+        synchronized (instances) {
+            instances.remove(this);
+        }
     }
 
     protected class NamedThreadFactory implements ThreadFactory {
@@ -48,7 +93,7 @@ public abstract class BaseParallelProcessor {
         }
 
         public Thread newThread(Runnable r) {
-            Thread th= new Thread(r, name + "-" + n.incrementAndGet());
+            Thread th = new Thread(r, name + "-" + n.incrementAndGet());
             th.setPriority(defaultThreadPriority);
             return th;
         }

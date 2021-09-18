@@ -58,7 +58,7 @@ public class TextArchiveParser extends BaseParser {
                     textInfo.source = commonHeaders.get("Source");
                     String s;
                     if ((s = doc.headers.get("StyleGenre")) != null) {
-                        textInfo.styleGenres = trims(s.split("[;]"));
+                        textInfo.styleGenres = splitAndTrim(s);
                     }
                     if (textInfo.title == null) {
                         textInfo.title = "";
