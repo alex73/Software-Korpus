@@ -53,11 +53,4 @@ public class ProcessPrepareLucene extends BaseParallelProcessor {
             }
         });
     }
-
-    @Override
-    public void finish(int minutes) throws Exception {
-        super.finish(minutes);
-        lucene.shutdown();
-        lucene = null;
-    }
 }

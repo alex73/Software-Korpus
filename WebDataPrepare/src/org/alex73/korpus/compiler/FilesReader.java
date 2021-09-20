@@ -7,8 +7,12 @@ import java.nio.file.Path;
 
 import org.alex73.korpus.compiler.parsers.IParser;
 import org.alex73.korpus.compiler.parsers.ParserFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FilesReader extends BaseParallelProcessor {
+    private static final Logger LOG = LoggerFactory.getLogger(FilesReader.class);
+
     private final Path inputDirectory;
     private final boolean headersOnly;
     private final BaseParallelProcessor processParser;
@@ -30,7 +34,7 @@ public class FilesReader extends BaseParallelProcessor {
 
     protected void process(Path file) {
         run(() -> {
-            //System.out.println(file);
+            LOG.trace("Read file " + file);
             String rel = inputDirectory.relativize(file).toString();
             String currentSubcorpus = rel.substring(0, rel.indexOf('/'));
             IParser parser = ParserFactory.getParser(currentSubcorpus, file);
@@ -39,7 +43,7 @@ public class FilesReader extends BaseParallelProcessor {
             } else {
                 parser.parse(processParser, headersOnly);
             }
-            //System.out.println(file + " - done");
+            LOG.trace("Finished file " + file);
         });
     }
 }

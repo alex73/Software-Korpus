@@ -11,9 +11,14 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public abstract class BaseParallelProcessor {
+    private static final Logger LOG = LoggerFactory.getLogger(BaseParallelProcessor.class);
+
     protected final ThreadPoolExecutor executor;
-    private boolean queueFilled;
+    private int queueCapacity;
     public int defaultThreadPriority = Thread.NORM_PRIORITY;
     private static List<BaseParallelProcessor> instances = new ArrayList<>();
     private static Thread statThread;
@@ -28,23 +33,19 @@ public abstract class BaseParallelProcessor {
                         break;
                     }
                     StringBuilder o = new StringBuilder();
-                    o.append("==================\n");
                     synchronized (instances) {
                         for (BaseParallelProcessor p : instances) {
-                            o.append(p.getClass().getSimpleName() + ":");
+                            o.append("\t" + p.getClass().getSimpleName() + ":");
                             o.append(" threads " + p.executor.getActiveCount() + "/" + p.executor.getMaximumPoolSize());
                             LinkedBlockingQueue<Runnable> q = (LinkedBlockingQueue<Runnable>) p.executor.getQueue();
-                            int qrem = q.remainingCapacity();
-                            int qsize = q.size();
-                            o.append(" queue " + qsize + "/" + (qrem + qsize));
+                            o.append(" queue " + q.size() + "/" + p.queueCapacity);
                             if (p.executor.isShutdown()) {
                                 o.append(" - shutdown");
                             }
                             o.append("\n");
                         }
                     }
-                    o.append("==================\n");
-                    System.out.print(o);
+                    LOG.info("Statistics: \n" + o);
                 }
             }
         };
@@ -61,6 +62,7 @@ public abstract class BaseParallelProcessor {
         synchronized (instances) {
             instances.add(this);
         }
+        this.queueCapacity = queueLength;
         executor = new ThreadPoolExecutor(1, threadsNumber, 1, TimeUnit.MINUTES,
                 new LinkedBlockingQueue<Runnable>(queueLength), new NamedThreadFactory(getClass().getSimpleName()),
                 new WaitPolicy(1, TimeUnit.HOURS));
@@ -71,7 +73,7 @@ public abstract class BaseParallelProcessor {
             try {
                 runnable.run();
             } catch (Throwable ex) {
-                ex.printStackTrace();
+                LOG.error("", ex);
             }
         });
     }
@@ -113,9 +115,6 @@ public abstract class BaseParallelProcessor {
             if (!executor.isShutdown()) {
                 try {
                     BlockingQueue<Runnable> queue = executor.getQueue();
-                    if (queue.remainingCapacity() == 0) {
-                        queueFilled = true;
-                    }
                     if (!queue.offer(r, timeout, unit)) {
                         throw new RejectedExecutionException("Max wait time expired to queue task");
                     }

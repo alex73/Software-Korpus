@@ -17,7 +17,7 @@ public class ProcessTexts extends BaseParallelProcessor {
     private final ProcessStat stat;
 
     public ProcessTexts(StaticGrammarFiller2 grFiller, ProcessPrepareLucene lucene, ProcessStat stat) throws Exception {
-        super(4, 20);
+        super(16, 32);
         this.grFiller = grFiller;
         this.lucene = lucene;
         this.stat = stat;

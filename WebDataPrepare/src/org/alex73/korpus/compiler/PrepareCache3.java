@@ -1,12 +1,15 @@
 package org.alex73.korpus.compiler;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.base.GrammarFinder;
@@ -19,9 +22,9 @@ import org.slf4j.LoggerFactory;
 public class PrepareCache3 {
     private static final Logger LOG = LoggerFactory.getLogger(PrepareCache3.class);
 
-    public static final String PARALLEL_COUNT = "4";
     public static final boolean processStat = true;
     public static final boolean writeToLucene = true;
+    public static final boolean cacheForProduction = false;
 
     public static Path INPUT;
     public static Path OUTPUT;
@@ -34,8 +37,6 @@ public class PrepareCache3 {
     static volatile Exception exception;
 
     public static void main(String[] args) throws Exception {
-        System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", PARALLEL_COUNT);
-
         String input = getKey("input", args);
         String output = getKey("output", args);
         grammarDbPath = getKey("grammardb", args);
@@ -53,20 +54,22 @@ public class PrepareCache3 {
         try {
             run();
         } catch (Throwable ex) {
-            ex.printStackTrace();
+            LOG.error("Error in main execution", ex);
         }
         BaseParallelProcessor.stopStat();
     }
 
     static void run() throws Exception {
         if (Files.exists(OUTPUT)) {
-            Files.list(OUTPUT).forEach(p -> {
-                try {
-                    Files.delete(p);
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
-            });
+            try (Stream<Path> files = Files.walk(OUTPUT)) {
+                files.sorted(Comparator.reverseOrder()).forEach(p -> {
+                    try {
+                        Files.delete(p);
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                });
+            }
         }
         Files.createDirectories(OUTPUT);
 
@@ -104,7 +107,8 @@ public class PrepareCache3 {
         LOG.info("2nd pass...");
         be = System.currentTimeMillis();
         ProcessStat stat = new ProcessStat(processStat);
-        ProcessLuceneWriter lucene = new ProcessLuceneWriter(writeToLucene, OUTPUT.toString(), maxMemoryMB - 8192);
+        ProcessLuceneWriter lucene = new ProcessLuceneWriter(writeToLucene, cacheForProduction, OUTPUT.toString(),
+                maxMemoryMB - 8192);
         ProcessPrepareLucene prepareLucene = new ProcessPrepareLucene(lucene);
         ProcessTexts t2 = new ProcessTexts(grFiller, prepareLucene, stat);
         ProcessFileParser p2 = new ProcessFileParser();
@@ -116,7 +120,7 @@ public class PrepareCache3 {
         stat.finish(OUTPUT);
         prepareLucene.finish(1);
         LOG.info("Finishing lucene...");
-        lucene.finish(30);
+        lucene.finish(30); // finish or shutdown ?
         af = System.currentTimeMillis();
         LOG.info("2st pass time: " + ((af - be) / 1000 / 60) + "min");
 

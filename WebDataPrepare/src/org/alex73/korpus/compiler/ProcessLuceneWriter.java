@@ -1,6 +1,11 @@
 package org.alex73.korpus.compiler;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.server.engine.LuceneFields;
@@ -8,61 +13,104 @@ import org.alex73.korpus.server.engine.StringArrayTokenStream;
 import org.alex73.korpus.utils.KorpusDateTime;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.IntRange;
+import org.apache.lucene.index.ConcurrentMergeScheduler;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
+import org.apache.lucene.index.NoMergePolicy;
+import org.apache.lucene.index.NoMergeScheduler;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.NIOFSDirectory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ProcessLuceneWriter extends BaseParallelProcessor {
-    protected Directory dir;
+    private static final Logger LOG = LoggerFactory.getLogger(ProcessLuceneWriter.class);
 
-    private final LuceneFields fields = new LuceneFields();
-    protected IndexWriter indexWriter;
+    static final int INSTANCE_COUNT = 8;
 
-    protected Document docSentence;
+    private final Path rootDir;
 
-    public ProcessLuceneWriter(boolean realWrite, String rootDir, int bufferSizeMb) throws Exception {
-        super(1, 40);
-        defaultThreadPriority = Thread.MAX_PRIORITY;
-        IndexWriterConfig config = new IndexWriterConfig();
-        config.setOpenMode(OpenMode.CREATE);
-        System.out.println("Lucene will use " + bufferSizeMb + "mb");
-        config.setRAMBufferSizeMB(bufferSizeMb);
-        config.setUseCompoundFile(false);
-        config.setIndexSort(new Sort(new SortField(fields.fieldTextID.name(), SortField.Type.INT)));
+    private final boolean realWrite;
+    private final boolean cacheForProduction;
+    private final int bufferSizeMb;
+    private final double bufferSizeMbEachInstance;
+    private final List<LuceneContext> contexts = Collections.synchronizedList(new ArrayList<>());
 
-        if (realWrite) {
-            dir = new NIOFSDirectory(Paths.get(rootDir));
-            indexWriter = new IndexWriter(dir, config);
+    private ThreadLocal<LuceneContext> context = new ThreadLocal<>() {
+        @Override
+        protected LuceneContext initialValue() {
+            LuceneContext r = new LuceneContext();
+            contexts.add(r);
+            r.fields = new LuceneFields();
+            if (realWrite) {
+                IndexWriterConfig config = new IndexWriterConfig();
+                config.setCommitOnClose(true);
+                config.setOpenMode(OpenMode.CREATE);
+                config.setRAMBufferSizeMB(bufferSizeMbEachInstance);
+                config.setIndexSort(new Sort(new SortField(r.fields.fieldTextID.name(), SortField.Type.INT)));
+                config.setMergePolicy(NoMergePolicy.INSTANCE);
+                config.setMergeScheduler(NoMergeScheduler.INSTANCE);
+                try {
+                    r.path = rootDir.resolve(Thread.currentThread().getName());
+                    r.dir = new NIOFSDirectory(r.path);
+                    r.indexWriter = new IndexWriter(r.dir, config);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+
+            r.docSentence = new Document();
+            r.docSentence.add(r.fields.fieldSentenceValues);
+            r.docSentence.add(r.fields.fieldSentenceDBGrammarTags);
+            r.docSentence.add(r.fields.fieldSentenceLemmas);
+            r.docSentence.add(r.fields.fieldSentencePBinary);
+            r.docSentence.add(r.fields.fieldSentencePage);
+
+            r.docSentence.add(r.fields.fieldSentenceTextSubcorpus);
+            // docSentence.add(fieldSentenceTextIDOrder);
+            r.docSentence.add(r.fields.fieldSentenceTextStyleGenre);
+            r.docSentence.add(r.fields.fieldSentenceTextAuthor);
+            r.docSentence.add(r.fields.fieldSentenceTextSource);
+            r.docSentence.add(r.fields.fieldSentenceTextCreationYear);
+            r.docSentence.add(r.fields.fieldSentenceTextPublishedYear);
+
+            r.docSentence.add(r.fields.fieldTextID);
+            return r;
         }
+    };
 
-        docSentence = new Document();
-        docSentence.add(fields.fieldSentenceValues);
-        docSentence.add(fields.fieldSentenceDBGrammarTags);
-        docSentence.add(fields.fieldSentenceLemmas);
-        docSentence.add(fields.fieldSentencePBinary);
-        docSentence.add(fields.fieldSentencePage);
-
-        docSentence.add(fields.fieldSentenceTextSubcorpus);
-        // docSentence.add(fieldSentenceTextIDOrder);
-        docSentence.add(fields.fieldSentenceTextStyleGenre);
-        docSentence.add(fields.fieldSentenceTextAuthor);
-        docSentence.add(fields.fieldSentenceTextSource);
-        docSentence.add(fields.fieldSentenceTextCreationYear);
-        docSentence.add(fields.fieldSentenceTextPublishedYear);
-
-        docSentence.add(fields.fieldTextID);
+    public ProcessLuceneWriter(boolean realWrite, boolean cacheForProduction, String rootDir, int bufferSizeMb)
+            throws Exception {
+        super(INSTANCE_COUNT, 40);
+        LOG.info("Lucene will use " + bufferSizeMb + "mb");
+        this.realWrite = realWrite;
+        this.cacheForProduction = cacheForProduction;
+        this.rootDir = Paths.get(rootDir);
+        this.bufferSizeMb = bufferSizeMb;
+        this.bufferSizeMbEachInstance = bufferSizeMb * 1.0 / INSTANCE_COUNT;
+        defaultThreadPriority = Thread.MAX_PRIORITY;
     }
 
-    public synchronized void shutdown() throws Exception {
-        if (indexWriter != null) {
-            indexWriter.forceMerge(1, true);
-            indexWriter.commit();
-            indexWriter.close();
-            dir.close();
+    @Override
+    public void finish(int minutes) throws Exception {
+        super.finish(minutes);
+        contexts.parallelStream().forEach(c -> {
+            if (c.indexWriter != null) {
+                try {
+                    c.indexWriter.close();
+                    c.dir.close();
+                } catch (Throwable ex) {
+                    LOG.error("", ex);
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+        if (realWrite) {
+            LOG.info("Merge all...");
+            mergeIndexes();
         }
     }
 
@@ -78,29 +126,30 @@ public class ProcessLuceneWriter extends BaseParallelProcessor {
      * 
      * @return words count
      */
-    private synchronized void addSentence(TextInfo textInfo, int page, String[] values, String[] dbGrammarTags,
-            String[] lemmas, byte[] xml) throws Exception {
-        fields.fieldSentenceTextSubcorpus.setStringValue(textInfo.subcorpus);
-        fields.fieldSentenceTextStyleGenre.setTokenStream(new StringArrayTokenStream(textInfo.styleGenres));
-        setYearsRange(textInfo.creationTime, fields.fieldSentenceTextCreationYear);
-        setYearsRange(textInfo.publicationTime, fields.fieldSentenceTextPublishedYear);
-        fields.fieldSentenceTextAuthor.setTokenStream(new StringArrayTokenStream(textInfo.authors));
-        fields.fieldSentenceTextSource.setStringValue(textInfo.source != null ? textInfo.source : "");
+    private void addSentence(TextInfo textInfo, int page, String[] values, String[] dbGrammarTags, String[] lemmas,
+            byte[] xml) throws Exception {
+        LuceneContext c = context.get();
+        c.fields.fieldSentenceTextSubcorpus.setStringValue(textInfo.subcorpus);
+        c.fields.fieldSentenceTextStyleGenre.setTokenStream(new StringArrayTokenStream(textInfo.styleGenres));
+        setYearsRange(textInfo.creationTime, c.fields.fieldSentenceTextCreationYear);
+        setYearsRange(textInfo.publicationTime, c.fields.fieldSentenceTextPublishedYear);
+        c.fields.fieldSentenceTextAuthor.setTokenStream(new StringArrayTokenStream(textInfo.authors));
+        c.fields.fieldSentenceTextSource.setStringValue(textInfo.source != null ? textInfo.source : "");
 
-        fields.fieldSentenceValues.setTokenStream(new StringArrayTokenStream(values));
-        fields.fieldSentenceDBGrammarTags.setTokenStream(new StringArrayTokenStream(dbGrammarTags));
-        fields.fieldSentenceLemmas.setTokenStream(new StringArrayTokenStream(lemmas));
-        fields.fieldSentencePBinary.setBytesValue(xml);
-        fields.fieldSentencePage.setIntValue(page);
+        c.fields.fieldSentenceValues.setTokenStream(new StringArrayTokenStream(values));
+        c.fields.fieldSentenceDBGrammarTags.setTokenStream(new StringArrayTokenStream(dbGrammarTags));
+        c.fields.fieldSentenceLemmas.setTokenStream(new StringArrayTokenStream(lemmas));
+        c.fields.fieldSentencePBinary.setBytesValue(xml);
+        c.fields.fieldSentencePage.setIntValue(page);
 
         Integer position = PrepareCache3.textPositionsBySourceFile.get(textInfo.sourceFilePath);
         if (position == null) {
-            System.out.println("No file " + textInfo.sourceFilePath);
+            throw new Exception("No file " + textInfo.sourceFilePath);
         }
-        fields.fieldTextID.setIntValue(position); // TODO
+        c.fields.fieldTextID.setIntValue(position); // TODO
 
-        if (indexWriter != null) {
-            indexWriter.addDocument(docSentence);
+        if (c.indexWriter != null) {
+            c.indexWriter.addDocument(c.docSentence);
         }
     }
 
@@ -111,5 +160,44 @@ public class ProcessLuceneWriter extends BaseParallelProcessor {
             KorpusDateTime dt = new KorpusDateTime(date);
             rangeField.setRangeValues(new int[] { dt.getEarliestYear() }, new int[] { dt.getLatestYear() });
         }
+    }
+
+    public void mergeIndexes() throws Exception {
+        LuceneFields fields = new LuceneFields();
+        IndexWriterConfig config = new IndexWriterConfig();
+        config.setCommitOnClose(true);
+        config.setOpenMode(OpenMode.CREATE);
+        config.setRAMBufferSizeMB(bufferSizeMb);
+        config.setIndexSort(new Sort(new SortField(fields.fieldTextID.name(), SortField.Type.INT)));
+        config.setMergeScheduler(new ConcurrentMergeScheduler());
+
+        Directory[] partDirs;
+        try (Directory dir = new NIOFSDirectory(rootDir)) {
+            try (IndexWriter indexWriter = new IndexWriter(dir, config)) {
+                partDirs = contexts.stream().map(c -> {
+                    try {
+                        return new NIOFSDirectory(c.path);
+                    } catch (IOException ex) {
+                        LOG.error("", ex);
+                        throw new RuntimeException(ex);
+                    }
+                }).toArray(Directory[]::new);
+                indexWriter.addIndexes(partDirs);
+                if (cacheForProduction) {
+                    indexWriter.forceMerge(1, true);
+                }
+            }
+        }
+        for (Directory d : partDirs) {
+            d.close();
+        }
+    }
+
+    static class LuceneContext {
+        LuceneFields fields;
+        IndexWriter indexWriter;
+        Path path;
+        NIOFSDirectory dir;
+        Document docSentence;
     }
 }
