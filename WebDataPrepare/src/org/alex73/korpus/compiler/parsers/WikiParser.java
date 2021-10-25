@@ -114,6 +114,7 @@ public class WikiParser extends BaseParser {
             textInfo.subcorpus = subcorpus;
             textInfo.url = urlPrefix + title;
             textInfo.title = title;
+            textInfo.textLabel = textInfo.source;
             if (headersOnly) {
                 ProcessHeaders.process(textInfo);
             } else {

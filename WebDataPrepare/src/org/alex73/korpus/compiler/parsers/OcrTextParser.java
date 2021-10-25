@@ -31,6 +31,7 @@ public class OcrTextParser extends BaseParser {
             textInfo.source = doc.headers.get("Source");
             textInfo.title = doc.headers.get("Title");
             textInfo.details = doc.headers.get("Details");
+            textInfo.textLabel = textInfo.source;
             if (headersOnly) {
                 ProcessHeaders.process(textInfo);
             } else {

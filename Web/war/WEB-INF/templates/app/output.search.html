@@ -8,13 +8,7 @@
       <tr>
         <td style="color: #337ab7; white-space: nowrap;">
             <a tabindex="0" href="#" onClick="new PopoverBiblio(event, korpusService.resultSearch.rows[{{:#index}}].doc, korpusService.resultSearch.rows[{{:#index}}].origText.page); return false;">
-              {{if doc.authors}}
-                {{titleShort:doc.authors}}
-              {{else doc.source}}
-                {{titleShort:doc.source}}
-              {{else}}
-                {{titleShort:doc.title}}
-              {{/if}}
+                {{titleShort:doc.textLabel}}
             </a>
         </td>
         <td>

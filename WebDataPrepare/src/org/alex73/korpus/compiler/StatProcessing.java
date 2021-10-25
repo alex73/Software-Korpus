@@ -55,6 +55,7 @@ public class StatProcessing {
             }
             break;
         case "sajty":
+        case "nierazabranaje":
             todo.add(getStatInfo(textInfo.subcorpus + "." + textInfo.source));
             break;
         }

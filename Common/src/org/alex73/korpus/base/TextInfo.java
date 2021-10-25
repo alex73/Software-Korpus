@@ -30,6 +30,7 @@ import org.alex73.korpus.utils.KorpusDateTime;
 public class TextInfo implements Serializable {
     public transient String sourceFilePath; // ID зыходнага файлу
     public String subcorpus; // падкорпус
+    public String textLabel;
     public String source; // крыніца: толькі для сайтаў і неразабраных
     public String url; // спасылка на знешні сайт, калі ёсць
     public String[] authors; // аўтары

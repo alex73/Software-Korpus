@@ -3,6 +3,7 @@ package org.alex73.korpus.compiler.parsers;
 import java.io.ByteArrayInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.compiler.BaseParallelProcessor;
@@ -53,6 +54,7 @@ public class TextParser extends BaseParser {
             textInfo.edition = doc.headers.get("Edition");
             textInfo.creationTime = getAndCheckYears(doc.headers.get("CreationYear"));
             textInfo.publicationTime = getAndCheckYears(doc.headers.get("PublicationYear"));
+            textInfo.textLabel = textInfo.authors != null ? String.join(",", Arrays.asList(textInfo.authors)) : "———";
 
             AuthorsUtil.fixAuthors(textInfo);
             if (headersOnly) {

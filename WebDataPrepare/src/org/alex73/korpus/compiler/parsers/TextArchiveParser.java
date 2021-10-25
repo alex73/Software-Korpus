@@ -56,6 +56,7 @@ public class TextArchiveParser extends BaseParser {
                     textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + en.getName();
                     textInfo.subcorpus = subcorpus;
                     textInfo.source = commonHeaders.get("Source");
+                    textInfo.textLabel = textInfo.source;
                     String s;
                     if ((s = doc.headers.get("StyleGenre")) != null) {
                         textInfo.styleGenres = splitAndTrim(s);

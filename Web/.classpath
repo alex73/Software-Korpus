@@ -9,7 +9,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Jetty"/>
-	<classpathentry exported="true" kind="lib" path="libs/org.apache.lucene/lucene-core-8.9.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.apache.lucene/lucene-core-8.9.0.jar" sourcepath="/data/src/lucene-core-8.9.0-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/org.apache.lucene/lucene-queries-8.9.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/org.freemarker/freemarker-2.3.31.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/aopalliance-repackaged-2.6.1.jar"/>
