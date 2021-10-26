@@ -269,6 +269,9 @@ $.views.converters("korpusname", function(val) {
 $.views.converters("korpusdesc", function(val) {
 	return val.replace(/.+\|\|/g, '');
 });
+$.views.converters("naciski", function(val) {
+    return val != null ? val.replaceAll("+", "\u0301") : val;
+});
 
 var korpusui: KorpusUI = null;
 var korpusService: KorpusService = null;
@@ -282,4 +285,3 @@ function initializeKorpusPage() {
 	korpusui = new KorpusUI();
 	korpusService = new KorpusService();
 }
-

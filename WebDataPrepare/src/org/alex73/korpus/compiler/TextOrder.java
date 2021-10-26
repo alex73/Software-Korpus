@@ -10,7 +10,7 @@ import org.alex73.korpus.base.TextInfo;
 
 public class TextOrder implements Comparator<TextInfo> {
     static final List<String> subcorpuses = Arrays.asList("teksty", "kankardans", "sajty", "wiki", "pieraklady",
-            "nierazabranaje", "telegram");
+            "nierazabranaje", "telegram", "dyjalektny");
     static final Collator BE = Collator.getInstance(new Locale("be"));
 
     @Override
@@ -41,6 +41,9 @@ public class TextOrder implements Comparator<TextInfo> {
                 break;
             case "kankardans":
                 c = kankardans.compare(o1, o2);
+                break;
+            case "dyjalektny":
+                c = dyjalektny.compare(o1, o2);
                 break;
             default:
                 throw new RuntimeException("Unknown subcorpus: " + o1.subcorpus);
@@ -84,6 +87,13 @@ public class TextOrder implements Comparator<TextInfo> {
         int c = Integer.compare(wikiOrder(o1), wikiOrder(o2));
         if (c == 0) {
             c = BE.compare(o1.title, o2.title);
+        }
+        return c;
+    };
+    Comparator<TextInfo> dyjalektny = (o1, o2) -> {
+        int c = BE.compare(o1.details, o2.details);
+        if (c == 0) {
+            c = BE.compare(o1.source, o2.source);
         }
         return c;
     };

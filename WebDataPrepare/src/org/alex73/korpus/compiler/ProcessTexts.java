@@ -32,9 +32,6 @@ public class ProcessTexts extends BaseParallelProcessor {
         if (textInfo.subcorpus == null) {
             throw new RuntimeException("subcorpus нявызначаны ў " + textInfo.sourceFilePath);
         }
-        if (textInfo.title == null) {
-            throw new RuntimeException("title нявызначаны ў " + textInfo.sourceFilePath);
-        }
         if (content.contains(null)) {
             throw new RuntimeException("content утрымлівае пустыя параграфы");
         }
