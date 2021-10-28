@@ -2,7 +2,6 @@
  Korpus - Corpus Linguistics Software.
 
  Copyright (C) 2013-2015 Aleś Bułojčyk (alex73mail@gmail.com)
-               Home page: https://sourceforge.net/projects/korpus/
 
  This file is part of Korpus.
 

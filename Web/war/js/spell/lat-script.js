@@ -14,7 +14,6 @@
 
 
     Author: Aleś Bułojčyk <alex73mail@gmail.com>
-    Homepage: http://sourceforge.net/projects/korpus/
 
     Асноўныя функцыі:
         lat(text, latTrad) - Лацінізаваць кірылічны тэкст
