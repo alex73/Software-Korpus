@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
     <link rel="stylesheet" href="css/styles.css">
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <!--script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script-->
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
     
@@ -40,95 +40,74 @@
             <select name="lang" id="lang" style="display: none">
                 <option value="be">Belarusian</option>
             </select>
-            <div class="row justify-content-end my-4">
-            <button type="submit" name="_action_checkText" class="btn btn-danger btn-lg" onClick="doit();return false;">Спраўдзіць</button>
+            <div class="row my-4" style="justify-content:space-between;">
+                <div>
+                    <div id="feedbackMessage"></div>
+                    <div id="feedbackErrorMessage" style="color: red;"></div>
+                </div>
+                <button type="submit" name="_action_checkText" class="btn btn-danger btn-lg" onClick="doit();return false;">Спраўдзіць</button>
             </div>
-            <div id="feedbackMessage"></div>
-            <div id="feedbackErrorMessage" style="color: red;"></div>
         </div>
     </form>
 </div>
 
 <div class="container">
+    <hr/>
     Мы раім усталяваць праверку правапісу на свой камп'ютар у выглядзе дадатка <a href="https://languagetool.org/">LanguageTool</a>.
-<div class="row">
-    <div class="col-lg-4 d-flex flex-wrap justify-content-center row-cols-lg-2 row-cols-sm-4 text-center px-sm-5">
-        <div class="py-4 px-sm-5 px-2"><a href="#">
-                <img width="64" height="64"  src="https://languagetool.org/images/add-on-chrome.png" />
-                <div>Chrome</div>
-            </a>
-        </div>
-        <div class="py-4 px-sm-5 px-2"><a href="#">
-                <img width="64" height="64"  src="https://languagetool.org/images/add-on-edge.png" />
-                <div>Edge</div>
-            </a>
-        </div>
-        <div class="py-4 px-sm-5 px-2"><a href="#">
-                <img width="64" height="64"  src="https://languagetool.org/images/add-on-firefox.png" />
-                <div>Firefox</div>
-            </a>
-        </div>
-        <div class="py-4 px-sm-5 px-2"><a href="#">
-                <img width="64" height="64"  src="https://languagetool.org/images/add-on-safari.png" />
-                <div>Safari</div>
-            </a>
-        </div>
+    <div class="row justify-content-center">
+        <a href="https://chrome.google.com/webstore/detail/grammar-and-spell-checker/oldceeleldhonbafppcapldpdifcinji" class="text-center p-3">
+            <img width="64" height="64" src="https://languagetool.org/images/add-on-chrome.png" />
+            <div>Chrome</div>
+        </a>
+        <a href="https://addons.mozilla.org/firefox/addon/languagetool/" class="text-center p-3">
+            <img width="64" height="64" src="https://languagetool.org/images/add-on-firefox.png" />
+            <div>Firefox</div>
+        </a>
+        <a href="https://apps.apple.com/app/id1534275760" class="text-center p-3">
+            <img width="64" height="64" src="https://languagetool.org/images/add-on-safari.png" />
+            <div>Safari</div>
+        </a>
+        <a href="https://microsoftedge.microsoft.com/addons/detail/hfjadhjooeceemgojogkhlppanjkbobc" class="text-center p-3">
+            <img width="64" height="64" src="https://languagetool.org/images/add-on-edge.png" />
+            <div>Edge</div>
+        </a>
+        <a href="https://addons.opera.com/extensions/details/grammar-and-spell-checker-languagetool/" class="text-center p-3">
+            <img width="64" height="64" src="https://languagetool.org/images/add-on-opera.png" />
+            <div>Opera</div>
+        </a>
+        <a href="https://addons.thunderbird.net/thunderbird/addon/grammar-and-spell-checker/" class="text-center p-3">
+            <img width="64" height="64" src="https://languagetool.org/images/add-on-thunderbird.png" />
+            <div>Thunderbird</div>
+        </a>
     </div>
-    <div class="col-lg-4 d-flex flex-wrap justify-content-center row-cols-lg-2 row-cols-sm-4 text-center px-sm-5">
-        <div class="py-4 px-sm-5 px-2"><a href="#">
-                <img width="64" height="64"  src="https://languagetool.org/images/add-on-word.png" />
-                <div>Word</div>
-            </a>
-        </div>
-        <div class="py-4 px-sm-5 px-2"><a href="#">
-                <img width="64" height="64"  src="https://languagetool.org/images/add-on-docs.png" />
-                <div>Google Docs</div>
-            </a>
-        </div>
-        <div class="py-4 px-sm-5 px-2"><a href="#">
-                <img width="64" height="64"  src="https://languagetool.org/images/add-on-open-office.png" />
-                <div>OpenOffice</div>
-            </a>
-        </div>
-        <div class="py-4 px-sm-5 px-2"><a href="#">
-                <img width="64" height="64"  src="https://languagetool.org/images/add-on-libre-office.png" />
-                <div>LibreOffice</div>
-            </a>
-        </div>
+    <div class="row justify-content-center">
+        <a href="https://extensions.libreoffice.org/en/extensions/show/languagetool" class="text-center p-3">
+            <img width="64" height="64"  src="https://languagetool.org/images/add-on-libre-office.png" />
+            <div>LibreOffice</div>
+        </a>
+        <a href="https://extensions.openoffice.org/project/languagetool" class="text-center p-3">
+            <img width="64" height="64"  src="https://languagetool.org/images/add-on-open-office.png" />
+            <div>OpenOffice</div>
+        </a>
+        <a href="https://appsource.microsoft.com/product/office/wa104381727" class="text-center p-3">
+            <img width="64" height="64"  src="https://languagetool.org/images/add-on-word.png" />
+            <div>Word</div>
+        </a>
+        <a href="https://gsuite.google.com/marketplace/app/grammar_and_spell_checker_languagetool/805250893316" class="text-center p-3">
+            <img width="64" height="64"  src="https://languagetool.org/images/add-on-docs.png" />
+            <div>Google Docs</div>
+        </a>
     </div>
-    <div class="col-lg-4 d-flex flex-wrap justify-content-center row-cols-lg-2 row-cols-sm-4 text-center px-sm-5">
-        <div class="py-4 px-sm-5 px-2"><a href="#">
-                <img width="64" height="64"  src="https://languagetool.org/images/add-on-mac.png" />
-                <div>macOS</div>
-            </a>
-        </div>
-        <div class="py-4 px-sm-5 px-2"><a href="#">
-                <img width="64" height="64"  src="https://languagetool.org/images/add-on-windows.png" />
-                <div>Windows</div>
-            </a>
-        </div>
-        <div class="py-4 px-sm-5 px-2"><a href="#">
-                <img width="64" height="64"  src="https://languagetool.org/images/add-on-thunderbird.png" />
-                <div>Thunderbird</div>
-            </a>
-        </div>
-        <div class="py-4 px-sm-5 px-2"><a href="#">
-                <img width="64" height="64"  src="https://languagetool.org/images/add-on-opera.png" />
-                <div>Opera</div>
-            </a>
-        </div>
+    <div class="row justify-content-center">
+        <a href="https://apps.apple.com/app/id1534275760" class="text-center p-3">
+            <img width="64" height="64"  src="https://languagetool.org/images/add-on-mac.png" />
+            <div>macOS</div>
+        </a>
+        <a href="https://languagetool.org/download/windows-app/LanguageTool-1.0.2.exe" class="text-center p-3">
+            <img width="64" height="64"  src="https://languagetool.org/images/add-on-windows.png" />
+            <div>Windows</div>
+        </a>
     </div>
-
-        <!--<img src="https://languagetool.org/images/add-on-word.png"/>
-        <img src="https://languagetool.org/images/add-on-docs.png"/>
-        <img src="https://languagetool.org/images/add-on-open-office.png"/>
-        <img src="https://languagetool.org/images/add-on-libre-office.png"/>
-        
-        <img src="https://languagetool.org/images/add-on-mac.png"/>
-        <img src="https://languagetool.org/images/add-on-windows.png"/>
-        <img src="https://languagetool.org/images/add-on-thunderbird.png"/>
-        <img src="https://languagetool.org/images/add-on-opera.png"/>-->
-</div>
 У LibreOffice, пачынаючы з версіі 7.2.2, вы можаце выкарыстоўваць граматычную базу для праверкі правапісу, вызначыўшы мову тэксту праз "Tools/Language", і уключыўшы аўтаматычную праверку правапісу праз "Tools/Automatic Spell Checking" і адмысловую праверку праз "Tools/Spelling..."
 <br/>
 Вы можаце скарыстацца абмежаваным, але больш інтэграваным у Windows і Microsoft Office дадаткам:
@@ -189,6 +168,8 @@
   });
  
   function doit() {
+     $("#feedbackMessage").text('');
+     $("#feedbackErrorMessage").text('');
      var langCode = document.checkform.lang.value;
      tinyMCE.activeEditor.execCommand("mceWritingImprovementTool", langCode);
   }
