@@ -232,6 +232,15 @@ public class KorpusApplication extends Application {
                     searchInitial.stat.add(s2);
                 });
                 break;
+            case "nierazabranaje":
+                Arrays.asList(stat.getProperty("sources.nierazabranaje", "").split(";")).forEach(sa -> {
+                    InitialData.Stat s2 = new InitialData.Stat();
+                    s2.name = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + sa;
+                    s2.texts = Integer.parseInt(stat.getProperty("texts." + k.key + "." + sa, "0"));
+                    s2.words = Integer.parseInt(stat.getProperty("words." + k.key + "." + sa, "0"));
+                    searchInitial.stat.add(s2);
+                });
+                break;
             }
         }
     }

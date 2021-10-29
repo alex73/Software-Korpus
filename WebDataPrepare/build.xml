@@ -31,8 +31,8 @@
 				<fileset dir="../Common/lib/" includes="**/*.jar" />
 				<fileset dir="../Web/libs/" includes="**/*.jar" />
 			</classpath>
-			<jvmarg line="-Xmx22g -XX:+CrashOnOutOfMemoryError -XX:OnError='echo zzzz' -XX:+ShowMessageBoxOnError"/>
-			<arg line="--input=/home/alex/Korpus-texts --output=/home/alex/Korpus-cache --grammardb=/home/alex/gits/GrammarDB"/>
+			<jvmarg line="-Xmx22g"/>
+			<arg line="--input=/home/alex/Korpus-full --output=/home/alex/Korpus-cache-full --grammardb=/home/alex/gits/GrammarDB"/>
 		</java>
 	</target>
 </project>

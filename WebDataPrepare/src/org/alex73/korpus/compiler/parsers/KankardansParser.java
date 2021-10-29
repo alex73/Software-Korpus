@@ -32,22 +32,29 @@ public class KankardansParser extends BaseParser {
     public void parse(BaseParallelProcessor queue, boolean headersOnly) throws Exception {
         List<String> lines = Files.readAllLines(file);
 
+        boolean inText = false;
         for (String line : lines) {
             line = line.trim();
             if (line.startsWith(PREFIX_TEXT)) {
                 flushText(headersOnly);
+                inText = false;
                 textTitle = line.substring(PREFIX_TEXT.length()).replaceAll("^[0-9]+\\.", "").trim();
             } else if (line.startsWith(PREFIX_PAGE)) {
-                String pageNumber = line.substring(PREFIX_PAGE.length()).trim();
-                if (!text.toString().contains("\n\n")) {
+                if (!inText) {
+                    inText = true;
                     text.append("\n");
                 }
+                String pageNumber = line.substring(PREFIX_PAGE.length()).trim();
                 text.append("##Page: " + pageNumber + "\n");
             } else if (line.startsWith(PREFIX_ROW)) {
             } else if (line.startsWith("№")) {
-                throw new RuntimeException(line);
+                throw new Exception("Wrong format: " + line);
             } else if (line.startsWith("##")) {
-                text.append(line + "\n");
+                if (!inText) {
+                    text.append(line + "\n");
+                } else {
+                    throw new Exception("Wrong format: " + line);
+                }
             } else {
                 text.append(line.replaceAll("^[0-9]+", "").trim()).append("\n");
             }
@@ -64,7 +71,7 @@ public class KankardansParser extends BaseParser {
             textInfo.subcorpus = subcorpus;
             textInfo.textOrder = ++textOrder;
             textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + textTitle;
-            textInfo.title = textTitle;
+            textInfo.title = doc.headers.get("Title");
             String s;
             if ((s = doc.headers.get("Authors")) != null) {
                 textInfo.authors = splitAndTrim(s);

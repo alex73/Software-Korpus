@@ -72,6 +72,9 @@ public abstract class BaseParallelProcessor {
         executor.execute(() -> {
             try {
                 runnable.run();
+            } catch (OutOfMemoryError ex) {
+                LOG.error("", ex);
+                System.exit(1);
             } catch (Throwable ex) {
                 LOG.error("", ex);
             }
