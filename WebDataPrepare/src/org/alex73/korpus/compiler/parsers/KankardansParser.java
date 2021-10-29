@@ -58,8 +58,8 @@ public class KankardansParser extends BaseParser {
     private void flushText(boolean headersOnly) {
         if (!text.isEmpty()) {
             TextFileParser doc = new TextFileParser(
-                    new ByteArrayInputStream(text.toString().getBytes(StandardCharsets.UTF_8)), headersOnly,
-                    PrepareCache3.errors);
+                    new ByteArrayInputStream(text.toString().getBytes(StandardCharsets.UTF_8)), headersOnly);
+            doc.parse(PrepareCache3.errors);
             TextInfo textInfo = new TextInfo();
             textInfo.subcorpus = subcorpus;
             textInfo.textOrder = ++textOrder;

@@ -32,7 +32,7 @@ public class TextArchiveParser extends BaseParser {
         Map<String, String> commonHeaders;
         if (Files.exists(headersFile)) {
             try (InputStream in = Files.newInputStream(headersFile)) {
-                TextFileParser fp = new TextFileParser(in, true, PrepareCache3.errors);
+                TextFileParser fp = new TextFileParser(in, true);
                 commonHeaders = fp.headers;
             }
         } else {
@@ -50,8 +50,7 @@ public class TextArchiveParser extends BaseParser {
                     data = IOUtils.toByteArray(in);
                 }
                 queue.run(() -> {
-                    TextFileParser doc = new TextFileParser(new ByteArrayInputStream(data), headersOnly,
-                            PrepareCache3.errors);
+                    TextFileParser doc = new TextFileParser(new ByteArrayInputStream(data), headersOnly);
                     TextInfo textInfo = new TextInfo();
                     textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + en.getName();
                     textInfo.subcorpus = subcorpus;
@@ -70,6 +69,7 @@ public class TextArchiveParser extends BaseParser {
                     if (headersOnly) {
                         ProcessHeaders.process(textInfo);
                     } else {
+                        doc.parse(PrepareCache3.errors);
                         ProcessTexts.process(textInfo, new PtextToKorpus(doc.lines, true).paragraphs);
                     }
                 });

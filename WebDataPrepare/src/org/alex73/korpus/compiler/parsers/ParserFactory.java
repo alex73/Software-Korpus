@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 public class ParserFactory {
     public static final List<Pair> parsers = new ArrayList<>();
     static {
-        parsers.add(new Pair("nierazabranaje:.+.text", OcrTextParser.class));
+        parsers.add(new Pair("nierazabranaje:.+.zip", OcrTextParser.class));
         parsers.add(new Pair("teksty:.+\\.list", NullParser.class));
         parsers.add(new Pair("teksty:.+\\.text", TextParser.class));
         parsers.add(new Pair("teksty:.+\\.(jpg|gif|png)", NullParser.class));

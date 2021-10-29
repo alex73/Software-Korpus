@@ -24,11 +24,11 @@ public class TextFileParser {
     private static Pattern RE_TAG_BEGIN = Pattern.compile("##([A-Za-z0-9]+)_BEGIN");
 
     public final Map<String, String> headers;
+    public final List<String> sourceLines = new ArrayList<>();
     public final List<TextLine> lines = new ArrayList<>();
     private Splitter3 splitter;
 
-    public TextFileParser(InputStream in, boolean headersOnly, IProcess errors) {
-        splitter = new Splitter3(true, errors);
+    public TextFileParser(InputStream in, boolean headersOnly) {
         try {
             BufferedReader rd = new BOMBufferedReader(new InputStreamReader(in, "UTF-8"));
 
@@ -39,32 +39,40 @@ public class TextFileParser {
 
             String s;
             while ((s = rd.readLine()) != null) {
-                if (s.trim().isEmpty()) {
-                    TextLine line = new TextLine();
-                    line.add(new TailItem("\n"));
-                    lines.add(line);
-                    continue;
-                }
-                if (s.startsWith("##")) {
-                    TextLine p;
-                    int pos = s.indexOf(':');
-                    String after = s.substring(pos + 1).trim();
-                    if (after.equals("begin") || after.equals("end") || s.startsWith("##Page:")) {
-                        p = new TextLine();
-                        p.add(new LongTagItem(s));
-                    } else {
-                        p = splitter.parse(s.substring(pos + 1));
-                        p.add(0, new LongTagItem(s.substring(0, pos + 1)));
-                    }
-                    lines.add(p);
-                    continue;
-                }
-                TextLine p = splitter.parse(s);
-                p.add(new TailItem("\n"));
-                lines.add(p);
+                sourceLines.add(s);
             }
         } catch (Exception ex) {
             throw new RuntimeException(ex);
+        }
+    }
+
+    public void parse(IProcess errors) {
+        splitter = new Splitter3(true, errors);
+
+        for (String s : sourceLines) {
+            if (s.trim().isEmpty()) {
+                TextLine line = new TextLine();
+                line.add(new TailItem("\n"));
+                lines.add(line);
+                continue;
+            }
+            if (s.startsWith("##")) {
+                TextLine p;
+                int pos = s.indexOf(':');
+                String after = s.substring(pos + 1).trim();
+                if (after.equals("begin") || after.equals("end") || s.startsWith("##Page:")) {
+                    p = new TextLine();
+                    p.add(new LongTagItem(s));
+                } else {
+                    p = splitter.parse(s.substring(pos + 1));
+                    p.add(0, new LongTagItem(s.substring(0, pos + 1)));
+                }
+                lines.add(p);
+                continue;
+            }
+            TextLine p = splitter.parse(s);
+            p.add(new TailItem("\n"));
+            lines.add(p);
         }
     }
 

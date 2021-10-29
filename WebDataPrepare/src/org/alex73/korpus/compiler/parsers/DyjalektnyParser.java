@@ -22,7 +22,7 @@ public class DyjalektnyParser extends BaseParser {
     public void parse(BaseParallelProcessor queue, boolean headersOnly) throws Exception {
         byte[] data = Files.readAllBytes(file);
         queue.run(() -> {
-            TextFileParser doc = new TextFileParser(new ByteArrayInputStream(data), headersOnly, PrepareCache3.errors);
+            TextFileParser doc = new TextFileParser(new ByteArrayInputStream(data), headersOnly);
             TextInfo textInfo = new TextInfo();
             textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString();
             textInfo.subcorpus = subcorpus;
@@ -38,6 +38,7 @@ public class DyjalektnyParser extends BaseParser {
             if (headersOnly) {
                 ProcessHeaders.process(textInfo);
             } else {
+                doc.parse(PrepareCache3.errors);
                 ProcessTexts.process(textInfo, new PtextToKorpus(doc.lines, true).paragraphs);
             }
         });
