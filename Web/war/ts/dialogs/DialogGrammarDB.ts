@@ -71,10 +71,13 @@ class DialogGrammarDB {
 				v.sourceFormsUsageCount[fi]++;
 				var suffix = '';
 				if (f.options === 'ANIM') {
-					suffix = ' <span class="grtag">(адуш.)</span>';
+					suffix += ' <span class="grtag">(адуш.)</span>';
 				} else if (f.options === 'INANIM') {
-					suffix = ' <span class="grtag">(неадуш.)</span>';
+					suffix += ' <span class="grtag">(неадуш.)</span>';
 				}
+                if (f.type === 'NUMERAL') {
+                    suffix += ' <span class="grtag">(2,3,4)</span>';
+                }
 				result.push(f.value + suffix);
 			}
 		}

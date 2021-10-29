@@ -1,0 +1,150 @@
+<#assign active = "index">
+<#assign title = "Беларускі N-корпус">
+<#assign brand = "Беларускі N-корпус">
+<#include "header.html">
+
+    <div class="container">
+
+
+    <span style="color: #0C8349">01.11.2021</span> - Вялікія змены ў праекце:
+    <ul style="margin: 0;">
+        <li>Значна папоўнены корпус тэкстаў, дададзены новыя падкорпусы, істотна абноўлены інтэрфейс корпусу. Аб'ём асноўнага корпусу ~ 163 млн. словаўжыванняў, усяго корпусу (разам з неразабранымі тэкстамі) ~337 млн. словаўжыванняў.</li>
+        <li>Абноўлены інтэрфейс граматычнай базы, дадзена інфармацыя пра крыніцы слова.</li>
+        <li>Дадаўся раздзел анлайн-праверкі беларускага правапісу, а таксама модулі праверкі для розных праграм і аперацыйных сістэм.</li>
+        <li>Дадаўся фанетычны канвертар (тэставая версія), які дазваляе канвертаваць тэксты ў транскрыпцыю.</li>
+        <li>Дададзены праекты ў распрацоўцы, створаныя на падставе граматычнай базы (тэставая версія).</li>
+    </ul>
+    <span style="color: #0C8349">01.11.2021</span> - У выдавецтве «Тэхналогія» выйшла электроннае выданне «Граматычнай базы беларускай мовы», падрыхтаванае сектарам камп’ютарнай лінгвістыкі Інстытута мовазнаўства.<br/>
+
+    <div id="more" style="display: flex; justify-content: flex-end"><a href="#" onClick="more(); return false">больш навін &gt;&gt;&gt;</a></div>
+    <div id="moreData" style="display: none">
+        <span style="color: #0C8349">09.09.2019</span> - Абноўлены Беларускі N-корпус. Дадалося ~5000 тэкстаў аб'ёмам ~12 млн. словаўжыванняў. Аб'ём Асноўнага корпусу складае ~ 163 млн. словаўжыванняў. Аб'ём усяго корпусу (разам з неразабранымі тэкстамі) - ~337 млн. словаўжыванняў.<br/>
+        <span style="color: #0C8349">05.08.2016</span> - Корпус папоўнены публіцыстычнымі тэкстамі ~20 млн. словаўжыванняў. Агульны аб'ём корпусу - ~80 млн. словаўжыванняў.
+    </div>
+        <hr/>
+
+        <div class="row card-desk row-cols-1 row-cols-md-2 2card-columns praprajekty">
+            <div class="p-2">
+                <div class="card h-100">
+                    <div class="card-header h6"><a href="korpus.html">
+                      <#if lang=='be'>Беларускі N-корпус<#elseif lang='en'>Belarusian N-corpus</#if>
+                    </a></div>
+                    <div class="card-body">
+                        <img src="images/korpus.png"/>
+                        <p><#if lang=='be'>
+                           Корпус тэкстаў сучаснай беларускай мовы са структурнай і граматычнай разметкай і пашпартызацыяй. 
+                           Корпус складаецца з некалькіх падкорпусаў: асноўны, неразабраныя тэксты, газеты і сайты, Вікіпедыі (абодва правапісы).
+                           Агульны аб'ём Асноўнага корпусу складае ~ 163 млн. словаўжыванняў. Аб'ём усяго корпусу - ~337 млн. словаўжыванняў.
+                        <#elseif lang='en'>
+                           Corpus of texts of the modern Belarusian language with structural and grammatical marking and certification.
+                           The corpus consists of several subcorpora: basic, unclassified texts, newspapers and websites, Wikipedia (both spellings).
+                           The total volume of the main corpus is ~ 163 million words. The volume of the whole corpus is ~ 337 million words.
+                        </#if></p>
+                    </div>
+                    <div class="card-footer">
+                        <a href="https://github.com/alex73/Software-Korpus">
+                          <#if lang=='be'>Зыходнікі<#elseif lang='en'>Source code</#if>
+                        </a>
+                        <a class="float-right" href="articles/Artykul_Koscanki_2018.html">
+                          <#if lang=='be'>Артыкул<#elseif lang='en'>Article</#if>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="p-2">
+                <div class="card h-100">
+                    <div class="card-header h6"><a href="grammar.html">Граматычная база беларускай мовы</a></div>
+                    <div class="card-body">
+                        <img src="images/baza.png"/>
+                        <p>Граматычная база ўяўляе сабой збор слоў з марфалагічнымі і іншымі паметамі. Вартасць граматычнай базы ў тым, 
+                            што яна змяшчае не толькі словы, зафіксаваныя ў нарматыўных слоўніках, але і словы, якія з’явіліся ў беларускай мове 
+                            за апошнія дзесяцігоддзі і ў слоўніках пакуль не адлюстраваны, што дазваляе  назваць дадзеную базу базай актуальнай лексікі беларускай мовы.</p>
+                    </div>
+                    <div class="card-footer">
+                        <a href="https://github.com/Belarus/GrammarDB/releases">Зыходнікі</a>
+                    </div>
+                </div>
+            </div>
+            <div class="p-2">
+                <div class="card h-100">
+                    <div class="card-header h6"><a target="_blank" href="https://biblija.bnkorpus.info/">Біблійны корпус</a></div>
+                    <div class="card-body">
+                        <img src="images/biblijny.png"/>
+                        <p>Беларускі Біблійны корпус змяшчае 16 перакладаў Бібліі на беларускую мову, а таксама тэксты на іншых мовах (лаціна, яўрэйская, украінская, 
+                            польская і інш.) для параўнанняў і ўяўляе сабой зручны і эфектыўны інструмент для перакладчыкаў і даследчыкаў Бібліі. Пры дапамозе 
+                            Біблійнага корпусу вы зможаце супаставіць тэксты перакладаў, а таксама знайсці патрэбнае слова і паглядзець варыянты яго перакладу
+                            ў розных выданнях.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-2">
+                <div class="card h-100">
+                    <div class="card-header h6"><a href="spell.html">Праверка правапісу +анлайн</a></div>
+                    <div class="card-body">
+                        <img src="images/spellchecker.png"/>
+                        <p>Анлайнавы сэрвіс, які дапаможа вам пазбавіцца памылак у тэксце, напісаным па-беларуску афіцыйным правапісам. Таксама на старонцы сэрвісу 
+                            вы зможаце спампаваць праграму праверкі арфаграфіі для Windows (уключна з Skype, Microsoft office і г.д.), LibreOffice/OpenOffice, 
+                            Mozilla Firefox/Thunderbird</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-2">
+                <div class="card h-100">
+                    <div class="card-header h6"><a target="_blank" href="https://github.com/alex73/SlounikPlus">SlounikPlus</a></div>
+                    <div class="card-body">
+                        <img src="images/slounikplus.png"/>
+                        <p>Праграма SloŭnikPlus створана з выкарыстаннем сучасных тэхналогій і істотна паляпшае працэс укладання слоўніка – значна павялічваецца 
+                            эфектыўнасць, хуткасць і камфортнасць працы у параўнанні з больш звыклымі спосабамі (напрыклад, пры дапамозе MS Office). 
+                            Дадатным бокам праграмы ёсць і тое, што яна працуе праз цэнтральны сервер, таму ўкладальнік не прывязаны да канкрэтнага камп’ютара 
+                            і можа працаваць з любога месца пры наяўнасці інтэрнэт-падключэння.</p>
+                        <p>A specific dictionary creating software SloŭnikPlus with a user friendly interface, which may be adapted to make dictionaries 
+                            and catalogues of almost any type. SloŭnikPlus (https://sourceforge.net/p/korpus/dict/) is based on modern technologies 
+                            and significantly improves dictionary creation process. It makes work faster, comfortable, and more effective in comparison 
+                            with usual dictionary creation.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-2">
+                <div class="card h-100">
+                    <div class="card-header h6"><a href="fanetyka.html">Фанетычны канвертар</a></div>
+                    <div class="card-body">
+                        <img src="images/fanietycny.png"/>
+                        <p>Анлайнавы канвертар слоў і тэкстаў беларускай мовы у фанетычную транскрыпцыю з выкарыстаннем Міжнароднага фанетычнага алфавіта (IPA) 
+                            і беларускай школьнай транскрыпцыі. </p>
+                        <p>The online converter of Belarusian words and texts to phonetic transcription using International Phonetic Alphabet (IPA) and 
+                            Belarusian school transription system.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-2">
+                <div class="card h-100">
+                    <div class="card-header h6"><a href="future.html">Праекты ў распрацоўцы</a></div>
+                    <div class="card-body">
+                        <p>Слоўнікі і іншыя праекты, якія створаны аўтаматычна з граматычнай базы</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-2">
+                <div class="card h-100">
+                    <div class="card-header h6">Карысныя спасылкі</div>
+                    <div class="card-body">
+                        <p><a href="https://pravilna.by/">https://pravilna.by/</a> - Пішам па-беларуску правільна!</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+    <br/><br/>
+    <p class="text-center">Дасылайце лісты на <a href="mailto:bnkorpus@gmail.com">bnkorpus@gmail.com</a></p>
+    </div>
+
+    <script>
+      function more() {
+        $('#more').hide();
+        $('#moreData').show();
+      }
+    </script>
+
+<#include "footer.html">

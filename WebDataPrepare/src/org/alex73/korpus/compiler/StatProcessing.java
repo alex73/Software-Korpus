@@ -1,5 +1,7 @@
 package org.alex73.korpus.compiler;
 
+import java.io.BufferedWriter;
+import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Collator;
@@ -20,6 +22,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPOutputStream;
 
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.text.structure.corpus.Paragraph;
@@ -128,9 +131,13 @@ public class StatProcessing {
 
         List<String> lemmas = new ArrayList<>(authorsByLemmas.keySet());
         Collections.sort(lemmas, BE);
-        lemmas = lemmas.stream().map(le -> le + '=' + String.join(";", authorsByLemmas.get(le)))
-                .collect(Collectors.toList());
-        Files.write(dir.resolve("lemma-authors.list"), lemmas);
+
+        try (BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(
+                new GZIPOutputStream(Files.newOutputStream(dir.resolve("lemma-authors.list.gz")))))) {
+            for (String le : lemmas) {
+                wr.write(le + '=' + String.join(";", authorsByLemmas.get(le)) + "\n");
+            }
+        }
     }
 
     private static final Collator BE = Collator.getInstance(new Locale("be"));

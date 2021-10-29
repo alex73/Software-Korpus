@@ -54,6 +54,7 @@ public class LemmaInfo {
         public String tag;
         public String value;
         public String options;
+        public String type;
     }
 
     public static class Author {

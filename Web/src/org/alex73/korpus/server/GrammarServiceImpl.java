@@ -433,6 +433,7 @@ public class GrammarServiceImpl {
                 rf.value = StressUtils.combineAccute(f.getValue());
                 rf.tag = f.getTag();
                 rf.options = f.getOptions() != null ? f.getOptions().name() : null;
+                rf.type = f.getType() != null ? f.getType().name() : null;
                 rv.dictionaries.addAll(SetUtils.getSlouniki(f.getSlouniki()).keySet());
                 rv.forms.add(rf);
             }

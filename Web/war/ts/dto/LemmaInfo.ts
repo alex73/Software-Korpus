@@ -30,6 +30,7 @@ class LemmaForm {
     public tag: string;
     public value: string;
     public options: string;
+    public type: string;
 }
 
 class Author {
