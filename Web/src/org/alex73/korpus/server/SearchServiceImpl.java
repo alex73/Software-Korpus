@@ -73,11 +73,7 @@ public class SearchServiceImpl {
         LOGGER.info(">> Request from " + request.getRemoteAddr());
         SearchParams params = rq.params;
         LatestMark latest = rq.latest;
-        for (WordRequest w : params.words) {
-            if (w.word != null) {
-                w.word = BelarusianWordNormalizer.lightNormalized(w.word);
-            }
-        }
+        params.words.forEach(w -> cleanupWordRequest(w));
         try {
             WordsDetailsChecks.reset();
             boolean enoughComplex = false;
@@ -150,11 +146,7 @@ public class SearchServiceImpl {
     public SearchTotalResult searchTotalCount(SearchRequest rq) throws Exception {
         LOGGER.info(">> Request total count from " + request.getRemoteAddr());
         SearchParams params = rq.params;
-        for (WordRequest w : params.words) {
-            if (w.word != null) {
-                w.word = BelarusianWordNormalizer.lightNormalized(w.word);
-            }
-        }
+        params.words.forEach(w -> cleanupWordRequest(w));
         try {
             WordsDetailsChecks.reset();
             boolean enoughComplex = false;
@@ -218,7 +210,7 @@ public class SearchServiceImpl {
     @Produces(MediaType.APPLICATION_JSON)
     public ClusterResults calculateClusters(ClusterParams params) throws Exception {
         LOGGER.info(">> Request clusters from " + request.getRemoteAddr());
-        params.word.word = BelarusianWordNormalizer.lightNormalized(params.word.word);
+        cleanupWordRequest(params.word);
         try {
             WordsDetailsChecks.reset();
             if (WordsDetailsChecks.isTooSimpleWord(params.word)) {
@@ -320,5 +312,20 @@ public class SearchServiceImpl {
             }
         }
         w.lemmas = result.stream().toArray(String[]::new);
+    }
+
+    private void cleanupWordRequest(WordRequest w) {
+        if (w.word != null) {
+            w.word = BelarusianWordNormalizer.lightNormalized(w.word.trim());
+            if (w.word.isEmpty()) {
+                w.word = null;
+            }
+        }
+        if (w.grammar != null) {
+            w.grammar = w.grammar.trim();
+            if (w.grammar.isEmpty()) {
+                w.grammar = null;
+            }
+        }
     }
 }

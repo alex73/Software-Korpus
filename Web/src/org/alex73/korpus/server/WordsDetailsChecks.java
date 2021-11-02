@@ -188,22 +188,13 @@ public class WordsDetailsChecks {
 
     public static boolean isTooSimpleWord(WordRequest w) {
         if (w.word == null) {
-            return true;
-        }
-        String wt = w.word.trim();
-        if (wt.isEmpty()) {
-            if (w.grammar != null) {
-                String gt = w.grammar.trim();
-                if (!gt.startsWith("K")) {
-                    return false;
-                }
-            }
+            return w.grammar == null;
         }
         if (needWildcardRegexp(w.word)) {
             // contains wildcards
             if (w.allForms) {
                 return true;
-            } else if (wt.replace("+", "").replace("*", "").replace("?", "").length() >= 2) {
+            } else if (w.word.replace("+", "").replace("*", "").replace("?", "").length() >= 2) {
                 return false;
             } else {
                 return true;
