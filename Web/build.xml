@@ -33,7 +33,7 @@
 			<arg value="--target"/>
 			<arg value="ES5"/>
 			<arg value="--outFile"/>
-			<arg value="war/app.js"/>
+			<arg value="war/app2.js"/>
 		</exec>
 	</target>
 
