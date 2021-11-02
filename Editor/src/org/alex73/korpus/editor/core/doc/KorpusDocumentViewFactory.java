@@ -43,6 +43,7 @@ public class KorpusDocumentViewFactory implements ViewFactory {
     static final Color TAG_BACKGROUND_COLOR = new Color(224, 224, 224);
     static final Color OTHER_BACKGROUND_COLOR = new Color(0x9ac2ff);
     static final Color SE_BACKGROUND_COLOR = new Color(0x9afff7);
+    static final Color PARAGRAPH_SEPARATOR_COLOR = new Color(224,224,255);
 
     public View create(Element elem) {
         if (elem instanceof KorpusDocument3.MyWordElement) {
@@ -140,7 +141,7 @@ public class KorpusDocumentViewFactory implements ViewFactory {
         @Override
         public void paint(Graphics g, Shape a) {
             super.paint(g, a);
-            g.setColor(Color.BLUE);
+            g.setColor(PARAGRAPH_SEPARATOR_COLOR);
             Rectangle r = a.getBounds();
             g.drawLine(r.x, r.y + r.height, r.x + r.width, r.y + r.height);
         }
