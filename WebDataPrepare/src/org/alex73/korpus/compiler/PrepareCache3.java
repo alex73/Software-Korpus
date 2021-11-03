@@ -22,13 +22,12 @@ import org.slf4j.LoggerFactory;
 public class PrepareCache3 {
     private static final Logger LOG = LoggerFactory.getLogger(PrepareCache3.class);
 
-    public static final boolean processStat = true;
-    public static final boolean writeToLucene = true;
-    public static final boolean cacheForProduction = false;
-
     public static Path INPUT;
     public static Path OUTPUT;
     public static String grammarDbPath;
+    public static boolean cacheForProduction;
+    public static boolean writeToLucene = true;
+    public static boolean processStat = true;
 
     public static Map<String, Integer> textPositionsBySourceFile;
 
@@ -37,15 +36,18 @@ public class PrepareCache3 {
     static volatile Exception exception;
 
     public static void main(String[] args) throws Exception {
-        String input = getKey("input", args);
-        String output = getKey("output", args);
-        grammarDbPath = getKey("grammardb", args);
+        String input = getKey("input", args, "Input path");
+        String output = getKey("output", args, "Output path");
+        grammarDbPath = getKey("grammardb", args, "GrammarDB path");
         if (input == null) {
             throw new Exception("--input not defined");
         }
         if (output == null) {
             throw new Exception("--output not defined");
         }
+        cacheForProduction = getBooleanKey("prod", args, false, "Merge indexes into one");
+        writeToLucene = getBooleanKey("write", args, true, "Write to Lucene index");
+        processStat = getBooleanKey("stat", args, true, "Collect statistics");
 
         INPUT = Paths.get(input);
         OUTPUT = Paths.get(output);
@@ -89,7 +91,7 @@ public class PrepareCache3 {
         LOG.info("1st pass time: " + ((af - be) / 1000) + "s");
         errorsList.clear();
 
-        textPositionsBySourceFile = ProcessHeaders.calcTextsPositions(OUTPUT.resolve("texts.jsons"));
+        textPositionsBySourceFile = ProcessHeaders.calcTextsPositions(OUTPUT.resolve("texts.jsons.gz"));
 
         GrammarDB2 gr;
         if (grammarDbPath != null) {
@@ -133,13 +135,39 @@ public class PrepareCache3 {
         LOG.info("Finished");
     }
 
-    static String getKey(String key, String[] args) {
+    static String getKey(String key, String[] args, String description) {
         for (String a : args) {
             if (a.startsWith("--" + key + "=")) {
-                return a.substring(key.length() + 3);
+                String r = a.substring(key.length() + 3);
+                LOG.info(description + ": " + r);
+                return r;
             }
         }
+        LOG.info(description + ": <not defined>");
         return null;
+    }
+
+    static boolean getBooleanKey(String key, String[] args, boolean def, String description) {
+        for (String a : args) {
+            if (a.startsWith("--" + key + "=")) {
+                String v = a.substring(key.length() + 3);
+                boolean r;
+                switch (v.toLowerCase()) {
+                case "true":
+                    r = true;
+                    break;
+                case "false":
+                    r = false;
+                    break;
+                default:
+                    throw new RuntimeException("Wrong value: " + a);
+                }
+                LOG.info(description + ": " + r);
+                return r;
+            }
+        }
+        LOG.info(description + ": <not defined>, default value: " + def);
+        return def;
     }
 
     public static IProcess errors = new IProcess() {

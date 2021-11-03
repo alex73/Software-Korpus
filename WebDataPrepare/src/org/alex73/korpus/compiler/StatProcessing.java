@@ -1,7 +1,5 @@
 package org.alex73.korpus.compiler;
 
-import java.io.BufferedWriter;
-import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Collator;
@@ -22,12 +20,13 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipOutputStream;
 
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.text.structure.corpus.Paragraph;
 import org.alex73.korpus.text.structure.corpus.Sentence;
 import org.alex73.korpus.text.structure.corpus.Word;
+import org.alex73.korpus.utils.KorpusFileUtils;
 import org.alex73.korpus.utils.StressUtils;
 
 public class StatProcessing {
@@ -105,13 +104,15 @@ public class StatProcessing {
     }
 
     public synchronized void write(Path dir) throws Exception {
-        for (Map.Entry<String, StatInfo> en : stats.entrySet()) {
-            en.getValue().writeFormsFreq(
-                    dir.resolve(("stat.formsfreq." + en.getKey().replace('/', '_') + ".tab").replace("..", ".")));
-            en.getValue().writeLemmasFreq(
-                    dir.resolve(("stat.lemmasfreq." + en.getKey().replace('/', '_') + ".tab").replace("..", ".")));
-            en.getValue().writeUnknownFreq(
-                    dir.resolve(("stat.unknownfreq." + en.getKey().replace('/', '_') + ".tab").replace("..", ".")));
+        try (ZipOutputStream zip = new ZipOutputStream(Files.newOutputStream(dir.resolve("stat-freq.zip")))) {
+            for (Map.Entry<String, StatInfo> en : stats.entrySet()) {
+                en.getValue().writeFormsFreq(zip,
+                        ("forms/freq." + en.getKey().replace('/', '_') + ".tab").replace("..", "."));
+                en.getValue().writeLemmasFreq(zip,
+                        ("lemmas/freq." + en.getKey().replace('/', '_') + ".tab").replace("..", "."));
+                en.getValue().writeUnknownFreq(zip,
+                        ("unknown/freq." + en.getKey().replace('/', '_') + ".tab").replace("..", "."));
+            }
         }
 
         List<String> stat = new ArrayList<>();
@@ -132,12 +133,8 @@ public class StatProcessing {
         List<String> lemmas = new ArrayList<>(authorsByLemmas.keySet());
         Collections.sort(lemmas, BE);
 
-        try (BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(
-                new GZIPOutputStream(Files.newOutputStream(dir.resolve("lemma-authors.list.gz")))))) {
-            for (String le : lemmas) {
-                wr.write(le + '=' + String.join(";", authorsByLemmas.get(le)) + "\n");
-            }
-        }
+        KorpusFileUtils.writeGzip(dir.resolve("lemma-authors.list.gz"),
+                lemmas.stream().map(le -> le + '=' + String.join(";", authorsByLemmas.get(le))));
     }
 
     private static final Collator BE = Collator.getInstance(new Locale("be"));
@@ -217,24 +214,23 @@ public class StatProcessing {
             }
         }
 
-        synchronized void writeFormsFreq(Path f) throws Exception {
-            List<String> list = byForm.entrySet().stream()
-                    .sorted((a, b) -> Integer.compare(b.getValue().get(), a.getValue().get())).map(en -> en.toString())
-                    .collect(Collectors.toList());
-            Files.write(f, list);
+        synchronized void writeFormsFreq(ZipOutputStream zip, String entryName) throws Exception {
+            KorpusFileUtils.writeZip(zip, entryName,
+                    byForm.entrySet().stream().sorted((a, b) -> Integer.compare(b.getValue().get(), a.getValue().get()))
+                            .map(en -> en.toString()));
         }
 
-        synchronized void writeUnknownFreq(Path f) throws Exception {
-            List<String> list = byUnknown.entrySet().stream()
-                    .sorted((a, b) -> Integer.compare(b.getValue().get(), a.getValue().get())).map(en -> en.toString())
-                    .collect(Collectors.toList());
-            Files.write(f, list);
+        synchronized void writeUnknownFreq(ZipOutputStream zip, String entryName) throws Exception {
+            KorpusFileUtils.writeZip(zip, entryName,
+                    byUnknown.entrySet().stream()
+                            .sorted((a, b) -> Integer.compare(b.getValue().get(), a.getValue().get()))
+                            .map(en -> en.toString()));
         }
 
-        synchronized void writeLemmasFreq(Path f) throws Exception {
-            List<String> list = byLemma.values().stream().sorted((a, b) -> Integer.compare(b.intCount, a.intCount))
-                    .map(s -> s.para + "\t" + s.intCount + "\t" + s.valuesCount).collect(Collectors.toList());
-            Files.write(f, list);
+        synchronized void writeLemmasFreq(ZipOutputStream zip, String entryName) throws Exception {
+            KorpusFileUtils.writeZip(zip, entryName,
+                    byLemma.values().stream().sorted((a, b) -> Integer.compare(b.intCount, a.intCount))
+                            .map(s -> s.para + "\t" + s.intCount + "\t" + s.valuesCount));
         }
     }
 

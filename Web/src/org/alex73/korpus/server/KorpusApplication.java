@@ -16,7 +16,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
-import java.util.zip.GZIPInputStream;
 
 import javax.annotation.PreDestroy;
 import javax.naming.Context;
@@ -36,6 +35,7 @@ import org.alex73.korpus.server.data.GrammarInitial;
 import org.alex73.korpus.server.data.GrammarInitial.GrammarLetter;
 import org.alex73.korpus.server.data.InitialData;
 import org.alex73.korpus.shared.LemmaInfo;
+import org.alex73.korpus.utils.KorpusFileUtils;
 import org.alex73.korpus.utils.SetUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -246,29 +246,25 @@ public class KorpusApplication extends Application {
     }
 
     protected void readTextInfos() throws Exception {
-        textInfos = Files.readAllLines(Paths.get(korpusCache + "/texts.jsons"));
+        textInfos = KorpusFileUtils.readGzip(Paths.get(korpusCache + "/texts.jsons")).toList();
 
         authorsByLemmas = new HashMap<>();
-        try (BufferedReader rd = new BufferedReader(new InputStreamReader(
-                new GZIPInputStream(Files.newInputStream(Paths.get(korpusCache + "/lemma-authors.list.gz")))))) {
-            String s;
-            while ((s = rd.readLine()) != null) {
-                int p = s.indexOf('=');
-                if (p < 0) {
-                    throw new Exception("Wrong line: " + s);
-                }
-                String lemma = s.substring(0, p);
-                String[] authorsList = s.substring(p + 1).split(";");
-                Set<String> authors = authorsByLemmas.get(lemma);
-                if (authors == null) {
-                    authors = new HashSet<>();
-                    authorsByLemmas.put(lemma, authors);
-                }
-                for (String a : authorsList) {
-                    authors.add(a);
-                }
+        KorpusFileUtils.readGzip(Paths.get(korpusCache + "/lemma-authors.list.gz")).forEach(s->{
+            int p = s.indexOf('=');
+            if (p < 0) {
+                throw new RuntimeException("Wrong line: " + s);
             }
-        }
+            String lemma = s.substring(0, p);
+            String[] authorsList = s.substring(p + 1).split(";");
+            Set<String> authors = authorsByLemmas.get(lemma);
+            if (authors == null) {
+                authors = new HashSet<>();
+                authorsByLemmas.put(lemma, authors);
+            }
+            for (String a : authorsList) {
+                authors.add(a);
+            }
+        });
     }
 
     protected void loadAuthors() throws Exception {

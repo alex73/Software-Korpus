@@ -1,7 +1,5 @@
 package org.alex73.korpus.compiler;
 
-import java.io.BufferedWriter;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.alex73.korpus.base.TextInfo;
+import org.alex73.korpus.utils.KorpusFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,12 +60,14 @@ public class ProcessHeaders extends BaseParallelProcessor {
         // write to json
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setSerializationInclusion(Include.NON_NULL);
-        try (BufferedWriter wr = Files.newBufferedWriter(outputFile)) {
-            for (TextInfo ti : textInfos) {
-                wr.write(objectMapper.writeValueAsString(ti));
-                wr.write('\n');
+
+        KorpusFileUtils.writeGzip(outputFile, textInfos.stream().map(ti -> {
+            try {
+                return objectMapper.writeValueAsString(ti);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
             }
-        }
+        }));
 
         textInfos = null;
 
