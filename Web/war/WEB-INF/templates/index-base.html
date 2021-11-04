@@ -34,7 +34,7 @@
                         <p><#if lang=='be'>
                            Корпус тэкстаў сучаснай беларускай мовы са структурнай і граматычнай разметкай і пашпартызацыяй. 
                            Корпус складаецца з некалькіх падкорпусаў: асноўны, неразабраныя тэксты, газеты і сайты, Вікіпедыі (абодва правапісы).
-                           Агульны аб'ём Асноўнага корпусу складае ~ 163 млн. словаўжыванняў. Аб'ём усяго корпусу - ~337 млн. словаўжыванняў.
+                           Аб'ём корпусу ~177 млн. словаўжыванняў, разам з неразабранымі тэкстамі ~1.07 млрд. словаўжыванняў.
                         <#elseif lang='en'>
                            Corpus of texts of the modern Belarusian language with structural and grammatical marking and certification.
                            The corpus consists of several subcorpora: basic, unclassified texts, newspapers and websites, Wikipedia (both spellings).
@@ -82,14 +82,17 @@
                     <div class="card-header h6"><a target="_blank" href="https://github.com/alex73/SlounikPlus">SlounikPlus</a></div>
                     <div class="card-body">
                         <img src="images/slounikplus.png"/>
-                        <p>Праграма SloŭnikPlus створана з выкарыстаннем сучасных тэхналогій і істотна паляпшае працэс укладання слоўніка – значна павялічваецца 
+                        <p><#if lang=='be'>
+                            Праграма SloŭnikPlus створана з выкарыстаннем сучасных тэхналогій і істотна паляпшае працэс укладання слоўніка – значна павялічваецца 
                             эфектыўнасць, хуткасць і камфортнасць працы у параўнанні з больш звыклымі спосабамі (напрыклад, пры дапамозе MS Office). 
                             Дадатным бокам праграмы ёсць і тое, што яна працуе праз цэнтральны сервер, таму ўкладальнік не прывязаны да канкрэтнага камп’ютара 
                             і можа працаваць з любога месца пры наяўнасці інтэрнэт-падключэння.</p>
-                        <p>A specific dictionary creating software SloŭnikPlus with a user friendly interface, which may be adapted to make dictionaries 
+                        <#elseif lang='en'>
+                            A specific dictionary creating software SloŭnikPlus with a user friendly interface, which may be adapted to make dictionaries 
                             and catalogues of almost any type. SloŭnikPlus (https://sourceforge.net/p/korpus/dict/) is based on modern technologies 
                             and significantly improves dictionary creation process. It makes work faster, comfortable, and more effective in comparison 
-                            with usual dictionary creation.</p>
+                            with usual dictionary creation.
+                        </#if></p>
                     </div>
                 </div>
             </div>
@@ -98,10 +101,13 @@
                     <div class="card-header h6"><a href="fanetyka.html">Фанетычны канвертар</a></div>
                     <div class="card-body">
                         <img src="images/fanietycny.png"/>
-                        <p>Анлайнавы канвертар слоў і тэкстаў беларускай мовы у фанетычную транскрыпцыю з выкарыстаннем Міжнароднага фанетычнага алфавіта (IPA) 
-                            і беларускай школьнай транскрыпцыі. </p>
-                        <p>The online converter of Belarusian words and texts to phonetic transcription using International Phonetic Alphabet (IPA) and 
-                            Belarusian school transription system.</p>
+                        <p><#if lang=='be'>
+                            Анлайнавы канвертар слоў і тэкстаў беларускай мовы у фанетычную транскрыпцыю з выкарыстаннем Міжнароднага фанетычнага алфавіта (IPA) 
+                            і беларускай школьнай транскрыпцыі.
+                        <#elseif lang='en'>
+                            The online converter of Belarusian words and texts to phonetic transcription using International Phonetic Alphabet (IPA) and 
+                            Belarusian school transription system.
+                        </#if></p>
                     </div>
                 </div>
             </div>
