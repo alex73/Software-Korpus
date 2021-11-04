@@ -1,5 +1,6 @@
 package org.alex73.korpus.compiler;
 
+import java.io.BufferedOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Collator;
@@ -104,7 +105,8 @@ public class StatProcessing {
     }
 
     public synchronized void write(Path dir) throws Exception {
-        try (ZipOutputStream zip = new ZipOutputStream(Files.newOutputStream(dir.resolve("stat-freq.zip")))) {
+        try (ZipOutputStream zip = new ZipOutputStream(
+                new BufferedOutputStream(Files.newOutputStream(dir.resolve("stat-freq.zip"))))) {
             for (Map.Entry<String, StatInfo> en : stats.entrySet()) {
                 en.getValue().writeFormsFreq(zip,
                         ("forms/freq." + en.getKey().replace('/', '_') + ".tab").replace("..", "."));
