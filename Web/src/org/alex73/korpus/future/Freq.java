@@ -11,6 +11,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.alex73.korpus.utils.KorpusFileUtils;
+
 @SuppressWarnings("serial")
 @WebServlet(urlPatterns = { "/freq/*" })
 public class Freq extends FutureBaseServlet {
@@ -19,7 +21,8 @@ public class Freq extends FutureBaseServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         int count = Integer.parseInt(req.getPathInfo().substring(1));
 
-        List<String> frequences = Files.readAllLines(Paths.get(getApp().korpusCache + "/stat.formsfreq.tab"));
+        List<String> frequences = KorpusFileUtils.readGzip(Paths.get(getApp().korpusCache + "/stat.formsfreq.tab.gz"))
+                .toList();
         frequences = frequences.subList(0, Math.min(frequences.size(), count));
         List<Pair> data = frequences.stream().map(line -> new Pair(line)).collect(Collectors.toList());
 

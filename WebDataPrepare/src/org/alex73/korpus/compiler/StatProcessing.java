@@ -21,6 +21,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipOutputStream;
 
 import org.alex73.korpus.base.TextInfo;
@@ -105,6 +106,8 @@ public class StatProcessing {
     }
 
     public synchronized void write(Path dir) throws Exception {
+        KorpusFileUtils.writeGzip(dir.resolve("stat.formsfreq.tab.gz"), stats.get("").getFormsFreq());
+
         try (ZipOutputStream zip = new ZipOutputStream(
                 new BufferedOutputStream(Files.newOutputStream(dir.resolve("stat-freq.zip"))))) {
             for (Map.Entry<String, StatInfo> en : stats.entrySet()) {
@@ -214,6 +217,11 @@ public class StatProcessing {
                     }
                 }
             }
+        }
+
+        synchronized Stream<String> getFormsFreq() throws Exception {
+            return byForm.entrySet().stream().sorted((a, b) -> Integer.compare(b.getValue().get(), a.getValue().get()))
+                    .map(en -> en.toString());
         }
 
         synchronized void writeFormsFreq(ZipOutputStream zip, String entryName) throws Exception {
