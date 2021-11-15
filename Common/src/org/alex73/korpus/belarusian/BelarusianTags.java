@@ -71,16 +71,14 @@ public class BelarusianTags {
         abrev(root);
         castki(root);
 
-        checkParadigmMarks();
+        checkParadigmMarks(root, "", 0);
+        checkDuplicateGroups(root, new ArrayList<>());
+        // праверыць якія групы не выкарыстоўваюцца
     }
 
     /**
      * шукаем ва ўсіх тэгах count(latestInParadigm)==1
      */
-    private void checkParadigmMarks() {
-        checkParadigmMarks(root, "", 0);
-    }
-
     private void checkParadigmMarks(TagLetter tl, String code, int pmCount) {
         if (tl.isLatestInParadigm()) {
             pmCount++;
@@ -93,6 +91,20 @@ public class BelarusianTags {
             for (OneLetterInfo letterInfo : tl.letters) {
                 checkParadigmMarks(letterInfo.nextLetters, code + letterInfo.letter, pmCount);
             }
+        }
+    }
+
+    /**
+     * Павярае ці няма аднолькавых назваў груп у іерархіі.
+     */
+    private void checkDuplicateGroups(TagLetter tl, List<String> path) {
+        for (OneLetterInfo li : tl.letters) {
+            if (path.contains(li.groupName) && !"Невядома".equals(li.groupName)) {
+                throw new RuntimeException("Duplicate group '" + li.groupName + "' in " + path);
+            }
+            path.add(li.groupName);
+            checkDuplicateGroups(li.nextLetters, path);
+            path.remove(path.size() - 1);
         }
     }
 
@@ -253,7 +265,7 @@ public class BelarusianTags {
 
         TagLetter su = t.add("Субстантываванасць => S:субстантываваны;U:субстантываваны множналікавы");
         su = su.add("Скланенне => 5:ад’ектыўнае скланенне").latestInParadigm();
-        su = su.add("Род => M:мужчынскі род;F:жаночы род;N:ніякі род;P:адсутнасць роду ў множным ліку;X:-");
+        su = su.add("Род => M:мужчынскі род;F:жаночы род;N:ніякі род;P:адсутнасць роду ў множным ліку;X:-"); // для субстантываваных
         su = su.add("Склон => N:назоўны склон;G:родны склон;D:давальны склон;A:вінавальны склон;I:творны склон;L:месны склон;V:клічны склон");
         su = su.add("Лік => S:адзіночны лік;P:множны лік");
     }

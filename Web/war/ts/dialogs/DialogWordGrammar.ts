@@ -1,3 +1,6 @@
+/*
+ * Паказвае граматычныя тэгі для фільтрацыі граматыкі.
+ */
 class DialogWordGrammar {
 	private currentWordElement: HTMLElement;
 	private hideParadigmGroups: boolean;

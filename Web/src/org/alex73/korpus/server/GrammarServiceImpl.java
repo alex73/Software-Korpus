@@ -306,9 +306,17 @@ public class GrammarServiceImpl {
                 }
             } else {
                 if (checkWord.test(v.getLemma())) {
-                    if (reGrammar != null
-                            && !reGrammar.matcher(DBTagsGroups.getDBTagString(SetUtils.tag(p, v))).matches()) {
-                        continue;
+                    if (reGrammar != null) {
+                        boolean tagFound = false;
+                        for (Form f : forms) {
+                            if (reGrammar.matcher(DBTagsGroups.getDBTagString(SetUtils.tag(p, v, f))).matches()) {
+                                tagFound = true;
+                                break;
+                            }
+                        }
+                        if (!tagFound) {
+                            continue;
+                        }
                     }
                     found.add(v.getLemma());
                 }

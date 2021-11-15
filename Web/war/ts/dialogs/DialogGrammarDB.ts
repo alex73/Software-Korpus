@@ -1,3 +1,6 @@
+/*
+ * Паказвае інфармацыю пра слова, разам з табліцай граматычных форм.
+ */
 class DialogGrammarDB {
 	constructor(data: LemmaParadigm) {
 		$('#dialog-grammardb-details').html($.templates("#template-grammardb").render({
