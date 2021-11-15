@@ -63,17 +63,6 @@
 		<war destfile="build/korpus.war" basedir="build/war" needxmlfile="false">
 			<zipfileset dir="build/classes/" prefix="WEB-INF/classes/" />
 		</war>
-
-		<copy todir="build/gwar">
-			<fileset dir="build/war" />
-		</copy>
-		<replaceregexp match="title.+?href.+?'>" replace=">" file="build/gwar/WEB-INF/templates/app/dialog.grammardb.html" />
-		<copy file="build/gwar/WEB-INF/templates/grammar1.html" tofile="build/gwar-index.html" overwrite="true" />
-		<delete dir="build/gwar/WEB-INF/templates/" includes="*.html" />
-		<copy file="build/gwar-index.html" tofile="build/gwar/WEB-INF/templates/index.html" overwrite="true" />
-		<war destfile="build/grammar1.war" basedir="build/gwar" needxmlfile="false">
-			<zipfileset dir="build/classes/" prefix="WEB-INF/classes/" />
-		</war>
 	</target>
 
 	<target name="clean" description="Cleans this project">
