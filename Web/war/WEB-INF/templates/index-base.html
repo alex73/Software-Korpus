@@ -1,25 +1,54 @@
 <#assign active = "index">
-<#assign title = "Беларускі N-корпус">
-<#assign brand = "Беларускі N-корпус">
+<#if lang=='be'>
+    <#assign title = "Беларускі N-корпус">
+    <#assign brand = "Беларускі N-корпус">
+<#elseif lang='en'>
+    <#assign title = "Belarusian N-corpus">
+    <#assign brand = "Belarusian N-corpus">
+</#if>
 <#include "header.html">
 
     <div class="container">
 
 
-    <span style="color: #0C8349">04.11.2021</span> - Вялікія змены ў праекце:
+    <span style="color: #0C8349">04.11.2021</span>
+        <#if lang=='be'> - Вялікія змены ў праекце:
+        <#elseif lang='en'> - Significant changes:
+        </#if>
     <ul style="margin: 0;">
-        <li>Значна папоўнены корпус тэкстаў, дададзены новыя падкорпусы, істотна абноўлены інтэрфейс корпусу. Аб'ём корпусу ~177 млн. словаўжыванняў, разам з неразабранымі тэкстамі ~1.07 млрд. словаўжыванняў.</li>
-        <li>Абноўлены інтэрфейс граматычнай базы, дадзена інфармацыя пра крыніцы слова.</li>
-        <li>Дадаўся раздзел анлайн-праверкі беларускага правапісу, а таксама модулі праверкі для розных праграм і аперацыйных сістэм.</li>
-        <li>Дадаўся фанетычны канвертар (тэставая версія), які дазваляе канвертаваць тэксты ў транскрыпцыю.</li>
-        <li>Дададзены праекты ў распрацоўцы, створаныя на падставе граматычнай базы (тэставая версія).</li>
+        <li><#if lang=='be'>Значна папоўнены корпус тэкстаў, дададзены новыя падкорпусы, істотна абноўлены інтэрфейс корпусу. Аб'ём корпусу ~177 млн. словаўжыванняў, разам з неразабранымі тэкстамі ~1.07 млрд. словаўжыванняў.
+        <#elseif lang='en'>Corpus of texts has been significantly expanded, new subcorpora have been added, and UI has been updated. The volume of the corpus is ~177 million word usages, together with unclassified texts ~1.07 billion word usages.
+        </#if></li>
+        <li><#if lang=='be'>Абноўлены інтэрфейс граматычнай базы, дадзена інфармацыя пра крыніцы слова.
+        <#elseif lang='en'>Grammar database UI has been updated, information about word sources was added.
+        </#if></li>
+        <li><#if lang=='be'>Дадаўся раздзел анлайн-праверкі беларускага правапісу, а таксама модулі праверкі для розных праграм і аперацыйных сістэм.
+        <#elseif lang='en'>Online Belarusian spell checker has been added spelling has been added, as well as verification plugins for various programs and operating systems.
+        </#if></li>
+        <li><#if lang=='be'>Дадаўся фанетычны канвертар (тэставая версія), які дазваляе канвертаваць тэксты ў транскрыпцыю.
+        <#elseif lang='en'>Added a phonetic converter (test version) that allows you to convert texts to transcription.
+        </#if></li>
+        <li><#if lang=='be'>Дадаліся праекты ў распрацоўцы, створаныя на падставе граматычнай базы (тэставая версія).
+        <#elseif lang='en'>Projects in development(test version) that based on grammar database has been added.
+        </#if></li>
     </ul>
-    <span style="color: #0C8349">29.10.2021</span> - У выдавецтве «Тэхналогія» выйшла электроннае выданне «Граматычнай базы беларускай мовы», падрыхтаванае сектарам камп’ютарнай лінгвістыкі Інстытута мовазнаўства.<br/>
+    <span style="color: #0C8349">29.10.2021</span> 
+        <#if lang=='be'> - У выдавецтве «Тэхналогія» выйшла электроннае выданне «Граматычнай базы беларускай мовы», падрыхтаванае сектарам камп’ютарнай лінгвістыкі Інстытута мовазнаўства.
+        <#elseif lang='en'> - The publishing house "Technology" has published an electronic edition of the "Grammar Database of the Belarusian Language", prepared by the Department of Computer Linguistics of the Institute of Linguistics.
+        </#if><br/>
 
-    <div id="more" style="display: flex; justify-content: flex-end"><a href="#" onClick="more(); return false">больш навін &gt;&gt;&gt;</a></div>
+    <div id="more" style="display: flex; justify-content: flex-end">
+        <a href="#" onClick="more(); return false"><#if lang=='be'>больш навін &gt;&gt;&gt;<#elseif lang='en'>more news &gt;&gt;&gt;</#if></a>
+    </div>
     <div id="moreData" style="display: none">
-        <span style="color: #0C8349">09.09.2019</span> - Абноўлены Беларускі N-корпус. Дадалося ~5000 тэкстаў аб'ёмам ~12 млн. словаўжыванняў. Аб'ём Асноўнага корпусу складае ~ 163 млн. словаўжыванняў. Аб'ём усяго корпусу (разам з неразабранымі тэкстамі) - ~337 млн. словаўжыванняў.<br/>
-        <span style="color: #0C8349">05.08.2016</span> - Корпус папоўнены публіцыстычнымі тэкстамі ~20 млн. словаўжыванняў. Агульны аб'ём корпусу - ~80 млн. словаўжыванняў.
+        <span style="color: #0C8349">09.09.2019</span>
+        <#if lang=='be'> - Абноўлены Беларускі N-корпус. Дадалося ~5000 тэкстаў аб'ёмам ~12 млн. словаўжыванняў. Аб'ём Асноўнага корпусу складае ~163 млн. словаўжыванняў. Аб'ём усяго корпусу (разам з неразабранымі тэкстамі) - ~337 млн. словаўжыванняў.
+        <#elseif lang='en'> - Belarusian N-corpus has been updated. ~5000 texts with a volume of ~12 million words were added. The volume of the main corpus is ~163 million words. The volume of the whole corpus (together with unclassified texts) is ~337 million usages.
+        </#if><br/>
+        <span style="color: #0C8349">05.08.2016</span>
+        <#if lang=='be'> - Корпус папоўнены публіцыстычнымі тэкстамі ~20 млн. словаўжыванняў. Агульны аб'ём корпусу - ~80 млн. словаўжыванняў.
+        <#elseif lang='en'> - The corpus is replenished with newspaper texts of ~ 20 million word usages. The total volume of the corpus is ~ 80 million words.
+        </#if>
     </div>
         <hr/>
 
@@ -38,42 +67,55 @@
                         <#elseif lang='en'>
                            Corpus of texts of the modern Belarusian language with structural and grammatical marking and certification.
                            The corpus consists of several subcorpora: basic, unclassified texts, newspapers and websites, Wikipedia (both spellings).
-                           The total volume of the main corpus is ~ 163 million words. The volume of the whole corpus is ~ 337 million words.
+                           The volume of the corpus is ~177 million word usages, together with unclassified texts ~1.07 billion word usages.
                         </#if></p>
                     </div>
                 </div>
             </div>
             <div class="p-2">
                 <div class="card h-100">
-                    <div class="card-header h6"><a href="grammar.html">Граматычная база беларускай мовы</a></div>
+                    <div class="card-header h6"><a href="grammar.html"><#if lang=='be'>Граматычная база беларускай мовы<#elseif lang='en'>Grammar database of the Belarusian language</#if></a></div>
                     <div class="card-body">
                         <img src="images/baza.png"/>
-                        <p>Граматычная база ўяўляе сабой збор слоў з марфалагічнымі і іншымі паметамі. Вартасць граматычнай базы ў тым, 
+                        <p><#if lang=='be'>Граматычная база ўяўляе сабой збор слоў з марфалагічнымі і іншымі паметамі. Вартасць граматычнай базы ў тым, 
                             што яна змяшчае не толькі словы, зафіксаваныя ў нарматыўных слоўніках, але і словы, якія з’явіліся ў беларускай мове 
-                            за апошнія дзесяцігоддзі і ў слоўніках пакуль не адлюстраваны, што дазваляе  назваць дадзеную базу базай актуальнай лексікі беларускай мовы.</p>
+                            за апошнія дзесяцігоддзі і ў слоўніках пакуль не адлюстраваны, што дазваляе назваць дадзеную базу базай актуальнай лексікі беларускай мовы.
+                        <#elseif lang='en'>The Grammar database is a collection of words with morphological and other marks. 
+                            It contains not only words recorded in normative dictionaries, but also words that have appeared in the Belarusian language 
+                            in recent decades and are not yet reflected in dictionaries. 
+                            This allows us to call Grammar database the database of actual vocabulary of the Belarusian language.
+                        </#if></p>
                     </div>
                 </div>
             </div>
             <div class="p-2">
                 <div class="card h-100">
-                    <div class="card-header h6"><a target="_blank" href="https://biblija.bnkorpus.info/">Біблійны корпус</a></div>
+                    <div class="card-header h6"><a target="_blank" href="https://biblija.bnkorpus.info/"><#if lang=='be'>Біблійны корпус<#elseif lang='en'>Bible Corpus</#if></a></div>
                     <div class="card-body">
                         <img src="images/biblijny.png"/>
-                        <p>Беларускі Біблійны корпус змяшчае 16 перакладаў Бібліі на беларускую мову, а таксама тэксты на іншых мовах (лаціна, яўрэйская, украінская, 
+                        <p><#if lang=='be'>Беларускі Біблійны корпус змяшчае 16 перакладаў Бібліі на беларускую мову, а таксама тэксты на іншых мовах (лаціна, яўрэйская, украінская, 
                             польская і інш.) для параўнанняў і ўяўляе сабой зручны і эфектыўны інструмент для перакладчыкаў і даследчыкаў Бібліі. Пры дапамозе 
                             Біблійнага корпусу вы зможаце супаставіць тэксты перакладаў, а таксама знайсці патрэбнае слова і паглядзець варыянты яго перакладу
-                            ў розных выданнях.</p>
+                            ў розных выданнях.
+                        <#elseif lang='en'>The Belarusian Bible Corpus contains 16 translations of the Bible into Belarusian, as well as texts in other languages 
+                            (Latin, Hebrew, Ukrainian, Polish, etc.) for comparisons. This is a convenient and effective tool for Bible translators and researchers. 
+                            With the help of the Bible Corpus you will be able to compare the texts of translations, 
+                            as well as find the right word and see variants of its translation in different editions.
+                        </#if></p>
                     </div>
                 </div>
             </div>
             <div class="p-2">
                 <div class="card h-100">
-                    <div class="card-header h6"><a href="spell.html">Праверка правапісу +анлайн</a></div>
+                    <div class="card-header h6"><a href="spell.html"><#if lang=='be'>Праверка правапісу +анлайн<#elseif lang='en'>Spell checker +web UI</#if></a></div>
                     <div class="card-body">
                         <img src="images/spellchecker.png"/>
-                        <p>Анлайнавы сэрвіс, які дапаможа вам пазбавіцца памылак у тэксце, напісаным па-беларуску афіцыйным правапісам. Таксама на старонцы сэрвісу 
-                            вы зможаце спампаваць праграму праверкі арфаграфіі для Windows (уключна з Skype, Microsoft office і г.д.), LibreOffice/OpenOffice, 
-                            Mozilla Firefox/Thunderbird</p>
+                        <p><#if lang=='be'>Анлайнавы сэрвіс, які дапаможа вам пазбавіцца памылак у тэксце, напісаным па-беларуску афіцыйным правапісам. Таксама на старонцы сэрвісу 
+                            вы зможаце спампаваць праграму праверкі арфаграфіі для розных браўзераў, Windows (уключна з Skype, Microsoft office і г.д.), LibreOffice/OpenOffice, 
+                            Mozilla Firefox/Thunderbird.
+                        <#elseif lang='en'>An online service that will help you get rid of errors in the text written in Belarusian official spelling. 
+                            Also you can download a spell checker for different browsers, Windows (including Skype, Microsoft office, etc.), LibreOffice/OpenOffice, Mozilla Firefox/Thunderbird.
+                        </#if></p>
                     </div>
                 </div>
             </div>
@@ -98,7 +140,7 @@
             </div>
             <div class="p-2">
                 <div class="card h-100">
-                    <div class="card-header h6"><a href="fanetyka.html">Фанетычны канвертар</a></div>
+                    <div class="card-header h6"><a href="fanetyka.html"><#if lang=='be'>Фанетычны канвертар<#elseif lang='en'>Phonetic converter</#if></a></div>
                     <div class="card-body">
                         <img src="images/fanietycny.png"/>
                         <p><#if lang=='be'>
@@ -113,15 +155,17 @@
             </div>
             <div class="p-2">
                 <div class="card h-100">
-                    <div class="card-header h6"><a href="future.html">Праекты ў распрацоўцы</a></div>
+                    <div class="card-header h6"><a href="future.html"><#if lang=='be'>Праекты ў распрацоўцы<#elseif lang='en'>Projects in development</#if></a></div>
                     <div class="card-body">
-                        <p>Слоўнікі і іншыя праекты, якія створаны аўтаматычна з граматычнай базы</p>
+                        <p><#if lang=='be'>Слоўнікі і іншыя праекты, якія створаны аўтаматычна з граматычнай базы.
+                        <#elseif lang='en'>Dictionaries and other projects that are created automatically from the Grammar database.
+                        </#if></p>
                     </div>
                 </div>
             </div>
             <div class="p-2">
                 <div class="card h-100">
-                    <div class="card-header h6">Карысныя спасылкі</div>
+                    <div class="card-header h6"><#if lang=='be'>Карысныя спасылкі<#elseif lang='en'>Useful links</#if></div>
                     <div class="card-body">
                         <p><a href="https://pravilna.by/">https://pravilna.by/</a> - Пішам па-беларуску правільна!</a>
                     </div>
@@ -132,7 +176,7 @@
 
     <div class="container">
     <br/><br/>
-    <p class="text-center">Дасылайце лісты на <a href="mailto:bnkorpus@gmail.com">bnkorpus@gmail.com</a></p>
+    <p class="text-center"><#if lang=='be'>Дасылайце лісты на<#elseif lang='en'>Send emails to</#if> <a href="mailto:bnkorpus@gmail.com">bnkorpus@gmail.com</a></p>
     </div>
 
     <script>
