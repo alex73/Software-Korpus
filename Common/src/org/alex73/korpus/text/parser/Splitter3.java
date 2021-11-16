@@ -53,6 +53,12 @@ public class Splitter3 {
             default:
                 if (currentChar == '&' && processAmp) {
                     parseCharNameOrNumber();
+                    while (pos < para.length()) {
+                        if (para.charAt(pos) == ';') {
+                            break;
+                        }
+                        pos++;
+                    }
                     if (currentChar == 0) {
                         continue;
                     }
