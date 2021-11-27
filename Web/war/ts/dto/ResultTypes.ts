@@ -14,13 +14,13 @@ class SearchResults {
 
 class ResultKwicOutRow {
     public doc: TextInfo;
-    public origText: Sentence;
+    public origText: Paragraph;
     public kwicBefore: WordResult[];
     public kwicWords: WordResult[];
     public kwicAfter: WordResult[];
     constructor(o:SearchResults) {
       this.doc = o.doc;
-      this.origText = o.text.sentences[0];
+      this.origText = o.text;
     }
 }
 

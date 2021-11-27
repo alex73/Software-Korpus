@@ -7,7 +7,7 @@
 	{{for resultKwic.rows}}
     <tr>
       <td style="color: #337ab7; white-space: nowrap;">
-        <a href="#" onClick="showBiblio($event, doc, docOther)">
+        <a href="#" onClick="new PopoverBiblio(event, korpusService.resultKwic.rows[{{:#index}}].doc, korpusService.resultKwic.rows[{{:#index}}].origText.page); return false;">
           {{titleShort:doc.textLabel}}
         </a>
       </td>
@@ -20,7 +20,7 @@
       <td class="text-left">
 		{{for kwicAfter}}<span wlemma="{{>lemmas}}" wcat="{{>tags}}" {{if requestedWord}}class="wordFound"{{/if}}>{{>normalized}}</span>{{>tail}}{{/for}}
       </td>
-      <td class="text-center"><a href="#" onClick="dialogText = new DialogText(korpusService.resultSearch.rows[{{:#index}}], this); return false;">[...]</a></td>
+      <td class="text-center"><a href="#" {{if ~root.visitedList.indexOf(docId)>=0}} class="visited" {{/if}} onClick="dialogText = new DialogText(korpusService.resultKwic.rows[{{:#index}}], this); return false;">[...]</a></td>
 	</tr>
 	{{/for}}
 </table>
