@@ -43,6 +43,7 @@ import org.alex73.korpus.belarusian.TagLetter;
 import org.alex73.korpus.editor.grammar.GrammarConstructor;
 import org.alex73.korpus.text.structure.files.WordItem;
 
+@Deprecated
 public class GrammarPaneController {
     static WordItem currentWord;
     static Integer intoParadigmId;

@@ -42,6 +42,7 @@ import javax.swing.JRadioButtonMenuItem;
 import javax.swing.KeyStroke;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
@@ -83,7 +84,6 @@ public class MainController {
         UI.mainWindow.mFileOpen.addActionListener(aFileOpen);
         UI.mainWindow.mFileSave.addActionListener(aFileSave);
         UI.mainWindow.mFileClose.addActionListener(aFileClose);
-        UI.mainWindow.mUnk1.addActionListener(aUnderChange);
         UI.mainWindow.mGoNextMark.addActionListener(aGoNextMark);
         UI.mainWindow.mUnk1.addActionListener(aUnderChange);
         UI.mainWindow.mUnk2.addActionListener(aUnderChange);
@@ -141,6 +141,9 @@ public class MainController {
     static ActionListener aFileOpen = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             JFileChooser fc = new JFileChooser(new File("."));
+            fc.addChoosableFileFilter(new FileNameExtensionFilter("Тэксты з разметкай", "ptext"));
+            fc.addChoosableFileFilter(new FileNameExtensionFilter("Тэксты", "text"));
+            fc.setAcceptAllFileFilterUsed(false);
             if (fc.showOpenDialog(UI.mainWindow) != JFileChooser.APPROVE_OPTION) {
                 return;
             }
@@ -441,6 +444,23 @@ public class MainController {
             wi.normalized = normalized.isEmpty() ? null : normalized;
             MainController.gr.filler.fillNonManual(wi);
             WordInfoPaneController.show(wi);
+        }
+        UI.editor.repaint();
+    }
+
+    static void updateFullGrammar() {
+        for (int p = 0; p < UI.doc.getDefaultRootElement().getElementCount(); p++) {
+            KorpusDocument3.MyLineElement par = (KorpusDocument3.MyLineElement) UI.doc.getDefaultRootElement().getElement(p);
+            for (int w = 0; w < par.getElementCount(); w++) {
+                KorpusDocument3.MyWordElement word = par.getElement(w);
+                if (word.item instanceof WordItem) {
+                    WordItem wi = (WordItem) word.item;
+                    if (wi.getText().equals("панічок")) {
+                        System.out.println();
+                    }
+                    MainController.gr.filler.fillNonManual(wi);
+                }
+            }
         }
         UI.editor.repaint();
     }

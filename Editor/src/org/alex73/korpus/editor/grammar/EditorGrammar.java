@@ -2,14 +2,21 @@ package org.alex73.korpus.editor.grammar;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.StringReader;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
@@ -18,10 +25,15 @@ import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.corpus.paradigm.Wordlist;
 import org.alex73.korpus.base.GrammarDB2;
+import org.alex73.korpus.base.GrammarDBSaver;
 import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.editor.core.Theme;
 
 public class EditorGrammar {
+    static final String HEADER_PREFIX = "=====";
+    static final Pattern RE_HEADER_PARADIGM = Pattern.compile("=+");
+    static final Pattern RE_HEADER_VARIANT = Pattern.compile("=+\\s+([0-9]+)");
+    static final Pattern RE_HEADER_FORMS = Pattern.compile("=+\\s+([0-9]+)([a-z])");
 
     static final JAXBContext CONTEXT;
     static final Schema schema;
@@ -38,21 +50,45 @@ public class EditorGrammar {
     public EditorGrammarFiller filler;
     private String localGrammarFile;
 
+    private GrammarDB2 db;
+    // цалкам створаныя парадыгмы
     private List<Paradigm> docLevelParadigms = new ArrayList<>();
+    // спіс усіх зменаў
+    private List<Custom> customs = new ArrayList<>();
 
     public EditorGrammar(GrammarDB2 db, StaticGrammarFiller2 staticFiller, String localGrammarFile) throws Exception {
         filler = new EditorGrammarFiller(db, staticFiller, docLevelParadigms);
         this.localGrammarFile = localGrammarFile;
 
-        File f = new File(localGrammarFile);
-/*        if (f.exists()) {
-            try (InputStream in = new BufferedInputStream(new FileInputStream(localGrammarFile), 65536)) {
-                Wordlist words = (Wordlist) CONTEXT.createUnmarshaller().unmarshal(in);
-                for (Paradigm p : words.getParadigm()) {
-                    addDocLevelParadigm(p);
+        Path f = Paths.get(localGrammarFile);
+        if (Files.exists(f)) {
+            List<String> buffer = new ArrayList<>();
+            Custom c = new Custom();
+            for (String s : Files.readAllLines(f)) {
+                if (s.startsWith(HEADER_PREFIX)) {
+                    if (!buffer.isEmpty()) {
+                        c.load(buffer);
+                        c.apply();
+                    }
+                    Matcher m;
+                    if ((m = RE_HEADER_PARADIGM.matcher(s)).matches()) {
+                    } else if ((m = RE_HEADER_VARIANT.matcher(s)).matches()) {
+                        c.pdgId = Integer.parseInt(m.group(1));
+                    } else if ((m = RE_HEADER_FORMS.matcher(s)).matches()) {
+                        c.pdgId = Integer.parseInt(m.group(1));
+                        c.variant = m.group(2);
+                    }
+                    buffer.clear();
+                    c = new Custom();
+                } else {
+                    buffer.add(s);
                 }
             }
-        }*/
+            if (!buffer.isEmpty()) {
+                c.load(buffer);
+                c.apply();
+            }
+        }
     }
 
     public List<Paradigm> getAllParadigms() {
@@ -63,10 +99,8 @@ public class EditorGrammar {
         return r;
     }
 
+    @Deprecated
     public void addDocLevelParadigm(Paradigm p) {
-        synchronized (docLevelParadigms) {
-            docLevelParadigms.add(p);
-        }
     }
 
     public void addParadigm(Paradigm p) throws Exception {
@@ -79,6 +113,9 @@ public class EditorGrammar {
             m.marshal(p, wr);
             wr.write("\n");
         }
+        Custom c = new Custom();
+        c.p = p;
+        c.apply();
     }
 
     public void addVariant(Variant v, int pdgId) throws Exception {
@@ -91,6 +128,10 @@ public class EditorGrammar {
             m.marshal(v, wr);
             wr.write("\n");
         }
+        Custom c = new Custom();
+        c.pdgId = pdgId;
+        c.v = v;
+        c.apply();
     }
 
     public void addForms(List<Form> forms, int pdgId, String variantId) throws Exception {
@@ -105,6 +146,11 @@ public class EditorGrammar {
                 wr.write("\n");
             }
         }
+        Custom c = new Custom();
+        c.pdgId = pdgId;
+        c.variant = variantId;
+        c.forms = forms;
+        c.apply();
     }
 
     /*
@@ -163,5 +209,66 @@ public class EditorGrammar {
             list.getParadigm().addAll(docLevelParadigms);
         }
         m.marshal(list, out);
+    }
+
+    class Custom {
+        int pdgId = -1;
+        String variant = null;
+        Paradigm p;
+        Variant v;
+        List<Form> forms;
+
+        void load(List<String> data) throws Exception {
+            Unmarshaller unm = CONTEXT.createUnmarshaller();
+            if (variant != null) { // add some forms
+                forms = data.stream().map(s -> {
+                    try {
+                        return (Form) unm.unmarshal(new StringReader(s));
+                    } catch (JAXBException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }).collect(Collectors.toList());
+            } else if (pdgId != -1) { // add some variant
+                v = (Variant) unm.unmarshal(new StringReader(String.join(" ", data)));
+            } else { // add full paradigm
+                p = (Paradigm) unm.unmarshal(new StringReader(String.join(" ", data)));
+            }
+        }
+
+        void apply() throws Exception {
+            customs.add(this);
+
+            Paradigm r;
+            if (forms != null) { // add some forms
+                r = getPrevParadigm();
+                r = GrammarDBSaver.cloneParadigm(r);
+                getVariant(r).getForm().addAll(forms);
+            } else if (v != null) {
+                r = getPrevParadigm();
+                r = GrammarDBSaver.cloneParadigm(r);
+                r.getVariant().add(v);
+            } else {
+                r = p;
+            }
+            synchronized (docLevelParadigms) {
+                docLevelParadigms.add(r);
+            }
+        }
+
+        Paradigm getPrevParadigm() {
+            List<Paradigm> prev = db.getAllParadigms().parallelStream().filter(p -> p.getPdgId() == pdgId).toList();
+            if (prev.size() != 1) {
+                throw new RuntimeException("Impossible to build upon #" + pdgId + ": " + prev.size() + " previous counts");
+            }
+            return prev.get(0);
+        }
+
+        Variant getVariant(Paradigm prev) {
+            List<Variant> r = prev.getVariant().stream().filter(v -> variant.equals(v.getId())).toList();
+            if (r.size() != 1) {
+                throw new RuntimeException("Wrong variant id");
+            }
+            return r.get(0);
+        }
     }
 }

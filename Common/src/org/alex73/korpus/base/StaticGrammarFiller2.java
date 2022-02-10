@@ -59,15 +59,15 @@ public class StaticGrammarFiller2 {
     public void fill(WordItem w) {
         WordInfo wi;
         String expected = w.normalized != null ? w.normalized : w.lightNormalized;
-        if (w.manualLemma == null && w.manualTag == null) {
+//        if (w.manualLemma == null && w.manualTag == null) {
             wi = get(expected);
             if (wi == null) {
                 wi = calculateWordInfo(expected, null, null);
                 set(expected, wi);
             }
-        } else {
-            wi = calculateWordInfo(expected, w.manualLemma, w.manualTag);
-        }
+//        } else {
+//            wi = calculateWordInfo(expected, w.manualLemma, w.manualTag);
+//        }
         w.lemmas = wi.lemmas;
         w.tags = wi.tags;
     }

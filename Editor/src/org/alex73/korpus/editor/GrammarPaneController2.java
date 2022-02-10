@@ -61,10 +61,12 @@ public class GrammarPaneController2 {
 
     public static void init() {
         ui.outScroll.getVerticalScrollBar().setUnitIncrement(8);
+        ui.tableTo.setModel(new Model(Collections.emptyList()));
+        ui.tableTo.getSelectionModel().addListSelectionListener(e -> updateList());
         ui.tableFound.setModel(new Model(Collections.emptyList()));
         ui.tableFound.getSelectionModel().addListSelectionListener(e -> constructForms());
-        ui.txtLike.getDocument().addDocumentListener(new DocumentChanger(e -> updateList()));
         ui.txtWhat.getDocument().addDocumentListener(new DocumentChanger(e -> updateList()));
+        ui.txtLike.getDocument().addDocumentListener(new DocumentChanger(e -> updateList()));
         ui.txtGrammar.getDocument().addDocumentListener(new DocumentChanger(e -> updateList()));
         ui.txtGrammar.getDocument().addDocumentListener(new DocumentChanger(e -> updateGrammar()));
         ui.cbPreserveCase.addActionListener(e -> updateList());
@@ -117,6 +119,10 @@ public class GrammarPaneController2 {
             ui.txtTo.setVisible(false);
             ui.scrollTo.setVisible(false);
             visible2 = true;
+            ui.panelSave.setVisible(visible2);
+            ui.panelInput.setVisible(visible2);
+            ui.listScroll.setVisible(visible2);
+            ui.outScroll.setVisible(visible2);
         } else {
             ui.txtTo.setVisible(true);
             ui.scrollTo.setVisible(true);
@@ -125,12 +131,8 @@ public class GrammarPaneController2 {
             }
             updaterTo = new UpdaterTo();
             updaterTo.execute();
-            visible2 = ui.tableTo.getSelectedRow() >= 0;
         }
-        ui.panelSave.setVisible(visible2);
-        ui.panelInput.setVisible(visible2);
-        ui.listScroll.setVisible(visible2);
-        ui.outScroll.setVisible(visible2);
+        ui.validate();
     }
 
     static UpdaterTo updaterTo;
@@ -159,7 +161,11 @@ public class GrammarPaneController2 {
         }
         boolean someFormsOnly = ui.rbAddForm.isSelected();
         PVW basedOn = ((Model) ui.tableFound.getModel()).rows.get(r);
-        Paradigm p = new GrammarConstructor(MainController.gr).constructParadigm(currentWord, basedOn.p, basedOn.v,
+        String word = ui.txtWhat.getText().trim();
+        if (word.startsWith("ў")) {
+            word = "у" + word.substring(1);
+        }
+        Paradigm p = new GrammarConstructor(MainController.gr).constructParadigm(word, basedOn.p, basedOn.v,
                 basedOn.w, ui.cbPreserveCase.isSelected());
         constructedParadigmTag = basedOn.p.getTag();
         constructedVariantTag = basedOn.v.getTag();
@@ -254,6 +260,10 @@ public class GrammarPaneController2 {
                     return;
                 }
                 PVW row = ((Model) ui.tableTo.getModel()).rows.get(ui.tableTo.getSelectedRow());
+                if (row.p.getPdgId() == 0) {
+                    JOptionPane.showMessageDialog(UI.mainWindow, "Нельга будаваць на падставе парадыгмы не з базы", "Памылка", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
                 MainController.gr.addForms(newVariant.getForm(), row.p.getPdgId(), row.v.getId());
             } else if (ui.rbAddVariant.isSelected()) {
                 if (ui.tableTo.getSelectedRow() < 0) {
@@ -262,6 +272,10 @@ public class GrammarPaneController2 {
                     return;
                 }
                 PVW row = ((Model) ui.tableTo.getModel()).rows.get(ui.tableTo.getSelectedRow());
+                if (row.p.getPdgId() == 0) {
+                    JOptionPane.showMessageDialog(UI.mainWindow, "Нельга будаваць на падставе парадыгмы не з базы", "Памылка", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
                 newVariant.setLemma(newVariant.getForm().get(0).getValue());
                 newVariant.setTag(constructedVariantTag);
                 MainController.gr.addVariant(newVariant, row.p.getPdgId());
@@ -275,6 +289,7 @@ public class GrammarPaneController2 {
                 p.setTag(constructedParadigmTag);
                 MainController.gr.addParadigm(p);
             }
+            MainController.updateFullGrammar();
             JOptionPane.showMessageDialog(UI.mainWindow, "Змены захаваныя", "Паведамленне",
                     JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception ex) {
@@ -285,12 +300,18 @@ public class GrammarPaneController2 {
 
     static class UpdaterList extends SwingWorker<List<PVW>, Void> {
         String word, grammar, theme, looksLike;
+        char tagStart;
         GrammarConstructor grConstr;
 
         public UpdaterList() {
-            grammar = ui.txtGrammar.getText().toUpperCase();
-            looksLike = ui.txtLike.getText();
-            word = currentWord;
+            grammar = ui.txtGrammar.getText().trim().toUpperCase();
+            looksLike = ui.txtLike.getText().trim();
+            word = ui.txtWhat.getText().trim();
+            if (ui.scrollTo.isVisible() && grammar.isEmpty() && ui.tableTo.getSelectedRow() >= 0) {
+                // табліца паказваецца - абіраць толькі гэтую часціну мовы
+                PVW row = ((Model) ui.tableTo.getModel()).rows.get(ui.tableTo.getSelectedRow());
+                grammar = row.p.getTag() != null ? row.p.getTag().substring(0, 1) : row.v.getTag().substring(0, 1);
+            }
         }
 
         @Override
@@ -330,7 +351,7 @@ public class GrammarPaneController2 {
 
         @Override
         protected List<PVW> doInBackground() throws Exception {
-            find = BelarusianWordNormalizer.lightNormalizedWithStars(find);
+            find = BelarusianWordNormalizer.superNormalized(find);
             if (find.isEmpty()) {
                 return Collections.emptyList();
             }
@@ -347,12 +368,13 @@ public class GrammarPaneController2 {
                     return;
                 }
                 for (Variant v : p.getVariant()) {
+                    String lemma = BelarusianWordNormalizer.superNormalized(v.getLemma());
                     if (reFilter != null) {
-                        if (!reFilter.matcher(v.getLemma()).matches()) {
+                        if (!reFilter.matcher(lemma).matches()) {
                             continue;
                         }
                     } else {
-                        if (!find.equals(v.getLemma())) {
+                        if (!find.equals(lemma)) {
                             continue;
                         }
                     }
@@ -394,6 +416,7 @@ public class GrammarPaneController2 {
                     ui.listScroll.setVisible(false);
                     ui.outScroll.setVisible(false);
                 }
+                ui.validate();
                 constructForms();
             } catch (CancellationException ex) {
             } catch (Throwable ex) {
