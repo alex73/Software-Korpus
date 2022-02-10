@@ -8,6 +8,9 @@
   <li class="nav-item">
     <a id="tabCluster" class="nav-link" href="#" onClick="korpusui.switchMode('cluster'); return false;">Кластар</a>
   </li>
+  <li class="nav-item">
+    <a id="tabSpisy" class="nav-link" href="#" onClick="korpusui.switchMode('spisy'); return false;">Канкардансныя спісы</a>
+  </li>
 </ul>
 <br/>
     <!--alert *ngIf="serviceSearch.errorSearch" type="danger">{{serviceSearch.errorSearch}}</alert-->
@@ -32,6 +35,16 @@
 		      <button type="submit" class="btn btn-danger btn-lg">Пошук</button>
 		    </div>
 	    </form>
+	    
+	<div id="divSpisy" class="d-none">
+		<div class="card">
+			<div class="card-body">
+				<div>
+	                <#include "page.korpus.spisy.html">
+	            </div>
+			</div>
+		</div>
+	</div>
 
       <span id="searchTop" style="position: relative; top: -50px"></span>
         <div id="desc" class="row col-md-12">

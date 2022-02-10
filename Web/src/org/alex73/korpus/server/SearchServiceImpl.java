@@ -1,10 +1,16 @@
 package org.alex73.korpus.server;
 
+import java.io.FileNotFoundException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.Collator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -12,6 +18,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
@@ -21,6 +28,7 @@ import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.server.data.ClusterParams;
 import org.alex73.korpus.server.data.ClusterResults;
+import org.alex73.korpus.server.data.FreqSpisResult;
 import org.alex73.korpus.server.data.InitialData;
 import org.alex73.korpus.server.data.LatestMark;
 import org.alex73.korpus.server.data.SearchParams;
@@ -39,6 +47,7 @@ import org.apache.lucene.search.BooleanQuery;
 @Path("/korpus")
 public class SearchServiceImpl {
     private final static Logger LOGGER = Logger.getLogger(SearchServiceImpl.class.getName());
+    private static final Collator BE = Collator.getInstance(new Locale("be"));
 
     @Context
     HttpServletRequest request;
@@ -56,6 +65,30 @@ public class SearchServiceImpl {
             return getApp().searchInitial;
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "getInitialData", ex);
+            throw ex;
+        }
+    }
+
+    @Path("freq")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<FreqSpisResult> getFrequences(@QueryParam("subcorpus") String subcorpus) throws Exception {
+        LOGGER.info("getFrequences from " + request.getRemoteAddr());
+        java.nio.file.Path file = Paths.get(getApp().korpusCache + "/freq." + subcorpus + ".tab");
+        try {
+            List<String> data = Files.readAllLines(file);
+            return data.stream().map(s -> {
+                int p = s.indexOf('=');
+                FreqSpisResult r = new FreqSpisResult();
+                r.w = s.substring(0, p);
+                r.c = Integer.parseInt(s.substring(p + 1));
+                return r;
+            }).sorted((a, b) -> BE.compare(a.w, b.w)).collect(Collectors.toList());
+        } catch(FileNotFoundException ex) {
+            LOGGER.log(Level.SEVERE, "Spi not found: "+file);
+            throw new Exception("Data not found");
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "getFrequences", ex);
             throw ex;
         }
     }

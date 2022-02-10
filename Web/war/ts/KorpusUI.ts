@@ -18,21 +18,28 @@ class KorpusUI {
 		document.getElementById("tabSearch").classList.remove("active");
 		document.getElementById("tabKWIC").classList.remove("active");
 		document.getElementById("tabCluster").classList.remove("active");
+		document.getElementById("tabSpisy").classList.remove("active");
 		switch (mode) {
 			case "search":
 				document.getElementById("tabSearch").classList.add("active");
+				document.getElementById("divSpisy").classList.add("d-none");
+				document.getElementById("divInputSearch").classList.remove("d-none");
 				document.getElementById("partInputOrder").classList.remove("d-none");
 				document.getElementById("partWordAdd").classList.remove("d-none");
 				document.getElementById("partWordAround").classList.add("d-none");
 				break;
 			case "kwic":
 				document.getElementById("tabKWIC").classList.add("active");
+				document.getElementById("divSpisy").classList.add("d-none");
+				document.getElementById("divInputSearch").classList.remove("d-none");
 				document.getElementById("partInputOrder").classList.add("d-none");
 				document.getElementById("partWordAdd").classList.remove("d-none");
 				document.getElementById("partWordAround").classList.add("d-none");
 				break;
 			case "cluster":
 				document.getElementById("tabCluster").classList.add("active");
+				document.getElementById("divSpisy").classList.add("d-none");
+				document.getElementById("divInputSearch").classList.remove("d-none");
 				document.getElementById("partInputOrder").classList.add("d-none");
 				document.getElementById("partWordAdd").classList.add("d-none");
 				document.getElementById("partWordAround").classList.remove("d-none");
@@ -41,6 +48,11 @@ class KorpusUI {
 					words.item(i).remove();
 				}
 				this.repaintRemoveIcons('inputword');
+				break;
+			case "spisy":
+				document.getElementById("tabSpisy").classList.add("active");
+				document.getElementById("divInputSearch").classList.add("d-none");
+				document.getElementById("divSpisy").classList.remove("d-none");
 				break;
 		}
 		this.maximizeHeader();
@@ -206,6 +218,27 @@ class KorpusUI {
         }));
         $('[data-toggle="tooltip"]').tooltip();
 	}
+	spisy() {
+		let subcorpus = $('input[name=kankardansnyjaSpisy]:checked').val();
+		let word = $('input[name=wordSpis]').val();
+		if (spisy[subcorpus] == null) {
+			korpusService.loadSpis(subcorpus, function() {
+				if (spisy[subcorpus] != null) {
+					korpusui.showSpisy(subcorpus, word);
+				}
+			});
+		} else {
+			korpusui.showSpisy(subcorpus, word);
+		}
+	}
+	showSpisy(subcorpus: string, word: string) {
+		word = word.trim().replace('.', '').replace('*', '.*');
+		let rx = word == '' ? null : new RegExp('^' + word + '$');
+		$('#output').html($.templates("#template-output-spisy").render({
+			subcorpus: subcorpus,
+			data: rx == null ? spisy[subcorpus] : spisy[subcorpus].filter(r => rx.test(r.w))
+		}));
+	}
 	static separatedStringToArray(v: string): string[] {
 		if (!v || v == 'Усе') {
 			return null;
@@ -282,6 +315,7 @@ var dialogSubcorpuses: DialogSubcorpuses = null;
 var dialogText: DialogText = null;
 var dialogStyleGenres: DialogStyleGenres = null;
 var dialogWordGrammar: DialogWordGrammar = null;
+var spisy: { [key: string]: FreqSpisResult[]; } = {};
 function initializeKorpusPage() {
 	korpusui = new KorpusUI();
 	korpusService = new KorpusService();

@@ -1,0 +1,18 @@
+<div id="dialog-subcorpuses-spisy-place" class="modal-body"></div>
+
+<script id="template-subcorpuses-spisy" type="text/x-jsrender">
+{{for ~root.kankardansnyjaSpisy itemVar='~sp'}}
+	{{for ~root.subcorpuses itemVar='~sk'}}
+		{{if ~sp == ~sk.key }}
+			<div>
+				<label><input type="radio" name="kankardansnyjaSpisy" value="{{>key}}" onclick="korpusui.spisy()"> {{korpusname:value}}</label>
+				<div style="font-size: 80%" class="mb-3">{{korpusdesc:value}}</div>
+			</div>
+		{{/if}}
+	{{/for}}
+{{/for}}
+</script>
+
+<div class="form-inline">
+	<label>Слова</label> <input type="text" placeholder="уводзіць тут, можна з '*'" class="form-control mx-2" size="20" name="wordSpis" oninput="korpusui.spisy()">
+</div>

@@ -34,6 +34,9 @@ public class ProcessHeaders extends BaseParallelProcessor {
         if (textInfo.subcorpus == null) {
             throw new RuntimeException("subcorpus нявызначаны ў " + textInfo.sourceFilePath);
         }
+        if (textInfo.textLabel == null) {
+            throw new RuntimeException("textLabel нявызначаны ў " + textInfo.sourceFilePath);
+        }
 
         instance.run(() -> {
             textInfo.creationTimeLatest();

@@ -110,7 +110,7 @@ public class PrepareCache3 {
         be = System.currentTimeMillis();
         ProcessStat stat = new ProcessStat(processStat);
         ProcessLuceneWriter lucene = new ProcessLuceneWriter(writeToLucene, cacheForProduction, OUTPUT.toString(),
-                maxMemoryMB - 8192);
+                maxMemoryMB - 18192);
         ProcessPrepareLucene prepareLucene = new ProcessPrepareLucene(lucene);
         ProcessTexts t2 = new ProcessTexts(grFiller, prepareLucene, stat);
         ProcessFileParser p2 = new ProcessFileParser();

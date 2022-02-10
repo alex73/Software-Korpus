@@ -6,6 +6,7 @@ class InitialData {
     public styleGenres: { [key:string]:string[]; };
     public grammar: GrammarInitial;
     public stat: InitialDataStat[];
+    public kankardansnyjaSpisy: string[];
 }
 
 class InitialDataStat {

@@ -256,3 +256,8 @@ class ClusterRow {
     public wordsAfter: string[];
     public count: number;
 }
+
+class FreqSpisResult {
+    public w: string;
+    public c: number;
+}

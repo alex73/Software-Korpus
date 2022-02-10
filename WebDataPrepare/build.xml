@@ -32,7 +32,7 @@
 				<fileset dir="../Web/libs/" includes="**/*.jar" />
 			</classpath>
 			<jvmarg line="-Xmx22g"/>
-			<arg line="--input=/home/alex/Korpus-full --output=/home/alex/Korpus-cache-full --grammardb=/home/alex/gits/GrammarDB"/>
+			<arg line="--input=/home/alex/Korpus --output=/home/alex/Korpus-cache --grammardb=/home/alex/gits/GrammarDB --prod=true"/>
 		</java>
 	</target>
 </project>

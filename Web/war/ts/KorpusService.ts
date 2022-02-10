@@ -91,6 +91,10 @@ class KorpusService {
         $('#output').html($.templates("#template-korpus-stat").render({
             initialData: this.initial
         }));
+		$('#dialog-subcorpuses-spisy-place').html($.templates("#template-subcorpuses-spisy").render({
+			kankardansnyjaSpisy: this.initial.kankardansnyjaSpisy,
+			subcorpuses: this.initial.subcorpuses
+		}));
 	}
 
 	search() {
@@ -268,6 +272,22 @@ class KorpusService {
 						this.currentPage = page;
 						korpusui.hideStatusError();
 						korpusui.showOutput();
+					});
+				}
+			})
+			.catch(err => korpusui.showError("Памылка: " + err));
+	}
+	loadSpis(subcorpus: string, after: any) {
+		$('#desc').hide();
+		fetch('rest/korpus/freq?subcorpus=' + subcorpus)
+			.then(r => {
+				if (!r.ok) {
+					korpusui.showError("Памылка запыту звестак падкорпуса: " + r.status + " " + r.statusText);
+				} else {
+					r.json().then(json => {
+						korpusui.hideStatusError();
+						spisy[subcorpus] = json;
+						after();
 					});
 				}
 			})

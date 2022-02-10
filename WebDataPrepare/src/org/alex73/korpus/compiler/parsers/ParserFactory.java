@@ -18,6 +18,7 @@ public class ParserFactory {
         parsers.add(new Pair("sajty:.+\\.zip", TextArchiveParser.class));
         parsers.add(new Pair("kankardans:.+\\.txt", KankardansParser.class));
         parsers.add(new Pair("dyjalektny:.+\\.text", DyjalektnyParser.class));
+        parsers.add(new Pair("skaryna:.+\\.text", SkarynaParser.class));
     }
 
     public static IParser getParser(String subcorpus, Path file) {

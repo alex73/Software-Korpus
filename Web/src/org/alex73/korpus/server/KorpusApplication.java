@@ -187,6 +187,9 @@ public class KorpusApplication extends Application {
             if (line.startsWith("subcorpus.")) {
                 searchInitial.subcorpuses.add(new KeyValue(line.substring(10, eq), line.substring(eq + 1)));
             }
+            if (line.startsWith("kankardansnyja_spisy=")) {
+                searchInitial.kankardansnyjaSpisy = line.substring(21).trim().split(";");
+            }
         }
         for (String key : (Set<String>) (Set<?>) stat.keySet()) {
             if (key.startsWith("authors.")) {

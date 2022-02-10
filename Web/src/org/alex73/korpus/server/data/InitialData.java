@@ -17,6 +17,7 @@ public class InitialData {
     public Map<String, List<String>> styleGenres;
     public GrammarInitial grammar;
     public List<Stat> stat;
+    public String[] kankardansnyjaSpisy;
 
     public static class Stat {
         public String name;

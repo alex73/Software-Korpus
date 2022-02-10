@@ -60,6 +60,13 @@
 {{include ~root tmpl="#template-output-paging"/}}
 </script>
 
+<script id="template-output-spisy" type="text/x-jsrender">
+{{for ~root.data}}
+	<a target="_blank" href='korpus.html#search:{"textStandard":{"subcorpuses":["{{>~root.subcorpus}}"]},"words":[{"word":"{{>w}}"}]}'>{{>w}}</a> -> {{>c}}<br/>
+{{/for}}
+</script>
+
+
 <div id="popoverWord" style="visibility: hidden; display: block; position: absolute;" class="popover in popover-top top" onBlur="popoverWordHide();">
   <div class="popover-arrow arrow"></div>
   <div id="popoverWordContent" class="popover-content" style="margin: 0.5em"></div>
