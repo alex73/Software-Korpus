@@ -8,34 +8,34 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="libs/org.apache.lucene/lucene-core-8.9.0.jar" sourcepath="/data/src/lucene-core-8.9.0-sources.jar"/>
-	<classpathentry kind="lib" path="libs/org.apache.lucene/lucene-queries-8.9.0.jar"/>
-	<classpathentry kind="lib" path="libs/org.freemarker/freemarker-2.3.31.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/aopalliance-repackaged-2.6.1.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/hk2-api-2.6.1.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/hk2-locator-2.6.1.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/hk2-utils-2.6.1.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jackson-annotations-2.12.4.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jackson-core-2.12.4.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jackson-databind-2.12.4.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jackson-jaxrs-base-2.12.4.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jackson-jaxrs-json-provider-2.12.4.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jackson-module-jaxb-annotations-2.12.4.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jakarta.activation-api-1.2.1.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jakarta.annotation-api-1.3.5.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jakarta.inject-2.6.1.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jakarta.validation-api-2.0.2.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jakarta.ws.rs-api-2.1.6.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jakarta.xml.bind-api-2.3.2.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/javassist-3.25.0-GA.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jersey-client-2.34.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jersey-common-2.34.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jersey-container-servlet-2.34.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jersey-container-servlet-core-2.34.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jersey-entity-filtering-2.34.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jersey-hk2-2.34.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/jersey-server-2.34.jar"/>
-	<classpathentry kind="lib" path="libs/org.glassfish.jersey/osgi-resource-locator-1.0.3.jar"/>
-	<classpathentry kind="lib" path="lib-compile/jakarta.servlet-api-4.0.4.jar"/>
-	<classpathentry kind="output" path="classes"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.apache.lucene/lucene-core-8.9.0.jar" sourcepath="/data/src/lucene-core-8.9.0-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.apache.lucene/lucene-queries-8.9.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.freemarker/freemarker-2.3.31.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/aopalliance-repackaged-2.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/hk2-api-2.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/hk2-locator-2.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/hk2-utils-2.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/jackson-annotations-2.12.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/jackson-core-2.12.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/jackson-databind-2.12.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/jackson-jaxrs-base-2.12.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/jackson-jaxrs-json-provider-2.12.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/jackson-module-jaxb-annotations-2.12.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/jakarta.activation-api-1.2.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/jakarta.annotation-api-1.3.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/jakarta.inject-2.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/jakarta.validation-api-2.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/jakarta.ws.rs-api-2.1.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/jakarta.xml.bind-api-2.3.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/javassist-3.25.0-GA.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/jersey-client-2.34.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/jersey-common-2.34.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/jersey-container-servlet-2.34.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/jersey-container-servlet-core-2.34.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/jersey-entity-filtering-2.34.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/jersey-hk2-2.34.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/jersey-server-2.34.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/org.glassfish.jersey/osgi-resource-locator-1.0.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib-compile/jakarta.servlet-api-4.0.4.jar"/>
+	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

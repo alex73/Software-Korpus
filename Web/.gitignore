@@ -1,7 +1,7 @@
 /build/
 /gwt-unitCache/
 /war/WEB-INF/classes
-/war/WEB-INF/deploy
+/war/WEB-INF/lib
 /war/korpus
 *.war
 .gwt
@@ -10,7 +10,7 @@
 /Korpus-cache/
 /Other-texts/
 /Other-cache/
-/classes/
 /war/*.html
 /war/*.js
 /war/*.js.map
+/web/

@@ -38,7 +38,7 @@ public class ProcessTexts extends BaseParallelProcessor {
 
         instance.run(() -> {
             Collections.shuffle(content);
-            instance.grFiller.fillNonManual(content);
+            instance.grFiller.fill(content);
             instance.stat.process(textInfo, content);
             if (writeToLucene) {
                 instance.lucene.process(textInfo, content);
