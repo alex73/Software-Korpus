@@ -91,16 +91,13 @@ public class KorpusDocumentViewFactory implements ViewFactory {
             g.drawLine(r.x, r.y, r.x, r.y + r.height - 1);
 
             if (wordElement.item instanceof WordItem) {
-                WordItem wi = (WordItem)wordElement.item;
-                boolean mark;
-                if (wi.manualLemma != null || wi.manualTag != null) {
+                WordItem wi = (WordItem) wordElement.item;
+
+                if (wi.manualLemma != null || wi.manualTag != null || wi.manualNormalized != null) {
                     g.setColor(new Color(224, 255, 224));
                     g.fillRect(r.x, r.y, r.width, r.height);
-                    mark = false;
-                } else {
-                    mark = wordElement.isMarked();
                 }
-                if (mark) {
+                if (wordElement.isMarked()) {
                     g.setColor(Color.RED);
                     int y = r.y + r.height - 1;
                     g.drawLine(r.x, y, r.x + r.width, y);

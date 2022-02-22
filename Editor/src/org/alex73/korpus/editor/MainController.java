@@ -357,7 +357,7 @@ public class MainController {
             } else {
                 throw new RuntimeException("Unknown file format");
             }
-            gr.filler.fillNonManual(lines);
+            gr.filler.fill(lines);
 
             UI.doc = new KorpusDocument3(lines);
             final KorpusDocumentViewFactory viewFactory = new KorpusDocumentViewFactory();
@@ -441,8 +441,8 @@ public class MainController {
             wi.manualLemma = manualLemma;
             wi.manualTag = manualTag;
             normalized = normalized.trim();
-            wi.normalized = normalized.isEmpty() ? null : normalized;
-            MainController.gr.filler.fillNonManual(wi);
+            wi.manualNormalized = normalized.isEmpty() ? null : normalized;
+            MainController.gr.filler.fill(wi);
             WordInfoPaneController.show(wi);
         }
         UI.editor.repaint();
@@ -458,7 +458,7 @@ public class MainController {
                     if (wi.getText().equals("панічок")) {
                         System.out.println();
                     }
-                    MainController.gr.filler.fillNonManual(wi);
+                    MainController.gr.filler.fill(wi);
                 }
             }
         }

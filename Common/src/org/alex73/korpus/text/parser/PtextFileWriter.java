@@ -41,8 +41,8 @@ public class PtextFileWriter {
                     if (it instanceof WordItem) {
                         WordItem wi = (WordItem) it;
                         write(wr, START_WORD, wi.lightNormalized);
-                        if (wi.normalized != null) {
-                            write(wr, START_WORD_NORMALIZED, wi.normalized);
+                        if (wi.manualNormalized != null) {
+                            write(wr, START_WORD_NORMALIZED, wi.manualNormalized);
                         }
                         if (wi.manualLemma != null) {
                             write(wr, START_WORD_LEMMA, wi.manualLemma);

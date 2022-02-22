@@ -68,7 +68,7 @@ public class UI {
 
     public static void init() throws Exception {
         mainWindow = new MainWindow();
-        mainWindow.setTitle("Рэдагаваньне файлаў корпусу, v.4.0");
+        mainWindow.setTitle("Рэдагаваньне файлаў корпусу, v.4.1");
 
         // GrammarDialogController.init(mainWindow);
         mainWindow.setBounds(200, 200, 900, 600);
@@ -116,7 +116,7 @@ public class UI {
 
         GrammarPaneController2.ui = new GrammarPane2();
         GrammarPaneController2.ui.setMinimumSize(new Dimension(100, 100));
-        pane2 = new DockablePane("GRAMMAR_DB", "Граматычная база", GrammarPaneController2.ui, true);
+        pane2 = new DockablePane("GRAMMAR_DB", "Дадаць у граматычную базу", GrammarPaneController2.ui, true);
         desktop.addDockable(pane2);
         GrammarPaneController2.init();
 

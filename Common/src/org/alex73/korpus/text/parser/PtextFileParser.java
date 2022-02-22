@@ -121,12 +121,13 @@ public class PtextFileParser {
         if (wLightNormalized != null) {
             WordItem w = new WordItem();
             w.lightNormalized = wLightNormalized;
-            w.normalized = wNormalized;
+            w.manualNormalized = wNormalized;
             w.manualLemma = wManualLemma;
             w.manualTag = wManualTag;
             w.type = wType;
             line.add(w);
             wLightNormalized = null;
+            wNormalized = null;
             wManualLemma = null;
             wManualTag = null;
             wType = null;

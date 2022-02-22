@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -28,6 +29,7 @@ import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.base.GrammarDBSaver;
 import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.editor.core.Theme;
+import org.alex73.korpus.utils.SetUtils;
 
 public class EditorGrammar {
     static final String HEADER_PREFIX = "=====";
@@ -50,44 +52,52 @@ public class EditorGrammar {
     public EditorGrammarFiller filler;
     private String localGrammarFile;
 
-    private GrammarDB2 db;
+    private final GrammarDB2 db;
     // цалкам створаныя парадыгмы
     private List<Paradigm> docLevelParadigms = new ArrayList<>();
     // спіс усіх зменаў
     private List<Custom> customs = new ArrayList<>();
 
     public EditorGrammar(GrammarDB2 db, StaticGrammarFiller2 staticFiller, String localGrammarFile) throws Exception {
+        this.db = db;
         filler = new EditorGrammarFiller(db, staticFiller, docLevelParadigms);
         this.localGrammarFile = localGrammarFile;
 
         Path f = Paths.get(localGrammarFile);
         if (Files.exists(f)) {
-            List<String> buffer = new ArrayList<>();
-            Custom c = new Custom();
-            for (String s : Files.readAllLines(f)) {
-                if (s.startsWith(HEADER_PREFIX)) {
-                    if (!buffer.isEmpty()) {
-                        c.load(buffer);
-                        c.apply();
-                    }
-                    Matcher m;
-                    if ((m = RE_HEADER_PARADIGM.matcher(s)).matches()) {
-                    } else if ((m = RE_HEADER_VARIANT.matcher(s)).matches()) {
-                        c.pdgId = Integer.parseInt(m.group(1));
-                    } else if ((m = RE_HEADER_FORMS.matcher(s)).matches()) {
-                        c.pdgId = Integer.parseInt(m.group(1));
-                        c.variant = m.group(2);
-                    }
-                    buffer.clear();
-                    c = new Custom();
-                } else {
-                    buffer.add(s);
+            importGrammar(f, db, docLevelParadigms, customs, null);
+        }
+    }
+
+    private static void importGrammar(Path f, GrammarDB2 db, List<Paradigm> docLevelParadigms, List<Custom> customs, String slounik) throws Exception {
+        List<String> buffer = new ArrayList<>();
+        Custom c = new Custom();
+        for (String s : Files.readAllLines(f)) {
+            if (s.isBlank()) {
+                continue;
+            }
+            if (s.startsWith(HEADER_PREFIX)) {
+                if (!buffer.isEmpty()) {
+                    c.load(buffer, slounik);
+                    c.apply(db, docLevelParadigms, customs);
                 }
+                c = new Custom();
+                Matcher m;
+                if ((m = RE_HEADER_PARADIGM.matcher(s)).matches()) {
+                } else if ((m = RE_HEADER_VARIANT.matcher(s)).matches()) {
+                    c.pdgId = Integer.parseInt(m.group(1));
+                } else if ((m = RE_HEADER_FORMS.matcher(s)).matches()) {
+                    c.pdgId = Integer.parseInt(m.group(1));
+                    c.variant = m.group(2);
+                }
+                buffer.clear();
+            } else {
+                buffer.add(s);
             }
-            if (!buffer.isEmpty()) {
-                c.load(buffer);
-                c.apply();
-            }
+        }
+        if (!buffer.isEmpty()) {
+            c.load(buffer, slounik);
+            c.apply(db, docLevelParadigms, customs);
         }
     }
 
@@ -115,7 +125,7 @@ public class EditorGrammar {
         }
         Custom c = new Custom();
         c.p = p;
-        c.apply();
+        c.apply(db, docLevelParadigms, customs);
     }
 
     public void addVariant(Variant v, int pdgId) throws Exception {
@@ -131,7 +141,7 @@ public class EditorGrammar {
         Custom c = new Custom();
         c.pdgId = pdgId;
         c.v = v;
-        c.apply();
+        c.apply(db, docLevelParadigms, customs);
     }
 
     public void addForms(List<Form> forms, int pdgId, String variantId) throws Exception {
@@ -150,7 +160,7 @@ public class EditorGrammar {
         c.pdgId = pdgId;
         c.variant = variantId;
         c.forms = forms;
-        c.apply();
+        c.apply(db, docLevelParadigms, customs);
     }
 
     /*
@@ -211,41 +221,71 @@ public class EditorGrammar {
         m.marshal(list, out);
     }
 
-    class Custom {
+    static class Custom {
         int pdgId = -1;
         String variant = null;
         Paradigm p;
         Variant v;
         List<Form> forms;
 
-        void load(List<String> data) throws Exception {
-            Unmarshaller unm = CONTEXT.createUnmarshaller();
-            if (variant != null) { // add some forms
-                forms = data.stream().map(s -> {
-                    try {
-                        return (Form) unm.unmarshal(new StringReader(s));
-                    } catch (JAXBException ex) {
-                        throw new RuntimeException(ex);
+        void load(List<String> data, String slounik) throws Exception {
+            try {
+                Unmarshaller unm = CONTEXT.createUnmarshaller();
+                if (variant != null) { // add some forms
+                    forms = data.stream().map(s -> {
+                        try {
+                            Form f = (Form) unm.unmarshal(new StringReader(s));
+                            if (slounik != null) {
+                                SetUtils.addSlounik(f, slounik);
+                            }
+                            return f;
+                        } catch (JAXBException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    }).collect(Collectors.toList());
+                } else if (pdgId != -1) { // add some variant
+                    v = (Variant) unm.unmarshal(new StringReader(String.join(" ", data)));
+                    if (slounik != null) {
+                        SetUtils.addSlounik(v, slounik);
                     }
-                }).collect(Collectors.toList());
-            } else if (pdgId != -1) { // add some variant
-                v = (Variant) unm.unmarshal(new StringReader(String.join(" ", data)));
-            } else { // add full paradigm
-                p = (Paradigm) unm.unmarshal(new StringReader(String.join(" ", data)));
+                } else { // add full paradigm
+                    p = (Paradigm) unm.unmarshal(new StringReader(String.join(" ", data)));
+                    if (slounik != null) {
+                        SetUtils.addSlounik(p.getVariant().get(0), slounik);
+                    }
+                }
+            } catch (Exception ex) {
+                System.err.println("Error loading :\n" + String.join("\n", data));
+                ex.printStackTrace();
             }
         }
 
-        void apply() throws Exception {
+        void apply(GrammarDB2 db, List<Paradigm> docLevelParadigms, List<Custom> customs) throws Exception {
             customs.add(this);
 
             Paradigm r;
             if (forms != null) { // add some forms
-                r = getPrevParadigm();
+                r = getPrevParadigm(db);
                 r = GrammarDBSaver.cloneParadigm(r);
-                getVariant(r).getForm().addAll(forms);
+                Variant v = getVariant(r);
+                for (Form f : forms) {
+                    int idx = -1;
+                    for (int i = v.getForm().size() - 1; i >= 0; i--) {
+                        if (v.getForm().get(i).getTag().equals(f.getTag())) {
+                            idx = i;
+                            break;
+                        }
+                    }
+                    if (idx >= 0) {
+                        v.getForm().add(idx + 1, f);
+                    } else {
+                        v.getForm().add(f);
+                    }
+                }
             } else if (v != null) {
-                r = getPrevParadigm();
+                r = getPrevParadigm(db);
                 r = GrammarDBSaver.cloneParadigm(r);
+                v.setId(Character.toString('a' + r.getVariant().size()));
                 r.getVariant().add(v);
             } else {
                 r = p;
@@ -255,7 +295,7 @@ public class EditorGrammar {
             }
         }
 
-        Paradigm getPrevParadigm() {
+        Paradigm getPrevParadigm(GrammarDB2 db) {
             List<Paradigm> prev = db.getAllParadigms().parallelStream().filter(p -> p.getPdgId() == pdgId).toList();
             if (prev.size() != 1) {
                 throw new RuntimeException("Impossible to build upon #" + pdgId + ": " + prev.size() + " previous counts");
@@ -270,5 +310,32 @@ public class EditorGrammar {
             }
             return r.get(0);
         }
+    }
+
+    static final String DB_PATH = "/home/alex/gits/GrammarDB";
+    static final String IMP_PATH = "/tmp/imp";
+    static final String DICT = "kolas";
+
+    public static void main(String[] args) throws Exception {
+        GrammarDB2 db = GrammarDB2.initializeFromDir(DB_PATH);
+        List<Paradigm> docLevelParadigms = new ArrayList<>();
+        List<Custom> customs = new ArrayList<>();
+
+        for (Path f : Files.list(Paths.get(IMP_PATH)).toList()) {
+            System.err.println("Load " + f);
+            importGrammar(f, db, docLevelParadigms, customs, DICT);
+        }
+
+        Set<Integer> removePdgId = docLevelParadigms.stream().filter(p -> p.getPdgId() != 0).map(p -> p.getPdgId()).collect(Collectors.toSet());
+        for (int i = 0; i < db.getAllParadigms().size(); i++) {
+            Paradigm p = db.getAllParadigms().get(i);
+            if (removePdgId.contains(p.getPdgId())) {
+                db.getAllParadigms().remove(i);
+                i--;
+            }
+        }
+        db.getAllParadigms().addAll(docLevelParadigms);
+
+        GrammarDBSaver.sortAndStore(db, DB_PATH);
     }
 }

@@ -6,7 +6,7 @@ public class WordItem implements ITextLineElement {
     /** Зыходнае слова ў тэксце з мінімальным прывядзеннем да стандартнага запісу: выпраўленне апострафаў. Мусіць абавязкова быць. */
     public String lightNormalized;
     /** Зыходнае слова ў тэксце, выпраўленае карыстальнікам для пошуку ў базе, накшталт "мн-о-о-о-га"->"многа". Толькі калі карыстальнік абраў. */
-    public String normalized;
+    public String manualNormalized;
 
     /** Аўтаматычна знойдзеныя лемы з базы, праз ';' */
     public String lemmas;
@@ -30,5 +30,17 @@ public class WordItem implements ITextLineElement {
     @Override
     public String getText() {
         return lightNormalized;
+    }
+
+    public WordItem clone() {
+        WordItem r = new WordItem();
+        r.lightNormalized = lightNormalized;
+        r.manualNormalized = manualNormalized;
+        r.lemmas = lemmas;
+        r.tags = tags;
+        r.manualLemma = manualLemma;
+        r.manualTag = manualTag;
+        r.type = type;
+        return r;
     }
 }

@@ -47,6 +47,7 @@ public class ErrorDialog extends javax.swing.JDialog {
 
         message.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         message.setText("error");
+        message.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
         getContentPane().add(message, java.awt.BorderLayout.CENTER);
 
         pack();

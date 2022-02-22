@@ -27,6 +27,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
@@ -62,17 +64,17 @@ public class WordInfoPaneController {
             currentWord = null;
         } else {
             UI.dockWordInfo.getDockKey().setName("Звесткі пра слова: "+word.lightNormalized);
-            p.txtNormal.setText(word.normalized != null ? word.normalized : "");
+            p.txtNormal.setText(word.manualNormalized != null ? word.manualNormalized : "");
             currentWord = new WordItem();
             currentWord.lightNormalized = word.lightNormalized;
-            currentWord.normalized = word.normalized;
+            currentWord.manualNormalized = word.manualNormalized;
             currentWord.manualLemma = word.manualLemma;
             currentWord.manualTag = word.manualTag;
             currentWord.type = word.type;
             showLemmasAndTags();
             p.txtNormal.getDocument().addDocumentListener(docListener);
 
-            GrammarPaneController2.show(word.normalized != null ? word.normalized : word.lightNormalized);
+            GrammarPaneController2.show(word.manualNormalized != null ? word.manualNormalized : word.lightNormalized);
         }
         changed = false;
         setButtonsEnabled();
@@ -81,8 +83,6 @@ public class WordInfoPaneController {
     }
 
     static void showLemmasAndTags() {
-        MainController.gr.filler.fillNonManual(currentWord);
-
         WordInfoPane p = UI.wordInfoPane;
 
         p.pLemma.removeAll();
@@ -94,10 +94,18 @@ public class WordInfoPaneController {
             return;
         }
 
+        WordItem nonManual = currentWord.clone();
+        nonManual.manualLemma = null;
+        nonManual.manualTag = null;
+
+        MainController.gr.filler.fill(nonManual);
+        MainController.gr.filler.fill(currentWord);
+
         // show lemmas
-        if (currentWord.lemmas != null) {
+        if (nonManual.lemmas != null) {
             ButtonGroup rbGroupLemma = new ButtonGroup();
-            for (String c : currentWord.lemmas.split(";")) {
+            Set<String> manualSet = listToSet(currentWord.lemmas);
+            for (String c : nonManual.lemmas.split(";")) {
                 if (c.isEmpty()) {
                     continue;
                 }
@@ -107,6 +115,7 @@ public class WordInfoPaneController {
                 if (c.equals(currentWord.manualLemma)) {
                     rb.setSelected(true);
                 }
+                rb.setEnabled(manualSet.contains(c));
                 rbGroupLemma.add(rb);
                 p.pLemma.add(rb);
                 rb.addActionListener(lemmaClick);
@@ -119,30 +128,21 @@ public class WordInfoPaneController {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1;
-        if (currentWord.tags != null) {
+        if (nonManual.tags != null) {
             ButtonGroup rbGroupGrammar = new ButtonGroup();
-            for (String c : currentWord.tags.split(";")) {
+            Set<String> manualSet = listToSet(currentWord.tags);
+            for (String c : nonManual.tags.split(";")) {
                 if (c.isEmpty()) {
                     continue;
                 }
-                String outText;
-                try {
-                    outText = c + ": ";
-                    for (String d : BelarusianTags.getInstance().describe(c, null)) {
-                        outText += d + ", ";
-                    }
-                    outText = outText.substring(0, outText.length() - 2);
-                } catch (Exception ex) {
-                    // unknown code
-                    outText = c + ":няправільны код";
-                }
-                JRadioButton rb = new JRadioButton("<html>" + outText + "</html>");
+                JRadioButton rb = new JRadioButton("<html>" + createTagDesc(c) + "</html>");
                 rb.setToolTipText(rb.getText());
                 rb.setName(c);
                 rb.setFont(p.pGrammar.getFont());
                 if (c.equals(currentWord.manualTag)) {
                     rb.setSelected(true);
                 }
+                rb.setEnabled(manualSet.contains(c));
                 rbGroupGrammar.add(rb);
                 gbc.gridy = p.pGrammar.getComponentCount();
                 p.pGrammar.add(rb, gbc);
@@ -152,6 +152,29 @@ public class WordInfoPaneController {
 
         UI.wordInfoPane.revalidate();
         UI.wordInfoPane.repaint();
+    }
+
+    private static Set<String> listToSet(String str) {
+        Set<String> set = new TreeSet<>();
+        for (String s : str.split(";")) {
+            set.add(s);
+        }
+        return set;
+    }
+
+    private static String createTagDesc(String tag) {
+        String outText;
+        try {
+            outText = tag + ": ";
+            for (String d : BelarusianTags.getInstance().describe(tag, null)) {
+                outText += d + ", ";
+            }
+            outText = outText.substring(0, outText.length() - 2);
+        } catch (Exception ex) {
+            // unknown code
+            outText = tag + ":няправільны код";
+        }
+        return outText;
     }
 
     static void setButtonsEnabled() {

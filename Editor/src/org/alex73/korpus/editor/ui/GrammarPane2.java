@@ -20,83 +20,60 @@ public class GrammarPane2 extends javax.swing.JPanel {
         java.awt.GridBagConstraints gridBagConstraints;
 
         buttonGroup1 = new javax.swing.ButtonGroup();
-        jPanel4 = new javax.swing.JPanel();
-        jLabel3 = new javax.swing.JLabel();
-        rbAddParadigm = new javax.swing.JRadioButton();
-        rbAddVariant = new javax.swing.JRadioButton();
-        rbAddForm = new javax.swing.JRadioButton();
-        txtTo = new javax.swing.JTextField();
-        scrollTo = new javax.swing.JScrollPane();
-        tableTo = new javax.swing.JTable();
-        panelSave = new javax.swing.JPanel();
-        cbPreserveCase = new javax.swing.JCheckBox();
-        btnSave = new javax.swing.JButton();
-        panelInput = new javax.swing.JPanel();
+        jTabbedPane1 = new javax.swing.JTabbedPane();
+        jPanel1 = new javax.swing.JPanel();
+        panelInputParadigm = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        txtWhat = new javax.swing.JTextField();
+        txtWhatParadigm = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        txtLike = new javax.swing.JTextField();
+        txtLikeParadigm = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
-        txtGrammar = new javax.swing.JTextField();
-        listScroll = new javax.swing.JScrollPane();
-        tableFound = new javax.swing.JTable();
-        outScroll = new javax.swing.JScrollPane();
-        outPanel = new javax.swing.JPanel();
+        txtGrammarParadigm = new javax.swing.JTextField();
+        panelSaveParadigm = new javax.swing.JPanel();
+        cbPreserveCaseParadigm = new javax.swing.JCheckBox();
+        btnSaveParadigm = new javax.swing.JButton();
+        listScrollParadigm = new javax.swing.JScrollPane();
+        tableFoundParadigm = new javax.swing.JTable();
+        outScrollParadigm = new javax.swing.JScrollPane();
+        outPanelParadigm = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
+        jPanel5 = new javax.swing.JPanel();
+        jLabel5 = new javax.swing.JLabel();
+        txtToVariant = new javax.swing.JTextField();
+        scrollTo1 = new javax.swing.JScrollPane();
+        tableToVariant = new javax.swing.JTable();
+        panelInputVariant = new javax.swing.JPanel();
+        jLabel13 = new javax.swing.JLabel();
+        txtWhatVariant = new javax.swing.JTextField();
+        jLabel14 = new javax.swing.JLabel();
+        txtLikeVariant = new javax.swing.JTextField();
+        jLabel15 = new javax.swing.JLabel();
+        txtGrammarVariant = new javax.swing.JTextField();
+        panelSaveVariant = new javax.swing.JPanel();
+        cbPreserveCaseVariant = new javax.swing.JCheckBox();
+        btnSaveVariant = new javax.swing.JButton();
+        listScrollVariant = new javax.swing.JScrollPane();
+        tableFoundVariant = new javax.swing.JTable();
+        outScrollVariant = new javax.swing.JScrollPane();
+        outPanelVariant = new javax.swing.JPanel();
+        jPanel3 = new javax.swing.JPanel();
+        jPanel6 = new javax.swing.JPanel();
+        jLabel6 = new javax.swing.JLabel();
+        txtToForm = new javax.swing.JTextField();
+        scrollTo2 = new javax.swing.JScrollPane();
+        tableToForm = new javax.swing.JTable();
+        panelSaveForm = new javax.swing.JPanel();
+        btnAddFormForm = new javax.swing.JButton();
+        filler1 = new javax.swing.Box.Filler(new java.awt.Dimension(0, 0), new java.awt.Dimension(0, 0), new java.awt.Dimension(32767, 32767));
+        btnSaveForm = new javax.swing.JButton();
+        outScrollForm = new javax.swing.JScrollPane();
+        outPanelForm = new javax.swing.JPanel();
 
-        setLayout(new java.awt.GridBagLayout());
+        setLayout(new java.awt.BorderLayout());
 
-        jLabel3.setText("Дадаць:");
-        jPanel4.add(jLabel3);
+        jPanel1.setLayout(new java.awt.GridBagLayout());
 
-        buttonGroup1.add(rbAddParadigm);
-        rbAddParadigm.setText("парадыгму");
-        jPanel4.add(rbAddParadigm);
-
-        buttonGroup1.add(rbAddVariant);
-        rbAddVariant.setSelected(true);
-        rbAddVariant.setText("варыянт");
-        jPanel4.add(rbAddVariant);
-
-        buttonGroup1.add(rbAddForm);
-        rbAddForm.setText("форму");
-        jPanel4.add(rbAddForm);
-
-        txtTo.setColumns(10);
-        txtTo.setToolTipText("Фільтар па леме ў якую парадыгму дадаваць, з '*'");
-        jPanel4.add(txtTo);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
-        add(jPanel4, gridBagConstraints);
-
-        scrollTo.setMinimumSize(new java.awt.Dimension(20, 120));
-        scrollTo.setPreferredSize(new java.awt.Dimension(20, 120));
-
-        tableTo.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        scrollTo.setViewportView(tableTo);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
-        add(scrollTo, gridBagConstraints);
-
-        cbPreserveCase.setText("Захоўваць вялікія літары");
-        panelSave.add(cbPreserveCase);
-
-        btnSave.setText("Захаваць");
-        panelSave.add(btnSave);
-
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
-        gridBagConstraints.weightx = 1.0;
-        add(panelSave, gridBagConstraints);
-
-        panelInput.setLayout(new java.awt.GridBagLayout());
+        panelInputParadigm.setLayout(new java.awt.GridBagLayout());
 
         jLabel1.setText("Разгортваем");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -105,17 +82,17 @@ public class GrammarPane2 extends javax.swing.JPanel {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        panelInput.add(jLabel1, gridBagConstraints);
+        panelInputParadigm.add(jLabel1, gridBagConstraints);
 
-        txtWhat.setColumns(10);
-        txtWhat.setToolTipText("Слова што разгортваць");
+        txtWhatParadigm.setColumns(10);
+        txtWhatParadigm.setToolTipText("Слова што разгортваць");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 5);
-        panelInput.add(txtWhat, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        panelInputParadigm.add(txtWhatParadigm, gridBagConstraints);
 
         jLabel4.setText("як");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -123,17 +100,17 @@ public class GrammarPane2 extends javax.swing.JPanel {
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        panelInput.add(jLabel4, gridBagConstraints);
+        panelInputParadigm.add(jLabel4, gridBagConstraints);
 
-        txtLike.setColumns(10);
-        txtLike.setToolTipText("Лема слова, на якое мусіць быць падобнае, можна з '*'");
+        txtLikeParadigm.setColumns(10);
+        txtLikeParadigm.setToolTipText("Лема слова, на якое мусіць быць падобнае, можна з '*'");
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 3;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 5);
-        panelInput.add(txtLike, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        panelInputParadigm.add(txtLikeParadigm, gridBagConstraints);
 
         jLabel2.setText("Граматыка");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -141,73 +118,302 @@ public class GrammarPane2 extends javax.swing.JPanel {
         gridBagConstraints.gridy = 0;
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        panelInput.add(jLabel2, gridBagConstraints);
+        panelInputParadigm.add(jLabel2, gridBagConstraints);
 
-        txtGrammar.setColumns(10);
+        txtGrammarParadigm.setColumns(10);
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 5;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 5);
-        panelInput.add(txtGrammar, gridBagConstraints);
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        panelInputParadigm.add(txtGrammarParadigm, gridBagConstraints);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
-        add(panelInput, gridBagConstraints);
+        jPanel1.add(panelInputParadigm, gridBagConstraints);
 
-        listScroll.setMinimumSize(new java.awt.Dimension(20, 120));
-        listScroll.setPreferredSize(new java.awt.Dimension(2, 120));
+        panelSaveParadigm.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 5, 0));
 
-        tableFound.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        listScroll.setViewportView(tableFound);
+        cbPreserveCaseParadigm.setText("Захоўваць вялікія літары");
+        panelSaveParadigm.add(cbPreserveCaseParadigm);
+
+        btnSaveParadigm.setText("Захаваць");
+        panelSaveParadigm.add(btnSaveParadigm);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+        gridBagConstraints.weightx = 1.0;
+        jPanel1.add(panelSaveParadigm, gridBagConstraints);
+
+        listScrollParadigm.setMinimumSize(new java.awt.Dimension(20, 120));
+        listScrollParadigm.setPreferredSize(new java.awt.Dimension(2, 120));
+
+        tableFoundParadigm.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        listScrollParadigm.setViewportView(tableFoundParadigm);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
-        add(listScroll, gridBagConstraints);
+        jPanel1.add(listScrollParadigm, gridBagConstraints);
 
-        outScroll.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        outScrollParadigm.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
-        outPanel.setLayout(new java.awt.GridBagLayout());
-        outScroll.setViewportView(outPanel);
+        outPanelParadigm.setLayout(new java.awt.GridBagLayout());
+        outScrollParadigm.setViewportView(outPanelParadigm);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 0;
         gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
         gridBagConstraints.weightx = 1.0;
         gridBagConstraints.weighty = 1.0;
-        add(outScroll, gridBagConstraints);
+        jPanel1.add(outScrollParadigm, gridBagConstraints);
+
+        jTabbedPane1.addTab("Парадыгму", jPanel1);
+
+        jPanel2.setLayout(new java.awt.GridBagLayout());
+
+        jPanel5.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel5.setText("У якую парадыгму дадаваць (можна з *):");
+        jPanel5.add(jLabel5);
+
+        txtToVariant.setColumns(10);
+        txtToVariant.setToolTipText("Фільтар па леме ў якую парадыгму дадаваць, з '*'");
+        jPanel5.add(txtToVariant);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        jPanel2.add(jPanel5, gridBagConstraints);
+
+        scrollTo1.setMinimumSize(new java.awt.Dimension(20, 120));
+        scrollTo1.setPreferredSize(new java.awt.Dimension(20, 120));
+        scrollTo1.setViewportView(tableToVariant);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        jPanel2.add(scrollTo1, gridBagConstraints);
+
+        panelInputVariant.setLayout(new java.awt.GridBagLayout());
+
+        jLabel13.setText("Разгортваем");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        panelInputVariant.add(jLabel13, gridBagConstraints);
+
+        txtWhatVariant.setColumns(10);
+        txtWhatVariant.setToolTipText("Слова што разгортваць");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 1;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        panelInputVariant.add(txtWhatVariant, gridBagConstraints);
+
+        jLabel14.setText("як");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        panelInputVariant.add(jLabel14, gridBagConstraints);
+
+        txtLikeVariant.setColumns(10);
+        txtLikeVariant.setToolTipText("Лема слова, на якое мусіць быць падобнае, можна з '*'");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 3;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        panelInputVariant.add(txtLikeVariant, gridBagConstraints);
+
+        jLabel15.setText("Граматыка");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 4;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        panelInputVariant.add(jLabel15, gridBagConstraints);
+
+        txtGrammarVariant.setColumns(10);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 5;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
+        panelInputVariant.add(txtGrammarVariant, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+        jPanel2.add(panelInputVariant, gridBagConstraints);
+
+        panelSaveVariant.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 5, 0));
+
+        cbPreserveCaseVariant.setText("Захоўваць вялікія літары");
+        panelSaveVariant.add(cbPreserveCaseVariant);
+
+        btnSaveVariant.setText("Захаваць");
+        panelSaveVariant.add(btnSaveVariant);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+        gridBagConstraints.weightx = 1.0;
+        jPanel2.add(panelSaveVariant, gridBagConstraints);
+
+        listScrollVariant.setMinimumSize(new java.awt.Dimension(20, 120));
+        listScrollVariant.setPreferredSize(new java.awt.Dimension(2, 120));
+        listScrollVariant.setViewportView(tableFoundVariant);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        jPanel2.add(listScrollVariant, gridBagConstraints);
+
+        outScrollVariant.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+        outPanelVariant.setLayout(new java.awt.GridBagLayout());
+        outScrollVariant.setViewportView(outPanelVariant);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        jPanel2.add(outScrollVariant, gridBagConstraints);
+
+        jTabbedPane1.addTab("Варыянт", jPanel2);
+
+        jPanel3.setLayout(new java.awt.GridBagLayout());
+
+        jPanel6.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel6.setText("У які варыянт дадаваць (можна з *):");
+        jPanel6.add(jLabel6);
+
+        txtToForm.setColumns(10);
+        txtToForm.setToolTipText("Фільтар па леме ў якую парадыгму дадаваць, з '*'");
+        jPanel6.add(txtToForm);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        jPanel3.add(jPanel6, gridBagConstraints);
+
+        scrollTo2.setMinimumSize(new java.awt.Dimension(20, 120));
+        scrollTo2.setPreferredSize(new java.awt.Dimension(20, 120));
+        scrollTo2.setViewportView(tableToForm);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        jPanel3.add(scrollTo2, gridBagConstraints);
+
+        panelSaveForm.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT, 5, 0));
+
+        btnAddFormForm.setText("Дадаць форму");
+        panelSaveForm.add(btnAddFormForm);
+        panelSaveForm.add(filler1);
+
+        btnSaveForm.setText("Захаваць");
+        panelSaveForm.add(btnSaveForm);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTH;
+        gridBagConstraints.weightx = 1.0;
+        jPanel3.add(panelSaveForm, gridBagConstraints);
+
+        outScrollForm.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+        outPanelForm.setLayout(new java.awt.GridBagLayout());
+        outScrollForm.setViewportView(outPanelForm);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        jPanel3.add(outScrollForm, gridBagConstraints);
+
+        jTabbedPane1.addTab("Формы", jPanel3);
+
+        add(jTabbedPane1, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    public javax.swing.JButton btnSave;
+    public javax.swing.JButton btnAddFormForm;
+    public javax.swing.JButton btnSaveForm;
+    public javax.swing.JButton btnSaveParadigm;
+    public javax.swing.JButton btnSaveVariant;
     public javax.swing.ButtonGroup buttonGroup1;
-    public javax.swing.JCheckBox cbPreserveCase;
+    public javax.swing.JCheckBox cbPreserveCaseParadigm;
+    public javax.swing.JCheckBox cbPreserveCaseVariant;
+    public javax.swing.Box.Filler filler1;
     public javax.swing.JLabel jLabel1;
+    public javax.swing.JLabel jLabel13;
+    public javax.swing.JLabel jLabel14;
+    public javax.swing.JLabel jLabel15;
     public javax.swing.JLabel jLabel2;
-    public javax.swing.JLabel jLabel3;
     public javax.swing.JLabel jLabel4;
-    public javax.swing.JPanel jPanel4;
-    public javax.swing.JScrollPane listScroll;
-    public javax.swing.JPanel outPanel;
-    public javax.swing.JScrollPane outScroll;
-    public javax.swing.JPanel panelInput;
-    public javax.swing.JPanel panelSave;
-    public javax.swing.JRadioButton rbAddForm;
-    public javax.swing.JRadioButton rbAddParadigm;
-    public javax.swing.JRadioButton rbAddVariant;
-    public javax.swing.JScrollPane scrollTo;
-    public javax.swing.JTable tableFound;
-    public javax.swing.JTable tableTo;
-    public javax.swing.JTextField txtGrammar;
-    public javax.swing.JTextField txtLike;
-    public javax.swing.JTextField txtTo;
-    public javax.swing.JTextField txtWhat;
+    public javax.swing.JLabel jLabel5;
+    public javax.swing.JLabel jLabel6;
+    public javax.swing.JPanel jPanel1;
+    public javax.swing.JPanel jPanel2;
+    public javax.swing.JPanel jPanel3;
+    public javax.swing.JPanel jPanel5;
+    public javax.swing.JPanel jPanel6;
+    public javax.swing.JTabbedPane jTabbedPane1;
+    public javax.swing.JScrollPane listScrollParadigm;
+    public javax.swing.JScrollPane listScrollVariant;
+    public javax.swing.JPanel outPanelForm;
+    public javax.swing.JPanel outPanelParadigm;
+    public javax.swing.JPanel outPanelVariant;
+    public javax.swing.JScrollPane outScrollForm;
+    public javax.swing.JScrollPane outScrollParadigm;
+    public javax.swing.JScrollPane outScrollVariant;
+    public javax.swing.JPanel panelInputParadigm;
+    public javax.swing.JPanel panelInputVariant;
+    public javax.swing.JPanel panelSaveForm;
+    public javax.swing.JPanel panelSaveParadigm;
+    public javax.swing.JPanel panelSaveVariant;
+    public javax.swing.JScrollPane scrollTo1;
+    public javax.swing.JScrollPane scrollTo2;
+    public javax.swing.JTable tableFoundParadigm;
+    public javax.swing.JTable tableFoundVariant;
+    public javax.swing.JTable tableToForm;
+    public javax.swing.JTable tableToVariant;
+    public javax.swing.JTextField txtGrammarParadigm;
+    public javax.swing.JTextField txtGrammarVariant;
+    public javax.swing.JTextField txtLikeParadigm;
+    public javax.swing.JTextField txtLikeVariant;
+    public javax.swing.JTextField txtToForm;
+    public javax.swing.JTextField txtToVariant;
+    public javax.swing.JTextField txtWhatParadigm;
+    public javax.swing.JTextField txtWhatVariant;
     // End of variables declaration//GEN-END:variables
 }

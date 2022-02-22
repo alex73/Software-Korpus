@@ -29,6 +29,7 @@ public class EditorGrammarFiller {
     /**
      * Returns list of paradigms that can be used for specific word.
      */
+    @Deprecated
     public List<Paradigm> getParadigms(String w) {
         List<Paradigm> result=Collections.synchronizedList(new ArrayList<>());
         
@@ -50,21 +51,22 @@ public class EditorGrammarFiller {
     /**
      * Fills grammar for all words except manually choosed previously.
      */
-    public void fillNonManual(List<TextLine> lines) {
+    public void fill(List<TextLine> lines) {
         lines.parallelStream().forEach(line -> {
             for (ITextLineElement it : line) {
                 if (it instanceof WordItem) {
-                    fillNonManual((WordItem) it);
+                    fill((WordItem) it);
                 }
             }
         });
     }
 
-    public void fillNonManual(WordItem wi) {
+    public void fill(WordItem wi) {
         staticFiller.fill(wi);
         newParadigms.stream().forEach(p -> fillFromParadigm(wi, p));
     }
 
+    @Deprecated
     private boolean checkParadigm(String word, Paradigm p) {
         for(Variant v:p.getVariant()) {
             for(Form f:v.getForm()) {
@@ -83,33 +85,33 @@ public class EditorGrammarFiller {
      * Add grammar from specific paradigm if need.
      */
     public void fillFromParadigm(WordItem w, Paradigm p) {
-        String expected = w.normalized != null ? w.normalized : w.lightNormalized;
-        p.getVariant().forEach(v -> {
-            v.getForm().forEach(f -> {
-                if (f.getValue() == null || f.getValue().isEmpty()) {
-                    return;
-                }
-                if (BelarusianWordNormalizer.equals(f.getValue(), expected)) {
-                    w.lemmas = addIfNeed(w.lemmas, p.getLemma());
-                    w.tags = addIfNeed(w.tags, SetUtils.tag(p, v, f));
-                }
-            });
-        });
+        String expected = w.manualNormalized != null ? w.manualNormalized : w.lightNormalized;
+
+        StringBuilder lemmas = new StringBuilder();
+        StringBuilder dbTags = new StringBuilder();
+        StaticGrammarFiller2.fillTagLemmas(expected, w.manualLemma, w.manualTag, lemmas, dbTags, p);
+
+        w.tags = addIfNeed(w.tags, dbTags.toString());
+        w.lemmas = addIfNeed(w.lemmas, lemmas.toString());
     }
 
     /**
-     * Add part of name to string.
+     * Дадаем толькі новыя тэгі і лемы, бо асноўныя знойдзены праз staticFiller.
      */
     private String addIfNeed(String prevList, String newPart) {
+        if (newPart.isEmpty()) {
+            return prevList;
+        }
         if (prevList == null) {
             return newPart;
         }
-        String[] prev = prevList.split(";");
-        for (String s : prev) {
-            if (s.equals(newPart)) {
-                return prevList;
+
+        StringBuilder add = new StringBuilder();
+        for (String v : newPart.split(";")) {
+            if (!SetUtils.inSeparatedList(prevList, v)) {
+                add.append(';').append(v);
             }
         }
-        return prevList + ';' + newPart;
+        return prevList + add;
     }
 }

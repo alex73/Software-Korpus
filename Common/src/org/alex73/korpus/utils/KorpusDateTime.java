@@ -1,8 +1,9 @@
 package org.alex73.korpus.utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,8 +32,11 @@ public class KorpusDateTime {
     static Pattern RE_MONTH3 = Pattern.compile("([0-9]{2})\\.([0-9]{4})\\-([0-9]{2})\\.([0-9]{4})");
     static Pattern RE_DATETIME = Pattern.compile(
             "([0-9]{4})\\-([0-9]{2})\\-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2})(\\.[0-9]{3})?([\\-+]([0-9]{2}):([0-9]{2}))?");
-    static List<String> months = Arrays.asList("студзень", "люты", "сакавік", "красавік", "травень", "май", "чэрвень",
-            "ліпень", "жнівень", "верасень", "кастрычнік", "лістапад", "снежань");
+    static Map<String, Integer> months = new TreeMap<>();
+    static {
+        months.putAll(Map.of("студзень", 1, "люты", 2, "сакавік", 3, "красавік", 4, "травень", 5, "май", 5, "чэрвень", 6));
+        months.putAll(Map.of("ліпень", 7, "жнівень", 8, "верасень", 9, "кастрычнік", 10, "лістапад", 11, "снежань", 12));
+    }
 
     private List<Pair> pairs = new ArrayList<>();
 
@@ -74,7 +78,7 @@ public class KorpusDateTime {
                         Integer.parseInt(m.group(3)), DatatypeConstants.FIELD_UNDEFINED);
                 d2 = d1;
             } else if ((m = RE_MONTH1.matcher(y)).matches()) {
-                d1 = DTFACTORY.newXMLGregorianCalendarDate(Integer.parseInt(m.group(2)), months.indexOf(m.group(1)) + 1,
+                d1 = DTFACTORY.newXMLGregorianCalendarDate(Integer.parseInt(m.group(2)), months.get(m.group(1)),
                         DatatypeConstants.FIELD_UNDEFINED, DatatypeConstants.FIELD_UNDEFINED);
                 d2 = d1;
             } else if ((m = RE_MONTH2.matcher(y)).matches()) {
