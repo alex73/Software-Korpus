@@ -84,7 +84,7 @@ public class ProcessLuceneWriter extends BaseParallelProcessor {
 
     public ProcessLuceneWriter(boolean realWrite, boolean cacheForProduction, String rootDir, int bufferSizeMb)
             throws Exception {
-        super(INSTANCE_COUNT, 40);
+        super(INSTANCE_COUNT, INSTANCE_COUNT * 3);
         LOG.info("Lucene will use " + bufferSizeMb + "mb");
         this.realWrite = realWrite;
         this.cacheForProduction = cacheForProduction;

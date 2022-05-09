@@ -14,5 +14,5 @@
     <stringAttribute key="org.eclipse.jdt.launching.MODULE_NAME" value="Korpus-WebDataPrepare"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="--input=/home/alex/Korpus --output=/home/alex/Korpus-cache --grammardb=/home/alex/gits/GrammarDB --prod=false"/>
     <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="Korpus-WebDataPrepare"/>
-    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx22g"/>
+    <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xmx16g -XX:ErrorFile=/tmp/java_error%p.log"/>
 </launchConfiguration>

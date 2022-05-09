@@ -35,13 +35,7 @@ public abstract class BaseParallelProcessor {
                     StringBuilder o = new StringBuilder();
                     synchronized (instances) {
                         for (BaseParallelProcessor p : instances) {
-                            o.append("\t" + p.getClass().getSimpleName() + ":");
-                            o.append(" threads " + p.executor.getActiveCount() + "/" + p.executor.getMaximumPoolSize());
-                            LinkedBlockingQueue<Runnable> q = (LinkedBlockingQueue<Runnable>) p.executor.getQueue();
-                            o.append(" queue " + q.size() + "/" + p.queueCapacity);
-                            if (p.executor.isShutdown()) {
-                                o.append(" - shutdown");
-                            }
+                            p.dumpStat(o);
                             o.append("\n");
                         }
                     }
@@ -50,6 +44,16 @@ public abstract class BaseParallelProcessor {
             }
         };
         statThread.start();
+    }
+
+    protected void dumpStat(StringBuilder o) {
+        o.append("\t" + getClass().getSimpleName() + ":");
+        o.append(" threads " + executor.getActiveCount() + "/" + executor.getMaximumPoolSize());
+        LinkedBlockingQueue<Runnable> q = (LinkedBlockingQueue<Runnable>) executor.getQueue();
+        o.append(" queue " + q.size() + "/" + queueCapacity);
+        if (executor.isShutdown()) {
+            o.append(" - shutdown");
+        }
     }
 
     public static void stopStat() {

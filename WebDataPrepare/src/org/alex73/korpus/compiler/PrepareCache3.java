@@ -52,6 +52,10 @@ public class PrepareCache3 {
         INPUT = Paths.get(input);
         OUTPUT = Paths.get(output);
 
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+            e.printStackTrace();
+        });
+
         BaseParallelProcessor.startStat();
         try {
             run();
@@ -91,6 +95,7 @@ public class PrepareCache3 {
         LOG.info("1st pass time: " + ((af - be) / 1000) + "s");
         errorsList.clear();
 
+        int textsCount = ProcessHeaders.textInfos.size();
         textPositionsBySourceFile = ProcessHeaders.calcTextsPositions(OUTPUT.resolve("texts.jsons.gz"));
 
         GrammarDB2 gr;
@@ -104,15 +109,12 @@ public class PrepareCache3 {
         }
         StaticGrammarFiller2 grFiller = new StaticGrammarFiller2(new GrammarFinder(gr));
 
-        int maxMemoryMB = (int) (Runtime.getRuntime().maxMemory() / 1024 / 1024);
-
         LOG.info("2nd pass...");
         be = System.currentTimeMillis();
         ProcessStat stat = new ProcessStat(processStat);
-        ProcessLuceneWriter lucene = new ProcessLuceneWriter(writeToLucene, cacheForProduction, OUTPUT.toString(),
-                maxMemoryMB - 18192);
+        ProcessLuceneWriter lucene = new ProcessLuceneWriter(writeToLucene, cacheForProduction, OUTPUT.toString(), 2048);
         ProcessPrepareLucene prepareLucene = new ProcessPrepareLucene(lucene);
-        ProcessTexts t2 = new ProcessTexts(grFiller, prepareLucene, stat);
+        ProcessTexts t2 = new ProcessTexts(grFiller, prepareLucene, stat, textsCount);
         ProcessFileParser p2 = new ProcessFileParser();
         FilesReader r2 = new FilesReader(INPUT, false, p2);
         r2.finish(3 * 60);

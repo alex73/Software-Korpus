@@ -37,6 +37,14 @@ public class StatProcessing {
     // authors by lemmas
     private final Map<String, Set<String>> authorsByLemmas = new HashMap<>();
 
+    public StatProcessing() {
+        stats.put("", new StatInfo(true));
+        stats.put("teksty", new StatInfo(true));
+        stats.put("skaryna", new StatInfo(true));
+        stats.put("kankardans", new StatInfo(true));
+        stats.put("dyjalektny", new StatInfo(true));
+    }
+
     public void add(TextInfo textInfo, List<Paragraph> content) {
         StatInfo subcorpusInfo = getStatInfo(textInfo.subcorpus);
         if (textInfo.authors != null) {
@@ -97,12 +105,7 @@ public class StatProcessing {
     }
 
     private synchronized StatInfo getStatInfo(String key) {
-        StatInfo r = stats.get(key);
-        if (r == null) {
-            r = new StatInfo();
-            stats.put(key, r);
-        }
-        return r;
+        return stats.computeIfAbsent(key, k -> new StatInfo(false));
     }
 
     public synchronized void write(Path dir) throws Exception {
@@ -153,21 +156,26 @@ public class StatProcessing {
     private static class StatInfo {
         public AtomicInteger texts = new AtomicInteger();
         public AtomicInteger words = new AtomicInteger();
-        private final Map<String, ParadigmStat> byLemma = new HashMap<>();
-        private final Map<String, AtomicInteger> byForm = new HashMapSyncInit<>() {
-            @Override
-            public AtomicInteger init() {
-                return new AtomicInteger();
+        private Map<String, ParadigmStat> byLemma = null; // TODO disabled stat new HashMap<>();
+        private Map<String, AtomicInteger> byForm = null;
+        private Map<String, AtomicInteger> byUnknown = null; /*
+                                                              * new HashMapSyncInit<>() {
+                                                              * 
+                                                              * @Override public AtomicInteger init() { return new AtomicInteger(); } };
+                                                              */
+        Set<String> authors = Collections.synchronizedSet(new HashSet<>());
+        Set<String> sources = Collections.synchronizedSet(new HashSet<>());
+
+        public StatInfo(boolean collectForms) {
+            if (collectForms) {
+                byForm = new HashMapSyncInit<>() {
+                    @Override
+                    public AtomicInteger init() {
+                        return new AtomicInteger();
+                    }
+                };
             }
-        };
-        private final Map<String, AtomicInteger> byUnknown = new HashMapSyncInit<>() {
-            @Override
-            public AtomicInteger init() {
-                return new AtomicInteger();
-            }
-        };
-        final Set<String> authors = Collections.synchronizedSet(new HashSet<>());
-        final Set<String> sources = Collections.synchronizedSet(new HashSet<>());
+        }
 
         void addWord(String value, String[] lemmas) {
             words.incrementAndGet();
@@ -179,68 +187,77 @@ public class StatProcessing {
                 }
             }
 
-            if (!normalizedValue.isEmpty()) {
+            if (byForm != null && !normalizedValue.isEmpty()) {
                 byForm.get(normalizedValue).incrementAndGet();
             }
             if (lemmas == null) {
-                // TODO адкідаць пустыя словы, нумары, лацінку,
-                if (normalizedValue.isEmpty()) {
-                    return;
-                }
-                for (int i = 0; i < normalizedValue.length(); i++) {
-                    char c = normalizedValue.charAt(i);
-                    if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z')) {
+                if (byUnknown != null) {
+                    // TODO адкідаць пустыя словы, нумары, лацінку,
+                    if (normalizedValue.isEmpty()) {
                         return;
                     }
-                }
-                byUnknown.get(normalizedValue).incrementAndGet();
-            } else {
-                float part = 1.0f / lemmas.length;
-                for (String lemma : lemmas) {
-                    if (lemma.isEmpty()) {
-                        continue;
-                    }
-                    ParadigmStat ps;
-                    synchronized (byLemma) {
-                        ps = byLemma.get(lemma);
-                        if (ps == null) {
-                            ps = new ParadigmStat();
-                            ps.para = lemma;
-                            byLemma.put(lemma, ps);
+                    for (int i = 0; i < normalizedValue.length(); i++) {
+                        char c = normalizedValue.charAt(i);
+                        if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z')) {
+                            return;
                         }
                     }
-                    synchronized (ps) {
-                        ps.intCount++;
-                        ps.floatCount += part;
-                        Integer prev = ps.valuesCount.get(normalizedValue);
-                        ps.valuesCount.put(normalizedValue, prev == null ? 1 : prev.intValue() + 1);
+                    byUnknown.get(normalizedValue).incrementAndGet();
+                }
+            } else {
+                if (byLemma != null) {
+                    float part = 1.0f / lemmas.length;
+                    for (String lemma : lemmas) {
+                        if (lemma.isEmpty()) {
+                            continue;
+                        }
+                        ParadigmStat ps;
+                        synchronized (byLemma) {
+                            ps = byLemma.get(lemma);
+                            if (ps == null) {
+                                ps = new ParadigmStat();
+                                ps.para = lemma;
+                                byLemma.put(lemma, ps);
+                            }
+                        }
+                        synchronized (ps) {
+                            ps.intCount++;
+                            ps.floatCount += part;
+                            Integer prev = ps.valuesCount.get(normalizedValue);
+                            ps.valuesCount.put(normalizedValue, prev == null ? 1 : prev.intValue() + 1);
+                        }
                     }
                 }
             }
         }
 
         synchronized Stream<String> getFormsFreq() throws Exception {
-            return byForm.entrySet().stream().sorted((a, b) -> Integer.compare(b.getValue().get(), a.getValue().get()))
-                    .map(en -> en.toString());
+            if (byForm != null) {
+                return byForm.entrySet().stream().sorted((a, b) -> Integer.compare(b.getValue().get(), a.getValue().get())).map(en -> en.toString());
+            } else {
+                return Stream.empty();
+            }
         }
 
         synchronized void writeFormsFreq(ZipOutputStream zip, String entryName) throws Exception {
-            KorpusFileUtils.writeZip(zip, entryName,
-                    byForm.entrySet().stream().sorted((a, b) -> Integer.compare(b.getValue().get(), a.getValue().get()))
-                            .map(en -> en.toString()));
+            if (byForm != null) {
+                KorpusFileUtils.writeZip(zip, entryName,
+                        byForm.entrySet().stream().sorted((a, b) -> Integer.compare(b.getValue().get(), a.getValue().get())).map(en -> en.toString()));
+            }
         }
 
         synchronized void writeUnknownFreq(ZipOutputStream zip, String entryName) throws Exception {
-            KorpusFileUtils.writeZip(zip, entryName,
-                    byUnknown.entrySet().stream()
-                            .sorted((a, b) -> Integer.compare(b.getValue().get(), a.getValue().get()))
-                            .map(en -> en.toString()));
+            if (byUnknown != null) {
+                KorpusFileUtils.writeZip(zip, entryName,
+                        byUnknown.entrySet().stream().sorted((a, b) -> Integer.compare(b.getValue().get(), a.getValue().get())).map(en -> en.toString()));
+            }
         }
 
         synchronized void writeLemmasFreq(ZipOutputStream zip, String entryName) throws Exception {
-            KorpusFileUtils.writeZip(zip, entryName,
-                    byLemma.values().stream().sorted((a, b) -> Integer.compare(b.intCount, a.intCount))
-                            .map(s -> s.para + "\t" + s.intCount + "\t" + s.valuesCount));
+            if (byLemma != null) {
+                KorpusFileUtils.writeZip(zip, entryName, byLemma.values().stream().sorted((a, b) -> Integer.compare(b.intCount, a.intCount))
+                        .map(s -> s.para + "\t" + s.intCount + "\t" + s.valuesCount));
+            }
         }
     }
 

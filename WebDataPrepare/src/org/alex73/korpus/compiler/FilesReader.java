@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 import org.alex73.korpus.compiler.parsers.IParser;
 import org.alex73.korpus.compiler.parsers.ParserFactory;
@@ -18,18 +19,19 @@ public class FilesReader extends BaseParallelProcessor {
     private final BaseParallelProcessor processParser;
 
     public FilesReader(Path inputDirectory, boolean headersOnly, BaseParallelProcessor processParser) throws Exception {
-        super(8, 10);
+        super(4, 5);
         this.inputDirectory = inputDirectory;
         this.headersOnly = headersOnly;
         this.processParser = processParser;
-        Files.find(inputDirectory, Integer.MAX_VALUE, (p, a) -> a.isRegularFile(), FileVisitOption.FOLLOW_LINKS)
+        List<Path> files = Files.find(inputDirectory, Integer.MAX_VALUE, (p, a) -> a.isRegularFile(), FileVisitOption.FOLLOW_LINKS)
                 .sorted((p1, p2) -> {
                     try {
                         return Long.compare(Files.size(p2), Files.size(p1));
                     } catch (IOException ex) {
                         throw new RuntimeException(ex);
                     }
-                }).forEach(p -> process(p));
+                }).toList();
+        files.forEach(p -> process(p));
     }
 
     protected void process(Path file) {

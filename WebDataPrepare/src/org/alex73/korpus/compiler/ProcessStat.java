@@ -10,7 +10,7 @@ public class ProcessStat extends BaseParallelProcessor {
     private final StatProcessing textStat;
 
     public ProcessStat(boolean processStat) throws Exception {
-        super(16, 64);
+        super(8, 8);
         if (processStat) {
             textStat = new StatProcessing();
         } else {
