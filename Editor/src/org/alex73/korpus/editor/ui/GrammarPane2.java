@@ -34,6 +34,11 @@ public class GrammarPane2 extends javax.swing.JPanel {
         btnSaveParadigm = new javax.swing.JButton();
         listScrollParadigm = new javax.swing.JScrollPane();
         tableFoundParadigm = new javax.swing.JTable();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel3 = new javax.swing.JLabel();
+        txtOutTagParadigm = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
+        txtOutThemeParadigm = new javax.swing.JTextField();
         outScrollParadigm = new javax.swing.JScrollPane();
         outPanelParadigm = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
@@ -162,6 +167,33 @@ public class GrammarPane2 extends javax.swing.JPanel {
         gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
         gridBagConstraints.weightx = 1.0;
         jPanel1.add(listScrollParadigm, gridBagConstraints);
+
+        jPanel4.setLayout(new java.awt.GridBagLayout());
+
+        jLabel3.setText("Тэг:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
+        jPanel4.add(jLabel3, gridBagConstraints);
+
+        txtOutTagParadigm.setColumns(8);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
+        jPanel4.add(txtOutTagParadigm, gridBagConstraints);
+
+        jLabel7.setText("Тэма:");
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
+        jPanel4.add(jLabel7, gridBagConstraints);
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.insets = new java.awt.Insets(3, 3, 3, 3);
+        jPanel4.add(txtOutThemeParadigm, gridBagConstraints);
+
+        gridBagConstraints = new java.awt.GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+        jPanel1.add(jPanel4, gridBagConstraints);
 
         outScrollParadigm.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
@@ -379,12 +411,15 @@ public class GrammarPane2 extends javax.swing.JPanel {
     public javax.swing.JLabel jLabel14;
     public javax.swing.JLabel jLabel15;
     public javax.swing.JLabel jLabel2;
+    public javax.swing.JLabel jLabel3;
     public javax.swing.JLabel jLabel4;
     public javax.swing.JLabel jLabel5;
     public javax.swing.JLabel jLabel6;
+    public javax.swing.JLabel jLabel7;
     public javax.swing.JPanel jPanel1;
     public javax.swing.JPanel jPanel2;
     public javax.swing.JPanel jPanel3;
+    public javax.swing.JPanel jPanel4;
     public javax.swing.JPanel jPanel5;
     public javax.swing.JPanel jPanel6;
     public javax.swing.JTabbedPane jTabbedPane1;
@@ -411,6 +446,8 @@ public class GrammarPane2 extends javax.swing.JPanel {
     public javax.swing.JTextField txtGrammarVariant;
     public javax.swing.JTextField txtLikeParadigm;
     public javax.swing.JTextField txtLikeVariant;
+    public javax.swing.JTextField txtOutTagParadigm;
+    public javax.swing.JTextField txtOutThemeParadigm;
     public javax.swing.JTextField txtToForm;
     public javax.swing.JTextField txtToVariant;
     public javax.swing.JTextField txtWhatParadigm;

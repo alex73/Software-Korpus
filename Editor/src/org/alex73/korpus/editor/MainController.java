@@ -94,6 +94,12 @@ public class MainController {
         createFontChanger(UI.mainWindow.fontText, UI.mainWindow.bgText, UI.editor);
         createFontChanger(UI.mainWindow.fontInfo, UI.mainWindow.bgInfo, UI.wordInfoPane);
         createFontChanger(UI.mainWindow.fontGrammar, UI.mainWindow.bgGrammar, UI.grammarPane);
+        String editorFont = System.getProperty("EDITOR_FONT");
+        if (editorFont != null) {
+            Font font = UI.mainWindow.getFont();
+            font = new Font(editorFont, font.getStyle(), font.getSize());
+            setFont(UI.editor, font);
+        }
 
         UI.mainWindow.mGoEditor.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -268,7 +274,7 @@ public class MainController {
         }
 
         public void actionPerformed(ActionEvent e) {
-            Font font = UI.mainWindow.getFont();
+            Font font = c.getFont();
             font = new Font(font.getFamily(), font.getStyle(), size);
             setFont(c, font);
             GrammarPaneController2.applyFont();

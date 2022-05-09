@@ -37,6 +37,7 @@ import org.alex73.corpus.paradigm.FormType;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.GrammarDB2;
+import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.belarusian.BelarusianTags;
 import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.belarusian.TagLetter;
@@ -64,12 +65,13 @@ public class GrammarPaneController2 {
 
     static String currentWord;
     static volatile boolean notRealUpdate = false;
-    static String constructedParadigmTag, constructedVariantTag;
+    static String constructedVariantTag;
 
     static Context contextParadigm, contextVariant, contextForm;
 
     public static synchronized void show(String word) {
         String grammar = System.getProperty("DEFAULT_GRAMMAR", "");
+        boolean preserveCase = Boolean.parseBoolean(System.getProperty("DEFAULT_PRESERVE_CASE", "false"));
         String endLengthStr = System.getProperty("DEFAULT_END_LENGTH");
         String end;
         try {
@@ -85,6 +87,8 @@ public class GrammarPaneController2 {
             ui.txtWhatVariant.setText(word);
             ui.txtGrammarParadigm.setText(grammar);
             ui.txtGrammarVariant.setText(grammar);
+            ui.cbPreserveCaseParadigm.setSelected(preserveCase);
+            ui.cbPreserveCaseVariant.setSelected(preserveCase);
             ui.txtLikeParadigm.setText(end);
             ui.txtLikeVariant.setText(end);
             ui.txtToVariant.setText(word);
@@ -112,6 +116,8 @@ public class GrammarPaneController2 {
         contextParadigm.txtWhat = ui.txtWhatParadigm;
         contextParadigm.txtGrammar = ui.txtGrammarParadigm;
         contextParadigm.txtLike = ui.txtLikeParadigm;
+        contextParadigm.txtOutTag = ui.txtOutTagParadigm;
+        contextParadigm.txtOutTheme = ui.txtOutThemeParadigm;
         contextParadigm.tableFound = ui.tableFoundParadigm;
         contextParadigm.listScroll = ui.listScrollParadigm;
         contextParadigm.outScroll = ui.outScrollParadigm;
@@ -226,6 +232,7 @@ public class GrammarPaneController2 {
         JTextField txtWhat;
         JTextField txtGrammar;
         JTextField txtLike;
+        JTextField txtOutTag, txtOutTheme;
         JTable tableTo;
         JTable tableFound;
         JScrollPane listScroll;
@@ -274,6 +281,11 @@ public class GrammarPaneController2 {
                 txtGrammar.getDocument().addDocumentListener(new DocumentChanger(e -> updateList()));
                 txtGrammar.getDocument().addDocumentListener(new DocumentChanger(e -> updateGrammar(() -> "", txtGrammar)));
             }
+
+            if (txtOutTag != null) {
+                txtOutTag.getDocument().addDocumentListener(new DocumentChanger(e -> updateGrammar(() -> "", txtOutTag)));
+            }
+
 
             if (cbPreserveCase != null) {
                 cbPreserveCase.addActionListener(e -> updateList());
@@ -493,85 +505,65 @@ public class GrammarPaneController2 {
             if (word.startsWith("ў")) {
                 word = "у" + word.substring(1);
             }
-            Paradigm p = new GrammarConstructor(MainController.gr).constructParadigm(word, basedOn.p, basedOn.v, basedOn.w, cbPreserveCase.isSelected());
-            constructedParadigmTag = basedOn.p.getTag();
-            constructedVariantTag = basedOn.v.getTag();
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.fill = GridBagConstraints.HORIZONTAL;
-            gbc.gridy = 0;
-            gbc.anchor = GridBagConstraints.CENTER;
-            gbc.insets = new Insets(5, 5, 5, 5);
-            for (Form f : p.getVariant().get(0).getForm()) {
-                gbc.gridx = 0;
-
-                JTextField t = new JTextField(f.getTag());
-                t.setEnabled(false);
-                t.setName("Tag");
-                outPanel.add(t, gbc);
-
-                gbc.gridx++;
-                JTextField w = new JTextField(f.getValue());
-                w.setName("Value");
-                outPanel.add(w, gbc);
-
-                String[] ft = new String[FormType.values().length + 1];
-                ft[0] = "";
-                for (int i = 0; i < FormType.values().length; i++) {
-                    ft[i + 1] = FormType.values()[i].value();
+            if (txtOutTag != null) {
+                txtOutTag.setText(SetUtils.tag(basedOn.p, basedOn.v));
+            }
+            if (txtOutTheme != null) {
+                if (StaticGrammarFiller2.fillTheme != null) {
+                    txtOutTheme.setText(StaticGrammarFiller2.fillTheme);
                 }
-                gbc.gridx++;
-                JComboBox<String> tp = new JComboBox<>(ft);
-                tp.setName("Type");
-                tp.setSelectedItem(f.getType() == null ? "" : f.getType().value());
-                outPanel.add(tp, gbc);
-
-                gbc.gridy++;
+            }
+            Paradigm p = new GrammarConstructor(MainController.gr).constructParadigm(word, basedOn.p, basedOn.v, basedOn.w, cbPreserveCase.isSelected());
+            constructedVariantTag = basedOn.v.getTag();
+            for (Form f : p.getVariant().get(0).getForm()) {
+                addRow(outPanel.getComponentCount(), true, f.getTag(), f.getValue());
             }
             outPanel.revalidate();
             outPanel.repaint();
         }
 
-        synchronized void addForm() {
-            int maxy = -1;
-            for (int i = 0; i < outPanel.getComponentCount(); i++) {
-                if (outPanel.getComponent(i) instanceof JTextField textField) {
-                    GridBagConstraints gbc = ((GridBagLayout) outPanel.getLayout()).getConstraints(textField);
-                    maxy = Math.max(maxy, gbc.gridy);
-                }
-            }
-
+        private void addRow(int toIndex, boolean readOnlyTag, String tag, String form) {
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.fill = GridBagConstraints.HORIZONTAL;
             gbc.gridx = 0;
-            gbc.gridy = maxy + 1;
+            gbc.gridy = GridBagConstraints.RELATIVE;
             gbc.anchor = GridBagConstraints.CENTER;
             gbc.insets = new Insets(5, 5, 5, 5);
 
-            JButton r = new JButton("-");
-            r.setName("Remove");
-            outPanel.add(r, gbc);
+            JButton bAdd = new JButton("+");
+            bAdd.setName("Add");
+            outPanel.add(bAdd, gbc, toIndex++);
 
             gbc.gridx++;
-            JTextField t = new JTextField();
-            t.setColumns(6);
+            JButton bDel = new JButton("-");
+            bDel.setName("Remove");
+            outPanel.add(bDel, gbc, toIndex++);
+
+            gbc.gridx++;
+            JTextField t = new JTextField(tag);
+            if (readOnlyTag) {
+                t.setEnabled(false);
+            } else {
+                t.setColumns(4);
+                Supplier<String> beginTag = () -> {
+                    if (tableTo.getSelectedRow() >= 0) {
+                        PVW row = ((Model) tableTo.getModel()).rows.get(tableTo.getSelectedRow());
+                        return SetUtils.tag(row.p, row.v);
+                    } else {
+                        return "";
+                    }
+                };
+                updateGrammar(beginTag, t);
+                t.getDocument().addDocumentListener(new DocumentChanger(e -> updateGrammar(beginTag, t)));
+            }
             t.setName("Tag");
-            outPanel.add(t, gbc);
-            Supplier<String> beginTag = () -> {
-                if (tableTo.getSelectedRow() >= 0) {
-                    PVW row = ((Model) tableTo.getModel()).rows.get(tableTo.getSelectedRow());
-                    return SetUtils.tag(row.p, row.v);
-                } else {
-                    return "";
-                }
-            };
-            updateGrammar(beginTag, t);
-            t.getDocument().addDocumentListener(new DocumentChanger(e -> updateGrammar(beginTag, t)));
+            outPanel.add(t, gbc, toIndex++);
 
             gbc.gridx++;
-            JTextField w = new JTextField();
+            JTextField w = new JTextField(form);
             w.setColumns(10);
             w.setName("Value");
-            outPanel.add(w, gbc);
+            outPanel.add(w, gbc, toIndex++);
 
             String[] ft = new String[FormType.values().length + 1];
             ft[0] = "";
@@ -581,19 +573,32 @@ public class GrammarPaneController2 {
             gbc.gridx++;
             JComboBox<String> tp = new JComboBox<>(ft);
             tp.setName("Type");
-            outPanel.add(tp, gbc);
+            outPanel.add(tp, gbc, toIndex++);
 
-            r.addActionListener(e -> {
-                outPanel.remove(r);
+            bDel.addActionListener(e -> {
+                outPanel.remove(bAdd);
+                outPanel.remove(bDel);
                 outPanel.remove(t);
                 outPanel.remove(w);
                 outPanel.remove(tp);
                 outPanel.revalidate();
                 outPanel.repaint();
             });
+            bAdd.addActionListener(e -> {
+                for (int i = 0; i < outPanel.getComponentCount(); i++) {
+                    if (outPanel.getComponent(i) == tp) {
+                        addRow(i+1, false, t.getText(), w.getText());
+                        break;
+                    }
+                }
+            });
 
             outPanel.revalidate();
             outPanel.repaint();
+        }
+
+        synchronized void addForm() {
+            addRow(outPanel.getComponentCount(), false, "", "");
         }
 
         synchronized void save() {
@@ -601,6 +606,7 @@ public class GrammarPaneController2 {
             Form f = new Form();
             for (Component c : outPanel.getComponents()) {
                 switch (c.getName()) {
+                case "Add":
                 case "Remove":
                     break;
                 case "Tag":
@@ -673,7 +679,8 @@ public class GrammarPaneController2 {
                     newVariant.setLemma(newVariant.getForm().get(0).getValue());
                     newVariant.setTag(constructedVariantTag);
                     p.setLemma(newVariant.getLemma());
-                    p.setTag(constructedParadigmTag);
+                    p.setTag(txtOutTag.getText().trim());
+                    p.setTheme(txtOutTheme.getText().trim());
                     MainController.gr.addParadigm(p);
                 }
                     break;

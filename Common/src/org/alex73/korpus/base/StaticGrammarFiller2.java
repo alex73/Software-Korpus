@@ -18,6 +18,10 @@ import org.alex73.korpus.text.structure.files.WordItem;
 import org.alex73.korpus.utils.SetUtils;
 
 public class StaticGrammarFiller2 {
+    public static boolean fillParadigmOnly;
+    public static String fillTagPrefix;
+    public static String fillTheme;
+
     private final GrammarFinder finder;
     private final Map<String, WordInfo> cache = new HashMap<>();
 
@@ -103,8 +107,19 @@ public class StaticGrammarFiller2 {
     }
 
     public static void fillTagLemmas(String word, String manualLemma, String manualTag, StringBuilder lemmas, StringBuilder dbTags, Paradigm p) {
+        if (fillTheme != null) {
+            if (!fillTheme.equals(p.getTheme())) {
+                return;
+            }
+        }
         for (Variant v : p.getVariant()) {
             for (Form f : v.getForm()) {
+                if (fillParadigmOnly) {
+                    // check only first form
+                    if (f != v.getForm().get(0)) {
+                        break;
+                    }
+                }
                 if (f.getValue().isEmpty()) {
                     continue;
                 }
@@ -113,6 +128,11 @@ public class StaticGrammarFiller2 {
                 }
                 if (BelarusianWordNormalizer.equals(f.getValue(), word)) {
                     String fTag = SetUtils.tag(p, v, f);
+                    if (fillTagPrefix != null) {
+                        if (!fTag.startsWith(fillTagPrefix)) {
+                            continue;
+                        }
+                    }
                     if (manualTag != null && !manualTag.equals(fTag)) {
                         continue;
                     }

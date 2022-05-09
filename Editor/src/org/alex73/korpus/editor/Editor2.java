@@ -24,13 +24,19 @@ package org.alex73.korpus.editor;
 
 import javax.swing.UIManager;
 
+import org.alex73.korpus.base.StaticGrammarFiller2;
+
 public class Editor2 {
     public static String[] params;
 
     public static void main(String[] args) throws Exception {
         UIManager.setLookAndFeel(
                 UIManager.getSystemLookAndFeelClassName());
-        
+
+        StaticGrammarFiller2.fillParadigmOnly = Boolean.parseBoolean(System.getProperty("FILL_PARADIGM_ONLY", "false"));
+        StaticGrammarFiller2.fillTagPrefix = System.getProperty("FILL_TAG_PREFIX");
+        StaticGrammarFiller2.fillTheme = System.getProperty("FILL_THEME");
+
         params = args;
         try {
             UI.init();
