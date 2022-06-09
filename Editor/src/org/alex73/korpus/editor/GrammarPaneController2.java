@@ -21,12 +21,14 @@ import java.util.regex.Pattern;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
+import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
@@ -686,7 +688,21 @@ public class GrammarPaneController2 {
                     break;
                 }
                 MainController.updateFullGrammar();
-                JOptionPane.showMessageDialog(UI.mainWindow, "Змены захаваныя", "Паведамленне", JOptionPane.INFORMATION_MESSAGE);
+
+                JOptionPane messagePane = new JOptionPane("Змены захаваныя", JOptionPane.INFORMATION_MESSAGE);
+                final JDialog dialog = messagePane.createDialog(UI.mainWindow, "Паведамленне");
+                new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        Thread.sleep(500);
+                        return null;
+                    }
+
+                    protected void done() {
+                        dialog.dispose();
+                    };
+                }.execute();
+                dialog.setVisible(true);
             } catch (Exception ex) {
                 ex.printStackTrace();
                 JOptionPane.showMessageDialog(UI.mainWindow, "Памылка запісу файла: " + ex.getMessage(), "Памылка", JOptionPane.ERROR_MESSAGE);

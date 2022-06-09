@@ -63,7 +63,13 @@ public class EditorGrammarFiller {
 
     public void fill(WordItem wi) {
         staticFiller.fill(wi);
-        newParadigms.stream().forEach(p -> fillFromParadigm(wi, p));
+
+        String expected = wi.manualNormalized != null ? wi.manualNormalized : wi.lightNormalized;
+        StringBuilder lemmas = new StringBuilder();
+        StringBuilder dbTags = new StringBuilder();
+        newParadigms.stream().forEach(p -> StaticGrammarFiller2.fillTagLemmas(expected, wi.manualLemma, wi.manualTag, lemmas, dbTags, p));
+        wi.tags = addIfNeed(wi.tags, dbTags.toString());
+        wi.lemmas = addIfNeed(wi.lemmas, lemmas.toString());
     }
 
     @Deprecated
@@ -79,20 +85,6 @@ public class EditorGrammarFiller {
             }
         }
         return false;
-    }
-
-    /**
-     * Add grammar from specific paradigm if need.
-     */
-    public void fillFromParadigm(WordItem w, Paradigm p) {
-        String expected = w.manualNormalized != null ? w.manualNormalized : w.lightNormalized;
-
-        StringBuilder lemmas = new StringBuilder();
-        StringBuilder dbTags = new StringBuilder();
-        StaticGrammarFiller2.fillTagLemmas(expected, w.manualLemma, w.manualTag, lemmas, dbTags, p);
-
-        w.tags = addIfNeed(w.tags, dbTags.toString());
-        w.lemmas = addIfNeed(w.lemmas, lemmas.toString());
     }
 
     /**
