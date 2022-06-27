@@ -8,6 +8,7 @@ import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.GrammarDB2;
+import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.text.structure.files.ITextLineElement;
@@ -19,6 +20,7 @@ public class EditorGrammarFiller {
     protected final GrammarDB2 db;
     private final StaticGrammarFiller2 staticFiller;
     private final List<Paradigm> newParadigms;
+    private StaticGrammarFiller2 cachedFiller; // based on newParadigms
 
     public EditorGrammarFiller(GrammarDB2 db, StaticGrammarFiller2 staticFiller, List<Paradigm> newParadigms) {
         this.db = db;
@@ -48,6 +50,13 @@ public class EditorGrammarFiller {
         return result;
     }
 
+    public void cacheAgain() {
+        GrammarDB2 gr = GrammarDB2.empty();
+        gr.getAllParadigms().addAll(newParadigms);
+        GrammarFinder finder = new GrammarFinder(gr);
+        cachedFiller = new StaticGrammarFiller2(finder);
+    }
+
     /**
      * Fills grammar for all words except manually choosed previously.
      */
@@ -63,13 +72,10 @@ public class EditorGrammarFiller {
 
     public void fill(WordItem wi) {
         staticFiller.fill(wi);
-
-        String expected = wi.manualNormalized != null ? wi.manualNormalized : wi.lightNormalized;
-        StringBuilder lemmas = new StringBuilder();
-        StringBuilder dbTags = new StringBuilder();
-        newParadigms.stream().forEach(p -> StaticGrammarFiller2.fillTagLemmas(expected, wi.manualLemma, wi.manualTag, lemmas, dbTags, p));
-        wi.tags = addIfNeed(wi.tags, dbTags.toString());
-        wi.lemmas = addIfNeed(wi.lemmas, lemmas.toString());
+        WordItem wi2 = wi.clone();
+        cachedFiller.fill(wi2);
+        wi.tags = addIfNeed(wi.tags, wi2.tags);
+        wi.lemmas = addIfNeed(wi.lemmas, wi2.lemmas);
     }
 
     @Deprecated
@@ -91,7 +97,7 @@ public class EditorGrammarFiller {
      * Дадаем толькі новыя тэгі і лемы, бо асноўныя знойдзены праз staticFiller.
      */
     private String addIfNeed(String prevList, String newPart) {
-        if (newPart.isEmpty()) {
+        if (newPart == null || newPart.isEmpty()) {
             return prevList;
         }
         if (prevList == null) {

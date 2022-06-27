@@ -67,6 +67,7 @@ public class EditorGrammar {
         if (Files.exists(f)) {
             importGrammar(f, db, docLevelParadigms, customs, null);
         }
+        filler.cacheAgain();
     }
 
     private static void importGrammar(Path f, GrammarDB2 db, List<Paradigm> docLevelParadigms, List<Custom> customs, String slounik) throws Exception {
@@ -126,6 +127,7 @@ public class EditorGrammar {
         Custom c = new Custom();
         c.p = p;
         c.apply(db, docLevelParadigms, customs);
+        filler.cacheAgain();
     }
 
     public void addVariant(Variant v, int pdgId) throws Exception {
@@ -142,6 +144,7 @@ public class EditorGrammar {
         c.pdgId = pdgId;
         c.v = v;
         c.apply(db, docLevelParadigms, customs);
+        filler.cacheAgain();
     }
 
     public void addForms(List<Form> forms, int pdgId, String variantId) throws Exception {
@@ -161,6 +164,7 @@ public class EditorGrammar {
         c.variant = variantId;
         c.forms = forms;
         c.apply(db, docLevelParadigms, customs);
+        filler.cacheAgain();
     }
 
     /*

@@ -461,9 +461,6 @@ public class MainController {
                 KorpusDocument3.MyWordElement word = par.getElement(w);
                 if (word.item instanceof WordItem) {
                     WordItem wi = (WordItem) word.item;
-                    if (wi.getText().equals("панічок")) {
-                        System.out.println();
-                    }
                     MainController.gr.filler.fill(wi);
                 }
             }
