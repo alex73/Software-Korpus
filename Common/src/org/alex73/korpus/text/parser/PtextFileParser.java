@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.alex73.korpus.text.structure.corpus.Word.OtherType;
 import org.alex73.korpus.text.structure.files.InlineTag;
@@ -19,7 +18,7 @@ import org.alex73.korpus.text.structure.files.WordItem;
  * Parser for files with grammar info.
  */
 public class PtextFileParser {
-    public final Map<String, String> headers;
+    public final Headers headers;
     public final List<TextLine> lines = new ArrayList<>();
     private String s;
     private int pos;
@@ -40,7 +39,9 @@ public class PtextFileParser {
             while ((s = rd.readLine()) != null) {
                 line = new TextLine();
                 if (s.trim().isEmpty()) {
-                    line.add(new TailItem("\n"));
+                    line.add(new TailItem(s + "\n"));
+                    lines.add(line);
+                    continue;
                 } else {
                     pos = 0;
                     while (true) {

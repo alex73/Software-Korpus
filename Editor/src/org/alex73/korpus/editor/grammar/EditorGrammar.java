@@ -318,7 +318,7 @@ public class EditorGrammar {
 
     static final String DB_PATH = "/home/alex/gits/GrammarDB";
     static final String IMP_PATH = "/tmp/imp";
-    static final String DICT = "kolas";
+    static final String DICT = null;
 
     public static void main(String[] args) throws Exception {
         GrammarDB2 db = GrammarDB2.initializeFromDir(DB_PATH);

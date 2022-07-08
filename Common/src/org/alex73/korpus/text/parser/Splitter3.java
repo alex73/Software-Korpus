@@ -2,6 +2,7 @@ package org.alex73.korpus.text.parser;
 
 import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.text.structure.files.ITextLineElement;
+import org.alex73.korpus.text.structure.files.InlineTag;
 import org.alex73.korpus.text.structure.files.SentenceSeparatorItem;
 import org.alex73.korpus.text.structure.files.TailItem;
 import org.alex73.korpus.text.structure.files.TextLine;
@@ -37,7 +38,7 @@ public class Splitter3 {
             case '.':
             case '?':
             case '!':
-                if (!result.isEmpty() && (result.get(result.size() - 1) instanceof SentenceSeparatorItem)) {
+                if (currentWord.isEmpty() && currentTail.isEmpty() && !result.isEmpty() && (result.get(result.size() - 1) instanceof SentenceSeparatorItem)) {
                     ITextLineElement prev = result.get(result.size() - 2);
                     TailItem tail = (TailItem) prev;
                     tail.text += currentChar;
@@ -48,6 +49,7 @@ public class Splitter3 {
                 }
                 break;
             case '<':
+                closeWord();
                 parseInlineTag();
                 break;
             default:
@@ -204,11 +206,31 @@ public class Splitter3 {
     }
 
     private void parseInlineTag() {
+        int start = pos;
         while (pos < para.length()) {
             if (para.charAt(pos) == '>') {
                 break;
             }
             pos++;
         }
+        result.add(new InlineTag(para.subSequence(start, pos + 1).toString()));
+    }
+
+    static String encodeString(String s) {
+        StringBuilder r = new StringBuilder();
+        for (char c : s.toCharArray()) {
+            switch (c) {
+            case '<':
+                r.append("&lt;");
+                break;
+            case '>':
+                r.append("&gt;");
+                break;
+            default:
+                r.append(c);
+                break;
+            }
+        }
+        return r.toString();
     }
 }

@@ -3,12 +3,8 @@ package org.alex73.korpus.text.parser;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.alex73.korpus.text.structure.files.LongTagItem;
@@ -23,7 +19,7 @@ public class TextFileParser {
     private static Pattern RE_TAG = Pattern.compile("##([A-Za-z0-9]+):?(.*)");
     private static Pattern RE_TAG_BEGIN = Pattern.compile("##([A-Za-z0-9]+)_BEGIN");
 
-    public final Map<String, String> headers;
+    public final Headers headers;
     public final List<String> sourceLines = new ArrayList<>();
     public final List<TextLine> lines = new ArrayList<>();
     private Splitter3 splitter;
@@ -52,7 +48,7 @@ public class TextFileParser {
         for (String s : sourceLines) {
             if (s.trim().isEmpty()) {
                 TextLine line = new TextLine();
-                line.add(new TailItem("\n"));
+                line.add(new TailItem(s + "\n"));
                 lines.add(line);
                 continue;
             }
@@ -60,7 +56,7 @@ public class TextFileParser {
                 TextLine p;
                 int pos = s.indexOf(':');
                 String after = s.substring(pos + 1).trim();
-                if (after.startsWith("begin:") || after.equals("end") || s.startsWith("##Page:")) {
+                if (after.equals("begin") || after.equals("end") || s.startsWith("##Page:")) {
                     p = new TextLine();
                     p.add(new LongTagItem(s));
                 } else {
@@ -76,24 +72,14 @@ public class TextFileParser {
         }
     }
 
-    public static Map<String, String> readHeaders(BufferedReader rd) throws Exception {
-        Map<String, String> headers = new TreeMap<>();
+    public static Headers readHeaders(BufferedReader rd) throws Exception {
+        Headers headers = new Headers();
         String s;
         while ((s = rd.readLine()) != null) {
-            if (s.trim().length() == 0) {
+            if (s.isBlank()) {
                 break;
             }
-            Matcher m;
-            if ((m = RE_TAG_BEGIN.matcher(s)).matches()) {
-                headers.put(m.group(1), readMultilineTag(m.group(1), rd));
-            } else if ((m = RE_TAG.matcher(s)).matches()) {
-                if (headers.containsKey(m.group(1))) {
-                    throw new ParseException("Загаловак '##" + m.group(1) + "' вызначаны двойчы", -1);
-                }
-                headers.put(m.group(1), m.group(2).trim());
-            } else {
-                throw new RuntimeException("Няправільны загаловак '" + s + "'");
-            }
+            headers.headers.add(s);
         }
         return headers;
     }

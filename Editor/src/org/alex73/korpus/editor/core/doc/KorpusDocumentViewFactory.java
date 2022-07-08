@@ -35,6 +35,7 @@ import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyWordElement;
+import org.alex73.korpus.text.structure.files.InlineTag;
 import org.alex73.korpus.text.structure.files.LongTagItem;
 import org.alex73.korpus.text.structure.files.SentenceSeparatorItem;
 import org.alex73.korpus.text.structure.files.WordItem;
@@ -69,7 +70,7 @@ public class KorpusDocumentViewFactory implements ViewFactory {
         @Override
         public Color getBackground() {
             KorpusDocument3.MyWordElement wordElement = getCurrentElement();
-            if (wordElement.item instanceof LongTagItem) {
+            if (wordElement.item instanceof LongTagItem || wordElement.item instanceof InlineTag) {
                 return TAG_BACKGROUND_COLOR;
             } else if (wordElement.item instanceof WordItem) {
                 WordItem wi = (WordItem) wordElement.item;

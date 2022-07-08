@@ -26,7 +26,7 @@ import java.util.Locale;
 public class BelarusianWordNormalizer {
     public static final Locale BEL = new Locale("be");
     public static final String apostrafy = "\'\u02BC\u2019";
-    public static final String naciski = "+\u00B4\u0301";
+    public static final String naciski = "\u00B4\u0301";
     public static final String letters = apostrafy + naciski
             + "-ёйцукенгшўзхфывапролджэячсмітьбющиЁЙЦУКЕНГШЎЗХФЫВАПРОЛДЖЭЯЧСМІТЬБЮЩИqwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789";
 
@@ -50,20 +50,18 @@ public class BelarusianWordNormalizer {
             }
             CIVIALIKIJA[c] = Character.isUpperCase(c);
         }
-        UMALYJA['+'] = '+';
         UMALYJA['\''] = '\'';
         UMALYJA['-'] = '-';
 
         LITENORMALIZE['ґ'] = 'г'; // ґ -> г
         LITENORMALIZE['Ґ'] = 'Г';
-        // Правільны апостраф - 02BC, але паўсюль ужываем лацінкавы
-        LITENORMALIZE['\''] = '\'';
-        LITENORMALIZE['\u02BC'] = '\'';
-        LITENORMALIZE['\u2019'] = '\'';
-        // Націск - '+'
-        LITENORMALIZE['+'] = '+';
-        LITENORMALIZE['\u00B4'] = '+';
-        LITENORMALIZE['\u0301'] = '+';
+        // Правільны апостраф - 02BC
+        LITENORMALIZE['\''] = '\u02BC';
+        LITENORMALIZE['\u02BC'] = '\u02BC';
+        LITENORMALIZE['\u2019'] = '\u02BC';
+        // Націскі
+        LITENORMALIZE['\u00B4'] = '\u00B4';
+        LITENORMALIZE['\u0301'] = '\u00B4'; // combined accent
         LITENORMALIZE['-'] = '-';
         // пошук
         LITENORMALIZE['?'] = '?';
@@ -74,9 +72,9 @@ public class BelarusianWordNormalizer {
         SUPERNORMALIZE['ў'] = 'у'; // ў -> у
         SUPERNORMALIZE['Ў'] = 'у';
         // Правільны апостраф - 02BC, але паўсюль ужываем лацінкавы
-        SUPERNORMALIZE['\''] = '\'';
-        SUPERNORMALIZE['\u02BC'] = '\'';
-        SUPERNORMALIZE['\u2019'] = '\'';
+        SUPERNORMALIZE['\''] = '\u02BC';
+        SUPERNORMALIZE['\u02BC'] = '\u02BC';
+        SUPERNORMALIZE['\u2019'] = '\u02BC';
         SUPERNORMALIZE['-'] = '-';
         SUPERNORMALIZE['?'] = '?';
         SUPERNORMALIZE['*'] = '*';

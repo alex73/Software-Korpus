@@ -23,6 +23,7 @@
 package org.alex73.korpus.editor.core.doc.structure;
 
 import org.alex73.korpus.text.structure.files.ITextLineElement;
+import org.alex73.korpus.text.structure.files.InlineTag;
 import org.alex73.korpus.text.structure.files.TailItem;
 import org.alex73.korpus.text.structure.files.WordItem;
 
@@ -34,6 +35,8 @@ public class ItemHelper {
             return new WordItem(text);
         } else if (o instanceof TailItem) {
             return new TailItem(text);
+        } else if (o instanceof InlineTag) {
+            return new InlineTag(text);
         } else {
             throw new RuntimeException("Wrong object type");
         }
@@ -45,6 +48,8 @@ public class ItemHelper {
             return new WordItem(text);
         } else if (o instanceof TailItem) {
             return new TailItem(text);
+        } else if (o instanceof InlineTag) {
+            return new InlineTag(text);
         } else {
             throw new RuntimeException("Wrong object type");
         }

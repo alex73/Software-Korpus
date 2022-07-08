@@ -2,10 +2,10 @@ package org.alex73.korpus.text.parser;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
-import java.util.Map;
 
 import org.alex73.korpus.text.structure.files.ITextLineElement;
 import org.alex73.korpus.text.structure.files.InlineTag;
@@ -19,7 +19,7 @@ import org.alex73.korpus.text.structure.files.WordItem;
  * Writer for usual text files. Just for compare with source text.
  */
 public class TextFileWriter {
-    public static void write(File outFile, Map<String, String> headers, List<TextLine> text) throws Exception {
+    public static void write(File outFile, Headers headers, List<TextLine> text) throws Exception {
         try (BufferedWriter wr = Files.newBufferedWriter(outFile.toPath(), StandardCharsets.UTF_8)) {
             TextFileWriter.writeHeaders(wr, headers);
 
@@ -27,20 +27,17 @@ public class TextFileWriter {
                 for (ITextLineElement it : line) {
                     if (it instanceof WordItem) {
                         WordItem wi = (WordItem) it;
-                        wr.write(wi.lightNormalized);
+                        wr.write(Splitter3.encodeString(wi.lightNormalized));
                     } else if (it instanceof TailItem) {
+                        String tt = it.getText();
                         if (it == line.get(line.size() - 1)) {
                             // latest - check newline
-                            String tt = it.getText();
-                            if (tt.equals("\n")) {
-                                // nothing
-                            } else if (tt.endsWith("\n")) {
+                            if (tt.endsWith("\n")) {
                                 // except last
-                                wr.write(tt.substring(0, tt.length() - 1));
+                                tt = tt.substring(0, tt.length() - 1);
                             }
-                        } else {
-                            wr.write(it.getText());
                         }
+                        wr.write(Splitter3.encodeString(tt));
                     } else if (it instanceof SentenceSeparatorItem) {
                     } else if (it instanceof LongTagItem) {
                         wr.write(it.getText());
@@ -55,13 +52,9 @@ public class TextFileWriter {
         }
     }
 
-    public static void writeHeaders(BufferedWriter wr, Map<String, String> headers) throws Exception {
-        for (Map.Entry<String, String> h : headers.entrySet()) {
-            if (h.getValue().contains("\n")) {
-                wr.write("##" + h.getKey() + "_BEGIN\n" + h.getValue() + "\n" + h.getKey() + "_END\n");
-            } else {
-                wr.write("##" + h.getKey() + ": " + h.getValue() + "\n");
-            }
+    public static void writeHeaders(Writer wr, Headers headers) throws Exception {
+        for (String s : headers.headers) {
+            wr.write(s + "\n");
         }
         wr.write("\n");
     }

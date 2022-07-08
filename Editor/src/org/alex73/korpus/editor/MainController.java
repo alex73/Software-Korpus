@@ -57,6 +57,7 @@ import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyLineElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyWordElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocumentViewFactory;
 import org.alex73.korpus.editor.grammar.EditorGrammar;
+import org.alex73.korpus.text.parser.Headers;
 import org.alex73.korpus.text.parser.IProcess;
 import org.alex73.korpus.text.parser.PtextFileParser;
 import org.alex73.korpus.text.parser.PtextFileWriter;
@@ -72,7 +73,7 @@ public class MainController {
 
     public static EditorGrammar gr;
     private static GrammarDB2 db;
-    private static Map<String, String> headers;
+    private static Headers headers;
     private static StaticGrammarFiller2 staticFiller;
 
     public static void initGrammar(GrammarDB2 gr) {
@@ -163,7 +164,7 @@ public class MainController {
                 bak.delete();
                 getOutFile().renameTo(bak);
                 PtextFileWriter.write(getOutFile(), headers, UI.doc.extractText());
-                TextFileWriter.write(new File(baseFileName + ".baktext"), headers, UI.doc.extractText());
+                TextFileWriter.write(new File(baseFileName + ".text"), headers, UI.doc.extractText());
                 UI.showInfo("Захавана ў " + getOutFile());
             } catch (Throwable ex) {
                 ex.printStackTrace();
