@@ -22,6 +22,7 @@
 package org.alex73.korpus.utils;
 
 import org.alex73.korpus.belarusian.BelarusianTags;
+import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 
 /**
  * Some utilities methods for stress processing.
@@ -30,7 +31,7 @@ import org.alex73.korpus.belarusian.BelarusianTags;
  */
 public class StressUtils {
 
-    public static char STRESS_CHAR = '+';
+    public static char STRESS_CHAR = BelarusianWordNormalizer.pravilny_nacisk;
     public static String STRESS_CHARS = "+\u0301\u00b4";
 
     public static String unstress(String stressedWord) {

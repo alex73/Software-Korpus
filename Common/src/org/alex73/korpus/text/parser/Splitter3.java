@@ -65,7 +65,7 @@ public class Splitter3 {
                         continue;
                     }
                 }
-                if (BelarusianWordNormalizer.apostrafy.indexOf(currentChar) >= 0 || currentChar == '-') {
+                if (BelarusianWordNormalizer.usie_apostrafy.indexOf(currentChar) >= 0 || currentChar == '-') {
                     // не могуць быць на мяжы
                     if (currentWord.length() > 0 && currentTail.length() == 0) {
                         currentWord.append(currentChar);
@@ -95,7 +95,7 @@ public class Splitter3 {
             // check if word ends with znak
             while (currentWord.length() > 0) {
                 char latestInWord = currentWord.charAt(currentWord.length() - 1);
-                if (BelarusianWordNormalizer.apostrafy.indexOf(latestInWord) >= 0 || latestInWord == '-') {
+                if (BelarusianWordNormalizer.usie_apostrafy.indexOf(latestInWord) >= 0 || latestInWord == '-') {
                     currentWord.setLength(currentWord.length() - 1);
                     currentTail.insert(0, latestInWord);
                 } else {

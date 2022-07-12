@@ -26,6 +26,7 @@ import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.corpus.paradigm.Wordlist;
+import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.editor.core.Theme;
 import org.alex73.korpus.text.parser.BOMBufferedReader;
 
@@ -158,14 +159,14 @@ public class GrammarDB2 {
      * Minimize memory usage.
      */
     private void optimize(Paradigm p) {
-        p.setLemma(optimizeString(p.getLemma()));
+        p.setLemma(optimizeString(fix(p.getLemma())));
         p.setTag(optimizeString(p.getTag()));
         for (Variant v : p.getVariant()) {
-            v.setLemma(optimizeString(v.getLemma()));
+            v.setLemma(optimizeString(fix(v.getLemma())));
             v.setPravapis(optimizeString(v.getPravapis()));
             for (Form f : v.getForm()) {
                 f.setTag(optimizeString(f.getTag()));
-                f.setValue(optimizeString(f.getValue()));
+                f.setValue(optimizeString(fix(f.getValue())));
                 f.setSlouniki(optimizeString(f.getSlouniki()));
                 f.setPravapis(optimizeString(f.getPravapis()));
             }
@@ -173,10 +174,17 @@ public class GrammarDB2 {
     }
 
     /**
-     * Remove duplicate strings from memory.
+     * Remove duplicate strings from memory. 
      */
     public static String optimizeString(String s) {
         return s == null ? null : s.intern();
+    }
+
+    /**
+     * Змяняе націск і апостраф.
+     */
+    public static String fix(String s) {
+        return s == null ? null : s.replace('\'', BelarusianWordNormalizer.pravilny_apostraf).replace('+', BelarusianWordNormalizer.pravilny_nacisk);
     }
 
     public void addXMLFile(File file) throws Exception {

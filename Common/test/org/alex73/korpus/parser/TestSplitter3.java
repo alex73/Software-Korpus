@@ -42,7 +42,7 @@ public class TestSplitter3 {
         nextW("123", " ");
         nextW("мо", "'' '");
         nextW("ак", " ");
-        nextW("з'ява", "");
+        nextW("з\u02BCява", "");
         endSentence();
 
         endText();

@@ -25,9 +25,11 @@ import java.util.Locale;
 
 public class BelarusianWordNormalizer {
     public static final Locale BEL = new Locale("be");
-    public static final String apostrafy = "\'\u02BC\u2019";
-    public static final String naciski = "\u00B4\u0301";
-    public static final String letters = apostrafy + naciski
+    public static final char pravilny_nacisk = '\u0301';
+    public static final String usie_naciski = pravilny_nacisk + "\u00B4";
+    public static final char pravilny_apostraf = '\u02BC';
+    public static final String usie_apostrafy = pravilny_apostraf + "\'\u2019";
+    public static final String letters = usie_naciski + usie_apostrafy
             + "-ёйцукенгшўзхфывапролджэячсмітьбющиЁЙЦУКЕНГШЎЗХФЫВАПРОЛДЖЭЯЧСМІТЬБЮЩИqwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789";
 
     private static final int CHARS_LEN = 0x2020;
@@ -50,18 +52,20 @@ public class BelarusianWordNormalizer {
             }
             CIVIALIKIJA[c] = Character.isUpperCase(c);
         }
+        UMALYJA[pravilny_nacisk] = pravilny_nacisk;
         UMALYJA['\''] = '\'';
         UMALYJA['-'] = '-';
 
         LITENORMALIZE['ґ'] = 'г'; // ґ -> г
         LITENORMALIZE['Ґ'] = 'Г';
         // Правільны апостраф - 02BC
-        LITENORMALIZE['\''] = '\u02BC';
-        LITENORMALIZE['\u02BC'] = '\u02BC';
-        LITENORMALIZE['\u2019'] = '\u02BC';
+        LITENORMALIZE['\''] = pravilny_apostraf;
+        LITENORMALIZE['\u02BC'] = pravilny_apostraf;
+        LITENORMALIZE['\u2019'] = pravilny_apostraf;
         // Націскі
-        LITENORMALIZE['\u00B4'] = '\u00B4';
-        LITENORMALIZE['\u0301'] = '\u00B4'; // combined accent
+        LITENORMALIZE[pravilny_nacisk] = pravilny_nacisk;
+        LITENORMALIZE['\u00B4'] = pravilny_nacisk;
+        LITENORMALIZE['\u0301'] = pravilny_nacisk; // combined accent
         LITENORMALIZE['-'] = '-';
         // пошук
         LITENORMALIZE['?'] = '?';
@@ -72,9 +76,9 @@ public class BelarusianWordNormalizer {
         SUPERNORMALIZE['ў'] = 'у'; // ў -> у
         SUPERNORMALIZE['Ў'] = 'у';
         // Правільны апостраф - 02BC, але паўсюль ужываем лацінкавы
-        SUPERNORMALIZE['\''] = '\u02BC';
-        SUPERNORMALIZE['\u02BC'] = '\u02BC';
-        SUPERNORMALIZE['\u2019'] = '\u02BC';
+        SUPERNORMALIZE['\''] = pravilny_apostraf;
+        SUPERNORMALIZE['\u02BC'] = pravilny_apostraf;
+        SUPERNORMALIZE['\u2019'] = pravilny_apostraf;
         SUPERNORMALIZE['-'] = '-';
         SUPERNORMALIZE['?'] = '?';
         SUPERNORMALIZE['*'] = '*';
@@ -165,10 +169,10 @@ public class BelarusianWordNormalizer {
                 return stressWasEquals + stressWasMissedInWord + stressWasMissedInDb <= 1;
             }
             if (cAny == Character.MAX_VALUE || cDb == Character.MAX_VALUE) {
-                if (cDb == '+') {
+                if (cDb == pravilny_nacisk) {
                     stressWasMissedInWord = 1;
                     continue;
-                } else if (cAny == '+') {
+                } else if (cAny == pravilny_nacisk) {
                     stressWasMissedInDb = 1;
                     continue;
                 }
@@ -198,14 +202,14 @@ public class BelarusianWordNormalizer {
                     cAny = 'у';
                 }
             }
-            if (cDb == '+' && cAny == '+') {
+            if (cDb == pravilny_nacisk && cAny == pravilny_nacisk) {
                 stressWasEquals = 1;
                 continue;
-            } else if (cDb == '+') {
+            } else if (cDb == pravilny_nacisk) {
                 stressWasMissedInWord = 1;
                 iAny--;
                 continue;
-            } else if (cAny == '+') {
+            } else if (cAny == pravilny_nacisk) {
                 stressWasMissedInDb = 1;
                 iDb--;
                 continue;

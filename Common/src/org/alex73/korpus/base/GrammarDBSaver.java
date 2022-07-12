@@ -20,6 +20,7 @@ import org.alex73.corpus.paradigm.FormOptions;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.corpus.paradigm.Wordlist;
+import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.utils.StressUtils;
 
 public class GrammarDBSaver {
@@ -37,7 +38,7 @@ public class GrammarDBSaver {
             return "unknown.xml";
         } else if (ptag.startsWith("NP")) {
             return "NP.xml";
-        } else if (ptag.length() == 2 && ptag.charAt(1) == '+') {
+        } else if (ptag.length() == 2 && ptag.charAt(1) == BelarusianWordNormalizer.pravilny_nacisk) {
             return ptag.substring(0, 1) + "__.xml";
         } else if (p.getVariant().stream().allMatch(v -> v.getForm().isEmpty())) {
             return ptag.substring(0, 1) + "_.xml";
@@ -60,10 +61,9 @@ public class GrammarDBSaver {
         }
     }
 
+    @Deprecated
     public static void store(File out, Wordlist list) throws Exception {
-        Marshaller m = GrammarDB2.getContext().createMarshaller();
-        m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-        m.marshal(list, out);
+        store(list.getParadigm(), out);
     }
 
     public static void store(List<Paradigm> ps, File out) throws Exception {
@@ -71,6 +71,8 @@ public class GrammarDBSaver {
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         Wordlist w = new Wordlist();
         w.getParadigm().addAll(ps);
+        w = cloneWordlist(w);
+        w.getParadigm().parallelStream().forEach(p -> unfix(p));
         m.marshal(w, out);
     }
 
@@ -94,9 +96,28 @@ public class GrammarDBSaver {
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         for (String fn : es.keySet()) {
             Wordlist wl = es.get(fn);
+            wl = cloneWordlist(wl);
+            wl.getParadigm().parallelStream().forEach(p -> unfix(p));
             Collections.sort(wl.getParadigm(), COMPARATOR);
             m.marshal(wl, new File(dir, fn));
         }
+    }
+
+    private static void unfix(Paradigm p) {
+        p.setLemma(unfix(p.getLemma()));
+        for (Variant v : p.getVariant()) {
+            v.setLemma(unfix(v.getLemma()));
+            for (Form f : v.getForm()) {
+                f.setValue(unfix(f.getValue()));
+            }
+        }
+    }
+
+    /**
+     * Remove duplicate strings from memory. Таксама змяняе націск і апостраф.
+     */
+    public static String unfix(String s) {
+        return s == null ? null : s.replace(BelarusianWordNormalizer.pravilny_apostraf, '\'').replace(BelarusianWordNormalizer.pravilny_nacisk, '+');
     }
 
     public static void sortList(List<Paradigm> ps) {
@@ -107,6 +128,15 @@ public class GrammarDBSaver {
         Marshaller m = GrammarDB2.getContext().createMarshaller();
         m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         m.marshal(list, out);
+    }
+
+    public static Wordlist cloneWordlist(Wordlist p) throws Exception {
+        Marshaller m = GrammarDB2.getContext().createMarshaller();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        m.marshal(p, out);
+        Unmarshaller unm = GrammarDB2.getContext().createUnmarshaller();
+        Wordlist r = (Wordlist) unm.unmarshal(new ByteArrayInputStream(out.toByteArray()));
+        return r;
     }
 
     public static Paradigm cloneParadigm(Paradigm p) throws Exception {
