@@ -103,14 +103,22 @@ public class GrammarDBSaver {
         }
     }
 
-    private static void unfix(Paradigm p) {
+    public static void unfix(Paradigm p) {
         p.setLemma(unfix(p.getLemma()));
         for (Variant v : p.getVariant()) {
-            v.setLemma(unfix(v.getLemma()));
-            for (Form f : v.getForm()) {
-                f.setValue(unfix(f.getValue()));
-            }
+            unfix(v);
         }
+    }
+
+    public static void unfix(Variant v) {
+        v.setLemma(unfix(v.getLemma()));
+        for (Form f : v.getForm()) {
+            unfix(f);
+        }
+    }
+
+    public static void unfix(Form f) {
+        f.setValue(unfix(f.getValue()));
     }
 
     /**
@@ -154,6 +162,15 @@ public class GrammarDBSaver {
         m.marshal(v, out);
         Unmarshaller unm = GrammarDB2.getContext().createUnmarshaller();
         Variant r = (Variant) unm.unmarshal(new ByteArrayInputStream(out.toByteArray()));
+        return r;
+    }
+
+    public static Form cloneForm(Form f) throws Exception {
+        Marshaller m = GrammarDB2.getContext().createMarshaller();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        m.marshal(f, out);
+        Unmarshaller unm = GrammarDB2.getContext().createUnmarshaller();
+        Form r = (Form) unm.unmarshal(new ByteArrayInputStream(out.toByteArray()));
         return r;
     }
 

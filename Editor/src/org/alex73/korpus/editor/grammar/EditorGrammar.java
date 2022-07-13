@@ -115,6 +115,8 @@ public class EditorGrammar {
     }
 
     public void addParadigm(Paradigm p) throws Exception {
+        p = GrammarDBSaver.cloneParadigm(p);
+        GrammarDBSaver.unfix(p);
         try (BufferedWriter wr = Files.newBufferedWriter(Paths.get(localGrammarFile), StandardOpenOption.APPEND, StandardOpenOption.CREATE)) {
             wr.write("=====");
             wr.write("\n");
@@ -131,6 +133,8 @@ public class EditorGrammar {
     }
 
     public void addVariant(Variant v, int pdgId) throws Exception {
+        v = GrammarDBSaver.cloneVariant(v);
+        GrammarDBSaver.unfix(v);
         try (BufferedWriter wr = Files.newBufferedWriter(Paths.get(localGrammarFile), StandardOpenOption.APPEND, StandardOpenOption.CREATE)) {
             wr.write("===== " + pdgId);
             wr.write("\n");
@@ -155,6 +159,8 @@ public class EditorGrammar {
             m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             m.setProperty(Marshaller.JAXB_FRAGMENT, true);
             for (Form f : forms) {
+                f = GrammarDBSaver.cloneForm(f);
+                GrammarDBSaver.unfix(f);
                 m.marshal(f, wr);
                 wr.write("\n");
             }
@@ -294,6 +300,7 @@ public class EditorGrammar {
             } else {
                 r = p;
             }
+            GrammarDB2.optimize(r);
             synchronized (docLevelParadigms) {
                 docLevelParadigms.add(r);
             }

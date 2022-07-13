@@ -158,7 +158,7 @@ public class GrammarDB2 {
     /**
      * Minimize memory usage.
      */
-    private void optimize(Paradigm p) {
+    public static void optimize(Paradigm p) {
         p.setLemma(optimizeString(fix(p.getLemma())));
         p.setTag(optimizeString(p.getTag()));
         for (Variant v : p.getVariant()) {
