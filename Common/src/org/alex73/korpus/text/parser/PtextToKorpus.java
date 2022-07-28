@@ -2,6 +2,8 @@ package org.alex73.korpus.text.parser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.alex73.korpus.text.structure.corpus.Paragraph;
 import org.alex73.korpus.text.structure.corpus.Sentence;
@@ -19,16 +21,19 @@ public class PtextToKorpus {
         ONE_LINE, EMPTY_LINE_SEPARATOR
     };
 
+    static final Pattern RE_INLINE_TAG_PAGE = Pattern.compile("<p:(.+)>");
+
     public final List<Paragraph> paragraphs = new ArrayList<>();
     private final List<Sentence> sentences = new ArrayList<>();
     private final List<Word> words = new ArrayList<>();
     private BLOCK_MODE mode;
     private int page;
+    private String inlinePage;
 
     public PtextToKorpus(List<TextLine> lines, boolean splitEachLine) {
         mode = splitEachLine ? BLOCK_MODE.ONE_LINE : BLOCK_MODE.EMPTY_LINE_SEPARATOR;
         for (TextLine line : lines) {
-            if (line.isEmpty() || line.size() == 1 && line.get(0).getText().isBlank()) {
+            if (line.isEmpty() || (line.size() == 1 && line.get(0).getText().isBlank())) {
                 switch (mode) {
                 case ONE_LINE:
                     continue;
@@ -39,8 +44,20 @@ public class PtextToKorpus {
                     break;
                 }
             }
+            if (words.isEmpty() && sentences.isEmpty() && inlinePage != null) {
+                boolean firstIsPageNumber = !line.isEmpty() && (line.get(0) instanceof InlineTag)
+                        && RE_INLINE_TAG_PAGE.matcher(line.get(0).getText()).matches();
+                if (!firstIsPageNumber) {
+                    addInlinePageNumber();
+                }
+            }
             for (ITextLineElement w : line) {
                 if (w instanceof InlineTag) {
+                    Matcher m;
+                    if ((m = RE_INLINE_TAG_PAGE.matcher(w.getText())).matches()) {
+                        inlinePage = m.group(1);
+                        addInlinePageNumber();
+                    }
                 } else if (w instanceof LongTagItem) {
                     if ("##Poetry:begin".equals(w.getText())) {
                         mode = BLOCK_MODE.EMPTY_LINE_SEPARATOR;
@@ -85,6 +102,23 @@ public class PtextToKorpus {
             }
         }
         flushParagraph();
+    }
+
+    private void addInlinePageNumber() {
+        if (!words.isEmpty()) {
+            Word prev = words.get(words.size() - 1);
+            if (prev.tail == null) {
+                prev.tail = "{" + inlinePage + "}";
+            } else {
+                prev.tail += "{" + inlinePage + "}";
+            }
+        } else {
+            Word wo = new Word();
+            wo.source = null;
+            wo.normalized = "";
+            wo.tail = "{" + inlinePage + "}";
+            words.add(wo);
+        }
     }
 
     public static Paragraph oneLine(TextLine line) {

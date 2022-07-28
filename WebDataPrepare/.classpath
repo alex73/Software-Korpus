@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/Korpus-Common"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/Korpus-Common"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Korpus-Web"/>
 	<classpathentry kind="lib" path="lib/commons-compress-1.20.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.25.jar"/>

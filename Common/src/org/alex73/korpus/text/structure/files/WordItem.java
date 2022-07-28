@@ -12,6 +12,8 @@ public class WordItem implements ITextLineElement {
     public String lemmas;
     /** Аўтаматычна знойдзеныя тэгі з базы, праз ';' */
     public String tags;
+    /** Аўтаматычна знойдзеныя варыянты з базы, праз ';' */
+    public String variantIds;
 
     /** Адна абраная лема пры зняцці аманіміі. Толькі калі карыстальнік абраў. */
     public String manualLemma;
@@ -38,6 +40,7 @@ public class WordItem implements ITextLineElement {
         r.manualNormalized = manualNormalized;
         r.lemmas = lemmas;
         r.tags = tags;
+        r.variantIds = variantIds;
         r.manualLemma = manualLemma;
         r.manualTag = manualTag;
         r.type = type;

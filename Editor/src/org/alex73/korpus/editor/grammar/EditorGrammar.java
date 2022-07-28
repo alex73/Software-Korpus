@@ -266,7 +266,7 @@ public class EditorGrammar {
                 }
             } catch (Exception ex) {
                 System.err.println("Error loading :\n" + String.join("\n", data));
-                ex.printStackTrace();
+                throw ex;
             }
         }
 
@@ -309,7 +309,7 @@ public class EditorGrammar {
         Paradigm getPrevParadigm(GrammarDB2 db) {
             List<Paradigm> prev = db.getAllParadigms().parallelStream().filter(p -> p.getPdgId() == pdgId).toList();
             if (prev.size() != 1) {
-                throw new RuntimeException("Impossible to build upon #" + pdgId + ": " + prev.size() + " previous counts");
+                throw new RuntimeException("Было разгортванне на падставе парадыгмы #" + pdgId + ", але такой няма ў базе");
             }
             return prev.get(0);
         }

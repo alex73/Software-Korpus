@@ -6,9 +6,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -17,6 +15,7 @@ import org.alex73.korpus.compiler.BaseParallelProcessor;
 import org.alex73.korpus.compiler.PrepareCache3;
 import org.alex73.korpus.compiler.ProcessHeaders;
 import org.alex73.korpus.compiler.ProcessTexts;
+import org.alex73.korpus.text.parser.Headers;
 import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.TextFileParser;
 import org.apache.commons.io.IOUtils;
@@ -29,14 +28,14 @@ public class TextArchiveParser extends BaseParser {
     @Override
     public void parse(BaseParallelProcessor queue, boolean headersOnly) throws Exception {
         Path headersFile = Paths.get(file.toString() + ".headers");
-        Map<String, String> commonHeaders;
+        Headers commonHeaders;
         if (Files.exists(headersFile)) {
             try (InputStream in = Files.newInputStream(headersFile)) {
                 TextFileParser fp = new TextFileParser(in, true);
                 commonHeaders = fp.headers;
             }
         } else {
-            commonHeaders = Collections.emptyMap();
+            commonHeaders = new Headers();
         }
 
         try (ZipFile zip = new ZipFile(file.toFile())) {

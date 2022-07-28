@@ -292,7 +292,7 @@ $('body')
 	});
 $.views.converters("wordtail", function (val) {
 	if (val) {
-		return val.replace('<', '&lt;').replace('>', '&gt;').replace('\n', '<br/>');
+		return val.replace('<', '&lt;').replace('>', '&gt;').replace('\n', '<br/>').replace('{', '<b style="background-color: #CCF">{').replace('}', '}</b>');
 	} else {
 		return "";
 	}

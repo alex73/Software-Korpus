@@ -53,7 +53,7 @@ public class TextFileWriter {
     }
 
     public static void writeHeaders(Writer wr, Headers headers) throws Exception {
-        for (String s : headers.headers) {
+        for (String s : headers.getLines()) {
             wr.write(s + "\n");
         }
         wr.write("\n");

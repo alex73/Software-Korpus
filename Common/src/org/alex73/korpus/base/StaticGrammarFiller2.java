@@ -74,6 +74,7 @@ public class StaticGrammarFiller2 {
         }
         w.lemmas = wi.lemmas;
         w.tags = wi.tags;
+        w.variantIds = wi.variantIds;
     }
 
     private WordInfo get(String word) {
@@ -97,16 +98,18 @@ public class StaticGrammarFiller2 {
     private WordInfo calculateWordInfo(String word, String manualLemma, String manualTag) {
         StringBuilder lemmas = new StringBuilder();
         StringBuilder dbTags = new StringBuilder();
+        StringBuilder variantIds = new StringBuilder();
         for (Paradigm p : finder.getParadigms(word)) {
-            fillTagLemmas(word, manualLemma, manualTag, lemmas, dbTags, p);
+            fillTagLemmas(word, manualLemma, manualTag, lemmas, variantIds, dbTags, p);
         }
         WordInfo result = new WordInfo();
         result.tags = dbTags.length() > 0 ? dbTags.toString() : null;
         result.lemmas = lemmas.length() > 0 ? lemmas.toString() : null;
+        result.variantIds = variantIds.length() > 0 ? variantIds.toString() : null;
         return result;
     }
 
-    public static void fillTagLemmas(String word, String manualLemma, String manualTag, StringBuilder lemmas, StringBuilder dbTags, Paradigm p) {
+    public static void fillTagLemmas(String word, String manualLemma, String manualTag, StringBuilder lemmas, StringBuilder variantIds, StringBuilder dbTags, Paradigm p) {
         if (fillTheme != null) {
             if (!fillTheme.equals(p.getTheme())) {
                 return;
@@ -138,6 +141,7 @@ public class StaticGrammarFiller2 {
                     }
                     add(lemmas, p.getLemma());
                     add(dbTags, fTag);
+                    add(variantIds, p.getPdgId() + v.getId());
                 }
             }
         }
@@ -153,6 +157,6 @@ public class StaticGrammarFiller2 {
     }
 
     static class WordInfo {
-        String tags, lemmas;
+        String tags, lemmas, variantIds;
     }
 }

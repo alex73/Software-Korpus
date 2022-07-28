@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import org.alex73.korpus.text.structure.files.LongTagItem;
 import org.alex73.korpus.text.structure.files.TailItem;
@@ -16,9 +15,6 @@ import org.alex73.korpus.text.structure.files.TextLine;
  * It parses only line-by-line. See PtextToKorpus for poetry and 'empy-line-separator' modes.
  */
 public class TextFileParser {
-    private static Pattern RE_TAG = Pattern.compile("##([A-Za-z0-9]+):?(.*)");
-    private static Pattern RE_TAG_BEGIN = Pattern.compile("##([A-Za-z0-9]+)_BEGIN");
-
     public final Headers headers;
     public final List<String> sourceLines = new ArrayList<>();
     public final List<TextLine> lines = new ArrayList<>();
@@ -79,22 +75,9 @@ public class TextFileParser {
             if (s.isBlank()) {
                 break;
             }
-            headers.headers.add(s);
+            headers.add(s);
         }
         return headers;
     }
 
-    private static String readMultilineTag(String tagName, BufferedReader rd) throws Exception {
-        String out = "";
-
-        String endLine = "##" + tagName + "_END";
-        String s;
-        while ((s = rd.readLine()) != null) {
-            if (s.equals(endLine)) {
-                return out;
-            }
-            out += s + "\n";
-        }
-        throw new Exception("Wrong description header");
-    }
 }
