@@ -38,5 +38,4 @@ public class ForceMerge {
             d.close();
         }
     }
-
 }

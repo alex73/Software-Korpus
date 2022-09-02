@@ -32,7 +32,7 @@ public class SkarynaParser extends BaseParser {
             if (headersOnly) {
                 ProcessHeaders.process(textInfo);
             } else {
-                doc.parse(PrepareCache3.errors);
+                doc.parse(true, PrepareCache3.errors);
                 ProcessTexts.process(textInfo, new PtextToKorpus(doc.lines, true).paragraphs);
             }
         });

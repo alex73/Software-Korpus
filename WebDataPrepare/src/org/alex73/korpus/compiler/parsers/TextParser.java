@@ -13,10 +13,15 @@ import org.alex73.korpus.compiler.ProcessTexts;
 import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.TextFileParser;
 
+/**
+ * Texts will be moved to separate subcorpus "pieraklady" except in case of System.getProperty("SUBCORPUS_PIERAKLADY") == "FALSE"
+ */
 public class TextParser extends BaseParser {
+    private boolean pierakladyEnabled;
 
     public TextParser(String subcorpus, Path file) {
         super(subcorpus, file);
+        pierakladyEnabled = !"FALSE".equals(System.getProperty("SUBCORPUS_PIERAKLADY"));
     }
 
     @Override
@@ -41,7 +46,7 @@ public class TextParser extends BaseParser {
                     // пераклад на іншую мову
                     return;
                 }
-                if (textInfo.langOrig != null && "teksty".equals(subcorpus)) {
+                if (pierakladyEnabled && textInfo.langOrig != null && "teksty".equals(subcorpus)) {
                     // корпус перакладаў
                     textInfo.subcorpus = "pieraklady";
                 }
@@ -61,7 +66,7 @@ public class TextParser extends BaseParser {
                 if (headersOnly) {
                     ProcessHeaders.process(textInfo);
                 } else {
-                    doc.parse(PrepareCache3.errors);
+                    doc.parse(true, PrepareCache3.errors);
                     ProcessTexts.process(textInfo, new PtextToKorpus(doc.lines, true).paragraphs);
                 }
             } catch (Exception ex) {

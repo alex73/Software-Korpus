@@ -22,7 +22,6 @@ public class GrammarPane3 extends javax.swing.JPanel {
         buttonGroup1 = new javax.swing.ButtonGroup();
         panelInputParadigm = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        txtWhatParadigm = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
         txtLikeParadigm = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
@@ -52,16 +51,6 @@ public class GrammarPane3 extends javax.swing.JPanel {
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
         panelInputParadigm.add(jLabel1, gridBagConstraints);
-
-        txtWhatParadigm.setColumns(10);
-        txtWhatParadigm.setToolTipText("Слова што разгортваць");
-        gridBagConstraints = new java.awt.GridBagConstraints();
-        gridBagConstraints.gridx = 1;
-        gridBagConstraints.gridy = 0;
-        gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints.weightx = 1.0;
-        gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-        panelInputParadigm.add(txtWhatParadigm, gridBagConstraints);
 
         jLabel4.setText("як");
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -193,6 +182,5 @@ public class GrammarPane3 extends javax.swing.JPanel {
     public javax.swing.JTextField txtLikeParadigm;
     public javax.swing.JTextField txtOutTagParadigm;
     public javax.swing.JTextField txtOutThemeParadigm;
-    public javax.swing.JTextField txtWhatParadigm;
     // End of variables declaration//GEN-END:variables
 }

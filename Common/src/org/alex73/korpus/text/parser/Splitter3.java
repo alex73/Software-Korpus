@@ -14,7 +14,7 @@ import org.alex73.korpus.text.structure.files.WordItem;
  */
 public class Splitter3 {
     private final IProcess errors;
-    private final boolean processAmp;
+    private final boolean processSimpleHtml;
     private CharSequence para;
     private int pos;
     private char currentChar;
@@ -22,8 +22,8 @@ public class Splitter3 {
     private final StringBuilder currentWord = new StringBuilder();
     private final StringBuilder currentTail = new StringBuilder();
 
-    public Splitter3(boolean processAmp, IProcess errors) {
-        this.processAmp = processAmp;
+    public Splitter3(boolean processSimpleHtml, IProcess errors) {
+        this.processSimpleHtml = processSimpleHtml;
         this.errors = errors;
     }
 
@@ -49,11 +49,13 @@ public class Splitter3 {
                 }
                 break;
             case '<':
-                closeWord();
-                parseInlineTag();
-                break;
+                if (processSimpleHtml) {
+                    closeWord();
+                    parseInlineTag();
+                    break;
+                }
             default:
-                if (currentChar == '&' && processAmp) {
+                if (currentChar == '&' && processSimpleHtml) {
                     parseCharNameOrNumber();
                     while (pos < para.length()) {
                         if (para.charAt(pos) == ';') {
@@ -212,6 +214,9 @@ public class Splitter3 {
                 break;
             }
             pos++;
+        }
+        if (pos == para.length()) {
+            pos--;
         }
         result.add(new InlineTag(para.subSequence(start, pos + 1).toString()));
     }

@@ -38,8 +38,8 @@ public class TextFileParser {
         }
     }
 
-    public void parse(IProcess errors) {
-        splitter = new Splitter3(true, errors);
+    public void parse(boolean processSimpleHtml, IProcess errors) {
+        splitter = new Splitter3(processSimpleHtml, errors);
 
         for (String s : sourceLines) {
             if (s.trim().isEmpty()) {

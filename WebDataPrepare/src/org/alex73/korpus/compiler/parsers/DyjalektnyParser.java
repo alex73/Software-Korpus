@@ -38,7 +38,7 @@ public class DyjalektnyParser extends BaseParser {
             if (headersOnly) {
                 ProcessHeaders.process(textInfo);
             } else {
-                doc.parse(PrepareCache3.errors);
+                doc.parse(false, PrepareCache3.errors);
                 ProcessTexts.process(textInfo, new PtextToKorpus(doc.lines, true).paragraphs);
             }
         });

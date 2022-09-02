@@ -66,7 +66,7 @@ public class KankardansParser extends BaseParser {
         if (!text.isEmpty()) {
             TextFileParser doc = new TextFileParser(
                     new ByteArrayInputStream(text.toString().getBytes(StandardCharsets.UTF_8)), headersOnly);
-            doc.parse(PrepareCache3.errors);
+            doc.parse(false, PrepareCache3.errors);
             TextInfo textInfo = new TextInfo();
             textInfo.subcorpus = subcorpus;
             textInfo.textOrder = ++textOrder;

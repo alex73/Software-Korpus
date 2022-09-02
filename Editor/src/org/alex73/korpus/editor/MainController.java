@@ -348,7 +348,7 @@ public class MainController {
             } else if (f.getName().endsWith(".text")) {
                 try (BufferedInputStream in = new BufferedInputStream(Files.newInputStream(f.toPath()))) {
                     TextFileParser parser = new TextFileParser(in, false);
-                    parser.parse(new IProcess() {
+                    parser.parse(true, new IProcess() {
                         @Override
                         public void showStatus(String status) {
                         }
