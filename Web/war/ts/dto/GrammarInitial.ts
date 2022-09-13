@@ -5,6 +5,7 @@ class GrammarInitial {
   public skipGrammar: { [key: string]: string[]; };
   public slouniki: GrammarDict[];
   public stat: GrammarInitialStat;
+  public localization: { [key:string]:{ [key:string]:string; } };
 }
 
 class GrammarInitialStat {

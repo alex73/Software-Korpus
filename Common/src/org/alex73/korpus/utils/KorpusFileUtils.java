@@ -8,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
@@ -19,8 +20,8 @@ public class KorpusFileUtils {
     public static void writeGzip(Path file, Stream<String> data) throws IOException {
         try (BufferedWriter wr = new BufferedWriter(
                 new OutputStreamWriter(new GZIPOutputStream(Files.newOutputStream(file))))) {
-            for (String s : data.toList()) {
-                wr.write(s);
+            for (Iterator<String> it = data.iterator(); it.hasNext();) {
+                wr.write(it.next());
                 wr.write('\n');
             }
         }
@@ -29,8 +30,8 @@ public class KorpusFileUtils {
     public static void writeZip(ZipOutputStream zip, String entryName, Stream<String> data) throws IOException {
         zip.putNextEntry(new ZipEntry(entryName));
         BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(zip));
-        for (String s : data.toList()) {
-            wr.write(s);
+        for (Iterator<String> it = data.iterator(); it.hasNext();) {
+            wr.write(it.next());
             wr.write('\n');
         }
         wr.flush();

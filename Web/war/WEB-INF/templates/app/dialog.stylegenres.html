@@ -16,16 +16,16 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title pull-left">Стыль/жанр</h4>
+        <h4 class="modal-title pull-left">${messages.dialog_stylegenre}</h4>
         <span>
-          <button type="button" class="btn btn-secondary" onClick="dialogStyleGenres.onCancel()">Скасаваць</button>
-          <button type="button" class="btn btn-primary" onClick="dialogStyleGenres.onOk()">Абраць</button>
+          <button type="button" class="btn btn-secondary" onClick="dialogStyleGenres.onCancel()">${messages.cancel}</button>
+          <button type="button" class="btn btn-primary" onClick="dialogStyleGenres.onOk()">${messages.choose}</button>
         </span>
       </div>
       <div class="modal-header">
         <span>
-          <button type="button" class="btn btn-secondary" onClick="dialogStyleGenres.all(true)">Пазначыць усе</button>
-          <button type="button" class="btn btn-secondary" onClick="dialogStyleGenres.all(false)">Зняць усе</button>
+          <button type="button" class="btn btn-secondary" onClick="dialogStyleGenres.all(true)">${messages.select_all}</button>
+          <button type="button" class="btn btn-secondary" onClick="dialogStyleGenres.all(false)">${messages.unselect_all}</button>
         </span>
       </div>
       <div id="dialog-sg-place" class="modal-body">

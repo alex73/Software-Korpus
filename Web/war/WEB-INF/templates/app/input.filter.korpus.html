@@ -1,48 +1,48 @@
 <div class="card" style="width: 100%">
     <div class="card-body" *ngIf="serviceSearch.inputCorpusType == 'MAIN'">
             <div class="form-group row my-1">
-                <label for="inputFilterCorpus" class="col-sm-4 col-md-3 col-lg-2 col-form-label">Падкорпусы</label>
+                <label for="inputFilterCorpus" class="col-sm-4 col-md-3 col-lg-2 col-form-label">${messages.korpus_filter_subcorpuses}</label>
                 <div class="col-sm-8 col-md-9 col-lg-10">
                     <a href="#" class="form-control notextout" id="inputFilterCorpusNames" onClick="dialogSubcorpuses = new DialogSubcorpuses(); return false;"></a>
                     <span id="inputFilterCorpus" class="d-none"></span>
                 </div>
             </div>
             <div id="inputFilterAuthorShow" class="form-group row my-1">
-                <label for="inputFilterAuthor" class="col-sm-4 col-md-3 col-lg-2 col-form-label">Аўтары</label>
+                <label for="inputFilterAuthor" class="col-sm-4 col-md-3 col-lg-2 col-form-label">${messages.korpus_filter_authors}</label>
                 <div class="col-sm-8 col-md-9 col-lg-10">
-                    <a href="#" class="form-control notextout" id="inputFilterAuthor" onClick="dialogList = new DialogList(korpusService.initial.authors, 'inputFilterAuthor', 'Аўтары'); return false;"></a>
+                    <a href="#" class="form-control notextout" id="inputFilterAuthor" onClick="dialogList = new DialogList(korpusService.initial.authors, 'inputFilterAuthor', '${messages.korpus_filter_authors}'); return false;"></a>
                 </div>
             </div>
             <div id="inputFilterSourceShow" class="form-group row my-1">
-                <label for="inputFilterSource" class="col-sm-4 col-md-3 col-lg-2 col-form-label">Крыніцы</label>
+                <label for="inputFilterSource" class="col-sm-4 col-md-3 col-lg-2 col-form-label">${messages.korpus_filter_sources}</label>
                 <div class="col-sm-8 col-md-9 col-lg-10">
-                    <a href="#" class="form-control notextout" id="inputFilterSource" onClick="dialogList = new DialogList(korpusService.initial.sources, 'inputFilterSource', 'Крыніцы'); return false;"></a>
+                    <a href="#" class="form-control notextout" id="inputFilterSource" onClick="dialogList = new DialogList(korpusService.initial.sources, 'inputFilterSource', '${messages.korpus_filter_sources}'); return false;"></a>
                 </div>
             </div>
             <div id="inputFilterStyleShow" class="form-group row my-1">
-                <label for="inputFilterStyle" class="col-sm-4 col-md-3 col-lg-2 col-form-label">Стылі/жанры</label>
+                <label for="inputFilterStyle" class="col-sm-4 col-md-3 col-lg-2 col-form-label">${messages.korpus_filter_stylesgenres}</label>
                 <div class="col-sm-8 col-md-9 col-lg-10">
                     <a href="#" class="form-control notextout" id="inputFilterStyle" onClick="dialogStyleGenres = new DialogStyleGenres(); return false;"></a>
                 </div>
             </div>
             <div id="inputFilterYearWrittenShow" class="form-group row my-1">
-                <label for="inputFilterYearWrittenFrom" class="col-sm-4 col-md-3 col-lg-2 col-form-label">Год напісання</label>
+                <label for="inputFilterYearWrittenFrom" class="col-sm-4 col-md-3 col-lg-2 col-form-label">${messages.korpus_filter_yearwritten}</label>
                 <div class="col-sm-8 col-md-9 col-lg-10">
                     <div class="form-inline">
-                        <label for="inputFilterYearWrittenFrom" class="px-2">ад</label>
+                        <label for="inputFilterYearWrittenFrom" class="px-2">${messages.korpus_filter_from}</label>
                         <input id="inputFilterYearWrittenFrom" type="text" class="form-control" size="4" maxlength="4">
-                        <label for="inputFilterYearWrittenTo" class="px-2">да</label>
+                        <label for="inputFilterYearWrittenTo" class="px-2">${messages.korpus_filter_to}</label>
                         <input id="inputFilterYearWrittenTo" type="text" class="form-control" size="4" maxlength="4">
                     </div>
                 </div>
             </div>
             <div id="inputFilterYearPublishedShow" class="form-group row my-1">
-                <label for="inputFilterYearPublishedFrom" class="col-sm-4 col-md-3 col-lg-2 col-form-label">Год выдання</label>
+                <label for="inputFilterYearPublishedFrom" class="col-sm-4 col-md-3 col-lg-2 col-form-label">${messages.korpus_filter_yearpublished}</label>
                 <div class="col-sm-8 col-md-9 col-lg-10">
                     <div class="form-inline">
-                        <label for="inputFilterYearPublishedFrom" class="px-2">ад</label>
+                        <label for="inputFilterYearPublishedFrom" class="px-2">${messages.korpus_filter_from}</label>
                         <input id="inputFilterYearPublishedFrom" type="text" class="form-control" size="4" maxlength="4">
-                        <label for="inputFilterYearPublishedTo" class="px-2">да</label>
+                        <label for="inputFilterYearPublishedTo" class="px-2">${messages.korpus_filter_to}</label>
                         <input id="inputFilterYearPublishedTo" type="text" class="form-control" size="4" maxlength="4">
                     </div>
                 </div>

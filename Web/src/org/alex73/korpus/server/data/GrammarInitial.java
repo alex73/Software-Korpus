@@ -18,6 +18,7 @@ public class GrammarInitial {
     public Map<Character, Set<String>> skipGrammar;
     public List<GrammarDict> slouniki;
     public List<Stat> stat;
+    public Map<String, Map<String, String>> localization;
 
     public static class Stat {
         public String title;

@@ -1,0 +1,39 @@
+<#assign active = "naciski">
+<#include "header.html">
+
+<div class="container">
+	<form onSubmit="req(); return false;">
+		<div class="class="form-group">
+			<textarea id="text" class="form-control" rows="3" style="font-size: 150%"></textarea>
+			<p>Націскі пазначаюцца па граматычнай базе. Таму, вы не пабачыце націскі ў словах, якіх няма ў граматычнай базе, альбо пабачыце некалькі націскаў у адным слове, калі ёсць аманімія ў граматычнай базе.</p>
+		</div>
+		<div class="row justify-content-end my-4">
+			<button type="submit" class="btn btn-danger btn-lg">Пазначыць</button>
+		</div>
+	</form>
+</div>
+
+<script>
+	function req() {
+		let arg = $('#text').val();
+		fetch('naciski', {
+		      method: 'POST',
+		      headers: {
+		        'Content-Type': 'text/plain; charset=UTF-8'
+		      },
+		      body: arg
+		    })
+		      .then(r => {
+		        if (!r.ok) {
+		        	alert("Памылка: " + r.status + " " + r.statusText);
+		        } else {
+		          r.text().then(data => {
+		            $("#text").val(data);
+		          });
+		        }
+		      })
+		      .catch(err => alert("Памылка: " + err));
+	}
+</script>
+
+<#include "footer.html">

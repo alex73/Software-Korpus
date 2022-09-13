@@ -2,12 +2,12 @@
   <table class="table table-sm hspacing d-flex justify-content-center">
     <tr>
       <th></th>
-      <th>Тэкстаў</th>
-      <th>Слоў</th>
+      <th>${messages.korpus_stat_texts}</th>
+      <th>${messages.korpus_stat_words}</th>
     </tr>
     {{for initialData.stat}}
       <tr>
-        <td>{{:name}}</td>
+        <td>{{if name}}{{:name}}{{else}}${messages.stat_total}{{/if}}</td>
         <td class="text-right text-nowrap" title="{{:texts}}">{{roundnum:texts}}</td>
         <td class="text-right text-nowrap" title="{{:words}}">{{roundnum:words}}</td>
       </tr>

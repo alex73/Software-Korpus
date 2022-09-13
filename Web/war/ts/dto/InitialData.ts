@@ -7,6 +7,8 @@ class InitialData {
     public grammar: GrammarInitial;
     public stat: InitialDataStat[];
     public kankardansnyjaSpisy: string[];
+    public preselectedSubcorpuses: string;
+    public localization: { [key:string]:{ [key:string]:string; } };
 }
 
 class InitialDataStat {

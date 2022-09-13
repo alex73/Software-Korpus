@@ -11,8 +11,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -51,6 +53,7 @@ public class KorpusApplication extends Application {
     private List<String> textInfos;
     public GrammarDB2 gr;
     public GrammarFinder grFinder;
+    private Map<String, Map<String,String>> localization;
     public GrammarInitial grammarInitial;
     InitialData searchInitial;
     public Map<String, Set<String>> authorsByLemmas;
@@ -59,9 +62,12 @@ public class KorpusApplication extends Application {
     LuceneFilter processKorpus;
 
     public static KorpusApplication instance;
+    public ResourceBundle messagesEn, messagesBe;
 
     public KorpusApplication() {
         instance = this;
+        messagesBe = ResourceBundle.getBundle("messages", new Locale("be"));
+        messagesEn = ResourceBundle.getBundle("messages", new Locale("en"));
 
         System.out.println("Starting...");
         try {
@@ -96,6 +102,9 @@ public class KorpusApplication extends Application {
             processKorpus = new LuceneFilter(korpusCache);
             System.out.println("Lucene initialized");
 
+            localization = new TreeMap<>();
+            prepareLocalization("be", messagesBe);
+            prepareLocalization("en", messagesEn);
             prepareInitialGrammar();
             prepareInitialKorpus();
             System.out.println("Initialization finished. Used memory: " + getUsedMemory());
@@ -114,12 +123,19 @@ public class KorpusApplication extends Application {
         return Math.round((runtime.totalMemory() - runtime.freeMemory()) / 1024.0 / 1024.0) + "mb";
     }
 
+    void prepareLocalization(String lang, ResourceBundle messages) {
+        Map<String, String> lines = new HashMap<>();
+        messages.getKeys().asIterator().forEachRemaining(key -> lines.put(key, messages.getString(key)));
+        localization.put(lang, lines);
+    }
+
     void prepareInitialGrammar() throws Exception {
         grammarInitial = new GrammarInitial();
         grammarInitial.grammarTree = new TreeMap<>();
         grammarInitial.grammarTree = addGrammar(BelarusianTags.getInstance().getRoot());
         grammarInitial.grammarWordTypes = DBTagsGroups.wordTypes;
         grammarInitial.grammarWordTypesGroups = DBTagsGroups.tagGroupsByWordType;
+        grammarInitial.localization = localization;
 
         grammarInitial.skipGrammar = new TreeMap<>();
         for (String line : settings) {
@@ -143,7 +159,6 @@ public class KorpusApplication extends Application {
         }
         grammarInitial.stat = new ArrayList<>();
         GrammarInitial.Stat grStatTotal = new GrammarInitial.Stat();
-        grStatTotal.title = "Агулам";
         grammarInitial.stat.add(grStatTotal);
         Map<Character, GrammarInitial.Stat> grStats = new TreeMap<>();
         for (TagLetter.OneLetterInfo li : BelarusianTags.getInstance().getRoot().letters) {
@@ -179,7 +194,11 @@ public class KorpusApplication extends Application {
         searchInitial.subcorpuses = new ArrayList<>();
         searchInitial.authors = new TreeMap<>();
         searchInitial.sources = new TreeMap<>();
+        searchInitial.localization = localization;
         for (String line : settings) {
+            if (line.isBlank()) {
+                continue;
+            }
             int eq = line.indexOf('=');
             if (eq < 0) {
                 throw new RuntimeException();
@@ -189,6 +208,9 @@ public class KorpusApplication extends Application {
             }
             if (line.startsWith("kankardansnyja_spisy=")) {
                 searchInitial.kankardansnyjaSpisy = line.substring(21).trim().split(";");
+            }
+            if (line.startsWith("preselected_subcorpuses=")) {
+                searchInitial.preselectedSubcorpuses = line.substring(24).trim();
             }
         }
         for (String key : (Set<String>) (Set<?>) stat.keySet()) {
@@ -206,15 +228,14 @@ public class KorpusApplication extends Application {
         searchInitial.grammar = grammarInitial;
         searchInitial.stat = new ArrayList<>();
         InitialData.Stat s = new InitialData.Stat();
-        s.name = "Агулам";
-        s.texts = Integer.parseInt(stat.getProperty("texts.", "0"));
-        s.words = Integer.parseInt(stat.getProperty("words.", "0"));
+        s.texts = Long.parseLong(stat.getProperty("texts.", "0"));
+        s.words = Long.parseLong(stat.getProperty("words.", "0"));
         searchInitial.stat.add(s);
         for (KeyValue k : searchInitial.subcorpuses) {
             s = new InitialData.Stat();
             s.name = "&nbsp;&nbsp;&nbsp;&nbsp;" + k.value.replaceAll("\\|\\|.+", "");
-            s.texts = Integer.parseInt(stat.getProperty("texts." + k.key, "0"));
-            s.words = Integer.parseInt(stat.getProperty("words." + k.key, "0"));
+            s.texts = Long.parseLong(stat.getProperty("texts." + k.key, "0"));
+            s.words = Long.parseLong(stat.getProperty("words." + k.key, "0"));
             searchInitial.stat.add(s);
             switch (k.key) {
             case "teksty":

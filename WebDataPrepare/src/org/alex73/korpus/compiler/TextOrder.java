@@ -49,7 +49,11 @@ public class TextOrder implements Comparator<TextInfo> {
                 c = skaryna.compare(o1, o2);
                 break;
             default:
-                throw new RuntimeException("Unknown subcorpus: " + o1.subcorpus);
+                if (o1.subcorpus.startsWith("wiki")) {
+                    c = wiki.compare(o1, o2);
+                } else {
+                    throw new RuntimeException("Unknown subcorpus: " + o1.subcorpus);
+                }
             }
         }
         if (c == 0) {
@@ -87,7 +91,7 @@ public class TextOrder implements Comparator<TextInfo> {
         return c;
     };
     Comparator<TextInfo> wiki = (o1, o2) -> {
-        int c = Integer.compare(wikiOrder(o1), wikiOrder(o2));
+        int c = o1.subcorpus.compareTo(o2.subcorpus);
         if (c == 0) {
             c = BE.compare(o1.title, o2.title);
         }
@@ -185,15 +189,5 @@ public class TextOrder implements Comparator<TextInfo> {
         if (s2 == null)
             s2 = "";
         return s1.compareTo(s2);
-    }
-
-    static int wikiOrder(TextInfo ti) {
-        if (ti.url.startsWith("https://be-tarask.")) {
-            return 1;
-        } else if (ti.url.startsWith("https://be.")) {
-            return 0;
-        } else {
-            throw new RuntimeException("Невядомая спасылка на wiki: " + ti.url);
-        }
     }
 }

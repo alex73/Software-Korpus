@@ -12,16 +12,16 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title pull-left">Падкорпусы</h4>
+        <h4 class="modal-title pull-left">${messages.dialog_subcorpuses}</h4>
         <span>
-          <button type="button" class="btn btn-secondary" onClick="dialogSubcorpuses.onCancel()">Скасаваць</button>
-          <button type="button" class="btn btn-primary" onClick="dialogSubcorpuses.onOk()">Абраць</button>
+          <button type="button" class="btn btn-secondary" onClick="dialogSubcorpuses.onCancel()">${messages.cancel}</button>
+          <button type="button" class="btn btn-primary" onClick="dialogSubcorpuses.onOk()">${messages.choose}</button>
         </span>
       </div>
       <div class="modal-header">
         <span>
-          <button type="button" class="btn btn-secondary" onClick="dialogSubcorpuses.all(true)">Пазначыць усе</button>
-          <button type="button" class="btn btn-secondary" onClick="dialogSubcorpuses.all(false)">Зняць усе</button>
+          <button type="button" class="btn btn-secondary" onClick="dialogSubcorpuses.all(true)">${messages.select_all}</button>
+          <button type="button" class="btn btn-secondary" onClick="dialogSubcorpuses.all(false)">${messages.unselect_all}</button>
         </span>
       </div>
       <div id="dialog-subcorpuses-place" class="modal-body">

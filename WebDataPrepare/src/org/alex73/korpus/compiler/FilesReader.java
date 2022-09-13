@@ -38,12 +38,7 @@ public class FilesReader extends BaseParallelProcessor {
         run(() -> {
             LOG.trace("Read file " + file);
             String rel = inputDirectory.relativize(file).toString();
-            int p = rel.indexOf('/');
-            if (p < 0) {
-                return;
-            }
-            String currentSubcorpus = rel.substring(0, rel.indexOf('/'));
-            IParser parser = ParserFactory.getParser(currentSubcorpus, file);
+            IParser parser = ParserFactory.getParser(rel, file);
             if (parser == null) {
                 throw new Exception("Unknown parser for " + rel, null);
             } else {

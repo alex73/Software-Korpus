@@ -19,6 +19,7 @@ class GrammarService {
         } else {
           r.json().then(json => {
             this.initial = json;
+            localization = this.initial.localization[document.documentElement.lang];
             grammarui.hideStatusError();
             this.afterInit();
           });

@@ -1,0 +1,18 @@
+<#assign active = "korpus">
+<#include "header.html">
+
+    <div class="container">
+<#assign allow_grammardb = false>
+        <#include "app/page.korpus.html">
+
+    </div>
+    <div class="container text-center" style="font-size: 80%">
+        <hr/><a href="https://github.com/alex73/Software-Korpus" target="_blank">Corpus engine</a> is licensed under a <a href="http://www.gnu.org/licenses/gpl-3.0.html">GPLv3</a> license.
+    </div>
+
+    <script src="app2.js"></script>
+    <script>
+      initializeKorpusPage();
+    </script>
+
+<#include "footer.html">

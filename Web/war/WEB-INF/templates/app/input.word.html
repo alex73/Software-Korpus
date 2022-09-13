@@ -8,21 +8,21 @@
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
-            <div class="form-row">
+            <div class="form-row <#if !allow_grammardb>d-none</#if>">
                 <div class="form-inline form-group my-1">
-                    <label>Усе словаформы
+                    <label>${messages.korpus_word_allforms}
                     <input class="ml-2" type="checkbox" name="allForms" onChange="KorpusUI.lemmaChange('inputword', this)"></label>
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-inline form-group my-1">
-                    <label class="inputword-lemma-prompt">Слова</label>
-                    <input type="text" placeholder="уводзіць тут" class="form-control ml-2" size="10" name="wordText">
+                    <label class="inputword-lemma-prompt">${messages.korpus_word_word}</label>
+                    <input type="text" placeholder="${messages.korpus_word_enter_here}" class="form-control ml-2" size="25" name="wordText">
                 </div>
             </div>
-            <div class="form-row">
+            <div class="form-row <#if !allow_grammardb>d-none</#if>">
                 <div class="form-inline form-group my-1">
-                    <label>Граматыка</label>
+                    <label>${messages.korpus_word_grammar}</label>
                     <a href="#" class="form-control wordgram-display ml-2"
                         onClick="dialogWordGrammar = DialogWordGrammar.createParadigmTagsDialog(this, true); return false;">---</a>
                 </div>

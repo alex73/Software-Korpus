@@ -151,6 +151,7 @@ class OutGrammarForm {
 
 var grammarui: GrammarUI = null;
 var grammarService: GrammarService = null;
+var localization: { [key:string]: string } = null;
 var dialogGrammarDB: DialogGrammarDB = null;
 function initializeGrammarPage() {
 	grammarui = new GrammarUI();

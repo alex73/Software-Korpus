@@ -1,18 +1,18 @@
 <div class="card" style="width:100%">
 	<div class="card-body">
 		<div id="part-wordorder">
-		Парадак слоў:
+		${messages.korpus_order_prompt}:
 		  <label class="radio-inline pl-2">
 		  	<input type="radio" name="wordsOrder" value="PRESET" checked [(ngModel)]="serviceSearch.inputWordsOrder">
-		  		Вызначаны парадак
+		  		${messages.korpus_order_defined}
 		  </label>
 		  <label class="radio-inline pl-2">
 		  	<input type="radio" name="wordsOrder" value="ANY_IN_SENTENCE" [(ngModel)]="serviceSearch.inputWordsOrder">
-		  		Любая адлегласць у межах сказа
+		  		${messages.korpus_order_any_in_sentence}
 		  </label>
 		  <label class="radio-inline pl-2">
 		  	<input type="radio" name="wordsOrder" value="ANY_IN_PARAGRAPH" [(ngModel)]="serviceSearch.inputWordsOrder">
-		  		Любая адлегласць у межах абзаца
+		  		${messages.korpus_order_any_in_paragraph}
 		  </label>
 		</div>
 	</div>

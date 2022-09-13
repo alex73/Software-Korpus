@@ -13,20 +13,21 @@ public class ParserFactory {
         parsers.add(new Pair("teksty:.+\\.list", NullParser.class));
         parsers.add(new Pair("teksty:.+\\.text", TextParser.class));
         parsers.add(new Pair("teksty:.+\\.(jpg|gif|png)", NullParser.class));
-        parsers.add(new Pair("wiki:.+\\.xml(\\.bz2)?", WikiParser.class));
         parsers.add(new Pair("sajty:.+\\.zip\\.headers", NullParser.class));
         parsers.add(new Pair("sajty:.+\\.zip", TextArchiveParser.class));
         parsers.add(new Pair("kankardans:.+\\.txt", KankardansParser.class));
         parsers.add(new Pair("dyjalektny:.+\\.text", DyjalektnyParser.class));
         parsers.add(new Pair("skaryna:.+\\.text", SkarynaParser.class));
+        parsers.add(new Pair("wiki[a-z]*/.+\\.xml(\\.bz2)?", WikiParser.class));
     }
 
-    public static IParser getParser(String subcorpus, Path file) {
+    public static IParser getParser(String relativePath, Path file) {
+        String currentSubcorpus = relativePath.substring(0, relativePath.indexOf('/'));
         for (Pair p : parsers) {
-            Matcher m = p.re.matcher(subcorpus + ":" + file.toString());
+            Matcher m = p.re.matcher(relativePath);
             if (m.matches()) {
                 try {
-                    return p.parser.getConstructor(String.class, Path.class).newInstance(subcorpus, file);
+                    return p.parser.getConstructor(String.class, Path.class).newInstance(currentSubcorpus, file);
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }

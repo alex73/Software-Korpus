@@ -1,60 +1,60 @@
 <script id="template-biblio" type="text/x-jsrender">
   {{if doc.url}}
   <div>
-    <b>URL:</b> <a target="_blank" href="{{> doc.url}}">{{> doc.url}}</a>
+    <b>${messages.korpus_biblio_url}:</b> <a target="_blank" href="{{> doc.url}}">{{> doc.url}}</a>
   </div>
   {{/if}}
   {{if doc.authors}}
   <div>
-    <b>Аўтары:</b> {{> doc.authors}}
+    <b>${messages.korpus_biblio_authors}:</b> {{> doc.authors}}
   </div>
   {{/if}}
   {{if doc.translation}}
   <div>
-    <b>Перакладчык:</b> {{> doc.translators}}
+    <b>${messages.korpus_biblio_translators}:</b> {{> doc.translators}}
   </div>
   {{/if}}
   {{if doc.langOrig}}
   <div>
-    <b>Пераклад з:</b> {{> doc.langOrig}}
+    <b>${messages.korpus_biblio_langOrig}:</b> {{> doc.langOrig}}
   </div>
   {{/if}}
   <div>
-    <b>Назва:</b> {{> doc.title}}
+    <b>${messages.korpus_biblio_title}:</b> {{> doc.title}}
   </div>
   {{if doc.styleGenres}}
   <div>
-    <b>Стыль/жанр:</b> {{> doc.styleGenres}}
+    <b>${messages.korpus_biblio_styleGenres}:</b> {{> doc.styleGenres}}
   </div>
   {{/if}}
   {{if doc.edition}}
   <div>
-    <b>Выданне:</b> {{> doc.edition}}
+    <b>${messages.korpus_biblio_edition}:</b> {{> doc.edition}}
   </div>
   {{/if}}
   {{if doc.details}}
   <div>
-    <b>Падрабязнасці:</b> {{> doc.details}}
+    <b>${messages.korpus_biblio_details}:</b> {{> doc.details}}
   </div>
   {{/if}}
   {{if doc.file}}
   <div>
-    <b>Файл:</b> {{> doc.file}}
+    <b>${messages.korpus_biblio_file}:</b> {{> doc.file}}
   </div>
   {{/if}}
   {{if doc.creationTime}}
   <div>
-    <b>Час стварэння:</b> {{> doc.creationTime}}
+    <b>${messages.korpus_biblio_creationTime}:</b> {{> doc.creationTime}}
   </div>
   {{/if}}
   {{if doc.publicationTime}}
   <div>
-    <b>Час публікацыі:</b> {{> doc.publicationTime}}
+    <b>${messages.korpus_biblio_publicationTime}:</b> {{> doc.publicationTime}}
   </div>
   {{/if}}
   {{if page > 0}}
   <div>
-    <b>Старонка:</b> {{> page}}
+    <b>${messages.korpus_biblio_page}:</b> {{> page}}
   </div>
   {{/if}}
 </script>

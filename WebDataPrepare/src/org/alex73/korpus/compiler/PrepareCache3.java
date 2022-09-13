@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.alex73.korpus.base.GrammarDB2;
@@ -95,6 +97,7 @@ public class PrepareCache3 {
         LOG.info("1st pass time: " + ((af - be) / 1000) + "s");
         errorsList.clear();
 
+        Set<String> subcorpuses = ProcessHeaders.textInfos.stream().map(ti -> ti.subcorpus).distinct().collect(Collectors.toSet());
         int textsCount = ProcessHeaders.textInfos.size();
         textPositionsBySourceFile = ProcessHeaders.calcTextsPositions(OUTPUT.resolve("texts.jsons.gz"));
 
@@ -111,7 +114,7 @@ public class PrepareCache3 {
 
         LOG.info("2nd pass...");
         be = System.currentTimeMillis();
-        ProcessStat stat = new ProcessStat(processStat);
+        ProcessStat stat = new ProcessStat(processStat, subcorpuses);
         ProcessLuceneWriter lucene = new ProcessLuceneWriter(writeToLucene, cacheForProduction, OUTPUT.toString(), 2048);
         ProcessPrepareLucene prepareLucene = new ProcessPrepareLucene(lucene);
         ProcessTexts t2 = new ProcessTexts(grFiller, prepareLucene, stat, textsCount);

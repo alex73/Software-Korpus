@@ -1,0 +1,18 @@
+<#assign active = "korpus">
+<#include "header.html">
+
+    <div class="container">
+<#assign allow_grammardb = true>
+        <#include "app/page.korpus.html">
+
+    </div>
+    <div class="container text-center" style="font-size: 80%">
+        <hr/>${messages.footer_grammar_corpus}
+    </div>
+
+    <script src="app2.js"></script>
+    <script>
+      initializeKorpusPage();
+    </script>
+
+<#include "footer.html">

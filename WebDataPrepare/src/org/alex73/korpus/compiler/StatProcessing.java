@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -37,12 +38,11 @@ public class StatProcessing {
     // authors by lemmas
     private final Map<String, Set<String>> authorsByLemmas = new HashMap<>();
 
-    public StatProcessing() {
+    public StatProcessing(Set<String> subcorpuses) {
         stats.put("", new StatInfo(true));
-        stats.put("teksty", new StatInfo(true));
-        stats.put("skaryna", new StatInfo(true));
-        stats.put("kankardans", new StatInfo(true));
-        stats.put("dyjalektny", new StatInfo(true));
+        for (String sc : subcorpuses) {
+            stats.put(sc, new StatInfo(true));
+        }
     }
 
     public void add(TextInfo textInfo, List<Paragraph> content) {
@@ -133,8 +133,8 @@ public class StatProcessing {
             }
         }
         for (Map.Entry<String, StatInfo> en : stats.entrySet()) {
-            stat.add("texts." + en.getKey() + "=" + en.getValue().texts.intValue());
-            stat.add("words." + en.getKey() + "=" + en.getValue().words.intValue());
+            stat.add("texts." + en.getKey() + "=" + en.getValue().texts.get());
+            stat.add("words." + en.getKey() + "=" + en.getValue().words.get());
         }
         Files.write(dir.resolve("stat.properties"), stat);
 
@@ -154,8 +154,8 @@ public class StatProcessing {
     private static final Pattern RE_SPLIT = Pattern.compile(";");
 
     private static class StatInfo {
-        public AtomicInteger texts = new AtomicInteger();
-        public AtomicInteger words = new AtomicInteger();
+        public AtomicLong texts = new AtomicLong();
+        public AtomicLong words = new AtomicLong();
         private Map<String, ParadigmStat> byLemma = null; // TODO disabled stat new HashMap<>();
         private Map<String, AtomicInteger> byForm = null;
         private Map<String, AtomicInteger> byUnknown = null; /*

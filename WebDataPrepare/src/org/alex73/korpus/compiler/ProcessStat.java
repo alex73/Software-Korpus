@@ -2,6 +2,7 @@ package org.alex73.korpus.compiler;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.text.structure.corpus.Paragraph;
@@ -9,10 +10,10 @@ import org.alex73.korpus.text.structure.corpus.Paragraph;
 public class ProcessStat extends BaseParallelProcessor {
     private final StatProcessing textStat;
 
-    public ProcessStat(boolean processStat) throws Exception {
+    public ProcessStat(boolean processStat, Set<String> subcorpuses) throws Exception {
         super(8, 8);
         if (processStat) {
-            textStat = new StatProcessing();
+            textStat = new StatProcessing(subcorpuses);
         } else {
             textStat = null;
         }

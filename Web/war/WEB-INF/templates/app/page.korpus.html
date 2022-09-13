@@ -1,15 +1,15 @@
 <ul class="nav nav-tabs">
   <li class="nav-item">
-    <a id="tabSearch" class="nav-link active" href="#" onClick="korpusui.switchMode('search'); return false;">Пошук</a>
+    <a id="tabSearch" class="nav-link active" href="#" onClick="korpusui.switchMode('search'); return false;">${messages.korpus_subpage_search}</a>
   </li>
   <li class="nav-item">
-    <a id="tabKWIC" class="nav-link" href="#" onClick="korpusui.switchMode('kwic'); return false;">KWIC</a>
+    <a id="tabKWIC" class="nav-link" href="#" onClick="korpusui.switchMode('kwic'); return false;">${messages.korpus_subpage_kwic}</a>
   </li>
   <li class="nav-item">
-    <a id="tabCluster" class="nav-link" href="#" onClick="korpusui.switchMode('cluster'); return false;">Кластар</a>
+    <a id="tabCluster" class="nav-link" href="#" onClick="korpusui.switchMode('cluster'); return false;">${messages.korpus_subpage_cluster}</a>
   </li>
   <li class="nav-item">
-    <a id="tabSpisy" class="nav-link" href="#" onClick="korpusui.switchMode('spisy'); return false;">Канкардансныя спісы</a>
+    <a id="tabSpisy" class="nav-link" href="#" onClick="korpusui.switchMode('spisy'); return false;">${messages.korpus_subpage_concordance_lists}</a>
   </li>
 </ul>
 <br/>
@@ -18,7 +18,7 @@
     <div id="status" class="alert alert-info fade show" role="alert"></div>
 
     <!--div class="tab-content" (select)="serviceSearch.selectSearch()" [active]="serviceSearch.typeSearch == 'search'"-->
-	    <button id="btnShowSearch" type="button" style="display: none;" class="btn btn-secondary btn-block" onClick="korpusui.maximizeHeader()">Крытэрыі пошуку <img src="icons/down.svg"/></button>
+	    <button id="btnShowSearch" type="button" style="display: none;" class="btn btn-secondary btn-block" onClick="korpusui.maximizeHeader()">${messages.korpus_search_criteria} <img src="icons/down.svg"/></button>
 	    <form id="divInputSearch" onSubmit="korpusService.search(); return false;">
 		    <div class="row">
 		      <#include "input.filter.korpus.html">
@@ -32,7 +32,7 @@
 		      <#include "input.order.html">
 		    </div>
 		    <div class="row justify-content-end">
-		      <button type="submit" class="btn btn-danger btn-lg">Пошук</button>
+		      <button type="submit" class="btn btn-danger btn-lg">${messages.korpus_button_search}</button>
 		    </div>
 	    </form>
 	    

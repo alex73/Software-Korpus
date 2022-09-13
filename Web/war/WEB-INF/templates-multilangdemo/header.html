@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>${messages.getString(active+"_title")}</title>
+    <title>Corpus demo</title>
 
     <link rel="stylesheet" href="css/bootstrap-4.5.3.min.css">
     <link rel="stylesheet" href="css/styles.css">
@@ -22,7 +22,7 @@
     <!-- Static navbar -->
     <nav class="navbar navbar-expand-lg fixed-top navbar-light bg-light">
       <div class="container">
-        <a class="navbar-brand" href="index.html">${messages.getString(active+"_brand")}</a>
+        <a class="navbar-brand" href="index.html">Corpus demo</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -36,8 +36,6 @@
 
             <li class="nav-item"><a class="nav-link" href="index.${lang}.html">${messages.header_about}</a></li>
             <li class="nav-item"><a class="nav-link" href="korpus.${lang}.html">${messages.header_korpus}</a></li>
-            <li class="nav-item"><a class="nav-link" href="grammar.${lang}.html">${messages.header_grammar}</a></li>
-            <li class="nav-item"><a class="nav-link" href="spell.${lang}.html">${messages.header_spell}</a></li>
           </ul>
         </div>
       </div>
@@ -47,8 +45,5 @@ var page = window.location.pathname.replace(/.*\//, "");
 if (!page) {
   page = "index.html";
 }
-var pagelink = document.querySelector("a.nav-link[href$='"+page+"']");
-if (pagelink) {
-    pagelink.classList.add("active");
-}
+document.querySelector("a.nav-link[href$='"+page+"']").classList.add("active");
 </script>

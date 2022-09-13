@@ -7,7 +7,7 @@
     </tr>
     {{for initial.stat}}
       <tr>
-        <td>{{:title}}</td>
+        <td>{{if title}}{{:title}}{{else}}${messages.stat_total}{{/if}}</td>
         <td class="text-right text-nowrap" title="{{:paradigmCount}}">{{roundnum:paradigmCount}}</td>
         <td class="text-right text-nowrap" title="{{:formCount}}">{{roundnum:formCount}}</td>
       </tr>

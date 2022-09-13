@@ -2,16 +2,16 @@
       <div class="modal-header">
         <h4 class="modal-title pull-left">{{>title}}</h4>
         <span>
-          <button type="button" class="btn btn-secondary" onClick="dialogList.onCancel()">Скасаваць</button>
-          <button type="button" class="btn btn-primary" onClick="dialogList.onOk()">Абраць</button>
+          <button type="button" class="btn btn-secondary" onClick="dialogList.onCancel()">${messages.cancel}</button>
+          <button type="button" class="btn btn-primary" onClick="dialogList.onOk()">${messages.choose}</button>
         </span>
       </div>
       <div class="modal-header">
         <span>
-          <button type="button" class="btn btn-secondary" onClick="dialogList.all(true)">Пазначыць усе</button>
-          <button type="button" class="btn btn-secondary" onClick="dialogList.all(false)">Зняць усе</button>
+          <button type="button" class="btn btn-secondary" onClick="dialogList.all(true)">${messages.select_all}</button>
+          <button type="button" class="btn btn-secondary" onClick="dialogList.all(false)">${messages.unselect_all}</button>
         </span>
-        <input class="my-auto form-control w-auto" type="text" placeholder="фільтраваць" onInput="dialogList.filter(this);">
+        <input class="my-auto form-control w-auto" type="text" placeholder="${messages.dialog_filter}" onInput="dialogList.filter(this);">
       </div>
       <div class="modal-body">
         {{for list}}

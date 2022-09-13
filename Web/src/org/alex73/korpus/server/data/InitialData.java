@@ -18,10 +18,12 @@ public class InitialData {
     public GrammarInitial grammar;
     public List<Stat> stat;
     public String[] kankardansnyjaSpisy;
+    public String preselectedSubcorpuses;
+    public Map<String, Map<String, String>> localization;
 
     public static class Stat {
         public String name;
-        public int texts;
-        public int words;
+        public long texts;
+        public long words;
     }
 }

@@ -16,10 +16,10 @@ function roundnum(v: number): string {
     if (v < 1000) {
         return v.toString();
     } else if (v < 990000) {
-        return "~" + f.format(v / 1000) + " тыс.";
+        return "~" + f.format(v / 1000) + " " + localization['stat_ths'];
     } else if (v < 990000000) {
-        return "~" + f.format(v / 1000000) + " млн.";
+        return "~" + f.format(v / 1000000) + " " + localization['stat_mln'];
     } else {
-        return "~" + f.format(v / 1000000000) + " млрд.";
+        return "~" + f.format(v / 1000000000) + " " + localization['stat_bln'];
     }
 }

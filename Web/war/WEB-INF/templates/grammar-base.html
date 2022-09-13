@@ -1,0 +1,18 @@
+<#assign active = "grammar">
+<#include "header.html">
+
+    <div class="container">
+
+        <#include "app/page.grammar.html">
+
+    </div>
+    <div class="container text-center" style="font-size: 80%">
+        <hr/><hr/>${messages.footer_grammar_corpus}
+    </div>
+
+    <script src="app2.js"></script>
+    <script>
+      initializeGrammarPage();
+    </script>
+
+<#include "footer.html">
