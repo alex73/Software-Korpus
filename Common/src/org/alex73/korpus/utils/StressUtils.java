@@ -21,6 +21,9 @@
 
 package org.alex73.korpus.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.alex73.korpus.belarusian.BelarusianTags;
 import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 
@@ -106,6 +109,14 @@ public class StressUtils {
         return word;
     }
 
+    public static boolean isAssignable(String destination, String withStress) {
+        if (destination.equals(unstress(destination))) {
+            return destination.equals(unstress(withStress));
+        } else {
+            return destination.equals(withStress);
+        }
+    }
+
     public static int getStressFromStart(String word) {
         int r = 0;
         for (int i = 0; i < word.length() - 1; i++) {
@@ -122,12 +133,21 @@ public class StressUtils {
         return -1;
     }
 
-    public static boolean isAssignable(String destination, String withStress) {
-        if (destination.equals(unstress(destination))) {
-            return destination.equals(unstress(withStress));
-        } else {
-            return destination.equals(withStress);
+    public static List<Integer> getAllStressesFromStart(String word) {
+        List<Integer> result = new ArrayList<>();
+        int r = 0;
+        for (int i = 0; i < word.length() - 1; i++) {
+            char c = word.charAt(i);
+            char c1 = word.charAt(i + 1);
+            if (STRESS_CHARS.indexOf(c1) >= 0) {
+                result.add(r);
+            }
+            boolean halosnaja = BelarusianTags.HALOSNYJA.indexOf(c) >= 0;
+            if (halosnaja) {
+                r++;
+            }
         }
+        return result;
     }
 
     public static int getStressFromEnd(String word) {
@@ -143,6 +163,22 @@ public class StressUtils {
             }
         }
         return -1;
+    }
+
+    public static List<Integer> getAllStressesFromEnd(String word) {
+        List<Integer> result = new ArrayList<>();
+        int r = 0;
+        for (int i = word.length() - 1; i >= 0; i--) {
+            char c = word.charAt(i);
+            if (STRESS_CHARS.indexOf(c) >= 0) {
+                result.add(r);
+            }
+            boolean halosnaja = BelarusianTags.HALOSNYJA.indexOf(c) >= 0;
+            if (halosnaja) {
+                r++;
+            }
+        }
+        return result;
     }
 
     public static String setStressFromStart(String word, int pos) {

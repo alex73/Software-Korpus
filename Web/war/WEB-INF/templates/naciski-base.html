@@ -4,7 +4,7 @@
 <div class="container">
 	<form onSubmit="req(); return false;">
 		<div class="class="form-group">
-			<textarea id="text" class="form-control" rows="3" style="font-size: 150%"></textarea>
+			<textarea id="text" class="form-control" rows="8" style="font-size: 150%"></textarea>
 			<p>Націскі пазначаюцца па граматычнай базе. Таму, вы не пабачыце націскі ў словах, якіх няма ў граматычнай базе, альбо пабачыце некалькі націскаў у адным слове, калі ёсць аманімія ў граматычнай базе.</p>
 		</div>
 		<div class="row justify-content-end my-4">
@@ -16,7 +16,7 @@
 <script>
 	function req() {
 		let arg = $('#text').val();
-		fetch('naciski', {
+		fetch('rest/naciski', {
 		      method: 'POST',
 		      headers: {
 		        'Content-Type': 'text/plain; charset=UTF-8'
