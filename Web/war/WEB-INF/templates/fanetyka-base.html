@@ -38,6 +38,7 @@
 		</ul>
 	</div>
 		<div class="row justify-content-end my-4">
+			<button type="button" class="btn btn-info btn-lg mx-4" onClick="reqNaciski(); return false;">Пазначыць націскі</button>
 			<button type="button" id="forvo" class="btn btn-warning btn-lg mx-4" style="display: none" onClick="forvoopen(); return false;">Паслухаць у forvo</button>
 			<button type="submit" class="btn btn-danger btn-lg">Канвертаваць</button>
 		</div>
@@ -81,13 +82,13 @@
 	});
 	function req() {
 		let arg = $('#text').val();
-		if (!arg.includes(' ')) {
+		if (arg.trim() != '' && !arg.includes(' ')) {
 			forvoword = arg.toLowerCase().replace('+','').replace('|','').replace('ґ','г');
 			$('#forvo').show();
 		} else {
 			$('#forvo').hide();
 		}
-		fetch('fan', {
+		fetch('rest/conv/fanetyka', {
 		      method: 'POST',
 		      headers: {
 		        'Content-Type': 'text/plain; charset=UTF-8'
@@ -100,6 +101,26 @@
 		        } else {
 		          r.text().then(data => {
 		            $("#out").html(data);
+		          });
+		        }
+		      })
+		      .catch(err => alert("Памылка: " + err));
+	}
+	function reqNaciski() {
+		let arg = $('#text').val();
+		fetch('rest/conv/naciski', {
+		      method: 'POST',
+		      headers: {
+		        'Content-Type': 'text/plain; charset=UTF-8'
+		      },
+		      body: arg
+		    })
+		      .then(r => {
+		        if (!r.ok) {
+		        	alert("Памылка: " + r.status + " " + r.statusText);
+		        } else {
+		          r.text().then(data => {
+		              $('#text').val(data);
 		          });
 		        }
 		      })
