@@ -95,7 +95,7 @@ public class UI2 {
 
     public static void init() throws Exception {
         mainWindow = new MainWindow2();
-        mainWindow.setTitle("Разгортванне слоў, v.2022-08-29");
+        mainWindow.setTitle("Разгортванне слоў, v.2022-09-23");
         mainWindow.setBounds(200, 200, 900, 600);
 
         new SwingWorker<Void, String>() {

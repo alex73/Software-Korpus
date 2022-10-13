@@ -9,16 +9,16 @@ import java.util.regex.Pattern;
 public class ParserFactory {
     public static final List<Pair> parsers = new ArrayList<>();
     static {
-        parsers.add(new Pair("nierazabranaje:.+.zip", OcrTextParser.class));
-        parsers.add(new Pair("teksty:.+\\.list", NullParser.class));
-        parsers.add(new Pair("teksty:.+\\.text", TextParser.class));
-        parsers.add(new Pair("teksty:.+\\.(jpg|gif|png)", NullParser.class));
-        parsers.add(new Pair("sajty:.+\\.zip\\.headers", NullParser.class));
-        parsers.add(new Pair("sajty:.+\\.zip", TextArchiveParser.class));
-        parsers.add(new Pair("kankardans:.+\\.txt", KankardansParser.class));
-        parsers.add(new Pair("dyjalektny:.+\\.text", DyjalektnyParser.class));
-        parsers.add(new Pair("skaryna:.+\\.text", SkarynaParser.class));
+        parsers.add(new Pair("nierazabranaje/.+.zip", OcrTextParser.class));
+        parsers.add(new Pair("teksty/.+\\.list", NullParser.class));
+        parsers.add(new Pair("teksty/.+\\.text", TextParser.class));
+        parsers.add(new Pair("teksty/.+\\.(jpg|gif|png)", NullParser.class));
         parsers.add(new Pair("wiki[a-z]*/.+\\.xml(\\.bz2)?", WikiParser.class));
+        parsers.add(new Pair("sajty/.+\\.zip\\.headers", NullParser.class));
+        parsers.add(new Pair("sajty/.+\\.zip", TextArchiveParser.class));
+        parsers.add(new Pair("kankardans/.+\\.txt", KankardansParser.class));
+        parsers.add(new Pair("dyjalektny/.+\\.text", DyjalektnyParser.class));
+        parsers.add(new Pair("skaryna/.+\\.text", SkarynaParser.class));
     }
 
     public static IParser getParser(String relativePath, Path file) {

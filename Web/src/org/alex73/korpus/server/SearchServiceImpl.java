@@ -277,6 +277,7 @@ public class SearchServiceImpl {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public SearchResults[] getSentences(SentencesRequest rq) throws Exception {
+        rq.params.words.forEach(w -> cleanupWordRequest(w));
         SearchParams params = rq.params;
         int[] list = rq.list;
         for (WordRequest w : params.words) {
@@ -353,6 +354,9 @@ public class SearchServiceImpl {
             if (w.word.isEmpty()) {
                 w.word = null;
             }
+        }
+        if (w.word == null) {
+            w.allForms = false;
         }
         if (w.grammar != null) {
             w.grammar = w.grammar.trim();

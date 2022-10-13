@@ -36,7 +36,7 @@ public class Kanvertary {
                 throw new Exception("Пусты тэкст");
             }
 
-            FanetykaText f = new FanetykaText(KorpusApplication.instance.grFinder, text.replace('\u0301', '+').replace('+', '´').replaceAll("[-‒‒–]", "-"));
+            FanetykaText f = new FanetykaText(KorpusApplication.instance.grFinder, text.replace('+', BelarusianWordNormalizer.pravilny_nacisk).replaceAll("[-‒‒–]", "-"));
 
             return "<div>Вынікі канвертавання (IPA):</div><div style='font-size: 150%'>" + f.ipa.replace("\n", "<br/>")
                     + "</div><br/><div>Школьная транскрыпцыя:</div><div style='font-size: 150%'>" + f.skola.replace("\n", "<br/>") + "</div>";
