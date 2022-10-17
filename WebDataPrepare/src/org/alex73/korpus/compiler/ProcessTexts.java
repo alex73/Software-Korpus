@@ -1,53 +1,52 @@
 package org.alex73.korpus.compiler;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import org.alex73.korpus.base.StaticGrammarFiller2;
-import org.alex73.korpus.base.TextInfo;
-import org.alex73.korpus.text.structure.corpus.Paragraph;
 
-public class ProcessTexts extends BaseParallelProcessor {
+public class ProcessTexts extends BaseParallelProcessor<MessageParsedText> {
     public static final boolean writeToLucene = true;
 
-    private static ProcessTexts instance;
-
     private final StaticGrammarFiller2 grFiller;
-    private final ProcessPrepareLucene lucene;
+    private final Consumer<MessageParsedText> lucene;
     private final ProcessStat stat;
     private static final AtomicInteger counter = new AtomicInteger();
     private final int totalCount;
 
-    public ProcessTexts(StaticGrammarFiller2 grFiller, ProcessPrepareLucene lucene, ProcessStat stat, int textsCount) throws Exception {
-        super(4, 4);
+    public ProcessTexts(StaticGrammarFiller2 grFiller, Consumer<MessageParsedText> lucene, ProcessStat stat, int textsCount) throws Exception {
+        super(8, 16);
         this.grFiller = grFiller;
         this.lucene = lucene;
         this.stat = stat;
 
         totalCount = textsCount;
-        instance = this;
     }
 
-    public static void process(TextInfo textInfo, List<Paragraph> content) {
-        if (textInfo.sourceFilePath == null) {
+    @Override
+    public void accept(MessageParsedText text) {
+        if (text.textInfo.sourceFilePath == null) {
             throw new RuntimeException("sourceFilePath нявызначаны");
         }
-        if (textInfo.subcorpus == null) {
-            throw new RuntimeException("subcorpus нявызначаны ў " + textInfo.sourceFilePath);
+        if (text.textInfo.subcorpus == null) {
+            throw new RuntimeException("subcorpus нявызначаны ў " + text.textInfo.sourceFilePath);
         }
-        if (content.contains(null)) {
+        if (text.paragraphs.contains(null)) {
             throw new RuntimeException("content утрымлівае пустыя параграфы");
         }
 
-        instance.run(() -> {
+        run(() -> {
             counter.incrementAndGet();
-            //System.out.println("Process: " + textInfo.sourceFilePath);
-            Collections.shuffle(content);
-            instance.grFiller.fill(content);
-            instance.stat.process(textInfo, content);
-            if (writeToLucene) {
-                instance.lucene.process(textInfo, content);
+            // System.out.println("Process: " + textInfo.sourceFilePath);
+            Collections.shuffle(text.paragraphs);
+            grFiller.fill(text.paragraphs);
+            stat.accept(text);
+            for (int i = 0; i < text.paragraphs.size(); i += 500) {
+                MessageParsedText portion = new MessageParsedText();
+                portion.textInfo = text.textInfo;
+                portion.paragraphs = text.paragraphs.subList(i, Math.min(text.paragraphs.size(), i + 500));
+                lucene.accept(portion);
             }
         });
     }

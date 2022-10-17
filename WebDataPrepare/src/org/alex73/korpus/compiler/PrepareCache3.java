@@ -1,5 +1,6 @@
 package org.alex73.korpus.compiler;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,14 +10,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.ZipOutputStream;
 
 import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.compiler.parsers.AuthorsUtil;
+import org.alex73.korpus.compiler.stat.StatWriting;
 import org.alex73.korpus.text.parser.IProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,18 +89,15 @@ public class PrepareCache3 {
         AuthorsUtil.init(INPUT);
 
         ProcessHeaders h1 = new ProcessHeaders();
-        ProcessFileParser p1 = new ProcessFileParser();
-        FilesReader r1 = new FilesReader(INPUT, true, p1);
+        FilesReader r1 = new FilesReader(INPUT, true, h1);
         r1.finish(60);
-        p1.finish(5);
         h1.finish(1);
         long af = System.currentTimeMillis();
         LOG.info("1st pass time: " + ((af - be) / 1000) + "s");
         errorsList.clear();
 
-        Set<String> subcorpuses = ProcessHeaders.textInfos.stream().map(ti -> ti.subcorpus).distinct().collect(Collectors.toSet());
-        int textsCount = ProcessHeaders.textInfos.size();
-        textPositionsBySourceFile = ProcessHeaders.calcTextsPositions(OUTPUT.resolve("texts.jsons.gz"));
+        int textsCount = h1.textInfos.size();
+        textPositionsBySourceFile = h1.calcTextsPositions(OUTPUT.resolve("texts.jsons.gz"));
 
         GrammarDB2 gr;
         if (grammarDbPath != null) {
@@ -114,22 +112,30 @@ public class PrepareCache3 {
 
         LOG.info("2nd pass...");
         be = System.currentTimeMillis();
-        ProcessStat stat = new ProcessStat(processStat, subcorpuses);
-        ProcessLuceneWriter lucene = new ProcessLuceneWriter(writeToLucene, cacheForProduction, OUTPUT.toString(), 2048);
+        ProcessLuceneWriter lucene = new ProcessLuceneWriter(writeToLucene, cacheForProduction, OUTPUT, 8192);
         ProcessPrepareLucene prepareLucene = new ProcessPrepareLucene(lucene);
+        ProcessStat stat = new ProcessStat(processStat, OUTPUT);
         ProcessTexts t2 = new ProcessTexts(grFiller, prepareLucene, stat, textsCount);
-        ProcessFileParser p2 = new ProcessFileParser();
-        FilesReader r2 = new FilesReader(INPUT, false, p2);
+        FilesReader r2 = new FilesReader(INPUT, false, t2);
         r2.finish(3 * 60);
-        p2.finish(10);
         t2.finish(10);
         LOG.info("Finishing stats...");
         stat.finish(OUTPUT);
         prepareLucene.finish(1);
         LOG.info("Finishing lucene...");
-        lucene.finish(30); // finish or shutdown ?
+        lucene.finish(60); // finish or shutdown ?
         af = System.currentTimeMillis();
         LOG.info("2st pass time: " + ((af - be) / 1000 / 60) + "min");
+
+        LOG.info("Merging Lucene and words counts...");
+        ProcessMergeAll m = new ProcessMergeAll();
+        try (ZipOutputStream zip = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(OUTPUT.resolve("stat-freq.zip")), 1024 * 1024))) {
+            if (writeToLucene) {
+                m.accept(lucene.mergeIndexes());
+            }
+            stat.mergeToZip(zip, m);
+            m.finish(60);
+        }
 
         Collections.sort(errorsList);
         Files.write(OUTPUT.resolve("errors.txt"), errorsList);

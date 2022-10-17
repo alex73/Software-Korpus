@@ -1,11 +1,8 @@
 package org.alex73.korpus.base;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
@@ -23,20 +20,14 @@ public class StaticGrammarFiller2 {
     public static String fillTheme;
 
     private final GrammarFinder finder;
-    private final Map<String, WordInfo> cache = new HashMap<>();
-
-    private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-
-    private final Lock readLock = readWriteLock.readLock();
-
-    private final Lock writeLock = readWriteLock.writeLock();
+    private final Map<String, WordInfo> cache = new ConcurrentHashMap<>(1024 * 1024, 0.75f, 4);
 
     public StaticGrammarFiller2(GrammarFinder finder) {
         this.finder = finder;
     }
 
     public void fill(List<Paragraph> content) {
-        content.parallelStream().forEach(p -> {
+        content.stream().forEach(p -> {
             for (Sentence se : p.sentences) {
                 for (Word w : se.words) {
                     fill(w);
@@ -48,10 +39,10 @@ public class StaticGrammarFiller2 {
     private void fill(Word w) {
         WordInfo wi;
         if (w.lemmas == null && w.tags == null) {
-            wi = get(w.normalized);
+            wi = cache.get(w.normalized);
             if (wi == null) {
                 wi = calculateWordInfo(w.normalized, null, null);
-                set(w.normalized, wi);
+                cache.put(w.normalized, wi);
             }
         } else {
             wi = calculateWordInfo(w.normalized, w.lemmas, w.tags);
@@ -64,10 +55,10 @@ public class StaticGrammarFiller2 {
         WordInfo wi;
         String expected = w.manualNormalized != null ? w.manualNormalized : w.lightNormalized;
         if (w.manualLemma == null && w.manualTag == null) {
-            wi = get(expected);
+            wi = cache.get(expected);
             if (wi == null) {
                 wi = calculateWordInfo(expected, null, null);
-                set(expected, wi);
+                cache.put(expected, wi);
             }
         } else {
             wi = calculateWordInfo(expected, w.manualLemma, w.manualTag);
@@ -75,24 +66,6 @@ public class StaticGrammarFiller2 {
         w.lemmas = wi.lemmas;
         w.tags = wi.tags;
         w.variantIds = wi.variantIds;
-    }
-
-    private WordInfo get(String word) {
-        readLock.lock();
-        try {
-            return cache.get(word);
-        } finally {
-            readLock.unlock();
-        }
-    }
-
-    private void set(String word, WordInfo info) {
-        writeLock.lock();
-        try {
-            cache.put(word, info);
-        } finally {
-            writeLock.unlock();
-        }
     }
 
     private WordInfo calculateWordInfo(String word, String manualLemma, String manualTag) {

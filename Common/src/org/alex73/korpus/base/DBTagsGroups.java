@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.alex73.korpus.belarusian.BelarusianTags;
 import org.alex73.korpus.belarusian.TagLetter;
@@ -57,7 +58,7 @@ public class DBTagsGroups {
         return tagGroupsByWordType;
     }
 
-    private static Map<String, String> cache = Collections.synchronizedMap(new HashMap<>());
+    private static Map<String, String> cache = new ConcurrentHashMap<>();
 
     public static String getDBTagString(String grammarTag) {
         String r = cache.get(grammarTag);

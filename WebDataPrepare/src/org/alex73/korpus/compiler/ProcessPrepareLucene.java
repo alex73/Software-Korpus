@@ -1,33 +1,38 @@
 package org.alex73.korpus.compiler;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.alex73.korpus.base.DBTagsGroups;
-import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.server.text.BinaryParagraphWriter;
 import org.alex73.korpus.text.structure.corpus.Paragraph;
 import org.alex73.korpus.text.structure.corpus.Sentence;
 import org.alex73.korpus.text.structure.corpus.Word;
 
-public class ProcessPrepareLucene extends BaseParallelProcessor {
+public class ProcessPrepareLucene extends BaseParallelProcessor<MessageParsedText> {
     static final String[] STRING_ARRAY = new String[0];
-    private ProcessLuceneWriter lucene;
+    private Consumer<MessageLuceneWrite> lucene;
 
-    public ProcessPrepareLucene(ProcessLuceneWriter lucene) throws Exception {
-        super(8, 20);
+    public ProcessPrepareLucene(Consumer<MessageLuceneWrite> lucene) throws Exception {
+        super(16, 40);
         this.lucene = lucene;
     }
 
-    public void process(TextInfo textInfo, List<Paragraph> content) {
+    @Override
+    public void accept(MessageParsedText text) {
         run(() -> {
             BinaryParagraphWriter pwr = new BinaryParagraphWriter();
             Set<String> values = new HashSet<>();
             Set<String> dbGrammarTags = new HashSet<>();
             Set<String> lemmas = new HashSet<>();
-            for (Paragraph p : content) {
+
+            MessageLuceneWrite out = new MessageLuceneWrite();
+            out.textInfo = text.textInfo;
+            out.paragraphs = new MessageLuceneWrite.LuceneParagraph[text.paragraphs.size()];
+            for (int i = 0; i < text.paragraphs.size(); i++) {
+                Paragraph p = text.paragraphs.get(i);
                 values.clear();
                 dbGrammarTags.clear();
                 lemmas.clear();
@@ -47,10 +52,17 @@ public class ProcessPrepareLucene extends BaseParallelProcessor {
                         }
                     }
                 }
-                byte[] pxml = pwr.write(p);
-                lucene.process(textInfo, p.page, values.toArray(STRING_ARRAY), dbGrammarTags.toArray(STRING_ARRAY),
-                        lemmas.toArray(STRING_ARRAY), pxml);
+
+                MessageLuceneWrite.LuceneParagraph po = new MessageLuceneWrite.LuceneParagraph();
+                po.page = p.page;
+                po.xml = pwr.write(p);
+                po.values = values.toArray(STRING_ARRAY);
+                po.lemmas = lemmas.toArray(STRING_ARRAY);
+                po.dbGrammarTags = dbGrammarTags.toArray(STRING_ARRAY);
+                po.dbGrammarTags = dbGrammarTags.toArray(STRING_ARRAY);
+                out.paragraphs[i] = po;
             }
+            lucene.accept(out);
         });
     }
 }

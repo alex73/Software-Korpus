@@ -6,14 +6,12 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.alex73.korpus.base.TextInfo;
-import org.alex73.korpus.compiler.BaseParallelProcessor;
+import org.alex73.korpus.compiler.MessageParsedText;
 import org.alex73.korpus.compiler.PrepareCache3;
-import org.alex73.korpus.compiler.ProcessHeaders;
-import org.alex73.korpus.compiler.ProcessTexts;
 import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.TextFileParser;
 import org.apache.commons.io.IOUtils;
@@ -23,8 +21,9 @@ public class OcrTextParser extends BaseParser {
         super(subcorpus, file);
     }
 
+
     @Override
-    public void parse(BaseParallelProcessor queue, boolean headersOnly) throws Exception {
+    public void parse(Consumer<MessageParsedText> publisher, boolean headersOnly) throws Exception {
         try (ZipFile zip = new ZipFile(file.toFile())) {
             for (Enumeration<? extends ZipEntry> it = zip.entries(); it.hasMoreElements();) {
                 ZipEntry en = it.nextElement();
@@ -35,25 +34,25 @@ public class OcrTextParser extends BaseParser {
                 try (InputStream in = new BufferedInputStream(zip.getInputStream(en))) {
                     data = IOUtils.toByteArray(in);
                 }
-                queue.run(() -> {
-                    TextFileParser doc = new TextFileParser(new ByteArrayInputStream(data), headersOnly);
-                    TextInfo textInfo = new TextInfo();
-                    textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + en.getName();
-                    textInfo.subcorpus = subcorpus;
-                    textInfo.url = doc.headers.get("URL");
-                    textInfo.file = doc.headers.get("File");
-                    textInfo.source = doc.headers.get("Source");
-                    textInfo.title = doc.headers.get("Title");
-                    textInfo.details = doc.headers.get("Details");
-                    textInfo.textLabel = textInfo.source;
-                    if (headersOnly) {
-                        ProcessHeaders.process(textInfo);
-                    } else {
-                        boolean eachLine = fixHyphens(doc.sourceLines);
-                        doc.parse(false, PrepareCache3.errors);
-                        ProcessTexts.process(textInfo, new PtextToKorpus(doc.lines, eachLine).paragraphs);
-                    }
-                });
+                MessageParsedText text = new MessageParsedText();
+                TextFileParser doc = new TextFileParser(new ByteArrayInputStream(data), headersOnly);
+                text.textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + en.getName();
+                text.textInfo.subcorpus = subcorpus;
+                text.textInfo.url = doc.headers.get("URL");
+                text.textInfo.file = doc.headers.get("File");
+                text.textInfo.source = doc.headers.get("Source");
+                text.textInfo.title = doc.headers.get("Title");
+                text.textInfo.details = doc.headers.get("Details");
+                text.textInfo.textLabel = text.textInfo.source;
+                if (headersOnly) {
+                    // ProcessHeaders.process(textInfo);
+                } else {
+                    boolean eachLine = fixHyphens(doc.sourceLines);
+                    doc.parse(false, PrepareCache3.errors);
+                    text.paragraphs = new PtextToKorpus(doc.lines, eachLine).paragraphs;
+                    /// ProcessTexts.process(textInfo, );
+                }
+                publisher.accept(text);
             }
         }
     }

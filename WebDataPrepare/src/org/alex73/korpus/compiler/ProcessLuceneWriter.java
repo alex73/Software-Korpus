@@ -2,12 +2,11 @@ package org.alex73.korpus.compiler;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.alex73.korpus.base.TextInfo;
+import org.alex73.korpus.compiler.MessageLuceneWrite.LuceneParagraph;
 import org.alex73.korpus.server.engine.LuceneFields;
 import org.alex73.korpus.server.engine.StringArrayTokenStream;
 import org.alex73.korpus.utils.KorpusDateTime;
@@ -26,7 +25,7 @@ import org.apache.lucene.store.NIOFSDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ProcessLuceneWriter extends BaseParallelProcessor {
+public class ProcessLuceneWriter extends BaseParallelProcessor<MessageLuceneWrite> {
     private static final Logger LOG = LoggerFactory.getLogger(ProcessLuceneWriter.class);
 
     static final int INSTANCE_COUNT = 8;
@@ -44,13 +43,12 @@ public class ProcessLuceneWriter extends BaseParallelProcessor {
         protected LuceneContext initialValue() {
             LuceneContext r = new LuceneContext();
             contexts.add(r);
-            r.fields = new LuceneFields();
             if (realWrite) {
                 IndexWriterConfig config = new IndexWriterConfig();
                 config.setCommitOnClose(true);
                 config.setOpenMode(OpenMode.CREATE);
                 config.setRAMBufferSizeMB(bufferSizeMbEachInstance);
-                config.setIndexSort(new Sort(new SortField(r.fields.fieldTextID.name(), SortField.Type.INT)));
+                config.setIndexSort(new Sort(new SortField("textId", SortField.Type.INT))); // need to sort because mergeIndex will not work
                 config.setMergePolicy(NoMergePolicy.INSTANCE);
                 config.setMergeScheduler(NoMergeScheduler.INSTANCE);
                 try {
@@ -61,34 +59,16 @@ public class ProcessLuceneWriter extends BaseParallelProcessor {
                     throw new RuntimeException(ex);
                 }
             }
-
-            r.docSentence = new Document();
-            r.docSentence.add(r.fields.fieldSentenceValues);
-            r.docSentence.add(r.fields.fieldSentenceDBGrammarTags);
-            r.docSentence.add(r.fields.fieldSentenceLemmas);
-            r.docSentence.add(r.fields.fieldSentencePBinary);
-            r.docSentence.add(r.fields.fieldSentencePage);
-
-            r.docSentence.add(r.fields.fieldSentenceTextSubcorpus);
-            // docSentence.add(fieldSentenceTextIDOrder);
-            r.docSentence.add(r.fields.fieldSentenceTextStyleGenre);
-            r.docSentence.add(r.fields.fieldSentenceTextAuthor);
-            r.docSentence.add(r.fields.fieldSentenceTextSource);
-            r.docSentence.add(r.fields.fieldSentenceTextCreationYear);
-            r.docSentence.add(r.fields.fieldSentenceTextPublishedYear);
-
-            r.docSentence.add(r.fields.fieldTextID);
             return r;
         }
     };
 
-    public ProcessLuceneWriter(boolean realWrite, boolean cacheForProduction, String rootDir, int bufferSizeMb)
-            throws Exception {
+    public ProcessLuceneWriter(boolean realWrite, boolean cacheForProduction, Path rootDir, int bufferSizeMb) throws Exception {
         super(INSTANCE_COUNT, INSTANCE_COUNT * 3);
         LOG.info("Lucene will use " + bufferSizeMb + "mb");
         this.realWrite = realWrite;
         this.cacheForProduction = cacheForProduction;
-        this.rootDir = Paths.get(rootDir);
+        this.rootDir = rootDir;
         this.bufferSizeMb = bufferSizeMb;
         this.bufferSizeMbEachInstance = bufferSizeMb * 1.0 / INSTANCE_COUNT;
         defaultThreadPriority = Thread.MAX_PRIORITY;
@@ -108,49 +88,46 @@ public class ProcessLuceneWriter extends BaseParallelProcessor {
                 }
             }
         });
-        if (realWrite) {
-            LOG.info("Merge all...");
-            mergeIndexes();
-        }
     }
 
-    public void process(TextInfo textInfo, int page, String[] values, String[] dbGrammarTags, String[] lemmas,
-            byte[] xml) {
+    @Override
+    public void accept(MessageLuceneWrite text) {
         run(() -> {
-            addSentence(textInfo, page, values, dbGrammarTags, lemmas, xml);
+            LuceneContext c = context.get();
+            grow(text.paragraphs.length);
+            for (int i = 0; i < text.paragraphs.length; i++) {
+                LuceneFields fields = c.fields.get(i);
+                LuceneParagraph p = text.paragraphs[i];
+                fields.fieldSentenceTextSubcorpus.setStringValue(text.textInfo.subcorpus);
+                fields.fieldSentenceTextStyleGenre.setTokenStream(new StringArrayTokenStream(text.textInfo.styleGenres));
+                setYearsRange(text.textInfo.creationTime, fields.fieldSentenceTextCreationYear);
+                setYearsRange(text.textInfo.publicationTime, fields.fieldSentenceTextPublishedYear);
+                fields.fieldSentenceTextAuthor.setTokenStream(new StringArrayTokenStream(text.textInfo.authors));
+                fields.fieldSentenceTextSource.setStringValue(text.textInfo.source != null ? text.textInfo.source : "");
+
+                fields.fieldSentenceValues.setTokenStream(new StringArrayTokenStream(p.values));
+                fields.fieldSentenceDBGrammarTags.setTokenStream(new StringArrayTokenStream(p.dbGrammarTags));
+                fields.fieldSentenceLemmas.setTokenStream(new StringArrayTokenStream(p.lemmas));
+                fields.fieldSentencePBinary.setBytesValue(p.xml);
+                fields.fieldSentencePage.setIntValue(p.page);
+
+                Integer position = PrepareCache3.textPositionsBySourceFile.get(text.textInfo.sourceFilePath);
+                if (position == null) {
+                    throw new RuntimeException("No file " + text.textInfo.sourceFilePath);
+                }
+                fields.fieldTextID.setIntValue(position); // TODO
+            }
+
+            if (c.indexWriter != null) {
+                try {
+                    // System.out.println("Add " + text.paragraphs.length + " for " +
+                    // text.textInfo.title);
+                    c.indexWriter.addDocuments(c.documents.subList(0, text.paragraphs.length));
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
         });
-    }
-
-    /**
-     * Add sentence to database. Sentence linked to previously added text.
-     * 
-     * @return words count
-     */
-    private void addSentence(TextInfo textInfo, int page, String[] values, String[] dbGrammarTags, String[] lemmas,
-            byte[] xml) throws Exception {
-        LuceneContext c = context.get();
-        c.fields.fieldSentenceTextSubcorpus.setStringValue(textInfo.subcorpus);
-        c.fields.fieldSentenceTextStyleGenre.setTokenStream(new StringArrayTokenStream(textInfo.styleGenres));
-        setYearsRange(textInfo.creationTime, c.fields.fieldSentenceTextCreationYear);
-        setYearsRange(textInfo.publicationTime, c.fields.fieldSentenceTextPublishedYear);
-        c.fields.fieldSentenceTextAuthor.setTokenStream(new StringArrayTokenStream(textInfo.authors));
-        c.fields.fieldSentenceTextSource.setStringValue(textInfo.source != null ? textInfo.source : "");
-
-        c.fields.fieldSentenceValues.setTokenStream(new StringArrayTokenStream(values));
-        c.fields.fieldSentenceDBGrammarTags.setTokenStream(new StringArrayTokenStream(dbGrammarTags));
-        c.fields.fieldSentenceLemmas.setTokenStream(new StringArrayTokenStream(lemmas));
-        c.fields.fieldSentencePBinary.setBytesValue(xml);
-        c.fields.fieldSentencePage.setIntValue(page);
-
-        Integer position = PrepareCache3.textPositionsBySourceFile.get(textInfo.sourceFilePath);
-        if (position == null) {
-            throw new Exception("No file " + textInfo.sourceFilePath);
-        }
-        c.fields.fieldTextID.setIntValue(position); // TODO
-
-        if (c.indexWriter != null) {
-            c.indexWriter.addDocument(c.docSentence);
-        }
     }
 
     private void setYearsRange(String date, IntRange rangeField) {
@@ -162,42 +139,71 @@ public class ProcessLuceneWriter extends BaseParallelProcessor {
         }
     }
 
-    public void mergeIndexes() throws Exception {
-        LuceneFields fields = new LuceneFields();
-        IndexWriterConfig config = new IndexWriterConfig();
-        config.setCommitOnClose(true);
-        config.setOpenMode(OpenMode.CREATE);
-        config.setRAMBufferSizeMB(bufferSizeMb);
-        config.setIndexSort(new Sort(new SortField(fields.fieldTextID.name(), SortField.Type.INT)));
-        config.setMergeScheduler(new ConcurrentMergeScheduler());
-
-        Directory[] partDirs;
-        try (Directory dir = new NIOFSDirectory(rootDir)) {
-            try (IndexWriter indexWriter = new IndexWriter(dir, config)) {
-                partDirs = contexts.stream().map(c -> {
-                    try {
-                        return new NIOFSDirectory(c.path);
-                    } catch (IOException ex) {
-                        LOG.error("", ex);
-                        throw new RuntimeException(ex);
-                    }
-                }).toArray(Directory[]::new);
-                indexWriter.addIndexes(partDirs);
-                if (cacheForProduction) {
-                    indexWriter.forceMerge(1, true);
-                }
-            }
+    private void grow(int capacity) {
+        LuceneContext c = context.get();
+        while (c.fields.size() < capacity) {
+            c.fields.add(new LuceneFields());
         }
-        for (Directory d : partDirs) {
-            d.close();
+        while (c.documents.size() < capacity) {
+            LuceneFields fields = c.fields.get(c.documents.size());
+            Document docSentence = new Document();
+            docSentence.add(fields.fieldSentenceValues);
+            docSentence.add(fields.fieldSentenceDBGrammarTags);
+            docSentence.add(fields.fieldSentenceLemmas);
+            docSentence.add(fields.fieldSentencePBinary);
+            docSentence.add(fields.fieldSentencePage);
+
+            docSentence.add(fields.fieldSentenceTextSubcorpus);
+            // docSentence.add(fieldSentenceTextIDOrder);
+            docSentence.add(fields.fieldSentenceTextStyleGenre);
+            docSentence.add(fields.fieldSentenceTextAuthor);
+            docSentence.add(fields.fieldSentenceTextSource);
+            docSentence.add(fields.fieldSentenceTextCreationYear);
+            docSentence.add(fields.fieldSentenceTextPublishedYear);
+
+            docSentence.add(fields.fieldTextID);
+            c.documents.add(docSentence);
         }
     }
 
+    public ExRunnable mergeIndexes() {
+        return () -> {
+            LuceneFields fields = new LuceneFields();
+            IndexWriterConfig config = new IndexWriterConfig();
+            config.setCommitOnClose(true);
+            config.setOpenMode(OpenMode.CREATE);
+            config.setRAMBufferSizeMB(bufferSizeMb);
+            config.setIndexSort(new Sort(new SortField(fields.fieldTextID.name(), SortField.Type.INT)));
+            config.setMergeScheduler(new ConcurrentMergeScheduler());
+
+            Directory[] partDirs;
+            try (Directory dir = new NIOFSDirectory(rootDir)) {
+                try (IndexWriter indexWriter = new IndexWriter(dir, config)) {
+                    partDirs = contexts.stream().map(c -> {
+                        try {
+                            return new NIOFSDirectory(c.path);
+                        } catch (IOException ex) {
+                            LOG.error("", ex);
+                            throw new RuntimeException(ex);
+                        }
+                    }).toArray(Directory[]::new);
+                    indexWriter.addIndexes(partDirs);
+                    if (cacheForProduction) {
+                        indexWriter.forceMerge(1, true);
+                    }
+                }
+            }
+            for (Directory d : partDirs) {
+                d.close();
+            }
+        };
+    }
+
     static class LuceneContext {
-        LuceneFields fields;
         IndexWriter indexWriter;
         Path path;
         NIOFSDirectory dir;
-        Document docSentence;
+        List<LuceneFields> fields = new ArrayList<>();
+        List<Document> documents = new ArrayList<>();
     }
 }

@@ -3,7 +3,6 @@ package org.alex73.korpus.compiler.parsers;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-import org.alex73.korpus.compiler.BaseParallelProcessor;
 import org.alex73.korpus.utils.KorpusDateTime;
 
 public abstract class BaseParser implements IParser {
@@ -16,8 +15,6 @@ public abstract class BaseParser implements IParser {
         this.subcorpus = subcorpus;
         this.file = file;
     }
-
-    public abstract void parse(BaseParallelProcessor queue, boolean headersOnly) throws Exception;
 
     protected String[] splitAndTrim(String s) {
         if (s == null || s.isBlank()) {

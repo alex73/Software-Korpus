@@ -6,12 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
-import org.alex73.korpus.base.TextInfo;
-import org.alex73.korpus.compiler.BaseParallelProcessor;
+import org.alex73.korpus.compiler.MessageParsedText;
 import org.alex73.korpus.compiler.PrepareCache3;
-import org.alex73.korpus.compiler.ProcessHeaders;
-import org.alex73.korpus.compiler.ProcessTexts;
 import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.TextFileParser;
 
@@ -29,14 +27,14 @@ public class KankardansParser extends BaseParser {
     }
 
     @Override
-    public void parse(BaseParallelProcessor queue, boolean headersOnly) throws Exception {
+    public void parse(Consumer<MessageParsedText> publisher, boolean headersOnly) throws Exception {
         List<String> lines = Files.readAllLines(file);
 
         boolean inText = false;
         for (String line : lines) {
             line = line.trim();
             if (line.startsWith(PREFIX_TEXT)) {
-                flushText(headersOnly);
+                flushText(publisher, headersOnly);
                 inText = false;
                 textTitle = line.substring(PREFIX_TEXT.length()).replaceAll("^[0-9]+\\.", "").trim();
             } else if (line.startsWith(PREFIX_PAGE)) {
@@ -59,31 +57,29 @@ public class KankardansParser extends BaseParser {
                 text.append(line.replaceAll("^[0-9]+", "").trim()).append("\n");
             }
         }
-        flushText(headersOnly);
+        flushText(publisher, headersOnly);
     }
 
-    private void flushText(boolean headersOnly) {
+    private void flushText(Consumer<MessageParsedText> publisher, boolean headersOnly) {
         if (!text.isEmpty()) {
-            TextFileParser doc = new TextFileParser(
-                    new ByteArrayInputStream(text.toString().getBytes(StandardCharsets.UTF_8)), headersOnly);
-            doc.parse(false, PrepareCache3.errors);
-            TextInfo textInfo = new TextInfo();
-            textInfo.subcorpus = subcorpus;
-            textInfo.textOrder = ++textOrder;
-            textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + textTitle;
-            textInfo.title = doc.headers.get("Title");
+            MessageParsedText ti = new MessageParsedText();
+            TextFileParser doc = new TextFileParser(new ByteArrayInputStream(text.toString().getBytes(StandardCharsets.UTF_8)), headersOnly);
+            ti.textInfo.subcorpus = subcorpus;
+            ti.textInfo.textOrder = ++textOrder;
+            ti.textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + textTitle;
+            ti.textInfo.title = doc.headers.get("Title");
             String s;
             if ((s = doc.headers.get("Authors")) != null) {
-                textInfo.authors = splitAndTrim(s);
+                ti.textInfo.authors = splitAndTrim(s);
             }
-            textInfo.creationTime = getAndCheckYears(doc.headers.get("CreationYear"));
-            textInfo.publicationTime = getAndCheckYears(doc.headers.get("PublicationYear"));
-            textInfo.textLabel = textInfo.authors != null ? String.join(",", Arrays.asList(textInfo.authors)) : "———";
-            if (headersOnly) {
-                ProcessHeaders.process(textInfo);
-            } else {
-                ProcessTexts.process(textInfo, new PtextToKorpus(doc.lines, false).paragraphs);
+            ti.textInfo.creationTime = getAndCheckYears(doc.headers.get("CreationYear"));
+            ti.textInfo.publicationTime = getAndCheckYears(doc.headers.get("PublicationYear"));
+            ti.textInfo.textLabel = ti.textInfo.authors != null ? String.join(",", Arrays.asList(ti.textInfo.authors)) : "———";
+            if (!headersOnly) {
+                doc.parse(false, PrepareCache3.errors);
+                ti.paragraphs = new PtextToKorpus(doc.lines, false).paragraphs;
             }
+            publisher.accept(ti);
             text.setLength(0);
         }
     }

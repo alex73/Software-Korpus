@@ -1,7 +1,9 @@
 package org.alex73.korpus.compiler.parsers;
 
-import org.alex73.korpus.compiler.BaseParallelProcessor;
+import java.util.function.Consumer;
+
+import org.alex73.korpus.compiler.MessageParsedText;
 
 public interface IParser {
-    void parse(BaseParallelProcessor processor, boolean headersOnly) throws Exception;
+    void parse(Consumer<MessageParsedText> subscriber, boolean headersObly) throws Exception;
 }

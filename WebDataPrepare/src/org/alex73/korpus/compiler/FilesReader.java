@@ -5,21 +5,22 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.alex73.korpus.compiler.parsers.IParser;
 import org.alex73.korpus.compiler.parsers.ParserFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FilesReader extends BaseParallelProcessor {
+public class FilesReader extends BaseParallelProcessor<Path> {
     private static final Logger LOG = LoggerFactory.getLogger(FilesReader.class);
 
     private final Path inputDirectory;
     private final boolean headersOnly;
-    private final BaseParallelProcessor processParser;
+    private final Consumer<MessageParsedText> processParser;
 
-    public FilesReader(Path inputDirectory, boolean headersOnly, BaseParallelProcessor processParser) throws Exception {
-        super(4, 5);
+    public FilesReader(Path inputDirectory, boolean headersOnly, Consumer<MessageParsedText> processParser) throws Exception {
+        super(8, 16);
         this.inputDirectory = inputDirectory;
         this.headersOnly = headersOnly;
         this.processParser = processParser;
@@ -31,10 +32,11 @@ public class FilesReader extends BaseParallelProcessor {
                         throw new RuntimeException(ex);
                     }
                 }).toList();
-        files.forEach(p -> process(p));
+        files.forEach(p -> accept(p));
     }
 
-    protected void process(Path file) {
+    @Override
+    public void accept(Path file) {
         run(() -> {
             LOG.trace("Read file " + file);
             String rel = inputDirectory.relativize(file).toString();

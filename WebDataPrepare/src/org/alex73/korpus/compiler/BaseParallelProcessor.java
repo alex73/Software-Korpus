@@ -10,17 +10,18 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class BaseParallelProcessor {
+public abstract class BaseParallelProcessor<T> implements Consumer<T> {
     private static final Logger LOG = LoggerFactory.getLogger(BaseParallelProcessor.class);
 
     protected final ThreadPoolExecutor executor;
     private int queueCapacity;
     public int defaultThreadPriority = Thread.NORM_PRIORITY;
-    private static List<BaseParallelProcessor> instances = new ArrayList<>();
+    private static List<BaseParallelProcessor<?>> instances = new ArrayList<>();
     private static Thread statThread;
 
     public static void startStat() {
@@ -28,13 +29,13 @@ public abstract class BaseParallelProcessor {
             public void run() {
                 while (true) {
                     try {
-                        Thread.sleep(30000);
+                        Thread.sleep(10000);
                     } catch (InterruptedException ex) {
                         break;
                     }
                     StringBuilder o = new StringBuilder();
                     synchronized (instances) {
-                        for (BaseParallelProcessor p : instances) {
+                        for (BaseParallelProcessor<?> p : instances) {
                             p.dumpStat(o);
                             o.append("\n");
                         }

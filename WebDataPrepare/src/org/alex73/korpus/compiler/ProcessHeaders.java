@@ -15,37 +15,35 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class ProcessHeaders extends BaseParallelProcessor {
+public class ProcessHeaders extends BaseParallelProcessor<MessageParsedText> {
     private static final Logger LOG = LoggerFactory.getLogger(ProcessHeaders.class);
 
-    private static ProcessHeaders instance;
-
-    public static List<TextInfo> textInfos = Collections.synchronizedList(new ArrayList<>());
+    public List<TextInfo> textInfos = Collections.synchronizedList(new ArrayList<>());
 
     public ProcessHeaders() {
         super(1, 20);
-        instance = this;
     }
 
-    public static void process(TextInfo textInfo) {
-        if (textInfo.sourceFilePath == null) {
+    @Override
+    public void accept(MessageParsedText text) {
+        if (text.textInfo.sourceFilePath == null) {
             throw new RuntimeException("sourceFilePath нявызначаны");
         }
-        if (textInfo.subcorpus == null) {
-            throw new RuntimeException("subcorpus нявызначаны ў " + textInfo.sourceFilePath);
+        if (text.textInfo.subcorpus == null) {
+            throw new RuntimeException("subcorpus нявызначаны ў " + text.textInfo.sourceFilePath);
         }
-        if (textInfo.textLabel == null) {
-            throw new RuntimeException("textLabel нявызначаны ў " + textInfo.sourceFilePath);
+        if (text.textInfo.textLabel == null) {
+            throw new RuntimeException("textLabel нявызначаны ў " + text.textInfo.sourceFilePath);
         }
 
-        instance.run(() -> {
-            textInfo.creationTimeLatest();
-            textInfo.publicationTimeLatest();
-            textInfos.add(textInfo);
+        run(() -> {
+            text.textInfo.creationTimeLatest();
+            text.textInfo.publicationTimeLatest();
+            textInfos.add(text.textInfo);
         });
     }
 
-    static Map<String, Integer> calcTextsPositions(Path outputFile) throws Exception {
+    Map<String, Integer> calcTextsPositions(Path outputFile) throws Exception {
         LOG.info("Sorting {} text infos...", textInfos.size());
         // sort
         Collections.sort(textInfos, new TextOrder());
