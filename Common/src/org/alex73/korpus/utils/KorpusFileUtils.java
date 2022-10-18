@@ -14,12 +14,12 @@ import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 public class KorpusFileUtils {
     public static void writeGzip(Path file, Stream<String> data) throws IOException {
-        try (BufferedWriter wr = new BufferedWriter(
-                new OutputStreamWriter(new GZIPOutputStream(Files.newOutputStream(file))))) {
+        try (BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(Files.newOutputStream(file))))) {
             for (Iterator<String> it = data.iterator(); it.hasNext();) {
                 wr.write(it.next());
                 wr.write('\n');
@@ -37,15 +37,32 @@ public class KorpusFileUtils {
         wr.flush();
     }
 
-    public static Stream<String> readGzip(Path file) throws IOException {
+    public static List<String> readGzip(Path file) throws IOException {
         List<String> result = new ArrayList<>();
-        try (BufferedReader rd = new BufferedReader(
-                new InputStreamReader(new GZIPInputStream(Files.newInputStream(file))))) {
+        try (BufferedReader rd = new BufferedReader(new InputStreamReader(new GZIPInputStream(Files.newInputStream(file))))) {
             String s;
             while ((s = rd.readLine()) != null) {
                 result.add(s);
             }
         }
-        return result.stream();
+        return result;
+    }
+
+    public static List<String> readZip(Path file, String entry) throws IOException {
+        try (ZipFile zip = new ZipFile(file.toFile())) {
+            ZipEntry en = zip.getEntry(entry);
+            if (en == null) {
+                throw new IOException("There is no entry " + entry + " in the " + file.toAbsolutePath());
+            }
+
+            List<String> result = new ArrayList<>();
+            try (BufferedReader rd = new BufferedReader(new InputStreamReader(zip.getInputStream(en)))) {
+                String s;
+                while ((s = rd.readLine()) != null) {
+                    result.add(s);
+                }
+            }
+            return result;
+        }
     }
 }

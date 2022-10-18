@@ -270,7 +270,7 @@ public class KorpusApplication extends Application {
     }
 
     protected void readTextInfos() throws Exception {
-        textInfos = KorpusFileUtils.readGzip(Paths.get(korpusCache + "/texts.jsons.gz")).toList();
+        textInfos = KorpusFileUtils.readGzip(Paths.get(korpusCache + "/texts.jsons.gz"));
 
         authorsByLemmas = new HashMap<>();
         KorpusFileUtils.readGzip(Paths.get(korpusCache + "/lemma-authors.list.gz")).forEach(s->{

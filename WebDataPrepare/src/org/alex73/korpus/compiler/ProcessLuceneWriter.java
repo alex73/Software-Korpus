@@ -1,10 +1,12 @@
 package org.alex73.korpus.compiler;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.alex73.korpus.compiler.MessageLuceneWrite.LuceneParagraph;
 import org.alex73.korpus.server.engine.LuceneFields;
@@ -48,7 +50,8 @@ public class ProcessLuceneWriter extends BaseParallelProcessor<MessageLuceneWrit
                 config.setCommitOnClose(true);
                 config.setOpenMode(OpenMode.CREATE);
                 config.setRAMBufferSizeMB(bufferSizeMbEachInstance);
-                config.setIndexSort(new Sort(new SortField("textId", SortField.Type.INT))); // need to sort because mergeIndex will not work
+                // need to sort because mergeIndex will not work
+                config.setIndexSort(new Sort(new SortField("textId", SortField.Type.INT)));
                 config.setMergePolicy(NoMergePolicy.INSTANCE);
                 config.setMergeScheduler(NoMergeScheduler.INSTANCE);
                 try {
@@ -195,6 +198,14 @@ public class ProcessLuceneWriter extends BaseParallelProcessor<MessageLuceneWrit
             }
             for (Directory d : partDirs) {
                 d.close();
+            }
+            for (LuceneContext c : contexts) {
+                try (Stream<Path> ls = Files.list(c.path)) {
+                    for (Path f : ls.toList()) {
+                        Files.delete(f);
+                    }
+                }
+                Files.delete(c.path);
             }
         };
     }

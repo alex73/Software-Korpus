@@ -1,7 +1,6 @@
 package org.alex73.korpus.server;
 
 import java.io.FileNotFoundException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.Collator;
 import java.util.List;
@@ -40,6 +39,7 @@ import org.alex73.korpus.server.data.WordResult;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
 import org.alex73.korpus.server.text.BinaryParagraphReader;
 import org.alex73.korpus.text.structure.corpus.Paragraph;
+import org.alex73.korpus.utils.KorpusFileUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.BooleanQuery;
 
@@ -74,9 +74,8 @@ public class SearchServiceImpl {
     @Produces(MediaType.APPLICATION_JSON)
     public List<FreqSpisResult> getFrequences(@QueryParam("subcorpus") String subcorpus) throws Exception {
         LOGGER.info("getFrequences from " + request.getRemoteAddr());
-        java.nio.file.Path file = Paths.get(getApp().korpusCache + "/freq." + subcorpus + ".tab");
         try {
-            List<String> data = Files.readAllLines(file);
+            List<String> data = KorpusFileUtils.readZip(Paths.get(getApp().korpusCache), "forms/freq." + subcorpus + ".tab");
             return data.stream().map(s -> {
                 int p = s.indexOf('=');
                 FreqSpisResult r = new FreqSpisResult();
@@ -84,9 +83,9 @@ public class SearchServiceImpl {
                 r.c = Integer.parseInt(s.substring(p + 1));
                 return r;
             }).sorted((a, b) -> BE.compare(a.w, b.w)).collect(Collectors.toList());
-        } catch(FileNotFoundException ex) {
-            LOGGER.log(Level.SEVERE, "Spi not found: "+file);
-            throw new Exception("Data not found");
+        } catch (FileNotFoundException ex) {
+            LOGGER.log(Level.SEVERE, "getFrequences", ex);
+            throw new Exception("Data not found for subcorpus '" + subcorpus + "'");
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "getFrequences", ex);
             throw ex;

@@ -135,6 +135,7 @@ public class PrepareCache3 {
             }
             stat.mergeToZip(zip, m);
             m.finish(60);
+            stat.removeTemp();
         }
 
         Collections.sort(errorsList);

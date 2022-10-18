@@ -1,7 +1,6 @@
 package org.alex73.korpus.future;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,8 +20,7 @@ public class Freq extends FutureBaseServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         int count = Integer.parseInt(req.getPathInfo().substring(1));
 
-        List<String> frequences = KorpusFileUtils.readGzip(Paths.get(getApp().korpusCache + "/stat.formsfreq.tab.gz"))
-                .toList();
+        List<String> frequences = KorpusFileUtils.readZip(Paths.get(getApp().korpusCache + "/stat-freq.zip"), "forms/freq.tab");
         frequences = frequences.subList(0, Math.min(frequences.size(), count));
         List<Pair> data = frequences.stream().map(line -> new Pair(line)).collect(Collectors.toList());
 
