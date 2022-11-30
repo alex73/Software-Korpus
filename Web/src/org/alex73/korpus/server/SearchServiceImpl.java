@@ -75,7 +75,7 @@ public class SearchServiceImpl {
     public List<FreqSpisResult> getFrequences(@QueryParam("subcorpus") String subcorpus) throws Exception {
         LOGGER.info("getFrequences from " + request.getRemoteAddr());
         try {
-            List<String> data = KorpusFileUtils.readZip(Paths.get(getApp().korpusCache), "forms/freq." + subcorpus + ".tab");
+            List<String> data = KorpusFileUtils.readZip(Paths.get(getApp().korpusCache).resolve("stat-freq.zip"), "forms/freq." + subcorpus + ".tab");
             return data.stream().map(s -> {
                 int p = s.indexOf('=');
                 FreqSpisResult r = new FreqSpisResult();

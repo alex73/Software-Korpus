@@ -76,6 +76,9 @@ public class Kanvertary {
     }
 
     String wordAccent(String word) {
+        if (StressUtils.syllCount(word) < 2) {
+            return word;
+        }
         Set<Integer> stresses = new TreeSet<>();
         for (Paradigm p : KorpusApplication.instance.grFinder.getParadigms(word)) {
             for (Variant v : p.getVariant()) {
