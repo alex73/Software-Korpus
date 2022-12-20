@@ -9,8 +9,8 @@ import java.util.Locale;
 import org.alex73.korpus.base.TextInfo;
 
 public class TextOrder implements Comparator<TextInfo> {
-    static final List<String> subcorpuses = Arrays.asList("teksty", "kankardans", "sajty", "wiki", "pieraklady",
-            "nierazabranaje", "telegram", "dyjalektny", "skaryna");
+    static final List<String> subcorpuses = Arrays.asList("skaryna", "kankardans", "teksty", "pieraklady", "sajty", "wiki", "nierazabranaje", "telegram",
+            "dyjalektny");
     static final Collator BE = Collator.getInstance(new Locale("be"));
 
     @Override
