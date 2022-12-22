@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "https://www.eclipse.org/jetty/configure_10_0.dtd">
+
+<Configure id="korpus" class="org.eclipse.jetty.webapp.WebAppContext"> 
+  <Set name="contextPath">/korpus/</Set> 
+  <Set name="war">/home/alex/gits/Software-Korpus/WebService-Korpus/war</Set>
+
+  <New class="org.eclipse.jetty.plus.jndi.EnvEntry"> 
+    <Arg><Ref refid="korpus"/></Arg>
+    <Arg>GRAMMAR_DB</Arg> 
+    <Arg type="java.lang.String">/home/alex/gits/GrammarDB</Arg>
+    <Arg type="boolean">true</Arg>
+  </New>
+  <New class="org.eclipse.jetty.plus.jndi.EnvEntry"> 
+    <Arg><Ref refid="korpus"/></Arg>
+    <Arg>KORPUS_CACHE</Arg> 
+    <Arg type="java.lang.String">/home/alex/Korpus-cache</Arg>
+    <Arg type="boolean">true</Arg>
+  </New>
+  <New class="org.eclipse.jetty.plus.jndi.EnvEntry"> 
+    <Arg><Ref refid="korpus"/></Arg>
+    <Arg>CONFIG_DIR</Arg> 
+    <Arg type="java.lang.String">/home/alex/gits/Software-Korpus/WebService-Korpus/config</Arg>
+    <Arg type="boolean">true</Arg>
+  </New>
+  <New class="org.eclipse.jetty.plus.jndi.EnvEntry"> 
+    <Arg><Ref refid="korpus"/></Arg>
+    <Arg>KORPUS_LANGUAGES</Arg> 
+    <Arg type="java.lang.String">be</Arg>
+    <Arg type="boolean">true</Arg>
+  </New>
+
+  <Call name="setInitParameter">
+     <Arg>org.eclipse.jetty.servlet.Default.dirAllowed</Arg>
+     <Arg>false</Arg>
+  </Call>
+  <Call name="setInitParameter">
+     <Arg>org.eclipse.jetty.servlet.Default.welcomeServlets</Arg>
+     <Arg>true</Arg>
+  </Call>
+
+  <Get name="errorHandler">
+    <Call name="addErrorPage">
+      <Arg type="int">500</Arg>
+      <Arg type="int">599</Arg>
+      <Arg type="String">/WEB-INF/error.txt</Arg>
+    </Call>
+  </Get>
+</Configure>

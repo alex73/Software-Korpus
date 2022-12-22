@@ -25,6 +25,7 @@ class KorpusService {
 	//public errorSearch: string;
 	//public statusSearch: string;
 
+	private callPrefix: string = "korpus";
 	public initial: InitialData;
 
 	/*public typeSearch: string = "search";
@@ -53,23 +54,37 @@ class KorpusService {
 
 	constructor() {
 		korpusui.showStatus("Чытаюцца пачатковыя звесткі...");
-		fetch('rest/korpus/initial')
+		fetch('rest/localization')
 			.then(r => {
 				if (!r.ok) {
-					korpusui.showError("Памылка запыту пачатковых звестак: " + r.status + " " + r.statusText);
+					korpusui.showError("Памылка запыту лакалізацыі звестак: " + r.status + " " + r.statusText);
 				} else {
 					r.json().then(json => {
-						this.initial = json;
-						localization = this.initial.localization[document.documentElement.lang];
-						korpusui.hideStatusError();
-						this.afterInit();
+						localization = json[document.documentElement.lang];
+						this.afterInit1();
 					});
 				}
 			})
 			.catch(err => korpusui.showError("Памылка: " + err));
 	}
 
-	afterInit() {
+	afterInit1() {
+		fetch(this.callPrefix + '/korpus/initial')
+			.then(r => {
+				if (!r.ok) {
+					korpusui.showError("Памылка запыту пачатковых звестак: " + r.status + " " + r.statusText);
+				} else {
+					r.json().then(json => {
+						this.initial = json;
+						korpusui.hideStatusError();
+						this.afterInit2();
+					});
+				}
+			})
+			.catch(err => korpusui.showError("Памылка: " + err));
+	}
+
+	afterInit2() {
 		let ps = window.location.hash;
 		let mode = 'search';
 		if (ps.charAt(0) == '#') {
@@ -127,7 +142,7 @@ class KorpusService {
 	searchCluster() {
 		korpusui.showStatus("Шукаем...");
 
-		fetch('rest/korpus/cluster', {
+		fetch(this.callPrefix + '/korpus/cluster', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -159,7 +174,7 @@ class KorpusService {
 		rq.params = this.requestedParams;
 		rq.latest = this.latestMark;
 
-		fetch('rest/korpus/search', {
+		fetch(this.callPrefix + '/korpus/search', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -216,7 +231,7 @@ class KorpusService {
         $('.place-calc a').replaceWith('<img src="icons/process.svg"/>');
         let rq: SearchRequest = new SearchRequest();
         rq.params = this.requestedParams;
-        fetch('rest/korpus/searchTotalCount', {
+        fetch(this.callPrefix + '/korpus/searchTotalCount', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -248,7 +263,7 @@ class KorpusService {
 		let rq: SentencesRequest = new SentencesRequest();
 		rq.params = this.requestedParams;
 		rq.list = list;
-		fetch('rest/korpus/sentences', {
+		fetch(this.callPrefix + '/korpus/sentences', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -280,7 +295,7 @@ class KorpusService {
 	}
 	loadSpis(subcorpus: string, after: any) {
 		$('#desc').hide();
-		fetch('rest/korpus/freq?subcorpus=' + subcorpus)
+		fetch(this.callPrefix + '/korpus/freq?subcorpus=' + subcorpus)
 			.then(r => {
 				if (!r.ok) {
 					korpusui.showError("Памылка запыту звестак падкорпуса: " + r.status + " " + r.statusText);

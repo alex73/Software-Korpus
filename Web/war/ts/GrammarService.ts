@@ -1,4 +1,6 @@
 class GrammarService {
+	private callPrefix: string = "korpus";
+
   public error: string;
   public status: string;
 
@@ -10,24 +12,39 @@ class GrammarService {
   public result: GrammarSearchResult;
   public details: LemmaParadigm;
 
-  constructor() {
-    grammarui.showStatus("Чытаюцца пачатковыя звесткі...");
-    fetch('rest/grammar/initial')
+	constructor() {
+		grammarui.showStatus("Чытаюцца пачатковыя звесткі...");
+		fetch('rest/localization')
+			.then(r => {
+				if (!r.ok) {
+					korpusui.showError("Памылка запыту лакалізацыі звестак: " + r.status + " " + r.statusText);
+				} else {
+					r.json().then(json => {
+						localization = json[document.documentElement.lang];
+						this.afterInit1();
+					});
+				}
+			})
+			.catch(err => korpusui.showError("Памылка: " + err));
+	}
+
+	afterInit1() {
+      fetch(this.callPrefix + '/grammar/initial')
       .then(r => {
         if (!r.ok) {
           grammarui.showError("Памылка запыту пачатковых звестак: " + r.status + " " + r.statusText);
         } else {
           r.json().then(json => {
             this.initial = json;
-            localization = this.initial.localization[document.documentElement.lang];
             grammarui.hideStatusError();
-            this.afterInit();
+            this.afterInit2();
           });
         }
       })
       .catch(err => grammarui.showError("Памылка: " + err));
-  }
-  afterInit() {
+	}
+
+  afterInit2() {
     let ps = window.location.hash;
     if (ps.charAt(0) == '#') {
       ps = ps.substring(1);
@@ -51,7 +68,7 @@ class GrammarService {
     window.location.hash = '#' + stringify(rq);
 
     grammarui.showStatus("Шукаем...");
-    fetch('rest/grammar/search', {
+    fetch(this.callPrefix + '/grammar/search', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -87,9 +104,9 @@ class GrammarService {
     let url;
     let elemFull: HTMLInputElement = <HTMLInputElement>document.getElementById("grammarword-full");
     if (elemFull != null && elemFull.checked) {
-        url = "rest/grammar/detailsFull/" + pdgId;
+        url = this.callPrefix + "/grammar/detailsFull/" + pdgId;
     } else {
-        url = "rest/grammar/details/" + pdgId;
+        url = this.callPrefix + "/grammar/details/" + pdgId;
     }
 
     fetch(url)

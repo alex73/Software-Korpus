@@ -111,52 +111,70 @@
 </div>
 </div>
 <script>
+	var otherCallPrefix = "other";
 	$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 		$("#out").html('');
 	});
 	function req(url) {
-        grammarui.hideStatusError();
-		grammarui.showStatus("Запыт...");
+		hideStatusError();
+		showStatus("Запыт...");
 		fetch(url)
 		      .then(r => {
 		        if (!r.ok) {
-		        	grammarui.showError("Памылка: " + r.status + " " + r.statusText);
+		        	showError("Памылка: " + r.status + " " + r.statusText);
 		        } else {
 		          r.text().then(data => {
 		            $("#out").html(data);
-			        grammarui.hideStatusError();
+			        hideStatusError();
 		          });
 		        }
 		      })
-		      .catch(err => grammarui.showError("Памылка: " + err));
+		      .catch(err => showError("Памылка: " + err));
 	}
 	function reqFreq() {
-		req('freq/'+$('#freqCount').val());
+		req(otherCallPrefix + '/freq/'+$('#freqCount').val());
 	}
 	function reqArfa() {
-		req('arfa/'+$('#arfaWord').val().toLowerCase());
+		req(otherCallPrefix + '/arfa/'+$('#arfaWord').val().toLowerCase());
 	}
 	function reqHramatycny() {
-		req('hramatycny/'+$('#hramatycnyWord').val().toLowerCase());
+		req(otherCallPrefix + '/hramatycny/'+$('#hramatycnyWord').val().toLowerCase());
 	}
 	function reqFanietycny() {
-		req('fanietycny/'+$('#fanietycnyWord').val().toLowerCase());
+		req(otherCallPrefix + '/fanietycny/'+$('#fanietycnyWord').val().toLowerCase());
 	}
 	function reqAdvarotny() {
-		req('advarotny/'+$('#advarotnyWord').val().toLowerCase());
+		req(otherCallPrefix + '/advarotny/'+$('#advarotnyWord').val().toLowerCase());
 	}
 	function reqAmonimy() {
 		let amoType = $("input:radio[name='amoType']:checked").val();
 		let amoLevel = $("input:radio[name='amoLevel']:checked").val();
-		req('amonimy/'+amoType+'/'+amoLevel);
+		req(otherCallPrefix + '/amonimy/'+amoType+'/'+amoLevel);
+	}
+	function hideStatusError() {
+		$('#status').hide();
+		$('#error').hide();
+	}
+	function showStatus(s) {
+		$('#error').hide();
+		document.getElementById("status").innerText = s;
+		$('#status').show();
+	}
+	function showError(err) {
+		console.log("Error: " + err);
+		$('#status').hide();
+		document.getElementById("error").innerText = err;
+		$('#error').show();
 	}
 </script>
 
-<#include "app/dialog.grammardb.html">
+<!--#include "app/dialog.grammardb.html"-->
 
-<script src="app2.js"></script>
+<!-- script src="app2.js"></script-->
 <script>
-  initializeGrammarPage();
+  //initializeGrammarPage();
+	$('#status').hide();
+	$('#error').hide();
 </script>
 
 <#include "footer.html">

@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.alex73.korpus.server.KorpusApplication;
+import org.alex73.korpus.server.ApplicationWeb;
 
 import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.TemplateLoader;
@@ -63,10 +63,10 @@ public class MakeHTML extends HttpServlet {
             ResourceBundle messages;
             if (path.endsWith(".en.html")) {
                 lang = "en";
-                messages = KorpusApplication.instance.messagesEn;
+                messages = ApplicationWeb.instance.messagesEn;
             } else {
                 lang = "be";
-                messages = KorpusApplication.instance.messagesBe;
+                messages = ApplicationWeb.instance.messagesBe;
             }
             String templatePath = path.replaceAll("\\..+$", "") + "-base.html";
             Template t = cfg.getTemplate(templatePath);
