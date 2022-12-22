@@ -10,7 +10,7 @@ import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.base.StaticGrammarFiller2;
-import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
+import org.alex73.korpus.languages.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.text.structure.files.ITextLineElement;
 import org.alex73.korpus.text.structure.files.TextLine;
 import org.alex73.korpus.text.structure.files.WordItem;

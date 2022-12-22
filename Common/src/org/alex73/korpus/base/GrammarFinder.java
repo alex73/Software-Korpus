@@ -9,7 +9,9 @@ import java.util.stream.Stream;
 
 import org.alex73.corpus.paradigm.Fan;
 import org.alex73.corpus.paradigm.Paradigm;
-import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
+import org.alex73.korpus.languages.ILanguage;
+import org.alex73.korpus.languages.LanguageFactory;
+import org.alex73.korpus.languages.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.utils.StressUtils;
 
 public class GrammarFinder implements IGrammarFinder {
@@ -18,9 +20,11 @@ public class GrammarFinder implements IGrammarFinder {
     private final Paradigm[][] table;
     private final Map<String,String> morph = new HashMap<>();
     private final Map<String,String> fan = new HashMap<>();
+    private final ILanguage.INormalizer wordNormalizer;
 
     public GrammarFinder(GrammarDB2 gr) {
         long be = System.currentTimeMillis();
+        wordNormalizer = LanguageFactory.get("bel").getNormalizer();
         final List<List<Paradigm>> prepare = new ArrayList<>(HASHTABLE_SIZE);
         for (int i = 0; i < HASHTABLE_SIZE; i++) {
             prepare.add(new ArrayList<>());
@@ -47,7 +51,7 @@ public class GrammarFinder implements IGrammarFinder {
     }
 
     private void putToPrepare(String w, List<List<Paradigm>> prepare, Paradigm p) {
-        int hash = BelarusianWordNormalizer.hash(w);
+        int hash = wordNormalizer.hash(w);
         int indexByHash = Math.abs(hash) % HASHTABLE_SIZE;
         List<Paradigm> list = prepare.get(indexByHash);
         synchronized (list) {
@@ -98,7 +102,7 @@ public class GrammarFinder implements IGrammarFinder {
      * Find paradigms by lemma or form (lower case).
      */
     public Paradigm[] getParadigms(String word) {
-        int hash = BelarusianWordNormalizer.hash(word);
+        int hash = wordNormalizer.hash(word);
         int indexByHash = Math.abs(hash) % HASHTABLE_SIZE;
         Paradigm[] result = table[indexByHash];
         return result != null ? result : EMPTY;

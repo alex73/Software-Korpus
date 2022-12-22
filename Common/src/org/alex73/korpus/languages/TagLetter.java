@@ -19,7 +19,7 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
 
-package org.alex73.korpus.belarusian;
+package org.alex73.korpus.languages;
 
 import java.util.ArrayList;
 import java.util.List;

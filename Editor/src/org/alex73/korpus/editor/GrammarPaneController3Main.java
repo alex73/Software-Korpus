@@ -32,14 +32,14 @@ import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.base.StaticGrammarFiller2;
-import org.alex73.korpus.belarusian.BelarusianTags;
-import org.alex73.korpus.belarusian.TagLetter;
 import org.alex73.korpus.editor.GrammarPaneController2.DocumentChanger;
 import org.alex73.korpus.editor.GrammarPaneController2.Model;
 import org.alex73.korpus.editor.grammar.GrammarConstructor;
 import org.alex73.korpus.editor.grammar.GrammarConstructor.PVW;
 import org.alex73.korpus.editor.ui.GrammarPane3;
 import org.alex73.korpus.editor.ui.ShowXMLDialog;
+import org.alex73.korpus.languages.TagLetter;
+import org.alex73.korpus.languages.belarusian.BelarusianTags;
 import org.alex73.korpus.utils.SetUtils;
 
 public class GrammarPaneController3Main {

@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.alex73.korpus.base.DBTagsGroups;
-import org.alex73.korpus.base.DBTagsGroups.KeyValue;
+import org.alex73.korpus.languages.DBTagsFactory.DBTagsGroup;
+import org.alex73.korpus.languages.DBTagsFactory.KeyValue;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class GrammarInitial {
     public Map<Character, GrammarLetter> grammarTree;
     public List<KeyValue> grammarWordTypes;
-    public Map<Character, DBTagsGroups> grammarWordTypesGroups;
+    public Map<Character, DBTagsGroup> grammarWordTypesGroups;
     public Map<Character, Set<String>> skipGrammar;
     public List<GrammarDict> slouniki;
     public List<Stat> stat;

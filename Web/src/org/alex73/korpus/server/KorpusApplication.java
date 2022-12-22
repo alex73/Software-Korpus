@@ -26,13 +26,13 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 import org.alex73.corpus.paradigm.Variant;
-import org.alex73.korpus.base.DBTagsGroups;
-import org.alex73.korpus.base.DBTagsGroups.KeyValue;
 import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.base.TextInfo;
-import org.alex73.korpus.belarusian.BelarusianTags;
-import org.alex73.korpus.belarusian.TagLetter;
+import org.alex73.korpus.languages.DBTagsFactory.KeyValue;
+import org.alex73.korpus.languages.ILanguage;
+import org.alex73.korpus.languages.LanguageFactory;
+import org.alex73.korpus.languages.TagLetter;
 import org.alex73.korpus.server.data.GrammarInitial;
 import org.alex73.korpus.server.data.GrammarInitial.GrammarLetter;
 import org.alex73.korpus.server.data.InitialData;
@@ -47,6 +47,7 @@ public class KorpusApplication extends Application {
     public String korpusCache;
     public String grammarDb;
     public String configDir;
+    public String languages;
 
     List<String> settings;
     Properties stat;
@@ -76,6 +77,7 @@ public class KorpusApplication extends Application {
             korpusCache = (String) xmlNode.lookup("KORPUS_CACHE");
             grammarDb = (String) xmlNode.lookup("GRAMMAR_DB");
             configDir = (String) xmlNode.lookup("CONFIG_DIR");
+            languages = (String) xmlNode.lookup("KORPUS_LANGUAGES");
             if (configDir == null) {
                 throw new Exception("CONFIG_DIR is not defined");
             }
@@ -84,6 +86,9 @@ public class KorpusApplication extends Application {
             }
             if (grammarDb == null) {
                 throw new Exception("GRAMMAR_DB is not defined");
+            }
+            if (languages == null) {
+                throw new Exception("KORPUS_LANGUAGES is not defined");
             }
             settings = Files.readAllLines(Paths.get(configDir + "/settings.ini"));
             stat = loadSettings(korpusCache + "/stat.properties");
@@ -99,7 +104,7 @@ public class KorpusApplication extends Application {
                     + getUsedMemory());
             grFinder = new GrammarFinder(gr);
             System.out.println("GrammarDB indexed. Used memory: " + getUsedMemory());
-            processKorpus = new LuceneFilter(korpusCache);
+            processKorpus = new LuceneFilter(korpusCache, languages.split(";"));
             System.out.println("Lucene initialized");
 
             localization = new TreeMap<>();
@@ -130,11 +135,13 @@ public class KorpusApplication extends Application {
     }
 
     void prepareInitialGrammar() throws Exception {
+        ILanguage.IGrammarTags tags = LanguageFactory.get("bel").getTags();
+        ILanguage.IDBTags dbtf = LanguageFactory.get("bel").getDbTags();
         grammarInitial = new GrammarInitial();
         grammarInitial.grammarTree = new TreeMap<>();
-        grammarInitial.grammarTree = addGrammar(BelarusianTags.getInstance().getRoot());
-        grammarInitial.grammarWordTypes = DBTagsGroups.wordTypes;
-        grammarInitial.grammarWordTypesGroups = DBTagsGroups.tagGroupsByWordType;
+        grammarInitial.grammarTree = addGrammar(tags.getRoot());
+        grammarInitial.grammarWordTypes = dbtf.getWordTypes();
+        grammarInitial.grammarWordTypesGroups = dbtf.getTagGroupsByWordType();
         grammarInitial.localization = localization;
 
         grammarInitial.skipGrammar = new TreeMap<>();
@@ -161,7 +168,7 @@ public class KorpusApplication extends Application {
         GrammarInitial.Stat grStatTotal = new GrammarInitial.Stat();
         grammarInitial.stat.add(grStatTotal);
         Map<Character, GrammarInitial.Stat> grStats = new TreeMap<>();
-        for (TagLetter.OneLetterInfo li : BelarusianTags.getInstance().getRoot().letters) {
+        for (TagLetter.OneLetterInfo li : tags.getRoot().letters) {
             GrammarInitial.Stat gs = new GrammarInitial.Stat();
             gs.title = "&nbsp;&nbsp;&nbsp;&nbsp;" + li.description;
             grammarInitial.stat.add(gs);

@@ -3,7 +3,7 @@ package org.alex73.korpus.server.data;
 import java.util.List;
 import java.util.Map;
 
-import org.alex73.korpus.base.DBTagsGroups.KeyValue;
+import org.alex73.korpus.languages.DBTagsFactory.KeyValue;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;

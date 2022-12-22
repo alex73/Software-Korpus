@@ -37,4 +37,8 @@ public abstract class BaseParser implements IParser {
         new KorpusDateTime(s);
         return s;
     }
+
+    protected String getLang(String v) {
+        return v==null?"bel":v;
+    }
 }

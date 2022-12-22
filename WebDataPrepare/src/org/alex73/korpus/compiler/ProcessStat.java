@@ -41,23 +41,25 @@ public class ProcessStat extends BaseParallelProcessor<MessageParsedText> {
     @Override
     public void accept(MessageParsedText text) {
         run(() -> {
-            WordsStat stat = calcWordsStat(text);
-            getWordsStatBySubcorpus(text.textInfo.subcorpus).mergeFrom(stat);
-            addGlobalCounts(text.textInfo, stat.getWordsCount());
-            if (text.textInfo.authors != null) {
-                for (String author : text.textInfo.authors) {
-                    for (String lemma : stat.getAllLemmas()) {
-                        addAuthorByLemma(lemma, author);
+            for (int i = 0; i < text.textInfo.subtexts.length; i++) {
+                WordsStat stat = calcWordsStat(text, i);
+                getWordsStatBySubcorpus(text.textInfo.subcorpus).mergeFrom(stat);
+                addGlobalCounts(text.textInfo, i, stat.getWordsCount());
+                if (text.textInfo.subtexts[i].authors != null) {
+                    for (String author : text.textInfo.subtexts[i].authors) {
+                        for (String lemma : stat.getAllLemmas()) {
+                            addAuthorByLemma(lemma, author);
+                        }
                     }
                 }
             }
         });
     }
 
-    WordsStat calcWordsStat(MessageParsedText text) {
+    WordsStat calcWordsStat(MessageParsedText text, int textIndex) {
         WordsStat wordsStat = new WordsStat(null);
-        for (Paragraph p : text.paragraphs) {
-            for (Sentence se : p.sentences) {
+        for (Paragraph[] p : text.paragraphs) {
+            for (Sentence se : p[textIndex].sentences) {
                 for (Word w : se.words) {
                     String[] lemmas = w.lemmas == null || w.lemmas.isEmpty() ? null : RE_SPLIT.split(w.lemmas);
                     wordsStat.addWord(w.normalized, lemmas);
@@ -67,17 +69,17 @@ public class ProcessStat extends BaseParallelProcessor<MessageParsedText> {
         return wordsStat;
     }
 
-    void addGlobalCounts(TextInfo textInfo, int wordsCount) {
+    void addGlobalCounts(TextInfo textInfo, int textIndex, int wordsCount) {
         TextStatInfo subcorpusStatInfo = getTextStatInfo(textInfo.subcorpus);
         subcorpusStatInfo.texts.incrementAndGet();
         subcorpusStatInfo.words.addAndGet(wordsCount);
-        if (textInfo.authors != null) {
-            for (String a : textInfo.authors) {
+        if (textInfo.subtexts[textIndex].authors != null) {
+            for (String a : textInfo.subtexts[textIndex].authors) {
                 subcorpusStatInfo.authors.add(a);
             }
         }
-        if (textInfo.source != null) {
-            subcorpusStatInfo.sources.add(textInfo.source);
+        if (textInfo.subtexts[textIndex].source != null) {
+            subcorpusStatInfo.sources.add(textInfo.subtexts[textIndex].source);
         }
         switch (textInfo.subcorpus) {
         case "teksty":
@@ -91,7 +93,7 @@ public class ProcessStat extends BaseParallelProcessor<MessageParsedText> {
             break;
         case "sajty":
         case "nierazabranaje":
-            TextStatInfo subcorpusSource = getTextStatInfo(textInfo.subcorpus + "." + textInfo.source);
+            TextStatInfo subcorpusSource = getTextStatInfo(textInfo.subcorpus + "." + textInfo.subtexts[textIndex].source);
             subcorpusSource.texts.incrementAndGet();
             subcorpusSource.words.addAndGet(wordsCount);
             break;

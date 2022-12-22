@@ -1,4 +1,4 @@
-package org.alex73.korpus.belarusian;
+package org.alex73.korpus.languages.belarusian;
 
 import java.util.List;
 import java.util.Set;

@@ -26,8 +26,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
-import org.alex73.korpus.base.DBTagsGroups;
-import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
+import org.alex73.korpus.languages.ILanguage;
+import org.alex73.korpus.languages.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.server.data.SearchParams;
 import org.alex73.korpus.server.data.WordRequest;
 import org.alex73.korpus.server.data.WordResult;
@@ -49,13 +49,25 @@ public class WordsDetailsChecks {
      * Is the document correspond with search criteria ? Check and mark requested
      * words for highlight for user.
      */
-    public static boolean isAllowed(SearchParams.WordsOrder wordsOrder, List<WordRequest> words, Paragraph resultText) {
+    public static boolean isAllowed(String langCode, ILanguage lang, SearchParams.WordsOrder wordsOrder, List<WordRequest> words, Paragraph[] resultText) {
+        boolean found = false;
+        for (Paragraph p : resultText) {
+            if (langCode.equals(p.lang)) {
+                if (oneIsAllowed(lang, wordsOrder, words, p)) {
+                    found = true;
+                }
+            }
+        }
+        return found;
+    }
+
+    private static boolean oneIsAllowed(ILanguage lang, SearchParams.WordsOrder wordsOrder, List<WordRequest> words, Paragraph resultText) {
         boolean found = false;
         switch (wordsOrder) {
         case PRESET:
             for (int i = 0; i < resultText.sentences.length; i++) {
                 for (int j = 0; j < resultText.sentences[i].words.length; j++) {
-                    if (isWordsAroundMatchParams(words, resultText.sentences[i], j)) {
+                    if (isWordsAroundMatchParams(lang, words, resultText.sentences[i], j)) {
                         for (int k = 0, count = 0; count < words.size(); k++) {
                             // mark found words as requested
                             ((WordResult) resultText.sentences[i].words[j + k]).requestedWord = true;
@@ -72,7 +84,7 @@ public class WordsDetailsChecks {
                 for (WordRequest pw : words) {
                     boolean foundWord = false;
                     for (int j = 0; j < resultText.sentences[i].words.length; j++) {
-                        if (isOneWordMatchsParam(pw, (WordResult) resultText.sentences[i].words[j])) {
+                        if (isOneWordMatchsParam(lang, pw, (WordResult) resultText.sentences[i].words[j])) {
                             ((WordResult) resultText.sentences[i].words[j]).requestedWord = true;
                             foundWord = true;
                         }
@@ -92,7 +104,7 @@ public class WordsDetailsChecks {
                 boolean foundWord = false;
                 for (int i = 0; i < resultText.sentences.length; i++) {
                     for (int j = 0; j < resultText.sentences[i].words.length; j++) {
-                        if (isOneWordMatchsParam(pw, (WordResult) resultText.sentences[i].words[j])) {
+                        if (isOneWordMatchsParam(lang, pw, (WordResult) resultText.sentences[i].words[j])) {
                             ((WordResult) resultText.sentences[i].words[j]).requestedWord = true;
                             foundWord = true;
                         }
@@ -113,7 +125,7 @@ public class WordsDetailsChecks {
      * For the wordsOrder=PRESET: specified words should correspond with specified
      * parameter and all other parameters.
      */
-    private static boolean isWordsAroundMatchParams(List<WordRequest> words, Sentence resultWords, int wordIndex) {
+    private static boolean isWordsAroundMatchParams(ILanguage lang, List<WordRequest> words, Sentence resultWords, int wordIndex) {
         WordResult[] checks = new WordResult[words.size()];
         int count = 0;
         for (int i = wordIndex; i < resultWords.words.length && count < words.size(); i++) {
@@ -124,7 +136,7 @@ public class WordsDetailsChecks {
             return false;
         }
         for (int i = 0; i < words.size(); i++) {
-            if (!isOneWordMatchsParam(words.get(i), checks[i])) {
+            if (!isOneWordMatchsParam(lang, words.get(i), checks[i])) {
                 return false;
             }
         }
@@ -134,7 +146,7 @@ public class WordsDetailsChecks {
     /**
      * Is the word corresponds with parameter ?
      */
-    public static boolean isOneWordMatchsParam(WordRequest wordParam, WordResult wordResult) {
+    public static boolean isOneWordMatchsParam(ILanguage lang, WordRequest wordParam, WordResult wordResult) {
         if (wordResult.normalized == null) {
             return false;
         }
@@ -160,11 +172,10 @@ public class WordsDetailsChecks {
                     if (wordResult.normalized == null) {
                         return false;
                     }
-                    if (!getWildcardRegexp(wordParam.word)
-                            .matcher(StressUtils.unstress(wordResult.normalized.toLowerCase())).matches()) {
+                    if (!getWildcardRegexp(wordParam.word).matcher(StressUtils.unstress(wordResult.normalized.toLowerCase())).matches()) {
                         return false;
                     }
-                } else if (!BelarusianWordNormalizer.equals(wordParam.word, wordResult.normalized)) {
+                } else if (!lang.getNormalizer().equals(wordParam.word, wordResult.normalized)) {
                     return false;
                 }
             }
@@ -178,7 +189,7 @@ public class WordsDetailsChecks {
         // check grammar
         Pattern reGrammar = getPatternRegexp(wordParam.grammar);
         for (String t : wordResult.tags.split(";")) {
-            String dbTag = DBTagsGroups.getDBTagString(t);
+            String dbTag = lang.getDbTags().getDBTagString(t);
             if (reGrammar.matcher(dbTag).matches()) {
                 return true;
             }

@@ -22,75 +22,88 @@
 package org.alex73.korpus.base;
 
 import java.io.Serializable;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.alex73.korpus.utils.KorpusDateTime;
 
 @SuppressWarnings("serial")
 public class TextInfo implements Serializable {
-    public transient String sourceFilePath; // ID зыходнага файлу
-    public String subcorpus; // падкорпус
-    public String textLabel;
-    public String source; // крыніца: толькі для сайтаў і неразабраных
-    public String url; // спасылка на знешні сайт, калі ёсць
-    public String[] authors; // аўтары
-    public String title; // назва: заўсёды
-    public transient int textOrder; // толькі каб адсартаваць тэксты ў канкардансе
-    public String[] translators; // перакладчыкі
-    public String lang, langOrig; // мова тэксту, мова зыходнага тэксту
-    public String[] styleGenres; // стылі і жанры
-    public String edition; // выданне
-    public String details; // дэталі
-    public String file; // файл на зыходнай старонцы
-    public String creationTime, publicationTime; // дата стварэння і публікацыі
+    public String subcorpus;
+    public transient String sourceFilePath; // source file ID
+    public String[] styleGenres; // styles and genres
+    public transient int textOrder; // only for sort texts inside one file
+    public Subtext[] subtexts;
 
-    private transient Long creationTimeLatest, creationTimeEarliest;
-    private transient Long publicationTimeLatest, publicationTimeEarliest;
-
-    public Long creationTimeLatest() {
-        if (creationTime == null) {
-            return null;
+    public TextInfo(int parallelCount) {
+        subtexts = new Subtext[parallelCount];
+        for (int i = 0; i < subtexts.length; i++) {
+            subtexts[i] = new Subtext();
         }
-        if (creationTimeLatest == null) {
-            KorpusDateTime dt = new KorpusDateTime(creationTime);
-            creationTimeEarliest = dt.earliest();
-            creationTimeLatest = dt.latest();
-        }
-        return creationTimeLatest;
     }
 
-    public Long creationTimeEarliest() {
-        if (creationTime == null) {
-            return null;
-        }
-        if (creationTimeEarliest == null) {
-            KorpusDateTime dt = new KorpusDateTime(creationTime);
-            creationTimeEarliest = dt.earliest();
-            creationTimeLatest = dt.latest();
-        }
-        return creationTimeEarliest;
-    }
+    public static class Subtext {
+        public String textLabel; // TODO subcorpus-dependent
+        public String source; // крыніца: толькі для сайтаў і неразабраных
+        public String url; // спасылка на знешні сайт, калі ёсць
+        public String[] authors; // аўтары
+        public String title; // назва: заўсёды
+        public String[] translators; // перакладчыкі
+        public String lang, langOrig; // мова тэксту, мова зыходнага тэксту
+        public String edition; // выданне
+        public String details; // дэталі
+        public String file; // файл на зыходнай старонцы
+        public String creationTime, publicationTime; // дата стварэння і публікацыі
 
-    public Long publicationTimeLatest() {
-        if (publicationTime == null) {
-            return null;
-        }
-        if (publicationTimeLatest == null) {
-            KorpusDateTime dt = new KorpusDateTime(publicationTime);
-            publicationTimeEarliest = dt.earliest();
-            publicationTimeLatest = dt.latest();
-        }
-        return publicationTimeLatest;
-    }
+        private transient Long creationTimeLatest, creationTimeEarliest;
+        private transient Long publicationTimeLatest, publicationTimeEarliest;
 
-    public Long publicationTimeEarliest() {
-        if (publicationTime == null) {
-            return null;
+        public Long creationTimeLatest() {
+            if (creationTime == null) {
+                return null;
+            }
+            if (creationTimeLatest == null) {
+                KorpusDateTime dt = new KorpusDateTime(creationTime);
+                creationTimeEarliest = dt.earliest();
+                creationTimeLatest = dt.latest();
+            }
+            return creationTimeLatest;
         }
-        if (publicationTimeEarliest == null) {
-            KorpusDateTime dt = new KorpusDateTime(publicationTime);
-            publicationTimeEarliest = dt.earliest();
-            publicationTimeLatest = dt.latest();
+
+        public Long creationTimeEarliest() {
+            if (creationTime == null) {
+                return null;
+            }
+            if (creationTimeEarliest == null) {
+                KorpusDateTime dt = new KorpusDateTime(creationTime);
+                creationTimeEarliest = dt.earliest();
+                creationTimeLatest = dt.latest();
+            }
+            return creationTimeEarliest;
         }
-        return publicationTimeEarliest;
+
+        public Long publicationTimeLatest() {
+            if (publicationTime == null) {
+                return null;
+            }
+            if (publicationTimeLatest == null) {
+                KorpusDateTime dt = new KorpusDateTime(publicationTime);
+                publicationTimeEarliest = dt.earliest();
+                publicationTimeLatest = dt.latest();
+            }
+            return publicationTimeLatest;
+        }
+
+        public Long publicationTimeEarliest() {
+            if (publicationTime == null) {
+                return null;
+            }
+            if (publicationTimeEarliest == null) {
+                KorpusDateTime dt = new KorpusDateTime(publicationTime);
+                publicationTimeEarliest = dt.earliest();
+                publicationTimeLatest = dt.latest();
+            }
+            return publicationTimeEarliest;
+        }
     }
 }

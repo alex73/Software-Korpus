@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.text.parser.PtextFileParser;
 import org.alex73.korpus.text.parser.PtextFileWriter;
 import org.alex73.korpus.text.parser.TextFileParser;
@@ -28,7 +29,7 @@ public class ManyFiles {
                 List<String> expected = Files.readAllLines(f);
                 try (InputStream in = Files.newInputStream(f)) {
                     TextFileParser text = new TextFileParser(in, false);
-                    text.parse(null);
+                    text.parse(LanguageFactory.get("bel"), false, null);
                     TextFileWriter.write(new File(TEMP), text.headers, text.lines);
                     List<String> created = Files.readAllLines(Paths.get(TEMP));
                     assertEquals(expected, created);

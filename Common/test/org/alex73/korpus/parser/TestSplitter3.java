@@ -2,6 +2,7 @@ package org.alex73.korpus.parser;
 
 import static org.junit.Assert.assertEquals;
 
+import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.text.parser.IProcess;
 import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.Splitter3;
@@ -26,7 +27,7 @@ public class TestSplitter3 {
 
     @Test
     public void testText() {
-        p = PtextToKorpus.oneLine(new Splitter3(true, errors).parse("- Адно, слова... А: потым ? 123 мо'' 'ак з'ява"));
+        p = PtextToKorpus.oneLine(new Splitter3(LanguageFactory.get("bel").getNormalizer(), true, errors).parse("- Адно, слова... А: потым ? 123 мо'' 'ак з'ява"));
 
         nextW("", "- ");
         nextW("Адно", ", ");

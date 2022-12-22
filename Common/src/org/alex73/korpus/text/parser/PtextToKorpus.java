@@ -156,4 +156,8 @@ public class PtextToKorpus {
         sentences.clear();
         paragraphs.add(p);
     }
+
+    public Paragraph[] getParagraphs() {
+        return paragraphs.toArray(new Paragraph[paragraphs.size()]);
+    }
 }

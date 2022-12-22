@@ -14,8 +14,8 @@ import java.util.TreeMap;
 import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.GrammarDB2;
-import org.alex73.korpus.belarusian.FormsReadyFilter;
 import org.alex73.korpus.future.Hramatycny.Out;
+import org.alex73.korpus.languages.belarusian.FormsReadyFilter;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;

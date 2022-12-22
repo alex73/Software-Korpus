@@ -13,6 +13,7 @@ import java.util.zip.ZipFile;
 
 import org.alex73.korpus.compiler.MessageParsedText;
 import org.alex73.korpus.compiler.PrepareCache3;
+import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.text.parser.Headers;
 import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.TextFileParser;
@@ -47,24 +48,24 @@ public class TextArchiveParser extends BaseParser {
                     data = IOUtils.toByteArray(in);
                 }
                 TextFileParser doc = new TextFileParser(new ByteArrayInputStream(data), headersOnly);
-                MessageParsedText text = new MessageParsedText();
+                MessageParsedText text = new MessageParsedText(1);
                 text.textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + en.getName();
                 text.textInfo.subcorpus = subcorpus;
-                text.textInfo.source = commonHeaders.get("Source");
-                text.textInfo.title = doc.headers.get("Title");
-                text.textInfo.url = doc.headers.get("URL");
-                text.textInfo.publicationTime = getAndCheckYears(doc.headers.get("PublicationYear"));
-                text.textInfo.textLabel = text.textInfo.source;
+                text.textInfo.subtexts[0].source = commonHeaders.get("Source");
+                text.textInfo.subtexts[0].title = doc.headers.get("Title");
+                text.textInfo.subtexts[0].url = doc.headers.get("URL");
+                text.textInfo.subtexts[0].publicationTime = getAndCheckYears(doc.headers.get("PublicationYear"));
+                text.textInfo.subtexts[0].textLabel = text.textInfo.subtexts[0].source;
                 String s;
                 if ((s = doc.headers.get("StyleGenre")) != null) {
                     text.textInfo.styleGenres = splitAndTrim(s);
                 }
-                if (text.textInfo.title == null) {
-                    text.textInfo.title = "";
+                if (text.textInfo.subtexts[0].title == null) {
+                    text.textInfo.subtexts[0].title = "";
                 }
                 if (!headersOnly) {
-                    doc.parse(true, PrepareCache3.errors);
-                    text.paragraphs = new PtextToKorpus(doc.lines, true).paragraphs;
+                    doc.parse(LanguageFactory.get(getLang(text.textInfo.subtexts[0].lang)), true, PrepareCache3.errors);
+                    text.paragraphs[0] = new PtextToKorpus(doc.lines, true).getParagraphs();
                 }
                 publisher.accept(text);
             }

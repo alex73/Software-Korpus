@@ -5,7 +5,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
+import org.alex73.korpus.languages.ILanguage;
+import org.alex73.korpus.languages.LanguageFactory;
+import org.alex73.korpus.languages.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.server.data.ClusterParams;
 import org.alex73.korpus.server.data.ClusterResults;
 import org.alex73.korpus.server.data.WordRequest;
@@ -28,18 +30,19 @@ public class ClusterServiceImpl {
 
     public ClusterResults calc(ClusterParams params, LuceneFilter process) throws Exception {
         this.params = params;
+        ILanguage lang = LanguageFactory.get(params.lang);
 
         BooleanQuery.Builder query = new BooleanQuery.Builder();
-        process.addKorpusTextFilter(query, params.textStandard);
+        process.addKorpusTextFilter(params.lang, query, params.textStandard);
 
         WordRequest w = params.word;
-        w.word = BelarusianWordNormalizer.lightNormalized(w.word);
-        process.addWordFilter(query, w);
+        w.word = lang.getNormalizer().lightNormalized(w.word);
+        process.addWordFilter(params.lang, query, w);
 
         process.search(query.build(), SEARCH_BLOCK, new LuceneDriverRead.DocFilter<Void>() {
             @Override
             public Void processDoc(int docID) throws Exception {
-                process(docID, process);
+                process(lang, docID, process);
                 return null;
             }
         });
@@ -47,15 +50,17 @@ public class ClusterServiceImpl {
         return createResults();
     }
 
-    private void process(int docID, LuceneFilter process) throws Exception {
+    private void process(ILanguage lang, int docID, LuceneFilter process) throws Exception {
         Document doc = process.getSentence(docID);
 
-        Paragraph text = parent.restoreText(doc);
+        Paragraph[] ps = parent.restoreText(doc);
 
-        for (int i = 0; i < text.sentences.length; i++) {
-            for (int j = 0; j < text.sentences[i].words.length; j++) {
-                if (WordsDetailsChecks.isOneWordMatchsParam(params.word, (WordResult) text.sentences[i].words[j])) {
-                    process(text.sentences[i], j);
+        for (int pi = 0; pi < ps.length; pi++) {
+            for (int i = 0; i < ps[pi].sentences.length; i++) {
+                for (int j = 0; j < ps[pi].sentences[i].words.length; j++) {
+                    if (WordsDetailsChecks.isOneWordMatchsParam(lang, params.word, (WordResult) ps[pi].sentences[i].words[j])) {
+                        process(ps[pi].sentences[i], j);
+                    }
                 }
             }
         }

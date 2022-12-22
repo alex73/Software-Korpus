@@ -19,13 +19,15 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
 
-package org.alex73.korpus.belarusian;
+package org.alex73.korpus.languages.belarusian;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.alex73.korpus.belarusian.TagLetter.OneLetterInfo;
+import org.alex73.korpus.languages.ILanguage;
+import org.alex73.korpus.languages.TagLetter;
+import org.alex73.korpus.languages.TagLetter.OneLetterInfo;
 
 /**
  * Граматычныя пазнакі паказваюцца ў наступных месцах:
@@ -34,25 +36,13 @@ import org.alex73.korpus.belarusian.TagLetter.OneLetterInfo;
  * 3) Паказ граматычных характарыстык аднаго слова.
  * 4) Граматычны слоўнік у "праектах у распрацоўцы".
  */
-public class BelarusianTags {
+public class BelarusianTags implements ILanguage.IGrammarTags {
     public static final String NO_GROUP_ITEM = "не ўжываецца";
     public static final String HALOSNYJA = "ёуеыаоэяіюЁУЕЫАОЭЯІЮ";
     public static final String USUALLY_STRESSED = "ёоЁО";
-
-    private static BelarusianTags INSTANCE = new BelarusianTags();
-
-    public static BelarusianTags getInstance() {
-        return INSTANCE;
-    }
-
     private TagLetter root;
 
-    public static void main(String[] a) {
-        INSTANCE.isValidParadigmTag("VTPN1", "err p");
-        INSTANCE.isValidFormTag("VTPN1PG", "err f");
-    }
-
-    private BelarusianTags() {
+    public BelarusianTags() {
         root = new TagLetter();
 
         nazounik(root);

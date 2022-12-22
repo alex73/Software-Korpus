@@ -24,8 +24,8 @@ package org.alex73.korpus.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.alex73.korpus.belarusian.BelarusianTags;
-import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
+import org.alex73.korpus.languages.belarusian.BelarusianTags;
+import org.alex73.korpus.languages.belarusian.BelarusianWordNormalizer;
 
 /**
  * Some utilities methods for stress processing.

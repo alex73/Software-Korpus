@@ -1,5 +1,9 @@
 package org.alex73.korpus.server.engine;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.IntRange;
@@ -44,46 +48,45 @@ public class LuceneFields {
         TYPE_NOTSTORED_INDEXED.freeze();
     }
 
+    public static class LuceneFieldsLang {
+        public Field fieldSentenceValues;
+        public Field fieldSentenceDBGrammarTags;
+        public Field fieldSentenceLemmas;
+        public Field fieldSentenceTextAuthor;
+        public Field fieldSentenceTextSource;
+        public IntRange fieldSentenceTextCreationYear;
+        public IntRange fieldSentenceTextPublishedYear;
+    }
+
     public Field fieldSentenceTextSubcorpus;
     // public FieldInt fieldSentenceTextIDOrder;
     public Field fieldSentenceTextStyleGenre;
-    public Field fieldSentenceTextAuthor;
-    public Field fieldSentenceTextSource;
-    public IntRange fieldSentenceTextCreationYear;
-    public IntRange fieldSentenceTextPublishedYear;
-    //public Field fieldSentenceTextInfo;
+    
+    // public Field fieldSentenceTextInfo;
 
-    public Field fieldSentenceValues;
-    public Field fieldSentenceDBGrammarTags;
-    public Field fieldSentenceLemmas;
+    public Map<String, LuceneFieldsLang> byLang = new TreeMap<>();
     public Field fieldSentencePBinary;
-    public FieldInt fieldSentencePage;
 
     public FieldInt fieldTextID;
 
-    public String[] authors;
-    public String title;
-    public String[] translators;
-    public String langOrig;
-    public String[] styleGenres;
-    public String edition;
-    public String writtenTime, publicationTime;
-
-    public LuceneFields() {
-        // words fields
-        fieldSentenceValues = new Field("value", "", TYPE_NOTSTORED_INDEXED);
-        fieldSentenceDBGrammarTags = new Field("dbGrammarTag", "", TYPE_NOTSTORED_INDEXED);
-        fieldSentenceLemmas = new Field("lemma", "", TYPE_NOTSTORED_INDEXED);
+    public LuceneFields(Set<String> allLanguages) {
+        for (String lang : allLanguages) {
+            // words fields
+            LuceneFieldsLang lf = new LuceneFieldsLang();
+            byLang.put(lang, lf);
+            lf.fieldSentenceValues = new Field(lang + "_value", "", TYPE_NOTSTORED_INDEXED);
+            lf.fieldSentenceDBGrammarTags = new Field(lang + "_dbGrammarTag", "", TYPE_NOTSTORED_INDEXED);
+            lf.fieldSentenceLemmas = new Field(lang + "_lemma", "", TYPE_NOTSTORED_INDEXED);
+            lf.fieldSentenceTextAuthor = new Field("textAuthor", "", TYPE_NOTSTORED_INDEXED);
+            lf.fieldSentenceTextSource = new Field("textSource", "", TYPE_NOTSTORED_INDEXED);
+            lf.fieldSentenceTextCreationYear = new IntRange("creationYear", new int[] { 0 }, new int[] { 0 });
+            lf.fieldSentenceTextPublishedYear = new IntRange("publishedYear", new int[] { 0 }, new int[] { 0 });
+        }
         fieldSentencePBinary = new Field("pbinary", new byte[0], TYPE_STORED_NOTINDEXED);
 
         // korpus text fields for filtering
         fieldSentenceTextSubcorpus = new Field("textSubcorpus", "", TYPE_NOTSTORED_INDEXED);
         fieldSentenceTextStyleGenre = new Field("textStyleGenre", "", TYPE_NOTSTORED_INDEXED);
-        fieldSentenceTextAuthor = new Field("textAuthor", "", TYPE_NOTSTORED_INDEXED);
-        fieldSentenceTextSource = new Field("textSource", "", TYPE_NOTSTORED_INDEXED);
-        fieldSentenceTextCreationYear = new IntRange("creationYear", new int[] { 0 }, new int[] { 0 });
-        fieldSentenceTextPublishedYear = new IntRange("publishedYear", new int[] { 0 }, new int[] { 0 });
-        fieldSentencePage = new FieldInt("textPage", TYPE_STORED_NOTINDEXED_INT);
 //        fieldSentenceTextInfo = new Field("textInfo", new byte[0], TYPE_STORED_NOTINDEXED);
 
         fieldTextID = new FieldInt("textId", TYPE_STORED_INDEXED_INT);

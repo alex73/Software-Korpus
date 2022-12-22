@@ -55,7 +55,7 @@ public class AuthorsUtil {
         }
     }
 
-    public static void fixAuthors(TextInfo textInfo) {
+    public static void fixAuthors(TextInfo.Subtext textInfo) {
         if (textInfo.authors != null) {
             for (int i = 0; i < textInfo.authors.length; i++) {
                 String replaced = authorsIndex.get(textInfo.authors[i]);

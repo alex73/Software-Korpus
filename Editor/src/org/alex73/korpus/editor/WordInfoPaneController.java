@@ -37,8 +37,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import org.alex73.corpus.paradigm.Paradigm;
-import org.alex73.korpus.belarusian.BelarusianTags;
 import org.alex73.korpus.editor.ui.WordInfoPane;
+import org.alex73.korpus.languages.belarusian.BelarusianTags;
 import org.alex73.korpus.text.structure.files.WordItem;
 
 public class WordInfoPaneController {

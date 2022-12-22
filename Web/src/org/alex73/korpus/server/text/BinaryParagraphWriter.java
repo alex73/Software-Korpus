@@ -12,19 +12,24 @@ public class BinaryParagraphWriter {
     private ByteArrayOutputStream bytes = new ByteArrayOutputStream(1024);
     private DataOutputStream out = new DataOutputStream(bytes);
 
-    public byte[] write(Paragraph p) {
+    public byte[] write(Paragraph[] ps) {
         try {
             bytes.reset();
 
-            checkWriteShort(p.sentences.length, "Too many sentences in paragraph: ");
-            for (Sentence se : p.sentences) {
-                checkWriteShort(se.words.length, "Too many words in sentence: ");
-                for (Word w : se.words) {
-                    writeString(w.source);
-                    writeString(w.normalized);
-                    writeString(w.lemmas);
-                    writeString(w.tags);
-                    writeString(w.tail);
+            checkWriteShort(ps.length, "Too many texts: ");
+            for (Paragraph p : ps) {
+                writeString(p.lang);
+                writeInt(p.page);
+                checkWriteShort(p.sentences.length, "Too many sentences in paragraph: ");
+                for (Sentence se : p.sentences) {
+                    checkWriteShort(se.words.length, "Too many words in sentence: ");
+                    for (Word w : se.words) {
+                        writeString(w.source);
+                        writeString(w.normalized);
+                        writeString(w.lemmas);
+                        writeString(w.tags);
+                        writeString(w.tail);
+                    }
                 }
             }
 
@@ -39,6 +44,10 @@ public class BinaryParagraphWriter {
             throw new RuntimeException(error + value);
         }
         out.writeShort(value);
+    }
+
+    private void writeInt(int value) throws IOException {
+        out.writeInt(value);
     }
 
     private void writeString(String str) throws IOException {

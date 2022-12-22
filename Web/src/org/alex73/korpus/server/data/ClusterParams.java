@@ -28,6 +28,7 @@ import java.io.Serializable;
  */
 @SuppressWarnings("serial")
 public class ClusterParams implements Serializable {
+    public String lang;
     public StandardTextRequest textStandard = new StandardTextRequest();
     public WordRequest word;
     public int wordsBefore, wordsAfter;

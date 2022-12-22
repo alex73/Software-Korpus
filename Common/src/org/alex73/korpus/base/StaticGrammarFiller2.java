@@ -7,7 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
-import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
+import org.alex73.korpus.languages.ILanguage;
+import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.text.structure.corpus.Paragraph;
 import org.alex73.korpus.text.structure.corpus.Sentence;
 import org.alex73.korpus.text.structure.corpus.Word;
@@ -21,6 +22,7 @@ public class StaticGrammarFiller2 {
 
     private final GrammarFinder finder;
     private final Map<String, WordInfo> cache = new ConcurrentHashMap<>(1024 * 1024, 0.75f, 4);
+    private static final ILanguage.INormalizer wordNormalizer = LanguageFactory.get("bel").getNormalizer();
 
     public StaticGrammarFiller2(GrammarFinder finder) {
         this.finder = finder;
@@ -28,6 +30,9 @@ public class StaticGrammarFiller2 {
 
     public void fill(List<Paragraph> content) {
         content.stream().forEach(p -> {
+            if (!"bel".equals(p.lang)) {
+                return;
+            }
             for (Sentence se : p.sentences) {
                 for (Word w : se.words) {
                     fill(w);
@@ -102,7 +107,7 @@ public class StaticGrammarFiller2 {
                 if (manualLemma != null && !p.getLemma().equals(manualLemma)) {
                     continue;
                 }
-                if (BelarusianWordNormalizer.equals(f.getValue(), word)) {
+                if (wordNormalizer.equals(f.getValue(), word)) {
                     String fTag = SetUtils.tag(p, v, f);
                     if (fillTagPrefix != null) {
                         if (!fTag.startsWith(fillTagPrefix)) {

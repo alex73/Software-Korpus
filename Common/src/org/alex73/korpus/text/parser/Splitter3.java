@@ -1,6 +1,7 @@
 package org.alex73.korpus.text.parser;
 
-import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
+import org.alex73.korpus.languages.ILanguage;
+import org.alex73.korpus.languages.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.text.structure.files.ITextLineElement;
 import org.alex73.korpus.text.structure.files.InlineTag;
 import org.alex73.korpus.text.structure.files.SentenceSeparatorItem;
@@ -13,6 +14,7 @@ import org.alex73.korpus.text.structure.files.WordItem;
  * словы.
  */
 public class Splitter3 {
+    private final ILanguage.INormalizer wordNormalizer;
     private final IProcess errors;
     private final boolean processSimpleHtml;
     private CharSequence para;
@@ -22,7 +24,8 @@ public class Splitter3 {
     private final StringBuilder currentWord = new StringBuilder();
     private final StringBuilder currentTail = new StringBuilder();
 
-    public Splitter3(boolean processSimpleHtml, IProcess errors) {
+    public Splitter3(ILanguage.INormalizer wordNormalizer, boolean processSimpleHtml, IProcess errors) {
+        this.wordNormalizer = wordNormalizer;
         this.processSimpleHtml = processSimpleHtml;
         this.errors = errors;
     }
@@ -67,7 +70,7 @@ public class Splitter3 {
                         continue;
                     }
                 }
-                if (BelarusianWordNormalizer.usie_apostrafy.indexOf(currentChar) >= 0 || currentChar == '-') {
+                if (wordNormalizer.isApostraf(currentChar) || currentChar == '-') {
                     // не могуць быць на мяжы
                     if (currentWord.length() > 0 && currentTail.length() == 0) {
                         currentWord.append(currentChar);
@@ -76,7 +79,7 @@ public class Splitter3 {
                     }
                     continue;
                 }
-                if (BelarusianWordNormalizer.isLetter(currentChar)) {
+                if (wordNormalizer.isLetter(currentChar)) {
                     if (currentTail.length() > 0) {
                         closeWord();
                     }
@@ -97,7 +100,7 @@ public class Splitter3 {
             // check if word ends with znak
             while (currentWord.length() > 0) {
                 char latestInWord = currentWord.charAt(currentWord.length() - 1);
-                if (BelarusianWordNormalizer.usie_apostrafy.indexOf(latestInWord) >= 0 || latestInWord == '-') {
+                if (wordNormalizer.isApostraf(latestInWord) || latestInWord == '-') {
                     currentWord.setLength(currentWord.length() - 1);
                     currentTail.insert(0, latestInWord);
                 } else {
@@ -111,7 +114,7 @@ public class Splitter3 {
     private void closeWord() {
         if (currentWord.length() > 0) {
             WordItem w = new WordItem();
-            w.lightNormalized = BelarusianWordNormalizer.lightNormalized(currentWord);
+            w.lightNormalized = wordNormalizer.lightNormalized(currentWord);
             result.add(w);
         }
         if (currentTail.length() > 0) {

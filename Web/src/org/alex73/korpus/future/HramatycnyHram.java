@@ -9,7 +9,8 @@ import java.util.stream.Collectors;
 import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
-import org.alex73.korpus.belarusian.BelarusianTags;
+import org.alex73.korpus.languages.ILanguage;
+import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.utils.SetUtils;
 import org.alex73.korpus.utils.StressUtils;
 
@@ -17,15 +18,18 @@ import org.alex73.korpus.utils.StressUtils;
  * Фармаванне граматыкі для граматычнага слоўніка.
  */
 public class HramatycnyHram {
+    
+    static private final ILanguage.IGrammarTags BEL_TAGS = LanguageFactory.get("bel").getTags();
+    
     private StringBuilder text = new StringBuilder();
     private List<Group> groups = new ArrayList<>();
     private List<String> other = new ArrayList<>();
 
     public HramatycnyHram(Paradigm p, Variant v, List<Form> forms) {
         String tag = SetUtils.tag(p, v);
-        switch (BelarusianTags.getInstance().getValueOfGroup(tag, "Часціна мовы")) {
+        switch (BEL_TAGS.getValueOfGroup(tag, "Часціна мовы")) {
         case 'N':
-            toGrammarSklonavyja(BelarusianTags.getInstance().getValueOfGroup(tag, "Субстантываванасць") != 0);
+            toGrammarSklonavyja(BEL_TAGS.getValueOfGroup(tag, "Субстантываванасць") != 0);
             break;
         case 'A':
         case 'P':
@@ -59,7 +63,7 @@ public class HramatycnyHram {
             }
             if (groupCounts > 1 || itemsCount > 1) {
                 System.err.println(
-                        ftag + " трапляе ў некалькі граматык: " + BelarusianTags.getInstance().describe(ftag, null));
+                        ftag + " трапляе ў некалькі граматык: " + BEL_TAGS.describe(ftag, null));
             }
             if (itemsCount == 0) {
                 other.add(StressUtils.combineAccute(f.getValue()) + '/' + ftag);
@@ -160,7 +164,7 @@ public class HramatycnyHram {
                 if (Group.this.itemTagName == null) {
                     return true;
                 }
-                char tv = BelarusianTags.getInstance().getValueOfGroup(tag, Group.this.itemTagName);
+                char tv = BEL_TAGS.getValueOfGroup(tag, Group.this.itemTagName);
                 return tv == tagValue;
             }
 
@@ -186,7 +190,7 @@ public class HramatycnyHram {
 
         public boolean isAccepted(String tag) {
             for (Map.Entry<String, Character> t : tags.entrySet()) {
-                char tv = BelarusianTags.getInstance().getValueOfGroup(tag, t.getKey());
+                char tv = BEL_TAGS.getValueOfGroup(tag, t.getKey());
                 if (tv != t.getValue().charValue()) {
                     return false;
                 }

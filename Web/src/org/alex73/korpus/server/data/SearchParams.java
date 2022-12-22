@@ -34,6 +34,7 @@ public class SearchParams implements Serializable {
         PRESET, ANY_IN_SENTENCE, ANY_IN_PARAGRAPH
     };
 
+    public String lang;
     public StandardTextRequest textStandard;
     public List<WordRequest> words = new ArrayList<WordRequest>();
     public WordsOrder wordsOrder = WordsOrder.PRESET;

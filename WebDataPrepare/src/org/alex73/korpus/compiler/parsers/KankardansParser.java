@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 
 import org.alex73.korpus.compiler.MessageParsedText;
 import org.alex73.korpus.compiler.PrepareCache3;
+import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.TextFileParser;
 
@@ -62,22 +63,22 @@ public class KankardansParser extends BaseParser {
 
     private void flushText(Consumer<MessageParsedText> publisher, boolean headersOnly) {
         if (!text.isEmpty()) {
-            MessageParsedText ti = new MessageParsedText();
+            MessageParsedText ti = new MessageParsedText(1);
             TextFileParser doc = new TextFileParser(new ByteArrayInputStream(text.toString().getBytes(StandardCharsets.UTF_8)), headersOnly);
             ti.textInfo.subcorpus = subcorpus;
             ti.textInfo.textOrder = ++textOrder;
             ti.textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + textTitle;
-            ti.textInfo.title = doc.headers.get("Title");
+            ti.textInfo.subtexts[0].title = doc.headers.get("Title");
             String s;
             if ((s = doc.headers.get("Authors")) != null) {
-                ti.textInfo.authors = splitAndTrim(s);
+                ti.textInfo.subtexts[0].authors = splitAndTrim(s);
             }
-            ti.textInfo.creationTime = getAndCheckYears(doc.headers.get("CreationYear"));
-            ti.textInfo.publicationTime = getAndCheckYears(doc.headers.get("PublicationYear"));
-            ti.textInfo.textLabel = ti.textInfo.authors != null ? String.join(",", Arrays.asList(ti.textInfo.authors)) : "———";
+            ti.textInfo.subtexts[0].creationTime = getAndCheckYears(doc.headers.get("CreationYear"));
+            ti.textInfo.subtexts[0].publicationTime = getAndCheckYears(doc.headers.get("PublicationYear"));
+            ti.textInfo.subtexts[0].textLabel = ti.textInfo.subtexts[0].authors != null ? String.join(",", Arrays.asList(ti.textInfo.subtexts[0].authors)) : "———";
             if (!headersOnly) {
-                doc.parse(false, PrepareCache3.errors);
-                ti.paragraphs = new PtextToKorpus(doc.lines, false).paragraphs;
+                doc.parse(LanguageFactory.get(getLang(ti.textInfo.subtexts[0].lang)), false, PrepareCache3.errors);
+                ti.paragraphs[0] = new PtextToKorpus(doc.lines, false).getParagraphs();
             }
             publisher.accept(ti);
             text.setLength(0);

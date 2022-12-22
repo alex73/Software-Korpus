@@ -17,23 +17,29 @@ public class BinaryParagraphReader {
         in = new DataInputStream(bytes);
     }
 
-    public Paragraph read() throws IOException {
-        Paragraph p = new Paragraph();
-        p.sentences = new Sentence[in.readShort()];
-        for (int i = 0; i < p.sentences.length; i++) {
-            p.sentences[i] = new Sentence();
-            p.sentences[i].words = new Word[in.readShort()];
-            for (int j = 0; j < p.sentences[i].words.length; j++) {
-                Word w = new Word();
-                w.source = readString();
-                w.normalized = readString();
-                w.lemmas = readString();
-                w.tags = readString();
-                w.tail = readString();
-                p.sentences[i].words[j] = w;
+    public Paragraph[] read() throws IOException {
+        Paragraph[] ps = new Paragraph[in.readShort()];
+        for (int pi = 0; pi < ps.length; pi++) {
+            Paragraph p = new Paragraph();
+            ps[pi] = p;
+            p.lang = in.readUTF();
+            p.page = in.readInt();
+            p.sentences = new Sentence[in.readShort()];
+            for (int i = 0; i < p.sentences.length; i++) {
+                p.sentences[i] = new Sentence();
+                p.sentences[i].words = new Word[in.readShort()];
+                for (int j = 0; j < p.sentences[i].words.length; j++) {
+                    Word w = new Word();
+                    w.source = readString();
+                    w.normalized = readString();
+                    w.lemmas = readString();
+                    w.tags = readString();
+                    w.tail = readString();
+                    p.sentences[i].words[j] = w;
+                }
             }
         }
-        return p;
+        return ps;
     }
 
     private String readString() throws IOException {

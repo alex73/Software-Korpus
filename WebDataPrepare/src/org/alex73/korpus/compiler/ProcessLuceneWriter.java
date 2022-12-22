@@ -6,8 +6,12 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Stream;
 
+import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.compiler.MessageLuceneWrite.LuceneParagraph;
 import org.alex73.korpus.server.engine.LuceneFields;
 import org.alex73.korpus.server.engine.StringArrayTokenStream;
@@ -33,12 +37,15 @@ public class ProcessLuceneWriter extends BaseParallelProcessor<MessageLuceneWrit
     static final int INSTANCE_COUNT = 8;
 
     private final Path rootDir;
-
+    private final Set<String> allLanguages;
     private final boolean realWrite;
     private final boolean cacheForProduction;
     private final int bufferSizeMb;
     private final double bufferSizeMbEachInstance;
     private final List<LuceneContext> contexts = Collections.synchronizedList(new ArrayList<>());
+
+    private static final String[] EMPTY_STRINGARRAY = new String[0];
+    private static final StringArrayTokenStream EMPTY_STRINGARRAY_VALUE = new StringArrayTokenStream(new String[0]);
 
     private ThreadLocal<LuceneContext> context = new ThreadLocal<>() {
         @Override
@@ -66,9 +73,10 @@ public class ProcessLuceneWriter extends BaseParallelProcessor<MessageLuceneWrit
         }
     };
 
-    public ProcessLuceneWriter(boolean realWrite, boolean cacheForProduction, Path rootDir, int bufferSizeMb) throws Exception {
+    public ProcessLuceneWriter(Set<String> allLanguages, boolean realWrite, boolean cacheForProduction, Path rootDir, int bufferSizeMb) throws Exception {
         super(INSTANCE_COUNT, INSTANCE_COUNT * 3);
         LOG.info("Lucene will use " + bufferSizeMb + "mb");
+        this.allLanguages = allLanguages;
         this.realWrite = realWrite;
         this.cacheForProduction = cacheForProduction;
         this.rootDir = rootDir;
@@ -100,19 +108,62 @@ public class ProcessLuceneWriter extends BaseParallelProcessor<MessageLuceneWrit
             grow(text.paragraphs.length);
             for (int i = 0; i < text.paragraphs.length; i++) {
                 LuceneFields fields = c.fields.get(i);
+                for (LuceneFields.LuceneFieldsLang lf : fields.byLang.values()) {
+                    lf.fieldSentenceValues.setTokenStream(EMPTY_STRINGARRAY_VALUE);
+                    lf.fieldSentenceDBGrammarTags.setTokenStream(EMPTY_STRINGARRAY_VALUE);
+                    lf.fieldSentenceLemmas.setTokenStream(EMPTY_STRINGARRAY_VALUE);
+
+                    lf.fieldSentenceTextAuthor.setTokenStream(EMPTY_STRINGARRAY_VALUE);
+                    lf.fieldSentenceTextSource.setStringValue("");
+                    setYearsRange(null, lf.fieldSentenceTextCreationYear);
+                    setYearsRange(null, lf.fieldSentenceTextPublishedYear);
+                }
+
                 LuceneParagraph p = text.paragraphs[i];
                 fields.fieldSentenceTextSubcorpus.setStringValue(text.textInfo.subcorpus);
                 fields.fieldSentenceTextStyleGenre.setTokenStream(new StringArrayTokenStream(text.textInfo.styleGenres));
-                setYearsRange(text.textInfo.creationTime, fields.fieldSentenceTextCreationYear);
-                setYearsRange(text.textInfo.publicationTime, fields.fieldSentenceTextPublishedYear);
-                fields.fieldSentenceTextAuthor.setTokenStream(new StringArrayTokenStream(text.textInfo.authors));
-                fields.fieldSentenceTextSource.setStringValue(text.textInfo.source != null ? text.textInfo.source : "");
 
-                fields.fieldSentenceValues.setTokenStream(new StringArrayTokenStream(p.values));
-                fields.fieldSentenceDBGrammarTags.setTokenStream(new StringArrayTokenStream(p.dbGrammarTags));
-                fields.fieldSentenceLemmas.setTokenStream(new StringArrayTokenStream(p.lemmas));
+                for (Map.Entry<String, MessageLuceneWrite.LuceneParagraphLang> en : p.byLang.entrySet()) {
+                    String langCreationTime = "";
+                    String langPublicationTime = "";
+                    Set<String> langAuthors = new TreeSet<>();
+                    Set<String> langSources = new TreeSet<>();
+                    for (TextInfo.Subtext st : text.textInfo.subtexts) {
+                        if (!en.getKey().equals(st.lang)) {
+                            continue;
+                        }
+                        if (st.creationTime != null) {
+                            langCreationTime += ';' + st.creationTime;
+                        }
+                        if (st.publicationTime != null) {
+                            langPublicationTime += ';' + st.publicationTime;
+                        }
+                        if (st.authors != null) {
+                            for (String a : st.authors) {
+                                langAuthors.add(a);
+                            }
+                        }
+                        if (st.source != null) {
+                            langSources.add(st.source);
+                        }
+                    }
+                    if (!langCreationTime.isEmpty()) {
+                        langCreationTime = langCreationTime.substring(1);
+                    }
+                    if (!langPublicationTime.isEmpty()) {
+                        langPublicationTime = langPublicationTime.substring(1);
+                    }
+
+                    LuceneFields.LuceneFieldsLang fl = fields.byLang.get(en.getKey());
+                    fl.fieldSentenceValues.setTokenStream(new StringArrayTokenStream(en.getValue().values));
+                    fl.fieldSentenceDBGrammarTags.setTokenStream(new StringArrayTokenStream(en.getValue().dbGrammarTags));
+                    fl.fieldSentenceLemmas.setTokenStream(new StringArrayTokenStream(en.getValue().lemmas));
+                    fl.fieldSentenceTextAuthor.setTokenStream(new StringArrayTokenStream(langAuthors.toArray(EMPTY_STRINGARRAY)));
+                    fl.fieldSentenceTextSource.setTokenStream(new StringArrayTokenStream(langSources.toArray(EMPTY_STRINGARRAY)));
+                    setYearsRange(langCreationTime, fl.fieldSentenceTextCreationYear);
+                    setYearsRange(langPublicationTime, fl.fieldSentenceTextPublishedYear);
+                }
                 fields.fieldSentencePBinary.setBytesValue(p.xml);
-                fields.fieldSentencePage.setIntValue(p.page);
 
                 Integer position = PrepareCache3.textPositionsBySourceFile.get(text.textInfo.sourceFilePath);
                 if (position == null) {
@@ -134,8 +185,8 @@ public class ProcessLuceneWriter extends BaseParallelProcessor<MessageLuceneWrit
     }
 
     private void setYearsRange(String date, IntRange rangeField) {
-        if (date == null) {
-            rangeField.setRangeValues(new int[] { Integer.MIN_VALUE }, new int[] { Integer.MIN_VALUE });
+        if (date == null || date.isEmpty()) {
+            rangeField.setRangeValues(new int[] { Integer.MIN_VALUE }, new int[] { Integer.MAX_VALUE });
         } else {
             KorpusDateTime dt = new KorpusDateTime(date);
             rangeField.setRangeValues(new int[] { dt.getEarliestYear() }, new int[] { dt.getLatestYear() });
@@ -145,24 +196,25 @@ public class ProcessLuceneWriter extends BaseParallelProcessor<MessageLuceneWrit
     private void grow(int capacity) {
         LuceneContext c = context.get();
         while (c.fields.size() < capacity) {
-            c.fields.add(new LuceneFields());
+            c.fields.add(new LuceneFields(allLanguages));
         }
         while (c.documents.size() < capacity) {
             LuceneFields fields = c.fields.get(c.documents.size());
             Document docSentence = new Document();
-            docSentence.add(fields.fieldSentenceValues);
-            docSentence.add(fields.fieldSentenceDBGrammarTags);
-            docSentence.add(fields.fieldSentenceLemmas);
+            for (LuceneFields.LuceneFieldsLang lf : fields.byLang.values()) {
+                docSentence.add(lf.fieldSentenceValues);
+                docSentence.add(lf.fieldSentenceDBGrammarTags);
+                docSentence.add(lf.fieldSentenceLemmas);
+                docSentence.add(lf.fieldSentenceTextAuthor);
+                docSentence.add(lf.fieldSentenceTextSource);
+                docSentence.add(lf.fieldSentenceTextCreationYear);
+                docSentence.add(lf.fieldSentenceTextPublishedYear);
+            }
             docSentence.add(fields.fieldSentencePBinary);
-            docSentence.add(fields.fieldSentencePage);
 
             docSentence.add(fields.fieldSentenceTextSubcorpus);
             // docSentence.add(fieldSentenceTextIDOrder);
             docSentence.add(fields.fieldSentenceTextStyleGenre);
-            docSentence.add(fields.fieldSentenceTextAuthor);
-            docSentence.add(fields.fieldSentenceTextSource);
-            docSentence.add(fields.fieldSentenceTextCreationYear);
-            docSentence.add(fields.fieldSentenceTextPublishedYear);
 
             docSentence.add(fields.fieldTextID);
             c.documents.add(docSentence);
@@ -171,7 +223,7 @@ public class ProcessLuceneWriter extends BaseParallelProcessor<MessageLuceneWrit
 
     public ExRunnable mergeIndexes() {
         return () -> {
-            LuceneFields fields = new LuceneFields();
+            LuceneFields fields = new LuceneFields(allLanguages);
             IndexWriterConfig config = new IndexWriterConfig();
             config.setCommitOnClose(true);
             config.setOpenMode(OpenMode.CREATE);

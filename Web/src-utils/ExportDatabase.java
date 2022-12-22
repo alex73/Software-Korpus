@@ -15,7 +15,7 @@ import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.base.GrammarDBSaver;
-import org.alex73.korpus.belarusian.FormsReadyFilter;
+import org.alex73.korpus.languages.belarusian.FormsReadyFilter;
 import org.alex73.korpus.utils.SetUtils;
 import org.alex73.korpus.utils.StressUtils;
 

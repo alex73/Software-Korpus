@@ -17,7 +17,6 @@ import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.compiler.parsers.AuthorsUtil;
-import org.alex73.korpus.compiler.stat.StatWriting;
 import org.alex73.korpus.text.parser.IProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,7 +111,7 @@ public class PrepareCache3 {
 
         LOG.info("2nd pass...");
         be = System.currentTimeMillis();
-        ProcessLuceneWriter lucene = new ProcessLuceneWriter(writeToLucene, cacheForProduction, OUTPUT, 8192);
+        ProcessLuceneWriter lucene = new ProcessLuceneWriter(h1.allLanguages, writeToLucene, cacheForProduction, OUTPUT, 8192);
         ProcessPrepareLucene prepareLucene = new ProcessPrepareLucene(lucene);
         ProcessStat stat = new ProcessStat(processStat, OUTPUT);
         ProcessTexts t2 = new ProcessTexts(grFiller, prepareLucene, stat, textsCount);

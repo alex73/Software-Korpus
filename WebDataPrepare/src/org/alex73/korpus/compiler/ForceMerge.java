@@ -1,6 +1,7 @@
 package org.alex73.korpus.compiler;
 
 import java.nio.file.Paths;
+import java.util.Set;
 
 import org.alex73.korpus.server.engine.LuceneFields;
 import org.apache.lucene.index.ConcurrentMergeScheduler;
@@ -15,7 +16,7 @@ import org.apache.lucene.store.NIOFSDirectory;
 public class ForceMerge {
 
     public static void main(String[] args) throws Exception {
-        LuceneFields fields = new LuceneFields();
+        LuceneFields fields = new LuceneFields(Set.of("be"));
         IndexWriterConfig config = new IndexWriterConfig();
         config.setCommitOnClose(true);
         config.setOpenMode(OpenMode.CREATE);

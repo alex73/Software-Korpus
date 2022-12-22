@@ -1,6 +1,6 @@
 package org.alex73.korpus.compiler;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -8,6 +8,8 @@ import org.alex73.korpus.base.StaticGrammarFiller2;
 
 public class ProcessTexts extends BaseParallelProcessor<MessageParsedText> {
     public static final boolean writeToLucene = true;
+
+    public static ITextsPreprocessor preprocessor;
 
     private final StaticGrammarFiller2 grFiller;
     private final Consumer<MessageParsedText> lucene;
@@ -27,25 +29,27 @@ public class ProcessTexts extends BaseParallelProcessor<MessageParsedText> {
     @Override
     public void accept(MessageParsedText text) {
         if (text.textInfo.sourceFilePath == null) {
-            throw new RuntimeException("sourceFilePath нявызначаны");
+            throw new RuntimeException("sourceFilePath not defined");
         }
         if (text.textInfo.subcorpus == null) {
-            throw new RuntimeException("subcorpus нявызначаны ў " + text.textInfo.sourceFilePath);
-        }
-        if (text.paragraphs.contains(null)) {
-            throw new RuntimeException("content утрымлівае пустыя параграфы");
+            throw new RuntimeException("subcorpus not defined in the " + text.textInfo.sourceFilePath);
         }
 
         run(() -> {
             counter.incrementAndGet();
             // System.out.println("Process: " + textInfo.sourceFilePath);
-            Collections.shuffle(text.paragraphs);
-            grFiller.fill(text.paragraphs);
+            preprocessor.preprocess(text);
+            for (int v = 0; v < text.paragraphs.length; v++) {
+                for (int i = 0; i < text.textInfo.subtexts.length; i++) {
+                    text.paragraphs[v][i].lang = text.textInfo.subtexts[i].lang;
+                }
+                grFiller.fill(Arrays.asList(text.paragraphs[v]));
+            }
             stat.accept(text);
-            for (int i = 0; i < text.paragraphs.size(); i += 500) {
-                MessageParsedText portion = new MessageParsedText();
+            for (int i = 0; i < text.paragraphs[0].length; i += 500) {
+                MessageParsedText portion = new MessageParsedText(text.textInfo.subtexts.length);
                 portion.textInfo = text.textInfo;
-                portion.paragraphs = text.paragraphs.subList(i, Math.min(text.paragraphs.size(), i + 500));
+                portion.paragraphs = Arrays.copyOfRange(text.paragraphs, i, Math.min(text.paragraphs.length, i + 500));
                 lucene.accept(portion);
             }
         });

@@ -33,5 +33,5 @@ import org.alex73.korpus.text.structure.corpus.Paragraph;
 public class SearchResults implements Serializable {
     public int docId;
     public TextInfo doc;
-    public Paragraph text;
+    public Paragraph[] text;
 }

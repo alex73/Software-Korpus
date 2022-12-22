@@ -12,6 +12,7 @@ import java.util.zip.ZipFile;
 
 import org.alex73.korpus.compiler.MessageParsedText;
 import org.alex73.korpus.compiler.PrepareCache3;
+import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.TextFileParser;
 import org.apache.commons.io.IOUtils;
@@ -34,22 +35,22 @@ public class OcrTextParser extends BaseParser {
                 try (InputStream in = new BufferedInputStream(zip.getInputStream(en))) {
                     data = IOUtils.toByteArray(in);
                 }
-                MessageParsedText text = new MessageParsedText();
+                MessageParsedText text = new MessageParsedText(1);
                 TextFileParser doc = new TextFileParser(new ByteArrayInputStream(data), headersOnly);
                 text.textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + en.getName();
                 text.textInfo.subcorpus = subcorpus;
-                text.textInfo.url = doc.headers.get("URL");
-                text.textInfo.file = doc.headers.get("File");
-                text.textInfo.source = doc.headers.get("Source");
-                text.textInfo.title = doc.headers.get("Title");
-                text.textInfo.details = doc.headers.get("Details");
-                text.textInfo.textLabel = text.textInfo.source;
+                text.textInfo.subtexts[0].url = doc.headers.get("URL");
+                text.textInfo.subtexts[0].file = doc.headers.get("File");
+                text.textInfo.subtexts[0].source = doc.headers.get("Source");
+                text.textInfo.subtexts[0].title = doc.headers.get("Title");
+                text.textInfo.subtexts[0].details = doc.headers.get("Details");
+                text.textInfo.subtexts[0].textLabel = text.textInfo.subtexts[0].source;
                 if (headersOnly) {
                     // ProcessHeaders.process(textInfo);
                 } else {
                     boolean eachLine = fixHyphens(doc.sourceLines);
-                    doc.parse(false, PrepareCache3.errors);
-                    text.paragraphs = new PtextToKorpus(doc.lines, eachLine).paragraphs;
+                    doc.parse(LanguageFactory.get(getLang(text.textInfo.subtexts[0].lang)), false, PrepareCache3.errors);
+                    text.paragraphs[0] = new PtextToKorpus(doc.lines, eachLine).getParagraphs();
                     /// ProcessTexts.process(textInfo, );
                 }
                 publisher.accept(text);

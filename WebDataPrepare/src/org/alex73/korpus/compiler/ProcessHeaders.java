@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.utils.KorpusFileUtils;
@@ -19,6 +21,7 @@ public class ProcessHeaders extends BaseParallelProcessor<MessageParsedText> {
     private static final Logger LOG = LoggerFactory.getLogger(ProcessHeaders.class);
 
     public List<TextInfo> textInfos = Collections.synchronizedList(new ArrayList<>());
+    public Set<String> allLanguages = Collections.synchronizedSet(new TreeSet<>());
 
     public ProcessHeaders() {
         super(1, 20);
@@ -27,18 +30,25 @@ public class ProcessHeaders extends BaseParallelProcessor<MessageParsedText> {
     @Override
     public void accept(MessageParsedText text) {
         if (text.textInfo.sourceFilePath == null) {
-            throw new RuntimeException("sourceFilePath нявызначаны");
+            throw new RuntimeException("sourceFilePath not defined");
         }
         if (text.textInfo.subcorpus == null) {
-            throw new RuntimeException("subcorpus нявызначаны ў " + text.textInfo.sourceFilePath);
-        }
-        if (text.textInfo.textLabel == null) {
-            throw new RuntimeException("textLabel нявызначаны ў " + text.textInfo.sourceFilePath);
+            throw new RuntimeException("subcorpus not defined in the " + text.textInfo.sourceFilePath);
         }
 
         run(() -> {
-            text.textInfo.creationTimeLatest();
-            text.textInfo.publicationTimeLatest();
+            for (TextInfo.Subtext st : text.textInfo.subtexts) {
+                st.creationTimeLatest();
+                st.publicationTimeLatest();
+                ProcessTexts.preprocessor.preprocess(text);
+                if (st.textLabel == null) {
+                    throw new RuntimeException("textLabel нявызначаны ў " + text.textInfo.sourceFilePath);
+                }
+                if (!allLanguages.contains(st.lang)) {
+                    // check contains for better performance
+                    allLanguages.add(st.lang);
+                }
+            }
             textInfos.add(text.textInfo);
         });
     }
@@ -46,7 +56,7 @@ public class ProcessHeaders extends BaseParallelProcessor<MessageParsedText> {
     Map<String, Integer> calcTextsPositions(Path outputFile) throws Exception {
         LOG.info("Sorting {} text infos...", textInfos.size());
         // sort
-        Collections.sort(textInfos, new TextOrder());
+        Collections.sort(textInfos, ProcessTexts.preprocessor.getTextsComparator());
 
         LOG.info("Storing text positions...");
         // remember positions

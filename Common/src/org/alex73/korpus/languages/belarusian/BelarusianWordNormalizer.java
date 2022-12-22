@@ -19,11 +19,13 @@
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
 
-package org.alex73.korpus.belarusian;
+package org.alex73.korpus.languages.belarusian;
 
 import java.util.Locale;
 
-public class BelarusianWordNormalizer {
+import org.alex73.korpus.languages.ILanguage;
+
+public class BelarusianWordNormalizer implements ILanguage.INormalizer {
     public static final Locale BEL = new Locale("be");
     public static final char pravilny_nacisk = '\u0301';
     public static final String usie_naciski = pravilny_nacisk + "\u00B4";
@@ -84,7 +86,7 @@ public class BelarusianWordNormalizer {
         SUPERNORMALIZE['*'] = '*';
     }
 
-    public static int hash(String word) {
+    public int hash(String word) {
         if (word == null) {
             return 0;
         }
@@ -99,7 +101,7 @@ public class BelarusianWordNormalizer {
         return result;
     }
 
-    public static String lightNormalized(CharSequence word) {
+    public String lightNormalized(CharSequence word) {
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < word.length(); i++) {
             char c = word.charAt(i);
@@ -126,7 +128,7 @@ public class BelarusianWordNormalizer {
         return str.toString();
     }
 
-    public static String superNormalized(String word) {
+    public String superNormalized(String word) {
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < word.length(); i++) {
             char c = word.charAt(i);
@@ -138,6 +140,10 @@ public class BelarusianWordNormalizer {
         return str.toString();
     }
 
+    public boolean isApostraf(char c) {
+        return usie_apostrafy.indexOf(c) >= 0;
+    }
+
     /**
      * Параўноўвае слова ў базе(ці ўведзенае карыстальнікам слова) з словам у
      * тэксце. Тут правяраюцца ўсе "несупярэчнасці": націскі, вялікія літары,
@@ -145,7 +151,7 @@ public class BelarusianWordNormalizer {
      * 
      * Націскі могуць быць альбо не быць як у базе, так і ў тэксце.
      */
-    public static boolean equals(String dbWord, String anyWord) {
+    public boolean equals(String dbWord, String anyWord) {
         /* Націск супаў у той самай пазіцыі. */
         byte stressWasEquals = 0;
         /* Націск з базы быў прапушчаны. */
@@ -220,7 +226,7 @@ public class BelarusianWordNormalizer {
         }
     }
 
-    public static boolean isLetter(char c) {
+    public boolean isLetter(char c) {
         return letters.indexOf(c) >= 0;
     }
 }

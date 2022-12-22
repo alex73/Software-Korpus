@@ -7,9 +7,10 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import org.alex73.korpus.base.DBTagsGroups;
-import org.alex73.korpus.belarusian.BelarusianTags;
-import org.alex73.korpus.belarusian.TagLetter;
+import org.alex73.korpus.languages.DBTagsFactory;
+import org.alex73.korpus.languages.DBTagsFactory.DBTagsGroup;
+import org.alex73.korpus.languages.LanguageFactory;
+import org.alex73.korpus.languages.TagLetter;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -18,7 +19,7 @@ import freemarker.template.TemplateExceptionHandler;
 public class DumpTags {
 
     public static void main(String[] args) throws Exception {
-        TagLetter root = BelarusianTags.getInstance().getRoot();
+        TagLetter root = LanguageFactory.get("bel").getTags().getRoot();
 
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_30);
         cfg.setDirectoryForTemplateLoading(new File("src-utils"));
@@ -29,8 +30,8 @@ public class DumpTags {
         try (OutputStreamWriter wr = new OutputStreamWriter(new FileOutputStream("/tmp/tags.html"), "UTF-8")) {
             for (TagLetter.OneLetterInfo li : root.letters) {
                 Table table = new Table();
-                DBTagsGroups groups = DBTagsGroups.tagGroupsByWordType.get(li.letter);
-                for (DBTagsGroups.Group g : groups.groups) {
+                DBTagsGroup groups = LanguageFactory.get("bel").getDbTags().getTagGroupsByWordType().get(li.letter);
+                for (DBTagsFactory.Group g : groups.groups) {
                     table.columns.add(g.name);
                 }
                 Block b = new Block(li);

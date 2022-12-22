@@ -5,12 +5,14 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import javax.xml.parsers.SAXParserFactory;
 
 import org.alex73.korpus.compiler.MessageParsedText;
 import org.alex73.korpus.compiler.PrepareCache3;
+import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.Splitter3;
 import org.alex73.korpus.text.structure.corpus.Paragraph;
@@ -99,18 +101,18 @@ public class WikiParser extends BaseParser {
             }
         }
 
-        MessageParsedText ti = new MessageParsedText();
-        ti.textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + inTitle;
-        ti.textInfo.source = source;
+        MessageParsedText ti = new MessageParsedText(1);
         ti.textInfo.subcorpus = subcorpus;
-        ti.textInfo.url = urlPrefix + title;
-        ti.textInfo.title = title;
-        ti.textInfo.textLabel = ti.textInfo.source;
+        ti.textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + inTitle;
+        ti.textInfo.subtexts[0].source = source;
+        ti.textInfo.subtexts[0].url = urlPrefix + title;
+        ti.textInfo.subtexts[0].title = title;
+        ti.textInfo.subtexts[0].textLabel = ti.textInfo.subtexts[0].source;
         if (!headersOnly) {
             text = fixText(text);
-            ti.paragraphs = new ArrayList<>();
+            List<Paragraph> paragraphs = new ArrayList<>();
             StringBuilder ptext = new StringBuilder();
-            Splitter3 splitter = new Splitter3(false, PrepareCache3.errors);
+            Splitter3 splitter = new Splitter3(LanguageFactory.get(getLang(ti.textInfo.subtexts[0].lang)).getNormalizer(), false, PrepareCache3.errors);
             for (String s : text.split("\n")) {
                 s = s.trim();
                 if (s.isEmpty()) {
@@ -118,7 +120,7 @@ public class WikiParser extends BaseParser {
                         if (!ptext.toString().replace('\n', ' ').trim().isEmpty()) {
                             Paragraph par = PtextToKorpus.oneLine(splitter.parse(ptext));
                             if (par != null) {
-                                ti.paragraphs.add(par);
+                                paragraphs.add(par);
                             }
                         }
                         ptext.setLength(0);
@@ -130,9 +132,10 @@ public class WikiParser extends BaseParser {
             if (!ptext.toString().replace('\n', ' ').trim().isEmpty()) {
                 Paragraph p = PtextToKorpus.oneLine(splitter.parse(ptext));
                 if (p != null) {
-                    ti.paragraphs.add(p);
+                    paragraphs.add(p);
                 }
             }
+            ti.paragraphs[0] = paragraphs.toArray(new Paragraph[paragraphs.size()]);
         }
         publisher.accept(ti);
     }

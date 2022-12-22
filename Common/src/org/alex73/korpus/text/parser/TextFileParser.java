@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.alex73.korpus.languages.ILanguage;
 import org.alex73.korpus.text.structure.files.LongTagItem;
 import org.alex73.korpus.text.structure.files.TailItem;
 import org.alex73.korpus.text.structure.files.TextLine;
@@ -38,8 +39,8 @@ public class TextFileParser {
         }
     }
 
-    public void parse(boolean processSimpleHtml, IProcess errors) {
-        splitter = new Splitter3(processSimpleHtml, errors);
+    public void parse(ILanguage lang, boolean processSimpleHtml, IProcess errors) {
+        splitter = new Splitter3(lang.getNormalizer(), processSimpleHtml, errors);
 
         for (String s : sourceLines) {
             if (s.trim().isEmpty()) {

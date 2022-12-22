@@ -23,12 +23,14 @@ package org.alex73.korpus.server;
 
 import java.util.List;
 
-import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
+import org.alex73.korpus.languages.LanguageFactory;
+import org.alex73.korpus.languages.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.server.data.LatestMark;
 import org.alex73.korpus.server.data.StandardTextRequest;
 import org.alex73.korpus.server.data.WordRequest;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
 import org.alex73.korpus.server.engine.LuceneDriverRead.DocFilter;
+import org.alex73.korpus.server.engine.LuceneFields;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.IntRange;
 import org.apache.lucene.index.Term;
@@ -42,15 +44,19 @@ import org.apache.lucene.search.WildcardQuery;
 public class LuceneFilter {
     LuceneDriverRead lucene;
 
-    public LuceneFilter(String dir) throws Exception {
-        lucene = new LuceneDriverRead(dir);
+    public LuceneFilter(String dir, String[] languages) throws Exception {
+        lucene = new LuceneDriverRead(dir, languages);
     }
 
     public void close() throws Exception {
         lucene.shutdown();
     }
 
-    public void addKorpusTextFilter(BooleanQuery.Builder query, StandardTextRequest filter) {
+    public void addKorpusTextFilter(String textLanguage, BooleanQuery.Builder query, StandardTextRequest filter) {
+        LuceneFields.LuceneFieldsLang lf = lucene.byLang.get(textLanguage);
+        if (lf == null) {
+            throw new RuntimeException("Corpus doesn't have " + textLanguage + " language");
+        }
         // subcorpus
         if (filter.subcorpuses != null) {
             BooleanQuery.Builder q = new BooleanQuery.Builder();
@@ -64,7 +70,7 @@ public class LuceneFilter {
         if (filter.authors != null) {
             BooleanQuery.Builder q = new BooleanQuery.Builder();
             for (String a : filter.authors) {
-                q.add(new TermQuery(new Term(lucene.fieldSentenceTextAuthor.name(), a)), BooleanClause.Occur.SHOULD);
+                q.add(new TermQuery(new Term(lf.fieldSentenceTextAuthor.name(), a)), BooleanClause.Occur.SHOULD);
             }
             q.setMinimumNumberShouldMatch(1);
             query.add(q.build(), BooleanClause.Occur.MUST);
@@ -73,7 +79,7 @@ public class LuceneFilter {
         if (filter.sources != null) {
             BooleanQuery.Builder q = new BooleanQuery.Builder();
             for (String a : filter.sources) {
-                q.add(new TermQuery(new Term(lucene.fieldSentenceTextSource.name(), a)), BooleanClause.Occur.SHOULD);
+                q.add(new TermQuery(new Term(lf.fieldSentenceTextSource.name(), a)), BooleanClause.Occur.SHOULD);
             }
             q.setMinimumNumberShouldMatch(1);
             query.add(q.build(), BooleanClause.Occur.MUST);
@@ -82,8 +88,7 @@ public class LuceneFilter {
         if (filter.stylegenres != null) {
             BooleanQuery.Builder q = new BooleanQuery.Builder();
             for (String sg : filter.stylegenres) {
-                q.add(new TermQuery(new Term(lucene.fieldSentenceTextStyleGenre.name(), sg)),
-                        BooleanClause.Occur.SHOULD);
+                q.add(new TermQuery(new Term(lucene.fieldSentenceTextStyleGenre.name(), sg)), BooleanClause.Occur.SHOULD);
             }
             q.setMinimumNumberShouldMatch(1);
             query.add(q.build(), BooleanClause.Occur.MUST);
@@ -92,57 +97,51 @@ public class LuceneFilter {
         if (filter.yearWrittenFrom != null || filter.yearWrittenTo != null) {
             int yFrom = filter.yearWrittenFrom != null ? filter.yearWrittenFrom : 1;
             int yTo = filter.yearWrittenTo != null ? filter.yearWrittenTo : 9999;
-            Query q = IntRange.newIntersectsQuery(lucene.fieldSentenceTextCreationYear.name(), new int[] { yFrom },
-                    new int[] { yTo });
+            Query q = IntRange.newIntersectsQuery(lf.fieldSentenceTextCreationYear.name(), new int[] { yFrom }, new int[] { yTo });
             query.add(q, BooleanClause.Occur.MUST);
         }
         // published year
         if (filter.yearPublishedFrom != null || filter.yearPublishedTo != null) {
             int yFrom = filter.yearPublishedFrom != null ? filter.yearPublishedFrom : 1;
             int yTo = filter.yearPublishedTo != null ? filter.yearPublishedTo : 9999;
-            Query q = IntRange.newIntersectsQuery(lucene.fieldSentenceTextPublishedYear.name(), new int[] { yFrom },
-                    new int[] { yTo });
+            Query q = IntRange.newIntersectsQuery(lf.fieldSentenceTextPublishedYear.name(), new int[] { yFrom }, new int[] { yTo });
             query.add(q, BooleanClause.Occur.MUST);
         }
     }
 
-    public void addWordFilter(BooleanQuery.Builder query, WordRequest w) {
+    public void addWordFilter(String textLanguage, BooleanQuery.Builder query, WordRequest w) {
+        LuceneFields.LuceneFieldsLang lf = lucene.byLang.get(textLanguage);
+        if (lf == null) {
+            throw new RuntimeException("Corpus doesn't have " + textLanguage + " language");
+        }
         if (w.word != null && w.word.length() > 0) {
             Query wq;
             if (w.allForms) {
                 BooleanQuery.Builder qLemmas = new BooleanQuery.Builder();
                 for (String lemma : w.lemmas) {
-                    qLemmas.add(new TermQuery(getLemmaTerm(lemma)), BooleanClause.Occur.SHOULD);
+                    Term t = new Term(lf.fieldSentenceLemmas.name(), lemma);
+                    qLemmas.add(new TermQuery(t), BooleanClause.Occur.SHOULD);
                 }
                 wq = qLemmas.build();
             } else {
-                String wn = BelarusianWordNormalizer.superNormalized(w.word);
+                String wn = LanguageFactory.get(textLanguage).getNormalizer().superNormalized(w.word);
                 if (WordsDetailsChecks.needWildcardRegexp(wn)) {
                     // has wildcard
-                    wq = new WildcardQuery(getValueTerm(wn));
+                    Term t = new Term(lf.fieldSentenceValues.name(), wn);
+                    wq = new WildcardQuery(t);
                 } else {
                     // simple word
-                    wq = new TermQuery(getValueTerm(wn));
+                    Term t = new Term(lf.fieldSentenceValues.name(), wn);
+                    wq = new TermQuery(t);
                 }
             }
             query.add(wq, BooleanClause.Occur.MUST);
         }
         if (w.grammar != null) {
-            Query wq = new RegexpQuery(getGrammarTerm(w.grammar)); // TODO change to WildcardQuery
+            Term t = new Term(lf.fieldSentenceDBGrammarTags.name(), w.grammar);
+            Query wq = new RegexpQuery(t); // TODO change to WildcardQuery
             query.add(wq, BooleanClause.Occur.MUST);
         }
-    }
-
-    private Term getLemmaTerm(String lemma) {
-        return new Term(lucene.fieldSentenceLemmas.name(), lemma);
-    }
-
-    private Term getValueTerm(String value) {
-        return new Term(lucene.fieldSentenceValues.name(), value);
-    }
-
-    private Term getGrammarTerm(String grammar) {
-        return new Term(lucene.fieldSentenceDBGrammarTags.name(), grammar);
     }
 
     public void search(Query query, int pageSize, DocFilter<Void> filter) throws Exception {
@@ -163,9 +162,5 @@ public class LuceneFilter {
 
     public int getTextID(Document doc) {
         return doc.getField(lucene.fieldTextID.name()).numericValue().intValue();
-    }
-
-    public int getPage(Document doc) {
-        return doc.getField(lucene.fieldSentencePage.name()).numericValue().intValue();
     }
 }

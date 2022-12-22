@@ -26,8 +26,8 @@ import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.corpus.paradigm.Wordlist;
-import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.editor.core.Theme;
+import org.alex73.korpus.languages.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.text.parser.BOMBufferedReader;
 
 import com.esotericsoftware.kryo.Kryo;

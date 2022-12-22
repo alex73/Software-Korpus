@@ -19,6 +19,7 @@ public class ParserFactory {
         parsers.add(new Pair("kankardans/.+\\.txt", KankardansParser.class));
         parsers.add(new Pair("dyjalektny/.+\\.text", DyjalektnyParser.class));
         parsers.add(new Pair("skaryna/.+\\.text", SkarynaParser.class));
+        parsers.add(new Pair("zakanadaustva/.+\\.tmx", TmxParser.class));
     }
 
     public static IParser getParser(String relativePath, Path file) {

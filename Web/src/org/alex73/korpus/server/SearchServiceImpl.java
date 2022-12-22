@@ -24,7 +24,8 @@ import javax.ws.rs.core.MediaType;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.TextInfo;
-import org.alex73.korpus.belarusian.BelarusianWordNormalizer;
+import org.alex73.korpus.languages.ILanguage;
+import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.server.data.ClusterParams;
 import org.alex73.korpus.server.data.ClusterResults;
 import org.alex73.korpus.server.data.FreqSpisResult;
@@ -51,7 +52,7 @@ public class SearchServiceImpl {
 
     @Context
     HttpServletRequest request;
-    
+
     private KorpusApplication getApp() {
         return KorpusApplication.instance;
     }
@@ -103,9 +104,10 @@ public class SearchServiceImpl {
     @Produces(MediaType.APPLICATION_JSON)
     public SearchResult search(SearchRequest rq) throws Exception {
         LOGGER.info(">> Request from " + request.getRemoteAddr());
+        ILanguage lang = LanguageFactory.get(rq.params.lang);
         SearchParams params = rq.params;
         LatestMark latest = rq.latest;
-        params.words.forEach(w -> cleanupWordRequest(w));
+        params.words.forEach(w -> cleanupWordRequest(lang, w));
         try {
             WordsDetailsChecks.reset();
             boolean enoughComplex = false;
@@ -121,7 +123,7 @@ public class SearchServiceImpl {
             }
             for (WordRequest w : params.words) {
                 if (w.allForms) {
-                    findAllLemmas(w);
+                    findAllLemmas(lang, w);
                     if (w.lemmas.length == 0) {
                         throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
                     }
@@ -130,30 +132,29 @@ public class SearchServiceImpl {
 
             BooleanQuery.Builder query = new BooleanQuery.Builder();
             LuceneFilter process = getApp().processKorpus;
-            process.addKorpusTextFilter(query, params.textStandard);
+            process.addKorpusTextFilter(rq.params.lang, query, params.textStandard);
             for (WordRequest w : params.words) {
-                process.addWordFilter(query, w);
+                process.addWordFilter(rq.params.lang, query, w);
             }
 
             if (latest == null) {
                 latest = new LatestMark();
             }
-            List<Integer> found = process.search(query.build(), latest, Settings.KORPUS_SEARCH_RESULT_PAGE,
-                    new LuceneDriverRead.DocFilter<Integer>() {
-                        public Integer processDoc(int docID) {
-                            try {
-                                Document doc = getApp().processKorpus.getSentence(docID);
-                                Paragraph text = restoreText(doc);
-                                if (WordsDetailsChecks.isAllowed(params.wordsOrder, params.words, text)) {
-                                    return docID;
-                                } else {
-                                    return null;
-                                }
-                            } catch (Exception ex) {
-                                throw new RuntimeException(ex);
-                            }
+            List<Integer> found = process.search(query.build(), latest, Settings.KORPUS_SEARCH_RESULT_PAGE, new LuceneDriverRead.DocFilter<Integer>() {
+                public Integer processDoc(int docID) {
+                    try {
+                        Document doc = getApp().processKorpus.getSentence(docID);
+                        Paragraph[] text = restoreText(doc);
+                        if (WordsDetailsChecks.isAllowed(rq.params.lang, lang, params.wordsOrder, params.words, text)) {
+                            return docID;
+                        } else {
+                            return null;
                         }
-                    });
+                    } catch (Exception ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            });
             SearchResult result = new SearchResult();
             result.hasMore = found.size() >= Settings.KORPUS_SEARCH_RESULT_PAGE;
             result.foundIDs = new int[found.size()];
@@ -177,9 +178,10 @@ public class SearchServiceImpl {
     @Produces(MediaType.APPLICATION_JSON)
     public SearchTotalResult searchTotalCount(SearchRequest rq) throws Exception {
         LOGGER.info(">> Request total count from " + request.getRemoteAddr());
-        SearchParams params = rq.params;
-        params.words.forEach(w -> cleanupWordRequest(w));
         try {
+            ILanguage lang = LanguageFactory.get(rq.params.lang);
+            SearchParams params = rq.params;
+            params.words.forEach(w -> cleanupWordRequest(lang, w));
             WordsDetailsChecks.reset();
             boolean enoughComplex = false;
             for (WordRequest w : params.words) {
@@ -194,7 +196,7 @@ public class SearchServiceImpl {
             }
             for (WordRequest w : params.words) {
                 if (w.allForms) {
-                    findAllLemmas(w);
+                    findAllLemmas(lang, w);
                     if (w.lemmas.length == 0) {
                         throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
                     }
@@ -203,9 +205,9 @@ public class SearchServiceImpl {
 
             BooleanQuery.Builder query = new BooleanQuery.Builder();
             LuceneFilter process = getApp().processKorpus;
-            process.addKorpusTextFilter(query, params.textStandard);
+            process.addKorpusTextFilter(rq.params.lang, query, params.textStandard);
             for (WordRequest w : params.words) {
-                process.addWordFilter(query, w);
+                process.addWordFilter(rq.params.lang, query, w);
             }
 
             List<Integer> found = process.search(query.build(), new LatestMark(), Settings.KORPUS_SEARCH_TOTAL_MAX_COUNT,
@@ -213,8 +215,8 @@ public class SearchServiceImpl {
                         public Integer processDoc(int docID) {
                             try {
                                 Document doc = getApp().processKorpus.getSentence(docID);
-                                Paragraph text = restoreText(doc);
-                                if (WordsDetailsChecks.isAllowed(params.wordsOrder, params.words, text)) {
+                                Paragraph[] text = restoreText(doc);
+                                if (WordsDetailsChecks.isAllowed(rq.params.lang, lang, params.wordsOrder, params.words, text)) {
                                     return docID;
                                 } else {
                                     return null;
@@ -242,15 +244,16 @@ public class SearchServiceImpl {
     @Produces(MediaType.APPLICATION_JSON)
     public ClusterResults calculateClusters(ClusterParams params) throws Exception {
         LOGGER.info(">> Request clusters from " + request.getRemoteAddr());
-        cleanupWordRequest(params.word);
         try {
+            ILanguage lang = LanguageFactory.get(params.lang);
+            cleanupWordRequest(lang, params.word);
             WordsDetailsChecks.reset();
             if (WordsDetailsChecks.isTooSimpleWord(params.word)) {
                 LOGGER.info("<< Request too simple");
                 throw new RuntimeException(ServerError.REQUIEST_TOO_SIMPLE);
             }
             if (params.word.allForms) {
-                findAllLemmas(params.word);
+                findAllLemmas(lang, params.word);
                 if (params.word.lemmas.length == 0) {
                     throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
                 }
@@ -276,17 +279,18 @@ public class SearchServiceImpl {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public SearchResults[] getSentences(SentencesRequest rq) throws Exception {
-        rq.params.words.forEach(w -> cleanupWordRequest(w));
+        ILanguage lang = LanguageFactory.get(rq.params.lang);
+        rq.params.words.forEach(w -> cleanupWordRequest(lang, w));
         SearchParams params = rq.params;
         int[] list = rq.list;
         for (WordRequest w : params.words) {
             if (w.word != null) {
-                w.word = BelarusianWordNormalizer.lightNormalized(w.word);
+                w.word = lang.getNormalizer().lightNormalized(w.word);
             }
         }
         for (WordRequest w : params.words) {
             if (w.allForms) {
-                findAllLemmas(w);
+                findAllLemmas(lang, w);
                 if (w.lemmas.length == 0) {
                     throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
                 }
@@ -301,9 +305,8 @@ public class SearchServiceImpl {
                 result[i].docId = list[i];
                 result[i].doc = restoreTextInfo(doc);
                 result[i].text = restoreText(doc);
-                result[i].text.page = getApp().processKorpus.getPage(doc);
                 // mark result words
-                WordsDetailsChecks.isAllowed(params.wordsOrder, params.words, result[i].text);
+                WordsDetailsChecks.isAllowed(rq.params.lang, lang, params.wordsOrder, params.words, result[i].text);
             }
             return result;
         } catch (Exception ex) {
@@ -312,19 +315,21 @@ public class SearchServiceImpl {
         }
     }
 
-    protected Paragraph restoreText(Document doc) throws Exception {
+    protected Paragraph[] restoreText(Document doc) throws Exception {
         LuceneFilter process = getApp().processKorpus;
 
         byte[] xml = process.getXML(doc);
 
-        Paragraph p = new BinaryParagraphReader(xml).read();
-        for (int i = 0; i < p.sentences.length; i++) {
-            for (int j = 0; j < p.sentences[i].words.length; j++) {
-                p.sentences[i].words[j] = new WordResult(p.sentences[i].words[j]);
+        Paragraph[] ps = new BinaryParagraphReader(xml).read();
+        for (int pi = 0; pi < ps.length; pi++) {
+            for (int i = 0; i < ps[pi].sentences.length; i++) {
+                for (int j = 0; j < ps[pi].sentences[i].words.length; j++) {
+                    ps[pi].sentences[i].words[j] = new WordResult(ps[pi].sentences[i].words[j]);
+                }
             }
         }
 
-        return p;
+        return ps;
     }
 
     protected TextInfo restoreTextInfo(Document doc) throws Exception {
@@ -332,13 +337,13 @@ public class SearchServiceImpl {
         return getApp().getTextInfo(textID);
     }
 
-    private void findAllLemmas(WordRequest w) {
+    private void findAllLemmas(ILanguage lang, WordRequest w) {
         Set<String> result = new TreeSet<>();
         Paradigm[] ps = getApp().grFinder.getParadigms(w.word);
         // user can enter lemma of variant, but we need to find paradigm
         for (Paradigm p : ps) {
             for (Variant v : p.getVariant()) {
-                if (BelarusianWordNormalizer.equals(v.getLemma(), w.word)) {
+                if (lang.getNormalizer().equals(v.getLemma(), w.word)) {
                     result.add(p.getLemma());
                     break;
                 }
@@ -347,9 +352,9 @@ public class SearchServiceImpl {
         w.lemmas = result.stream().toArray(String[]::new);
     }
 
-    private void cleanupWordRequest(WordRequest w) {
+    private void cleanupWordRequest(ILanguage lang, WordRequest w) {
         if (w.word != null) {
-            w.word = BelarusianWordNormalizer.lightNormalized(w.word.trim());
+            w.word = lang.getNormalizer().lightNormalized(w.word.trim());
             if (w.word.isEmpty()) {
                 w.word = null;
             }
