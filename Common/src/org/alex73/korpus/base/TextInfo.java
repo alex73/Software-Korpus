@@ -22,8 +22,6 @@
 package org.alex73.korpus.base;
 
 import java.io.Serializable;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.alex73.korpus.utils.KorpusDateTime;
 
@@ -34,6 +32,9 @@ public class TextInfo implements Serializable {
     public String[] styleGenres; // styles and genres
     public transient int textOrder; // only for sort texts inside one file
     public Subtext[] subtexts;
+
+    public TextInfo() {
+    }
 
     public TextInfo(int parallelCount) {
         subtexts = new Subtext[parallelCount];

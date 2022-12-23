@@ -65,7 +65,7 @@ public class TextArchiveParser extends BaseParser {
                 }
                 if (!headersOnly) {
                     doc.parse(LanguageFactory.get(getLang(text.textInfo.subtexts[0].lang)), true, PrepareCache3.errors);
-                    text.paragraphs[0] = new PtextToKorpus(doc.lines, true).getParagraphs();
+                    text.paragraphs = get1LangParagraphs(new PtextToKorpus(doc.lines, true).paragraphs);
                 }
                 publisher.accept(text);
             }

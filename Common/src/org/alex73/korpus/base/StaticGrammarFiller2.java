@@ -81,9 +81,9 @@ public class StaticGrammarFiller2 {
             fillTagLemmas(word, manualLemma, manualTag, lemmas, variantIds, dbTags, p);
         }
         WordInfo result = new WordInfo();
-        result.tags = dbTags.length() > 0 ? dbTags.toString() : null;
-        result.lemmas = lemmas.length() > 0 ? lemmas.toString() : null;
-        result.variantIds = variantIds.length() > 0 ? variantIds.toString() : null;
+        result.tags = dbTags.length() > 0 ? dbTags.toString().intern() : null;
+        result.lemmas = lemmas.length() > 0 ? lemmas.toString().intern() : null;
+        result.variantIds = variantIds.length() > 0 ? variantIds.toString().intern() : null;
         return result;
     }
 

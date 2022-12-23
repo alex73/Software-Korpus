@@ -104,11 +104,11 @@ public class SearchServiceImpl {
     @Produces(MediaType.APPLICATION_JSON)
     public SearchResult search(SearchRequest rq) throws Exception {
         LOGGER.info(">> Request from " + request.getRemoteAddr());
-        ILanguage lang = LanguageFactory.get(rq.params.lang);
-        SearchParams params = rq.params;
-        LatestMark latest = rq.latest;
-        params.words.forEach(w -> cleanupWordRequest(lang, w));
         try {
+            ILanguage lang = LanguageFactory.get(rq.params.lang);
+            SearchParams params = rq.params;
+            LatestMark latest = rq.latest;
+            params.words.forEach(w -> cleanupWordRequest(lang, w));
             WordsDetailsChecks.reset();
             boolean enoughComplex = false;
             for (WordRequest w : params.words) {

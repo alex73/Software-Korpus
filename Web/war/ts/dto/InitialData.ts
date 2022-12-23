@@ -1,4 +1,5 @@
 class InitialData {
+    public languages: string[];
     public subcorpuses: KeyValue[];
     public authors: { [key:string]:string[]; };
     public sources: { [key:string]:string[]; };

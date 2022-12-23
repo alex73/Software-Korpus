@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<project name="Korpus-Web" default="all" basedir=".">
+<project name="Korpus-WebService-Korpus" default="all" basedir=".">
 
 	<target name="javac">
 		<mkdir dir="build/classes" />
-		<javac srcdir="src" includes="**" encoding="utf-8" destdir="build/classes">
+		<javac srcdir="src:../Common/src" includes="**" encoding="utf-8" destdir="build/classes">
 			<classpath>
 				<fileset dir="war/WEB-INF/lib/" includes="*.jar"/>
 				<fileset dir="lib-compile" includes="**/*.jar"/>
@@ -11,22 +11,13 @@
 		</javac>
 		<copy todir="build/classes">
 			<fileset dir="src" />
+			<fileset dir="../Common/src" />
 		</copy>
+		<!--copy file="../GrammarDB/db.cache" todir="build/classes" /-->
 	</target>
 
-	<target name="js">
-		<exec executable="tsc" failonerror="true">
-			<arg value="--project"/>
-			<arg value="war/ts/tsconfig.json"/>
-			<arg value="--target"/>
-			<arg value="ES5"/>
-			<arg value="--outFile"/>
-			<arg value="war/app2.js"/>
-		</exec>
-	</target>
-
-	<target name="war" depends="js,javac">
-		<war destfile="build/ROOT.war" basedir="war/" needxmlfile="false">
+	<target name="war" depends="javac">
+		<war destfile="build/korpus.war" basedir="war/" needxmlfile="false">
 			<zipfileset dir="build/classes/" prefix="WEB-INF/classes/" />
 		</war>
 	</target>

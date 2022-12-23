@@ -5,6 +5,8 @@
 		<ant dir="Common" target="clean" />
 		<ant dir="Editor" target="clean" />
 		<ant dir="Web" target="clean" />
+		<ant dir="WebService-Korpus" target="clean" />
+		<ant dir="WebService-Other" target="clean" />
 		<ant dir="WebDataPrepare" target="clean" />
 	</target>
 
@@ -12,6 +14,8 @@
 		<ant dir="Common" />
 		<ant dir="Editor" />
 		<ant dir="Web" />
+		<ant dir="WebService-Korpus" />
+		<ant dir="WebService-Other" />
 		<ant dir="WebDataPrepare" />
 	</target>
 

@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonInclude(Include.NON_NULL)
 public class InitialData {
+    public String[] languages;
     public List<KeyValue> subcorpuses;
     public Map<String, List<String>> authors; // map by subcorpus name
     public Map<String, List<String>> sources; // map by subcorpus name

@@ -9,11 +9,20 @@ import java.util.Locale;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.compiler.ITextsPreprocessor;
 import org.alex73.korpus.compiler.MessageParsedText;
+import org.alex73.korpus.compiler.PrepareCache3;
+import org.alex73.korpus.compiler.ProcessTexts;
 
 public class ApplyAsnouny implements ITextsPreprocessor {
     @Override
     public void preprocess(MessageParsedText text) {
-        ITextsPreprocessor.shuffle(text.paragraphs);
+        if (text.paragraphs != null) {
+            ITextsPreprocessor.shuffle(text.paragraphs);
+        }
+        for (TextInfo.Subtext st : text.textInfo.subtexts) {
+            if (st.lang == null) {
+                st.lang = "bel";
+            }
+        }
 
         if ("teksty".equals(text.textInfo.subcorpus) && text.textInfo.subtexts[0].langOrig != null) {
             // падкорпус перакладаў
@@ -195,5 +204,10 @@ public class ApplyAsnouny implements ITextsPreprocessor {
         if (s2 == null)
             s2 = "";
         return s1.compareTo(s2);
+    }
+
+    public static void main(String[] args) throws Exception {
+        ProcessTexts.preprocessor = new ApplyAsnouny();
+        PrepareCache3.main(args);
     }
 }

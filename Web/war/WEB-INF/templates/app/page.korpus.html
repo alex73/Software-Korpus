@@ -1,4 +1,4 @@
-<ul class="nav nav-tabs">
+<ul class="nav nav-tabs <#if active == 'paralelny'>d-none</#if>">
   <li class="nav-item">
     <a id="tabSearch" class="nav-link active" href="#" onClick="korpusui.switchMode('search'); return false;">${messages.korpus_subpage_search}</a>
   </li>
@@ -11,7 +11,7 @@
   <li class="nav-item">
     <a id="tabSpisy" class="nav-link" href="#" onClick="korpusui.switchMode('spisy'); return false;">${messages.korpus_subpage_concordance_lists}</a>
   </li>
-</ul>
+  </ul>
 <br/>
     <!--alert *ngIf="serviceSearch.errorSearch" type="danger">{{serviceSearch.errorSearch}}</alert-->
     <div id="error" class="alert alert-danger fade show" role="alert"></div>

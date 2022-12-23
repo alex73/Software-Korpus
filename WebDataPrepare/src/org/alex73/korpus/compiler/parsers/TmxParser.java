@@ -129,21 +129,21 @@ public class TmxParser extends BaseParser {
             for (Map<String, String> seg : segments) {
                 Splitter3 splitter = new Splitter3(LanguageFactory.get("bel").getNormalizer(), false, PrepareCache3.errors);
                 TextLine p = splitter.parse(seg.get("bel"));
-                Paragraph[] ps1 = new PtextToKorpus(List.of(p), false).getParagraphs();
-                if (ps1.length != 1) {
+                List<Paragraph> ps1 = new PtextToKorpus(List.of(p), false).paragraphs;
+                if (ps1.size() != 1) {
                     throw new RuntimeException("Wrong paragraphs count");
                 }
 
                 splitter = new Splitter3(LanguageFactory.get("rus").getNormalizer(), false, PrepareCache3.errors);
                 p = splitter.parse(seg.get("rus"));
-                Paragraph[] ps2 = new PtextToKorpus(List.of(p), false).getParagraphs();
-                if (ps2.length != 1) {
+                List<Paragraph> ps2 = new PtextToKorpus(List.of(p), false).paragraphs;
+                if (ps2.size() != 1) {
                     throw new RuntimeException("Wrong paragraphs count");
                 }
 
                 Paragraph[] pr = new Paragraph[2];
-                pr[0] = ps1[0];
-                pr[1] = ps2[0];
+                pr[0] = ps1.get(0);
+                pr[1] = ps2.get(0);
                 result.add(pr);
             }
             text.paragraphs = result.toArray(new Paragraph[result.size()][]);

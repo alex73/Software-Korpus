@@ -20,5 +20,6 @@ class Sentence {
 
 class Paragraph {
   public page: number;
+  public lang: string;
   public sentences: Sentence[];
 }

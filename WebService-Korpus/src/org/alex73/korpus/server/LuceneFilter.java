@@ -24,7 +24,6 @@ package org.alex73.korpus.server;
 import java.util.List;
 
 import org.alex73.korpus.languages.LanguageFactory;
-import org.alex73.korpus.languages.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.server.data.LatestMark;
 import org.alex73.korpus.server.data.StandardTextRequest;
 import org.alex73.korpus.server.data.WordRequest;
@@ -55,7 +54,7 @@ public class LuceneFilter {
     public void addKorpusTextFilter(String textLanguage, BooleanQuery.Builder query, StandardTextRequest filter) {
         LuceneFields.LuceneFieldsLang lf = lucene.byLang.get(textLanguage);
         if (lf == null) {
-            throw new RuntimeException("Corpus doesn't have " + textLanguage + " language");
+            throw new RuntimeException("Corpus doesn't have '" + textLanguage + "' language");
         }
         // subcorpus
         if (filter.subcorpuses != null) {

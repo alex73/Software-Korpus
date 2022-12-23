@@ -45,7 +45,7 @@ public class ApplicationKorpus extends Application {
     public String korpusCache;
     public String grammarDb;
     public String configDir;
-    public String languages;
+    public String[] languages;
 
     private List<String> settings;
     private Properties stat;
@@ -71,7 +71,7 @@ public class ApplicationKorpus extends Application {
             korpusCache = (String) xmlNode.lookup("KORPUS_CACHE");
             grammarDb = (String) xmlNode.lookup("GRAMMAR_DB");
             configDir = (String) xmlNode.lookup("CONFIG_DIR");
-            languages = (String) xmlNode.lookup("KORPUS_LANGUAGES");
+            String languagesLine = (String) xmlNode.lookup("KORPUS_LANGUAGES");
             if (configDir == null) {
                 throw new Exception("CONFIG_DIR is not defined");
             }
@@ -81,9 +81,10 @@ public class ApplicationKorpus extends Application {
             if (grammarDb == null) {
                 throw new Exception("GRAMMAR_DB is not defined");
             }
-            if (languages == null) {
+            if (languagesLine == null) {
                 throw new Exception("KORPUS_LANGUAGES is not defined");
             }
+            languages = languagesLine.split(";");
             settings = Files.readAllLines(Paths.get(configDir + "/settings.ini"));
             stat = loadSettings(korpusCache + "/stat.properties");
             readTextInfos();
@@ -97,8 +98,8 @@ public class ApplicationKorpus extends Application {
             System.out.println("GrammarDB loaded with " + gr.getAllParadigms().size() + " paradigms. Used memory: " + getUsedMemory());
             grFinder = new GrammarFinder(gr);
             System.out.println("GrammarDB indexed. Used memory: " + getUsedMemory());
-            processKorpus = new LuceneFilter(korpusCache, languages.split(";"));
-            System.out.println("Lucene initialized");
+            processKorpus = new LuceneFilter(korpusCache, languages);
+            System.out.println("Lucene initialized for languages: " + Arrays.toString(languages));
 
             prepareInitialGrammar();
             prepareInitialKorpus();
@@ -180,6 +181,7 @@ public class ApplicationKorpus extends Application {
 
     void prepareInitialKorpus() throws Exception {
         searchInitial = new InitialData();
+        searchInitial.languages = languages;
         searchInitial.subcorpuses = new ArrayList<>();
         searchInitial.authors = new TreeMap<>();
         searchInitial.sources = new TreeMap<>();

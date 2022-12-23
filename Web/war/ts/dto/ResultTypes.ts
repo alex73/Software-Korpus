@@ -1,25 +1,34 @@
 class SearchResults {
     public docId: number;
     public doc: TextInfo;
+    public subdoc: Subtext;
+    public subdocIndex: number = 0;
     public text: Paragraph;
-    
-    constructor(o:any) {
+
+    constructor(o:any, i:number) {
       this.docId = o.docId;
       this.doc = o.doc;
+      this.subdoc = o.doc.subtexts[i];
+      this.subdocIndex = i;
       this.text = new Paragraph();
-      this.text.page = o.text.page;
-      this.text.sentences = o.text.sentences;
+      this.text.lang = o.text[i].lang;
+      this.text.page = o.text[i].page;
+      this.text.sentences = o.text[i].sentences;
     }
 }
 
 class ResultKwicOutRow {
     public doc: TextInfo;
+    public subdoc: Subtext;
+    public subdocIndex: number = 0;
     public origText: Paragraph;
     public kwicBefore: WordResult[];
     public kwicWords: WordResult[];
     public kwicAfter: WordResult[];
-    constructor(o:SearchResults) {
+    constructor(o:SearchResults, i:number) {
       this.doc = o.doc;
+      this.subdoc = o.doc.subtexts[i];
+      this.subdocIndex = i;
       this.origText = o.text;
     }
 }
@@ -29,13 +38,13 @@ class ResultKwicOut {
     
     constructor(o:any[], wordsInRequest:number) {
       for(let orow of o) {
-        let r: SearchResults = new SearchResults(orow);
+        let r: SearchResults = new SearchResults(orow, 0);
 
         for(let i=0; i<r.text.sentences.length; i++) {
           for(let j=0; j<r.text.sentences[i].words.length; j++) {
             if (r.text.sentences[i].words[j].requestedWord && j + wordsInRequest < r.text.sentences[i].words.length) {
                 // show
-                let row: ResultKwicOutRow = new ResultKwicOutRow(r);
+                let row: ResultKwicOutRow = new ResultKwicOutRow(r, 0);
                 let wordsTo:number = this.showRow(row, r.text.sentences[i], j, wordsInRequest);
                 this.rows.push(row);
                 j = wordsTo;
@@ -81,11 +90,15 @@ class ResultKwicOut {
 class ResultSearchOutRow {
     public docId: number;
     public doc: TextInfo;
+    public subdoc: Subtext;
+    public subdocIndex: number;
     public origText: Paragraph;
     public words: WordResult[] = [];
     constructor(o:SearchResults) {
       this.docId = o.docId;
       this.doc = o.doc;
+      this.subdoc = o.subdoc;
+      this.subdocIndex = o.subdocIndex;
       this.origText = o.text;
     }
 }
@@ -93,10 +106,11 @@ class ResultSearchOutRow {
 class ResultSearchOut {
     public rows: ResultSearchOutRow[] = [];
     
-    constructor(o:any[], wordsInRequest:number) {
-      for(let orow of o) {
-        let r: SearchResults = new SearchResults(orow);
-        
+    constructor(olist:any[], wordsInRequest:number) {
+      for(let o of olist) {
+      for(var i = 0; i < o.doc.subtexts.length; i++) {
+        let r: SearchResults = new SearchResults(o, i);
+
         let num = this.getRequestedWordsCountInResult(r.text);
         let wordsCount;
         switch(num) {
@@ -118,6 +132,7 @@ class ResultSearchOut {
         this.outputText(r.text, out, wordsCount, 0, " ... ");
         this.rows.push(out);
       }
+      }
     }
 
     outputText(words: Paragraph, row: ResultSearchOutRow, wordAround:number, sentencesAround:number, separatorText:string) {
@@ -125,11 +140,11 @@ class ResultSearchOut {
         let end: TextPos = new TextPos(words, words.sentences.length - 1, words.sentences[words.sentences.length - 1].words.length - 1);
 
         let pos: TextPos = this.getNextRequestedWordPosAfter(words, null);
-        let currentAroundFrom: TextPos = pos.addWords(-wordAround);
+        let currentAroundFrom: TextPos = pos == null ? begin : pos.addWords(-wordAround);
         if (sentencesAround != 0) {
             currentAroundFrom = currentAroundFrom.addSequences(-sentencesAround);
         }
-        let currentAroundTo: TextPos = pos.addWords(wordAround);
+        let currentAroundTo: TextPos = pos == null ? end : pos.addWords(wordAround);
         if (sentencesAround != 0) {
             currentAroundTo = currentAroundTo.addSequences(sentencesAround);
         }
@@ -230,6 +245,11 @@ class LatestMark {
 
 class TextInfo {
     public subcorpus: string;
+    public styleGenres: string[];
+    public subtexts: Subtext[];
+}
+
+class Subtext {
     public source: string;
     public url: string;
     public authors: string[];
@@ -237,7 +257,6 @@ class TextInfo {
     public translators: string[];
     public lang: string;
     public langOrig: string;
-    public styleGenres: string[];
     public edition: string;
     public creationTime: string;
     public publicationTime: string;

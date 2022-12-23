@@ -1,4 +1,5 @@
 class BaseParams {
+	public lang: string;
     public textStandard: StandardTextRequest = new StandardTextRequest();
 }
 

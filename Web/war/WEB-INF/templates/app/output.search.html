@@ -5,10 +5,10 @@
       <th>Цалкам</th>
     </tr>
     {{for resultSearch.rows}}
-      <tr>
+      <tr <#if active == 'paralelny'>{{if subdocIndex == 0}}style="border-top: solid 1px blue"{{/if}}</#if> >
         <td style="color: #337ab7; white-space: nowrap;">
             <a tabindex="0" href="#" onClick="new PopoverBiblio(event, korpusService.resultSearch.rows[{{:#index}}].doc, korpusService.resultSearch.rows[{{:#index}}].origText.page); return false;">
-                {{titleShort:doc.textLabel}}
+                {{titleShort:subdoc.textLabel}}
             </a>
         </td>
         <td>

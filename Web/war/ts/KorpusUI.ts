@@ -2,7 +2,9 @@ declare var $: any;
 
 class KorpusUI {
 	visitedList: number[];
-	constructor() {
+	currentFindLanguage: string;
+	constructor(defaultLanguage: string) {
+		this.currentFindLanguage = defaultLanguage;
 		this.hideStatusError();
 	}
 	getMode(): string {
@@ -63,6 +65,17 @@ class KorpusUI {
 		korpusService.resultSearch = null;
 		this.showOutput();
 	}
+	switchLanguage(lang: string) {
+		this.currentFindLanguage = lang;
+
+		$('#parallel_'+lang).prop("checked", true);
+
+		// remove all words
+		if ($(".inputword:visible").length > 0) {
+			$(".inputword:visible").remove();
+			this.addWord('inputword');
+		}
+	}
 	addWord(type: string): HTMLElement {
 		const templateWord: HTMLElement = document.getElementById("template-" + type);
 		const newWord: HTMLElement = <HTMLElement>templateWord.cloneNode(true);
@@ -70,6 +83,11 @@ class KorpusUI {
 		newWord.style.display = 'block';
 		let r = templateWord.parentElement.insertBefore(newWord, templateWord);
 		this.repaintRemoveIcons(type);
+		if (this.currentFindLanguage != 'bel') {
+			$(".input-word-hidegrammar").hide();
+		} else {
+			$(".input-word-hidegrammar").show();
+		}
 		return r;
 	}
 	removeWord(type: string, button: HTMLElement) {
@@ -111,6 +129,7 @@ class KorpusUI {
 		$('#status').show();
 	}
 	private collectFromScreenBase(p: BaseParams) {
+		p.lang = this.currentFindLanguage;
 		p.textStandard.subcorpuses = KorpusUI.separatedStringToArray(document.getElementById('inputFilterCorpus').innerText);
 		p.textStandard.authors = $('#inputFilterAuthorShow').is(":visible") ? KorpusUI.separatedStringToArray(document.getElementById('inputFilterAuthor').innerText) : null;
 		p.textStandard.sources = $('#inputFilterSourceShow').is(":visible") ? KorpusUI.separatedStringToArray(document.getElementById('inputFilterSource').innerText) : null;
@@ -160,6 +179,9 @@ class KorpusUI {
 	}
 	restoreToScreen(mode: string, data: BaseParams) {
 		this.switchMode(mode);
+		if (data != null) {
+			this.switchLanguage(data.lang);
+		}
 		(<HTMLInputElement>document.getElementById('inputFilterYearWrittenFrom')).value = data && data.textStandard && data.textStandard.yearWrittenFrom ? data.textStandard.yearWrittenFrom : "";
 		(<HTMLInputElement>document.getElementById('inputFilterYearWrittenTo')).value = data && data.textStandard && data.textStandard.yearWrittenTo ? data.textStandard.yearWrittenTo : "";
 		(<HTMLInputElement>document.getElementById('inputFilterYearPublishedFrom')).value = data && data.textStandard && data.textStandard.yearPublishedFrom ? data.textStandard.yearPublishedFrom : "";
@@ -317,7 +339,7 @@ var dialogText: DialogText = null;
 var dialogStyleGenres: DialogStyleGenres = null;
 var dialogWordGrammar: DialogWordGrammar = null;
 var spisy: { [key: string]: FreqSpisResult[]; } = {};
-function initializeKorpusPage() {
-	korpusui = new KorpusUI();
-	korpusService = new KorpusService();
+function initializeKorpusPage(callPrefix: string, defaultLanguage: string) {
+	korpusui = new KorpusUI(defaultLanguage);
+	korpusService = new KorpusService(callPrefix);
 }

@@ -1,7 +1,6 @@
 package org.alex73.korpus.text.parser;
 
 import org.alex73.korpus.languages.ILanguage;
-import org.alex73.korpus.languages.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.text.structure.files.ITextLineElement;
 import org.alex73.korpus.text.structure.files.InlineTag;
 import org.alex73.korpus.text.structure.files.SentenceSeparatorItem;

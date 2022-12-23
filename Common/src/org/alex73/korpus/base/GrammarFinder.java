@@ -11,7 +11,6 @@ import org.alex73.corpus.paradigm.Fan;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.korpus.languages.ILanguage;
 import org.alex73.korpus.languages.LanguageFactory;
-import org.alex73.korpus.languages.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.utils.StressUtils;
 
 public class GrammarFinder implements IGrammarFinder {

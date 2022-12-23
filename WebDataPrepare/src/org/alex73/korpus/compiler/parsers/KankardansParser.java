@@ -78,7 +78,7 @@ public class KankardansParser extends BaseParser {
             ti.textInfo.subtexts[0].textLabel = ti.textInfo.subtexts[0].authors != null ? String.join(",", Arrays.asList(ti.textInfo.subtexts[0].authors)) : "———";
             if (!headersOnly) {
                 doc.parse(LanguageFactory.get(getLang(ti.textInfo.subtexts[0].lang)), false, PrepareCache3.errors);
-                ti.paragraphs[0] = new PtextToKorpus(doc.lines, false).getParagraphs();
+                ti.paragraphs = get1LangParagraphs(new PtextToKorpus(doc.lines, false).paragraphs);
             }
             publisher.accept(ti);
             text.setLength(0);

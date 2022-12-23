@@ -25,7 +25,7 @@ class KorpusService {
 	//public errorSearch: string;
 	//public statusSearch: string;
 
-	private callPrefix: string = "korpus";
+	private callPrefix: string = null;
 	public initial: InitialData;
 
 	/*public typeSearch: string = "search";
@@ -52,7 +52,8 @@ class KorpusService {
 	public resultKwic: ResultKwicOut;
 	public resultCluster: ClusterResult;
 
-	constructor() {
+	constructor(prefix: string) {
+		this.callPrefix = prefix;
 		korpusui.showStatus("Чытаюцца пачатковыя звесткі...");
 		fetch('rest/localization')
 			.then(r => {
@@ -85,6 +86,9 @@ class KorpusService {
 	}
 
 	afterInit2() {
+		if (this.initial.languages.length > 1) {
+			$('#parallel-filter').show();
+		}
 		let ps = window.location.hash;
 		let mode = 'search';
 		if (ps.charAt(0) == '#') {

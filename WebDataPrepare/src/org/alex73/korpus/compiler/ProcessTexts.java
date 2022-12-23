@@ -36,6 +36,9 @@ public class ProcessTexts extends BaseParallelProcessor<MessageParsedText> {
         }
 
         run(() -> {
+            if (text.paragraphs.length == 0) {
+                return;
+            }
             counter.incrementAndGet();
             // System.out.println("Process: " + textInfo.sourceFilePath);
             preprocessor.preprocess(text);

@@ -50,7 +50,7 @@ public class OcrTextParser extends BaseParser {
                 } else {
                     boolean eachLine = fixHyphens(doc.sourceLines);
                     doc.parse(LanguageFactory.get(getLang(text.textInfo.subtexts[0].lang)), false, PrepareCache3.errors);
-                    text.paragraphs[0] = new PtextToKorpus(doc.lines, eachLine).getParagraphs();
+                    text.paragraphs = get1LangParagraphs(new PtextToKorpus(doc.lines, eachLine).paragraphs);
                     /// ProcessTexts.process(textInfo, );
                 }
                 publisher.accept(text);

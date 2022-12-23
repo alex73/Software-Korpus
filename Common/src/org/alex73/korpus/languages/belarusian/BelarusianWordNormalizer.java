@@ -32,7 +32,7 @@ public class BelarusianWordNormalizer implements ILanguage.INormalizer {
     public static final char pravilny_apostraf = '\u02BC';
     public static final String usie_apostrafy = pravilny_apostraf + "\'\u2019";
     public static final String letters = usie_naciski + usie_apostrafy
-            + "-ёйцукенгшўзхфывапролджэячсмітьбющиЁЙЦУКЕНГШЎЗХФЫВАПРОЛДЖЭЯЧСМІТЬБЮЩИqwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789";
+            + "-ёйцукенгшўзхфывапролджэячсмітьъбющиЁЙЦУКЕНГШЎЗХФЫВАПРОЛДЖЭЯЧСМІТЬЪБЮЩИqwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789";
 
     private static final int CHARS_LEN = 0x2020;
     // Максімальная нармалізацыя - прывядзенне да агульнага хэшу ці для індэксацыі ў
@@ -86,6 +86,7 @@ public class BelarusianWordNormalizer implements ILanguage.INormalizer {
         SUPERNORMALIZE['*'] = '*';
     }
 
+    @Override
     public int hash(String word) {
         if (word == null) {
             return 0;
@@ -101,6 +102,7 @@ public class BelarusianWordNormalizer implements ILanguage.INormalizer {
         return result;
     }
 
+    @Override
     public String lightNormalized(CharSequence word) {
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < word.length(); i++) {
@@ -128,6 +130,7 @@ public class BelarusianWordNormalizer implements ILanguage.INormalizer {
         return str.toString();
     }
 
+    @Override
     public String superNormalized(String word) {
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < word.length(); i++) {
@@ -140,6 +143,7 @@ public class BelarusianWordNormalizer implements ILanguage.INormalizer {
         return str.toString();
     }
 
+    @Override
     public boolean isApostraf(char c) {
         return usie_apostrafy.indexOf(c) >= 0;
     }
@@ -151,6 +155,7 @@ public class BelarusianWordNormalizer implements ILanguage.INormalizer {
      * 
      * Націскі могуць быць альбо не быць як у базе, так і ў тэксце.
      */
+    @Override
     public boolean equals(String dbWord, String anyWord) {
         /* Націск супаў у той самай пазіцыі. */
         byte stressWasEquals = 0;
@@ -226,6 +231,7 @@ public class BelarusianWordNormalizer implements ILanguage.INormalizer {
         }
     }
 
+    @Override
     public boolean isLetter(char c) {
         return letters.indexOf(c) >= 0;
     }

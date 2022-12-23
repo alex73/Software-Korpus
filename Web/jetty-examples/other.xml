@@ -20,7 +20,7 @@
   <New class="org.eclipse.jetty.plus.jndi.EnvEntry"> 
     <Arg><Ref refid="korpus"/></Arg>
     <Arg>CONFIG_DIR</Arg> 
-    <Arg type="java.lang.String">/home/alex/gits/Software-Korpus/Web/config</Arg>
+    <Arg type="java.lang.String">/home/alex/gits/Software-Korpus/WebService-Korpus/config</Arg>
     <Arg type="boolean">true</Arg>
   </New>
 

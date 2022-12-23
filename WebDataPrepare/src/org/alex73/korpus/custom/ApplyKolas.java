@@ -7,13 +7,22 @@ import java.util.Locale;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.compiler.ITextsPreprocessor;
 import org.alex73.korpus.compiler.MessageParsedText;
+import org.alex73.korpus.compiler.PrepareCache3;
+import org.alex73.korpus.compiler.ProcessTexts;
 
 public class ApplyKolas implements ITextsPreprocessor {
     static final Collator BE = Collator.getInstance(new Locale("be"));
 
     @Override
     public void preprocess(MessageParsedText text) {
-        ITextsPreprocessor.shuffle(text.paragraphs);
+        if (text.paragraphs != null) {
+            ITextsPreprocessor.shuffle(text.paragraphs);
+        }
+        for (TextInfo.Subtext st : text.textInfo.subtexts) {
+            if (st.lang == null) {
+                st.lang = "bel";
+            }
+        }
     }
 
     @Override
@@ -44,5 +53,10 @@ public class ApplyKolas implements ITextsPreprocessor {
         } else {
             return defaultValue;
         }
+    }
+
+    public static void main(String[] args) throws Exception {
+        ProcessTexts.preprocessor = new ApplyKolas();
+        PrepareCache3.main(args);
     }
 }

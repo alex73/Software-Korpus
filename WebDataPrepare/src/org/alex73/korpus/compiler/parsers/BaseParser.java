@@ -2,7 +2,9 @@ package org.alex73.korpus.compiler.parsers;
 
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.List;
 
+import org.alex73.korpus.text.structure.corpus.Paragraph;
 import org.alex73.korpus.utils.KorpusDateTime;
 
 public abstract class BaseParser implements IParser {
@@ -39,6 +41,15 @@ public abstract class BaseParser implements IParser {
     }
 
     protected String getLang(String v) {
-        return v==null?"bel":v;
+        return v == null ? "bel" : v;
+    }
+
+    protected Paragraph[][] get1LangParagraphs(List<Paragraph> ps) {
+        Paragraph[][] r = new Paragraph[ps.size()][];
+        for (int i = 0; i < r.length; i++) {
+            r[i] = new Paragraph[1];
+            r[i][0] = ps.get(i);
+        }
+        return r;
     }
 }

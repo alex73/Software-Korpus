@@ -2,7 +2,7 @@
 <!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "https://www.eclipse.org/jetty/configure_10_0.dtd">
 
 <Configure id="korpus" class="org.eclipse.jetty.webapp.WebAppContext"> 
-  <Set name="contextPath">/parallel/</Set> 
+  <Set name="contextPath">/paralelny/</Set> 
   <Set name="war">/home/alex/gits/Software-Korpus/WebService-Korpus/war</Set>
 
   <New class="org.eclipse.jetty.plus.jndi.EnvEntry"> 
@@ -26,7 +26,7 @@
   <New class="org.eclipse.jetty.plus.jndi.EnvEntry"> 
     <Arg><Ref refid="korpus"/></Arg>
     <Arg>KORPUS_LANGUAGES</Arg> 
-    <Arg type="java.lang.String">be;ru</Arg>
+    <Arg type="java.lang.String">bel;rus</Arg>
     <Arg type="boolean">true</Arg>
   </New>
 

@@ -8,7 +8,7 @@
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
-            <div class="form-row <#if !allow_grammardb>d-none</#if>">
+            <div class="form-row <#if !allow_grammardb>d-none</#if> input-word-hidegrammar">
                 <div class="form-inline form-group my-1">
                     <label>${messages.korpus_word_allforms}
                     <input class="ml-2" type="checkbox" name="allForms" onChange="KorpusUI.lemmaChange('inputword', this)"></label>
@@ -20,7 +20,7 @@
                     <input type="text" placeholder="${messages.korpus_word_enter_here}" class="form-control ml-2" size="25" name="wordText">
                 </div>
             </div>
-            <div class="form-row <#if !allow_grammardb>d-none</#if>">
+            <div class="form-row <#if !allow_grammardb>d-none</#if> input-word-hidegrammar">
                 <div class="form-inline form-group my-1">
                     <label>${messages.korpus_word_grammar}</label>
                     <a href="#" class="form-control wordgram-display ml-2"

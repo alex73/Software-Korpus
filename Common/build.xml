@@ -18,7 +18,7 @@
 
     <target name="build">
         <mkdir dir="build/classes" />
-        <javac srcdir="src" encoding="utf-8" destdir="build/classes" nowarn="true" debug="true" debuglevel="lines,vars,source">
+        <javac srcdir="src" encoding="utf-8" destdir="build/classes">
             <classpath>
                 <fileset dir="lib" includes="**/*.jar" />
             </classpath>

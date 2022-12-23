@@ -26,7 +26,7 @@
   <New class="org.eclipse.jetty.plus.jndi.EnvEntry"> 
     <Arg><Ref refid="korpus"/></Arg>
     <Arg>KORPUS_LANGUAGES</Arg> 
-    <Arg type="java.lang.String">be</Arg>
+    <Arg type="java.lang.String">bel</Arg>
     <Arg type="boolean">true</Arg>
   </New>
 

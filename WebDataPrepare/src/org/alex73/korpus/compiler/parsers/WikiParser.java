@@ -8,7 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import javax.xml.parsers.SAXParserFactory;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamReader;
 
 import org.alex73.korpus.compiler.MessageParsedText;
 import org.alex73.korpus.compiler.PrepareCache3;
@@ -17,9 +18,6 @@ import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.Splitter3;
 import org.alex73.korpus.text.structure.corpus.Paragraph;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * Data from
@@ -39,7 +37,7 @@ public class WikiParser extends BaseParser {
     // Выкідаем: тэкст пачынаецца з #REDIRECT
     static final String[] SKIP_TEXT_MARKERS = new String[] { "#REDIRECT", "#перанакіраваньне" };
 
-    static final SAXParserFactory FACTORY = SAXParserFactory.newInstance();
+    static final XMLInputFactory FACTORY = XMLInputFactory.newInstance();
 
     private boolean headersOnly;
     String urlPrefix;
@@ -61,29 +59,33 @@ public class WikiParser extends BaseParser {
 
         try (InputStream in = file.toString().endsWith(".bz2") ? new BZip2CompressorInputStream(new BufferedInputStream(new FileInputStream(file.toFile())))
                 : new BufferedInputStream(new FileInputStream(file.toFile()))) {
-            FACTORY.newSAXParser().parse(in, new DefaultHandler() {
-                String pageTitle;
-                StringBuilder str = new StringBuilder();
-
-                @Override
-                public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+            XMLStreamReader reader = FACTORY.createXMLStreamReader(in);
+            String pageTitle = null;
+            StringBuilder str = new StringBuilder();
+            while (reader.hasNext()) {
+                int eventType = reader.next();
+                switch (eventType) {
+                case XMLStreamReader.START_ELEMENT:
                     str.setLength(0);
-                }
-
-                @Override
-                public void characters(char[] ch, int start, int length) throws SAXException {
-                    str.append(ch, start, length);
-                }
-
-                @Override
-                public void endElement(String uri, String localName, String qName) throws SAXException {
-                    if (qName.equals("title")) {
+                    break;
+                case XMLStreamReader.END_ELEMENT:
+                    String elementName = reader.getLocalName();
+                    switch (elementName) {
+                    case "title":
                         pageTitle = str.toString();
-                    } else if (qName.equals("text")) {
+                        break;
+                    case "text":
                         process(publisher, pageTitle, str.toString());
+                        break;
                     }
+                    break;
+                case XMLStreamReader.CHARACTERS:
+                case XMLStreamReader.CDATA:
+                    str.append(reader.getText());
+                    break;
                 }
-            });
+            }
+            reader.close();
         }
     }
 
@@ -135,7 +137,7 @@ public class WikiParser extends BaseParser {
                     paragraphs.add(p);
                 }
             }
-            ti.paragraphs[0] = paragraphs.toArray(new Paragraph[paragraphs.size()]);
+            ti.paragraphs = get1LangParagraphs(paragraphs);
         }
         publisher.accept(ti);
     }

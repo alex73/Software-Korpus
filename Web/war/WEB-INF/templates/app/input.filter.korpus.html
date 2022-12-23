@@ -1,5 +1,18 @@
 <div class="card" style="width: 100%">
     <div class="card-body" *ngIf="serviceSearch.inputCorpusType == 'MAIN'">
+            <div class="form-group row my-1" id="parallel-filter" style="display: none">
+                <label for="inputFilterYearPublishedFrom" class="col-sm-4 col-md-3 col-lg-2 col-form-label">${messages.korpus_filter_lang}</label>
+                <div class="col-sm-8 col-md-9 col-lg-10">
+                    <div class="custom-control custom-radio custom-control-inline">
+                      <input type="radio" id="parallel_bel" name="customRadioInline" class="custom-control-input" onClick="korpusui.switchLanguage('bel');">
+                      <label class="custom-control-label" for="parallel_bel">${messages.korpus_filter_lang_bel}</label>
+                    </div>
+                    <div class="custom-control custom-radio custom-control-inline">
+                      <input type="radio" id="parallel_rus" name="customRadioInline" class="custom-control-input" onClick="korpusui.switchLanguage('rus');" checked>
+                      <label class="custom-control-label" for="parallel_rus">${messages.korpus_filter_lang_rus}</label>
+                    </div>
+                </div>
+            </div>
             <div class="form-group row my-1">
                 <label for="inputFilterCorpus" class="col-sm-4 col-md-3 col-lg-2 col-form-label">${messages.korpus_filter_subcorpuses}</label>
                 <div class="col-sm-8 col-md-9 col-lg-10">
