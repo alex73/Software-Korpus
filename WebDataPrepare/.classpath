@@ -2,6 +2,9 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Korpus-Web"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/Korpus-Common"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Korpus-WebService-Korpus"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
 		<attributes>
 			<attribute name="module" value="true"/>
@@ -14,8 +17,13 @@
 	<classpathentry kind="lib" path="lib/jwarc-0.13.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/snappy-java-1.1.8.4.jar" sourcepath="/data/src/snappy-java-1.1.8.4-sources.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/Korpus-Web"/>
-	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/Korpus-Common"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/Korpus-WebService-Korpus"/>
+	<classpathentry kind="lib" path="lib/lucene-core-8.9.0.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-queries-8.9.0.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-annotations-2.12.4.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-core-2.12.4.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-databind-2.12.4.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-jaxrs-base-2.12.4.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-jaxrs-json-provider-2.12.4.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-module-jaxb-annotations-2.12.4.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

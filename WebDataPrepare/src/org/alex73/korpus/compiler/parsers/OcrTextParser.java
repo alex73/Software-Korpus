@@ -1,7 +1,6 @@
 package org.alex73.korpus.compiler.parsers;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Enumeration;
@@ -15,7 +14,6 @@ import org.alex73.korpus.compiler.PrepareCache3;
 import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.TextFileParser;
-import org.apache.commons.io.IOUtils;
 
 public class OcrTextParser extends BaseParser {
     public OcrTextParser(String subcorpus, Path file) {
@@ -31,12 +29,11 @@ public class OcrTextParser extends BaseParser {
                 if (en.isDirectory()) {
                     continue;
                 }
-                byte[] data;
+                TextFileParser doc;
                 try (InputStream in = new BufferedInputStream(zip.getInputStream(en))) {
-                    data = IOUtils.toByteArray(in);
+                    doc = new TextFileParser(in, headersOnly);
                 }
                 MessageParsedText text = new MessageParsedText(1);
-                TextFileParser doc = new TextFileParser(new ByteArrayInputStream(data), headersOnly);
                 text.textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + en.getName();
                 text.textInfo.subcorpus = subcorpus;
                 text.textInfo.subtexts[0].url = doc.headers.get("URL");

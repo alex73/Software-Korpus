@@ -1,7 +1,6 @@
 package org.alex73.korpus.compiler.parsers;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,7 +16,6 @@ import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.text.parser.Headers;
 import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.TextFileParser;
-import org.apache.commons.io.IOUtils;
 
 public class TextArchiveParser extends BaseParser {
     public TextArchiveParser(String subcorpus, Path file) {
@@ -43,11 +41,10 @@ public class TextArchiveParser extends BaseParser {
                 if (en.isDirectory()) {
                     continue;
                 }
-                byte[] data;
+                TextFileParser doc;
                 try (InputStream in = new BufferedInputStream(zip.getInputStream(en))) {
-                    data = IOUtils.toByteArray(in);
+                    doc = new TextFileParser(in, headersOnly);
                 }
-                TextFileParser doc = new TextFileParser(new ByteArrayInputStream(data), headersOnly);
                 MessageParsedText text = new MessageParsedText(1);
                 text.textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + en.getName();
                 text.textInfo.subcorpus = subcorpus;

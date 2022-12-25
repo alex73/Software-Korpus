@@ -11,12 +11,12 @@
 	</target>
 
 	<target name="build">
-		<ant dir="Common" />
-		<ant dir="Editor" />
+		<!--ant dir="Common" /-->
+		<!--ant dir="Editor" /-->
 		<ant dir="Web" />
 		<ant dir="WebService-Korpus" />
 		<ant dir="WebService-Other" />
-		<ant dir="WebDataPrepare" />
+		<!--ant dir="WebDataPrepare" /-->
 	</target>
 
 	<target name="all" depends="clean,build"/>
