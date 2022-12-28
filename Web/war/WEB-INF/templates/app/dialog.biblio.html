@@ -1,55 +1,55 @@
 <script id="template-biblio" type="text/x-jsrender">
-  {{if doc.url}}
+  {{if subdoc.url}}
   <div>
-    <b>${messages.korpus_biblio_url}:</b> <a target="_blank" href="{{> doc.url}}">{{> doc.url}}</a>
+    <b>${messages.korpus_biblio_url}:</b> <a target="_blank" href="{{> subdoc.url}}">{{> subdoc.url}}</a>
   </div>
   {{/if}}
-  {{if doc.authors}}
+  {{if subdoc.authors}}
   <div>
-    <b>${messages.korpus_biblio_authors}:</b> {{> doc.authors}}
+    <b>${messages.korpus_biblio_authors}:</b> {{> subdoc.authors}}
   </div>
   {{/if}}
-  {{if doc.translation}}
+  {{if subdoc.translation}}
   <div>
-    <b>${messages.korpus_biblio_translators}:</b> {{> doc.translators}}
+    <b>${messages.korpus_biblio_translators}:</b> {{> subdoc.translators}}
   </div>
   {{/if}}
-  {{if doc.langOrig}}
+  {{if subdoc.langOrig}}
   <div>
-    <b>${messages.korpus_biblio_langOrig}:</b> {{> doc.langOrig}}
+    <b>${messages.korpus_biblio_langOrig}:</b> {{> subdoc.langOrig}}
   </div>
   {{/if}}
   <div>
-    <b>${messages.korpus_biblio_title}:</b> {{> doc.title}}
+    <b>${messages.korpus_biblio_title}:</b> {{> subdoc.title}}
   </div>
   {{if doc.styleGenres}}
   <div>
     <b>${messages.korpus_biblio_styleGenres}:</b> {{> doc.styleGenres}}
   </div>
   {{/if}}
-  {{if doc.edition}}
+  {{if subdoc.edition}}
   <div>
-    <b>${messages.korpus_biblio_edition}:</b> {{> doc.edition}}
+    <b>${messages.korpus_biblio_edition}:</b> {{> subdoc.edition}}
   </div>
   {{/if}}
-  {{if doc.details}}
+  {{if subdoc.details}}
   <div>
-    <b>${messages.korpus_biblio_details}:</b> {{> doc.details}}
+    <b>${messages.korpus_biblio_details}:</b> {{> subdoc.details}}
   </div>
   {{/if}}
-  {{if doc.file}}
+  {{if subdoc.file}}
   <div>
-    <b>${messages.korpus_biblio_file}:</b> {{> doc.file}}
+    <b>${messages.korpus_biblio_file}:</b> {{> subdoc.file}}
   </div>
   {{/if}}
-  {{if doc.creationTime}}
+  {{if subdoc.creationTime}}
   <div>
-    <b>${messages.korpus_biblio_creationTime}:</b> {{> doc.creationTime}}
+    <b>${messages.korpus_biblio_creationTime}:</b> {{> subdoc.creationTime}}
   </div>
   {{/if}}
-  {{if doc.publicationTime}}
+  {{if subdoc.publicationTime}}
   <div>
-    <b>${messages.korpus_biblio_publicationTime}:</b> {{> doc.publicationTime}}
+    <b>${messages.korpus_biblio_publicationTime}:</b> {{> subdoc.publicationTime}}
   </div>
   {{/if}}
   {{if page > 0}}

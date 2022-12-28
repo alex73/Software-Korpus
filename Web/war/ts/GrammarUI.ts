@@ -20,7 +20,8 @@ class GrammarUI {
 	}
 	collectFromScreen(): GrammarRequest {
 		let r: GrammarRequest = new GrammarRequest();
-		
+
+		r.lang = 'bel';
 		r.multiForm = (<HTMLInputElement>document.getElementById('grammarword-multiform')).checked;
 		r.word = (<HTMLInputElement>document.getElementById('grammarword-word')).value.toLowerCase();
 		if ($('#grammar-show-grammardetails').is(":visible")) {

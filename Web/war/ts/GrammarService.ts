@@ -125,6 +125,7 @@ class GrammarService {
 }
 
 class GrammarRequest {
+  public lang: string; // мова
   public word: string; // тое што ўвёў карыстальнік
   public multiForm: boolean = false; // пошук па формах ?
   public grammar: string; // удакладненая граматыка

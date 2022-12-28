@@ -20,11 +20,11 @@ public class ApplyParalelny implements ITextsPreprocessor {
     @Override
     public Comparator<TextInfo> getTextsComparator() {
         return (o1, o2) -> {
-            if (o1.subtexts.length != 1) {
-                throw new RuntimeException("Не адзін варыянт тэкста " + o1.sourceFilePath);
+            if (o1.subtexts.length != 2) {
+                throw new RuntimeException("Не паралельны варыянт тэкста " + o1.sourceFilePath);
             }
-            if (o2.subtexts.length != 1) {
-                throw new RuntimeException("Не адзін варыянт тэкста " + o2.sourceFilePath);
+            if (o2.subtexts.length != 2) {
+                throw new RuntimeException("Не паралельны варыянт тэкста " + o2.sourceFilePath);
             }
             if (o1 == o2) {
                 return 0;

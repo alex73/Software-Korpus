@@ -7,7 +7,7 @@
 	{{for resultKwic.rows}}
     <tr>
       <td style="color: #337ab7; white-space: nowrap;">
-        <a href="#" onClick="new PopoverBiblio(event, korpusService.resultKwic.rows[{{:#index}}].doc, korpusService.resultKwic.rows[{{:#index}}].origText.page); return false;">
+        <a href="#" onClick="new PopoverBiblio(event, korpusService.resultKwic.rows[{{:#index}}].doc, korpusService.resultKwic.rows[{{:#index}}].subdoc, korpusService.resultKwic.rows[{{:#index}}].origText.page); return false;">
           {{titleShort:subdoc.textLabel}}
         </a>
       </td>
