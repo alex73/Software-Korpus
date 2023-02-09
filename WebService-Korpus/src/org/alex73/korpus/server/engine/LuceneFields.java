@@ -49,9 +49,9 @@ public class LuceneFields {
     }
 
     public static class LuceneFieldsLang {
-        public Field fieldSentenceValues;
-        public Field fieldSentenceDBGrammarTags;
-        public Field fieldSentenceLemmas;
+        public Field fieldSentenceValues; // all supernormalized words from this paragraph
+        public Field fieldSentenceDBGrammarTags; // all grammar tags from this paragraph
+        // public Field fieldSentenceLemmas; // all lemmas from this paragraph - no need since we will find by all forms from grammar database
         public Field fieldSentenceTextAuthor;
         public Field fieldSentenceTextSource;
         public IntRange fieldSentenceTextCreationYear;
@@ -76,7 +76,7 @@ public class LuceneFields {
             byLang.put(lang, lf);
             lf.fieldSentenceValues = new Field(lang + "_value", "", TYPE_NOTSTORED_INDEXED);
             lf.fieldSentenceDBGrammarTags = new Field(lang + "_dbGrammarTag", "", TYPE_NOTSTORED_INDEXED);
-            lf.fieldSentenceLemmas = new Field(lang + "_lemma", "", TYPE_NOTSTORED_INDEXED);
+            // lf.fieldSentenceLemmas = new Field(lang + "_lemma", "", TYPE_NOTSTORED_INDEXED);
             lf.fieldSentenceTextAuthor = new Field("textAuthor", "", TYPE_NOTSTORED_INDEXED);
             lf.fieldSentenceTextSource = new Field("textSource", "", TYPE_NOTSTORED_INDEXED);
             lf.fieldSentenceTextCreationYear = new IntRange("creationYear", new int[] { 0 }, new int[] { 0 });

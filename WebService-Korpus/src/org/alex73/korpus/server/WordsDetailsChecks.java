@@ -27,6 +27,7 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import org.alex73.korpus.languages.ILanguage;
+import org.alex73.korpus.server.data.ChainRequest;
 import org.alex73.korpus.server.data.SearchParams;
 import org.alex73.korpus.server.data.WordRequest;
 import org.alex73.korpus.server.data.WordResult;
@@ -48,7 +49,7 @@ public class WordsDetailsChecks {
      * Is the document correspond with search criteria ? Check and mark requested
      * words for highlight for user.
      */
-    public static boolean isAllowed(String langCode, ILanguage lang, SearchParams.WordsOrder wordsOrder, List<WordRequest> words, Paragraph[] resultText) {
+    public static boolean isAllowed(String langCode, ILanguage lang, ChainRequest chain, Paragraph[] resultText) {
         boolean found = false;
         for (Paragraph p : resultText) {
             if (langCode.equals(p.lang)) {

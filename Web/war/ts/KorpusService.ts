@@ -282,11 +282,11 @@ class KorpusService {
 						switch (this.requestedTypeSearch) {
 							case 'search':
 								this.resultKwic = null;
-								this.resultSearch = new ResultSearchOut(json, this.requestedParams.words.length);
+								this.resultSearch = new ResultSearchOut(json, this.requestedParams.chains.length);
 								break;
 							case 'kwic':
 								this.resultSearch = null;
-								this.resultKwic = new ResultKwicOut(json, this.requestedParams.words.length);
+								this.resultKwic = new ResultKwicOut(json, this.requestedParams.chains.length);
 								break;
 						}
 						this.currentPage = page;

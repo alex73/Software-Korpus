@@ -26,6 +26,7 @@ import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.languages.ILanguage;
 import org.alex73.korpus.languages.LanguageFactory;
+import org.alex73.korpus.server.data.ChainRequest;
 import org.alex73.korpus.server.data.ClusterParams;
 import org.alex73.korpus.server.data.ClusterResults;
 import org.alex73.korpus.server.data.FreqSpisResult;
@@ -37,6 +38,7 @@ import org.alex73.korpus.server.data.SearchResults;
 import org.alex73.korpus.server.data.SearchTotalResult;
 import org.alex73.korpus.server.data.WordRequest;
 import org.alex73.korpus.server.data.WordResult;
+import org.alex73.korpus.server.data.WordRequest.WordMode;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
 import org.alex73.korpus.server.text.BinaryParagraphReader;
 import org.alex73.korpus.text.structure.corpus.Paragraph;
@@ -108,53 +110,21 @@ public class SearchServiceImpl {
             ILanguage lang = LanguageFactory.get(rq.params.lang);
             SearchParams params = rq.params;
             LatestMark latest = rq.latest;
-            params.words.forEach(w -> cleanupWordRequest(lang, w));
+            params.chains.forEach(c -> c.words.forEach(w -> cleanupWordRequest(lang, w)));
             WordsDetailsChecks.reset();
-            boolean enoughComplex = false;
-            for (WordRequest w : params.words) {
-                if (!WordsDetailsChecks.isTooSimpleWord(w)) {
-                    enoughComplex = true;
-                    break;
-                }
-            }
-            if (!enoughComplex) {
-                LOGGER.info("<< Request too simple");
-                throw new RuntimeException(ServerError.REQUIEST_TOO_SIMPLE);
-            }
-            for (WordRequest w : params.words) {
-                if (w.allForms) {
-                    findAllLemmas(lang, w);
-                    if (w.lemmas.length == 0) {
-                        throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
-                    }
-                }
-            }
+            checkEnoughComplex(params);
+            params.chains.forEach(ch->ch.words.forEach(w->findAllLemmas(lang, w)));
 
             BooleanQuery.Builder query = new BooleanQuery.Builder();
             LuceneFilter process = getApp().processKorpus;
             process.addKorpusTextFilter(rq.params.lang, query, params.textStandard);
-            for (WordRequest w : params.words) {
-                process.addWordFilter(rq.params.lang, query, w);
-            }
+            params.chains.forEach(ch->ch.words.forEach(w->process.addWordFilter(rq.params.lang, query, w)));
 
             if (latest == null) {
                 latest = new LatestMark();
             }
-            List<Integer> found = process.search(query.build(), latest, Settings.KORPUS_SEARCH_RESULT_PAGE, new LuceneDriverRead.DocFilter<Integer>() {
-                public Integer processDoc(int docID) {
-                    try {
-                        Document doc = getApp().processKorpus.getSentence(docID);
-                        Paragraph[] text = restoreText(doc);
-                        if (WordsDetailsChecks.isAllowed(rq.params.lang, lang, params.wordsOrder, params.words, text)) {
-                            return docID;
-                        } else {
-                            return null;
-                        }
-                    } catch (Exception ex) {
-                        throw new RuntimeException(ex);
-                    }
-                }
-            });
+            List<Integer> found = process.search(query.build(), latest, Settings.KORPUS_SEARCH_RESULT_PAGE, 
+                    filterFoundDocumentsByChains(rq.params, lang));
             SearchResult result = new SearchResult();
             result.hasMore = found.size() >= Settings.KORPUS_SEARCH_RESULT_PAGE;
             result.foundIDs = new int[found.size()];
@@ -181,51 +151,18 @@ public class SearchServiceImpl {
         try {
             ILanguage lang = LanguageFactory.get(rq.params.lang);
             SearchParams params = rq.params;
-            params.words.forEach(w -> cleanupWordRequest(lang, w));
+            params.chains.forEach(c -> c.words.forEach(w -> cleanupWordRequest(lang, w)));
             WordsDetailsChecks.reset();
-            boolean enoughComplex = false;
-            for (WordRequest w : params.words) {
-                if (!WordsDetailsChecks.isTooSimpleWord(w)) {
-                    enoughComplex = true;
-                    break;
-                }
-            }
-            if (!enoughComplex) {
-                LOGGER.info("<< Request too simple");
-                throw new RuntimeException(ServerError.REQUIEST_TOO_SIMPLE);
-            }
-            for (WordRequest w : params.words) {
-                if (w.allForms) {
-                    findAllLemmas(lang, w);
-                    if (w.lemmas.length == 0) {
-                        throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
-                    }
-                }
-            }
+            checkEnoughComplex(params);
+            params.chains.forEach(ch->ch.words.forEach(w->findAllLemmas(lang, w)));
 
             BooleanQuery.Builder query = new BooleanQuery.Builder();
             LuceneFilter process = getApp().processKorpus;
             process.addKorpusTextFilter(rq.params.lang, query, params.textStandard);
-            for (WordRequest w : params.words) {
-                process.addWordFilter(rq.params.lang, query, w);
-            }
+            params.chains.forEach(ch->ch.words.forEach(w->process.addWordFilter(rq.params.lang, query, w)));
 
             List<Integer> found = process.search(query.build(), new LatestMark(), Settings.KORPUS_SEARCH_TOTAL_MAX_COUNT,
-                    new LuceneDriverRead.DocFilter<Integer>() {
-                        public Integer processDoc(int docID) {
-                            try {
-                                Document doc = getApp().processKorpus.getSentence(docID);
-                                Paragraph[] text = restoreText(doc);
-                                if (WordsDetailsChecks.isAllowed(rq.params.lang, lang, params.wordsOrder, params.words, text)) {
-                                    return docID;
-                                } else {
-                                    return null;
-                                }
-                            } catch (Exception ex) {
-                                throw new RuntimeException(ex);
-                            }
-                        }
-                    });
+                    filterFoundDocumentsByChains(rq.params, lang));
             SearchTotalResult result = new SearchTotalResult();
             result.totalCount = found.size();
             LOGGER.info("<< Result: found: " + result.totalCount);
@@ -252,12 +189,7 @@ public class SearchServiceImpl {
                 LOGGER.info("<< Request too simple");
                 throw new RuntimeException(ServerError.REQUIEST_TOO_SIMPLE);
             }
-            if (params.word.allForms) {
-                findAllLemmas(lang, params.word);
-                if (params.word.lemmas.length == 0) {
-                    throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
-                }
-            }
+              findAllLemmas(lang, params.word);
 
             LuceneFilter corpusFilter = getApp().processKorpus;
             ClusterResults res = new ClusterServiceImpl(this).calc(params, corpusFilter);
@@ -280,22 +212,11 @@ public class SearchServiceImpl {
     @Produces(MediaType.APPLICATION_JSON)
     public SearchResults[] getSentences(SentencesRequest rq) throws Exception {
         ILanguage lang = LanguageFactory.get(rq.params.lang);
-        rq.params.words.forEach(w -> cleanupWordRequest(lang, w));
+        rq.params.chains.forEach(c -> c.words.forEach(w -> cleanupWordRequest(lang, w)));
         SearchParams params = rq.params;
         int[] list = rq.list;
-        for (WordRequest w : params.words) {
-            if (w.word != null) {
-                w.word = lang.getNormalizer().lightNormalized(w.word);
-            }
-        }
-        for (WordRequest w : params.words) {
-            if (w.allForms) {
-                findAllLemmas(lang, w);
-                if (w.lemmas.length == 0) {
-                    throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
-                }
-            }
-        }
+        params.chains.forEach(c -> c.words.forEach(w -> cleanupWordRequest(lang, w)));
+        params.chains.forEach(ch->ch.words.forEach(w->findAllLemmas(lang, w)));
         try {
             WordsDetailsChecks.reset();
             SearchResults[] result = new SearchResults[list.length];
@@ -306,7 +227,9 @@ public class SearchServiceImpl {
                 result[i].doc = restoreTextInfo(doc);
                 result[i].text = restoreText(doc);
                 // mark result words
-                WordsDetailsChecks.isAllowed(rq.params.lang, lang, params.wordsOrder, params.words, result[i].text);
+                for (ChainRequest chain : rq.params.chains) {
+                    WordsDetailsChecks.isAllowed(rq.params.lang, lang, chain, result[i].text);
+                }
             }
             return result;
         } catch (Exception ex) {
@@ -338,6 +261,9 @@ public class SearchServiceImpl {
     }
 
     private void findAllLemmas(ILanguage lang, WordRequest w) {
+        if (w.mode != WordMode.ALL_FORMS) {
+            return;
+        }
         Set<String> result = new TreeSet<>();
         Paradigm[] ps = getApp().grFinder.getParadigms(w.word);
         // user can enter lemma of variant, but we need to find paradigm
@@ -350,6 +276,9 @@ public class SearchServiceImpl {
             }
         }
         w.lemmas = result.stream().toArray(String[]::new);
+        if (w.lemmas.length == 0) {
+            throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
+        }
     }
 
     private void cleanupWordRequest(ILanguage lang, WordRequest w) {
@@ -359,14 +288,49 @@ public class SearchServiceImpl {
                 w.word = null;
             }
         }
-        if (w.word == null) {
-            w.allForms = false;
-        }
         if (w.grammar != null) {
             w.grammar = w.grammar.trim();
             if (w.grammar.isEmpty()) {
                 w.grammar = null;
             }
         }
+    }
+
+    private void checkEnoughComplex(SearchParams params) {
+        boolean enoughComplex = false;
+        for (ChainRequest ch : params.chains) {
+            for (WordRequest w : ch.words) {
+                if (!WordsDetailsChecks.isTooSimpleWord(w)) {
+                    enoughComplex = true;
+                    break;
+                }
+            }
+        }
+        if (!enoughComplex) {
+            LOGGER.info("<< Request too simple");
+            throw new RuntimeException(ServerError.REQUIEST_TOO_SIMPLE);
+        }
+    }
+
+    private LuceneDriverRead.DocFilter<Integer> filterFoundDocumentsByChains(SearchParams params, ILanguage lang) {
+        return new LuceneDriverRead.DocFilter<>() {
+
+            public Integer processDoc(int docID) {
+                try {
+                    Document doc = getApp().processKorpus.getSentence(docID);
+                    Paragraph[] text = restoreText(doc);
+                    boolean allowed = false;
+                    for (ChainRequest chain : params.chains) {
+                        if (WordsDetailsChecks.isAllowed(params.lang, lang, chain, text)) {
+                            // need to process all for mark all occurrences
+                            allowed = true;
+                        }
+                    }
+                    return allowed ? docID : null;
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        };
     }
 }

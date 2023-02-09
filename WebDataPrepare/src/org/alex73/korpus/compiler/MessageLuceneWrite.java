@@ -17,6 +17,6 @@ public class MessageLuceneWrite {
     public static class LuceneParagraphLang {
         public String[] values;
         public String[] dbGrammarTags;
-        public String[] lemmas;
+        // public String[] lemmas;
     }
 }

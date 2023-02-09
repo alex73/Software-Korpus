@@ -1,8 +1,15 @@
 declare var $: any;
 
+/*
+  Паказваем:
+    пошук у корпусе - ланцужкі
+    KWIC - толькі адзін ланцужок
+    кластар - пакуль як ёсць
+ */
 class KorpusUI {
 	visitedList: number[];
 	currentFindLanguage: string;
+	chainsInParagraph: boolean;
 	constructor(defaultLanguage: string) {
 		this.currentFindLanguage = defaultLanguage;
 		this.hideStatusError();
@@ -17,44 +24,42 @@ class KorpusUI {
 		return 'search';
 	}
 	switchMode(mode: string) {
-		document.getElementById("tabSearch").classList.remove("active");
-		document.getElementById("tabKWIC").classList.remove("active");
-		document.getElementById("tabCluster").classList.remove("active");
-		document.getElementById("tabSpisy").classList.remove("active");
+		$('#tabSearch').removeClass("active");
+		$('#tabKWIC').removeClass("active");
+		$('#tabCluster').removeClass("active");
+		$('#tabSpisy').removeClass("active");
+		$('#divInputSearch').hide();
+		$('#divSearch').hide();
+		$('#divCluster').hide();
+		$('#divSpisy').hide();
 		switch (mode) {
 			case "search":
-				document.getElementById("tabSearch").classList.add("active");
-				document.getElementById("divSpisy").classList.add("d-none");
-				document.getElementById("divInputSearch").classList.remove("d-none");
-				document.getElementById("partInputOrder").classList.remove("d-none");
-				document.getElementById("partWordAdd").classList.remove("d-none");
-				document.getElementById("partWordAround").classList.add("d-none");
+				$('#tabSearch').addClass("active");
+				$('#divInputSearch').show();
+				$('#divSearch').show();
+				$(".korpus-words-searchonly").show();
 				break;
 			case "kwic":
-				document.getElementById("tabKWIC").classList.add("active");
-				document.getElementById("divSpisy").classList.add("d-none");
-				document.getElementById("divInputSearch").classList.remove("d-none");
-				document.getElementById("partInputOrder").classList.add("d-none");
-				document.getElementById("partWordAdd").classList.remove("d-none");
-				document.getElementById("partWordAround").classList.add("d-none");
+				$('#tabKWIC').addClass("active");
+				$('#divInputSearch').show();
+				$('#divSearch').show();
+				$(".korpus-words-searchonly").hide();
+				// remove more than one row
+				while(true) {
+					var collectionRows: NodeListOf<HTMLElement> = document.querySelectorAll("#divSearch .korpus-words-row-full");
+					if (collectionRows.length<=2) {
+						break;
+					}
+					collectionRows.item(collectionRows.length-1).remove();
+				}
 				break;
 			case "cluster":
-				document.getElementById("tabCluster").classList.add("active");
-				document.getElementById("divSpisy").classList.add("d-none");
-				document.getElementById("divInputSearch").classList.remove("d-none");
-				document.getElementById("partInputOrder").classList.add("d-none");
-				document.getElementById("partWordAdd").classList.add("d-none");
-				document.getElementById("partWordAround").classList.remove("d-none");
-				let words: NodeListOf<HTMLElement> = this.getWordCollection('inputword');
-				for (let i = 1; i < words.length; i++) {
-					words.item(i).remove();
-				}
-				this.repaintRemoveIcons('inputword');
+				$('#tabCluster').addClass("active");
+				$('#divCluster').show();
 				break;
 			case "spisy":
-				document.getElementById("tabSpisy").classList.add("active");
-				document.getElementById("divInputSearch").classList.add("d-none");
-				document.getElementById("divSpisy").classList.remove("d-none");
+				$('#tabSpisy').addClass("active");
+				$('#divSpisy').show();
 				break;
 		}
 		this.maximizeHeader();
@@ -73,40 +78,130 @@ class KorpusUI {
 		// remove all words
 		if ($(".inputword:visible").length > 0) {
 			$(".inputword:visible").remove();
-			this.addWord('inputword');
+			this.addRow(true);
 		}
 	}
-	addWord(type: string): HTMLElement {
-		const templateWord: HTMLElement = document.getElementById("template-" + type);
+	setWordMode(from: HTMLElement, mode: string) {
+		const word: HTMLElement = from.closest(".word-select");
+		$('.word-store-mode').text(mode);
+		switch(mode) {
+			case WordMode.USUAL:
+				$(word.querySelector('.word-select-dropdown button')).text('Звычайны пошук');
+				$(word.querySelector('.word-select-variants')).show();
+				$(word.querySelector('.word-select-grammar')).show();
+				$(word.querySelector('.word-select-wordprompt')).attr('placeholder', "можна з '*' і '?'");
+				break;
+			case WordMode.ALL_FORMS:
+				$(word.querySelector('.word-select-dropdown button')).text('Усе словаформы');
+				$(word.querySelector('.word-select-variants')).show();
+				$(word.querySelector('.word-select-grammar')).show();
+				$(word.querySelector('.word-select-wordprompt')).attr('placeholder', "адна з формаў");
+				break;
+			case WordMode.EXACT:
+				$(word.querySelector('.word-select-dropdown button')).text('Дакладны пошук');
+				$(word.querySelector('.word-select-variants')).hide();
+				$(word.querySelector('.word-select-grammar')).hide();
+				$(word.querySelector('.word-select-wordprompt')).attr('placeholder', "можна з '*' і '?'");
+				break;
+		}
+	}
+	setSepMode(from: HTMLElement, mode: string) {
+		const sep: HTMLElement = from.closest(".word-select");
+		switch(mode) {
+			case 'NONE':
+				$(sep).find('input').prop('checked', false);
+				$(sep).find("button.dropdown-toggle").text('не');
+				$(sep).find('.sep-store-mode').text('NONE');
+				return;
+			case '':
+				$(sep).find("button.dropdown-toggle").text('');
+				$(sep).find('input').prop('checked', false);
+				$(sep).find('.sep-store-mode').text('');
+				break;
+			default:
+				var v = '';
+				$(sep).find('input').each(function(index,data) {
+					if (this.checked) {
+						v += this.getAttribute('v');
+					}
+				});
+				$(sep).find("button.dropdown-toggle").text(v);
+				$(sep).find('.sep-store-mode').text(v);
+				break;
+		}
+	}
+	addWord(fullrow: HTMLElement): HTMLElement {
+		const templateWord: HTMLElement = document.getElementById("template-inputword");
 		const newWord: HTMLElement = <HTMLElement>templateWord.cloneNode(true);
 		newWord.removeAttribute('id');
 		newWord.style.display = 'block';
-		let r = templateWord.parentElement.insertBefore(newWord, templateWord);
-		this.repaintRemoveIcons(type);
-		if (this.currentFindLanguage != 'bel') {
-			$(".input-word-hidegrammar").hide();
-		} else {
-			$(".input-word-hidegrammar").show();
+		let row = fullrow.querySelector('.korpus-words-row');
+		let r = row.insertBefore(newWord, row.lastElementChild);
+		this.repaintWordButtons();
+		return r;
+	}
+	addSep(fullrow: HTMLElement): HTMLElement {
+		const templateSep: HTMLElement = document.getElementById("template-inputsep");
+		const newSep: HTMLElement = <HTMLElement>templateSep.cloneNode(true);
+		newSep.removeAttribute('id');
+		newSep.style.display = 'block';
+		let row = fullrow.querySelector('.korpus-words-row');
+		let r = row.insertBefore(newSep, row.lastElementChild);
+		return r;
+	}
+	addRow(initializeWords: boolean): HTMLElement {
+		const templateRow: HTMLElement = document.getElementById("template-inputrow");
+		const newRow: HTMLElement = <HTMLElement>templateRow.cloneNode(true);
+		newRow.removeAttribute('id');
+		newRow.style.display = '';
+		let r = templateRow.parentElement.insertBefore(newRow, templateRow.parentElement.lastElementChild);
+		if (initializeWords) {
+			this.addSep(r);
+			this.addWord(r);
+			this.addSep(r);
 		}
 		return r;
 	}
-	removeWord(type: string, button: HTMLElement) {
-		const block: HTMLElement = button.closest("." + type);
+	removeWord(button: HTMLElement) {
+		const block: HTMLElement = button.closest(".inputword");
+		block.nextElementSibling.remove(); // remove separator after
 		block.remove();
-		this.repaintRemoveIcons(type);
+		this.repaintWordButtons();
 	}
-	getWordCollection(type: string): NodeListOf<HTMLElement> {
-		return document.querySelectorAll("." + type + ":not(#template-" + type + ")");
+	removeRow(button: HTMLElement) {
+		const block: HTMLElement = button.closest(".korpus-words-row-full");
+		block.remove();
+		this.repaintWordButtons();
 	}
-	repaintRemoveIcons(type: string) {
-		var collection: NodeListOf<HTMLElement> = document.querySelectorAll("." + type + ":not(#template-" + type + ")");
-		if (collection.length > 1) {
-			$(".oneword-show").hide();
-			$(".oneword-hide").show();
+	getRows(): NodeListOf<HTMLElement> {
+		return document.querySelectorAll("#divSearch .korpus-words-row-full:not(#template-inputrow)");
+	}
+	repaintWordButtons() {
+		var what = $('.korpus-words-row-removebutton');
+		let rows: NodeListOf<HTMLElement> = this.getRows();
+		if (rows.length > 1) {
+			what.show();
+			if (this.chainsInParagraph) {
+				$('#btnChainAddSentence').hide();
+				$('#btnChainAddParagraph').show();
+			} else {
+				$('#btnChainAddSentence').show();
+				$('#btnChainAddParagraph').hide();
+			}
 		} else {
-			$(".oneword-show").show();
-			$(".oneword-hide").hide();
+			what.hide();
+			$('#btnChainAddSentence').show();
+			$('#btnChainAddParagraph').show();
 		}
+		rows.forEach(e => {
+			var collectionWords: NodeListOf<HTMLElement> = e.querySelectorAll(".inputword:not(#template-inputword)");
+			var what = $(e).find('.close');
+			if (collectionWords.length > 1) {
+				what.show();
+			} else {
+				what.hide();
+			}
+		});
 	}
 	static lemmaChange(type: string, cb: HTMLInputElement) {
 		cb.closest('.' + type).querySelector("." + type + "-lemma-prompt").textContent = cb.checked ? "Пачатковая форма" : "Слова";
@@ -142,33 +237,68 @@ class KorpusUI {
 	collectFromScreenSearch(): SearchParams {
 		let requestedParams: SearchParams = new SearchParams();
 		this.collectFromScreenBase(requestedParams);
-		requestedParams.words = [];
-		this.getWordCollection('inputword').forEach(w => {
-			let wrq = new WordRequest();
-			wrq.allForms = (<HTMLInputElement>w.querySelector("input[type='checkbox']")).checked;
-			wrq.word = fulltrim((<HTMLInputElement>w.querySelector("input[type='text']")).value);
-			wrq.grammar = fulltrim((<HTMLElement>w.querySelector(".wordgram-grammar-string")).innerText);
-			requestedParams.words.push(wrq);
-		});
-		if (this.getMode() == 'search') {
-			requestedParams.wordsOrder = (<HTMLInputElement>document.querySelector("#part-wordorder input[type='radio']:checked")).value;
+		let rows: NodeListOf<HTMLElement> = this.getRows();
+		if (rows.length > 1) {
+			requestedParams.chainsInParagraph = this.chainsInParagraph;
 		}
+		requestedParams.chains = [];
+		rows.forEach(row => {
+			var r = new ChainRequest();
+			r.words = [];
+			row.querySelectorAll('.inputword').forEach(w => r.words.push(this.collectWord(w)));
+			r.seps = [];
+			row.querySelectorAll('.inputsep').forEach(s => r.seps.push((<HTMLElement>s.querySelector(".sep-store-mode")).innerText));
+			requestedParams.chains.push(r);
+		});
 		return requestedParams;
 	}
 	collectFromScreenCluster(): ClusterParams {
 		let requestedParams: ClusterParams = new ClusterParams();
 		this.collectFromScreenBase(requestedParams);
-		this.getWordCollection('inputword').forEach(w => {
-			let wrq = new WordRequest();
-			wrq.allForms = (<HTMLInputElement>w.querySelector("input[type='checkbox']")).checked;
-			wrq.word = fulltrim((<HTMLInputElement>w.querySelector("input[type='text']")).value);
-			wrq.grammar = fulltrim((<HTMLElement>w.querySelector(".wordgram-grammar-string")).innerText);
-			requestedParams.word = wrq;
-		});
+		document.querySelectorAll('#divCluster .inputword').forEach(w => requestedParams.word = this.collectWord(w));
 		requestedParams.wordsBefore = parseInt((<HTMLInputElement>document.getElementById("inputClusterBefore")).value);
 		requestedParams.wordsAfter = parseInt((<HTMLInputElement>document.getElementById("inputClusterAfter")).value);
 
 		return requestedParams;
+	}
+	collectWord(w: Element): WordRequest {
+		let wrq = new WordRequest();
+		wrq.mode = (<HTMLInputElement>w.querySelector(".word-store-mode")).innerText;
+		wrq.variants = (<HTMLInputElement>w.querySelector("input[type='checkbox']")).checked;
+		wrq.word = fulltrim((<HTMLInputElement>w.querySelector("input[type='text']")).value);
+		wrq.grammar = fulltrim((<HTMLElement>w.querySelector(".wordgram-grammar-string")).innerText);
+		return wrq;
+	}
+	restoreWord(w: WordRequest, el: Element) {
+		(<HTMLElement>el.querySelector(".word-store-mode")).innerText = w.mode ? w.mode : WordMode.USUAL;
+		(<HTMLInputElement>el.querySelector("input[type='checkbox']")).checked = w.variants;
+		(<HTMLInputElement>el.querySelector("input[type='text']")).value = w.word ? w.word : "";
+		(<HTMLElement>el.querySelector(".wordgram-grammar-string")).innerText = w.grammar ? w.grammar : "";
+		DialogWordGrammar.wordGrammarToText(w.grammar, el.querySelector(".wordgram-display"));
+	}
+	restoreSep(s: string, sep: Element) {
+		if (s == null) {
+			s = '';
+		}
+		switch(s) {
+			case 'NONE':
+				$(sep).find('input').prop('checked', false);
+				$(sep).find("button.dropdown-toggle").text('не');
+				$(sep).find('.sep-store-mode').text('NONE');
+				return;
+			case '':
+				$(sep).find("button.dropdown-toggle").text('');
+				$(sep).find('input').prop('checked', false);
+				$(sep).find('.sep-store-mode').text('');
+				break;
+			default:
+				$(sep).find('input').each(function(index, data) {
+					this.checked = s.indexOf(this.getAttribute('v')) >= 0;
+				});
+				$(sep).find("button.dropdown-toggle").text(s);
+				$(sep).find('.sep-store-mode').text(s);
+				break;
+		}
 	}
 	showSubcorpusNames() {
 		let subcorpuses: string[] = KorpusUI.separatedStringToArray(document.getElementById('inputFilterCorpus').innerText);
@@ -191,33 +321,33 @@ class KorpusUI {
 		document.getElementById('inputFilterAuthor').innerText = data && data.textStandard && data.textStandard.authors ? data.textStandard.authors.join(';') : "Усе";
 		document.getElementById('inputFilterSource').innerText = data && data.textStandard && data.textStandard.sources ? data.textStandard.sources.join(';') : "Усе";
 		document.getElementById('inputFilterStyle').innerText = data && data.textStandard && data.textStandard.stylegenres ? data.textStandard.stylegenres.join(';') : "Усе";
+		this.addWord(document.querySelector("#divCluster .korpus-words-row-full"));
 		switch (this.getMode()) {
 			case 'search':
 			case 'kwic':
-				let sp: SearchParams = <SearchParams>data;
-				if (sp && sp.words) {
-					sp.words.forEach(wdata => {
-						let w = this.addWord('inputword');
-						(<HTMLInputElement>w.querySelector("input[type='text']")).value = wdata.word ? wdata.word : "";
-						(<HTMLInputElement>w.querySelector("input[type='checkbox']")).checked = wdata.allForms;
-						(<HTMLElement>w.querySelector(".inputword-lemma-prompt")).textContent = wdata.allForms ? "Пачатковая форма" : "Слова";
-						(<HTMLElement>w.querySelector(".wordgram-grammar-string")).innerText = wdata.grammar ? wdata.grammar : "";
-						DialogWordGrammar.wordGrammarToText(wdata.grammar, w.querySelector(".wordgram-display"));
+				let sps: SearchParams = <SearchParams>data;
+				if (sps && sps.chains) {
+					sps.chains.forEach(chain => {
+						if (chain.seps.length == chain.words.length + 1) {
+							let r = this.addRow(false);
+							for (let i = 0; i < chain.words.length; i++) {
+								this.restoreSep(chain.seps[i], this.addSep(r));
+								this.restoreWord(chain.words[i], this.addWord(r));
+							}
+							this.restoreSep(chain.seps[chain.seps.length - 1], this.addSep(r));
+						}
 					});
 				} else {
-					this.addWord('inputword');
-				}
-				if (sp && sp.wordsOrder) {
-					(<HTMLInputElement>document.querySelector("#part-wordorder input[type='radio'][value='" + sp.wordsOrder + "']")).checked = true;
+					this.addRow(true);
 				}
 				break;
 			case 'cluster':
 				let cp: ClusterParams = <ClusterParams>data;
 				if (cp && cp.word) {
-					let w: HTMLElement = this.addWord('inputword');
+					let w: HTMLElement = this.addWord(null);
 					(<HTMLInputElement>w.querySelector("input[type='text']")).value = cp.word.word ? cp.word.word : "";
-					(<HTMLInputElement>w.querySelector("input[type='checkbox']")).checked = cp.word.allForms;
-					(<HTMLElement>w.querySelector(".inputword-lemma-prompt")).textContent = cp.word.allForms ? "Пачатковая форма" : "Слова";
+					//(<HTMLInputElement>w.querySelector("input[type='checkbox']")).checked = cp.word.allForms;
+					//(<HTMLElement>w.querySelector(".inputword-lemma-prompt")).textContent = cp.word.allForms ? "Пачатковая форма" : "Слова";
 					(<HTMLElement>w.querySelector(".wordgram-grammar-string")).innerText = cp.word.grammar ? cp.word.grammar : "";
 					DialogWordGrammar.wordGrammarToText(cp.word.grammar, w.querySelector(".wordgram-display"));
 				}
@@ -327,6 +457,9 @@ $.views.converters("korpusdesc", function(val) {
 });
 $.views.converters("naciski", function(val) {
     return val != null ? val.replaceAll("+", "\u0301") : val;
+});
+$(function() {
+	$("body").tooltip({ selector: '[data-toggle=tooltip]' });
 });
 
 var korpusui: KorpusUI = null;

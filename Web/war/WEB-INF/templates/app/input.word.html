@@ -1,32 +1,50 @@
-<div class="col-12 col-md-6 col-xl-4 inputword" style="display: none" id="template-inputword">
-	<div class="card word-select">
-		<span class="d-none wordgram-grammar-string"></span>
-		<div class="card-body">
-			<div class="form-inline float-right ml-2">
-				<button type="button" class="oneword-hide close" aria-label="Close"
-					onClick="korpusui.removeWord('inputword', this); return false;">
-					<span aria-hidden="true">&times;</span>
-				</button>
-			</div>
-            <div class="form-row <#if !allow_grammardb>d-none</#if> input-word-hidegrammar">
-                <div class="form-inline form-group my-1">
-                    <label>${messages.korpus_word_allforms}
+<div class="inputword" style="display: none" id="template-inputword">
+    <div class="card word-select">
+        <span class="d-none wordgram-grammar-string"></span>
+        <span class="d-none word-store-mode">USUAL</span>
+        <div class="card-body">
+            <div class="float-right ml-3">
+                <button type="button" class="close" aria-label="Close" onClick="korpusui.removeWord(this); return false;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="float-right ml-1">
+                <sup><span class="badge badge-warning" data-toggle="tooltip" data-placement="bottom" title="aaaaaaaaaaaaaa aaa">?</span></sup>
+            </div>
+            <div class="form-row word-select-dropdown">
+                <div class="dropdown form-group w-100">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle w-100" type="button" data-toggle="dropdown" aria-expanded="false"
+                        title="bbbbbbb">Звычайны пошук</button>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" onClick="korpusui.setWordMode(this, WordMode.USUAL)">Звычайны пошук</a> 
+                        <a class="dropdown-item" onClick="korpusui.setWordMode(this, WordMode.ALL_FORMS)">Усе словаформы</a> 
+                        <a class="dropdown-item" onClick="korpusui.setWordMode(this, WordMode.EXACT)">Дакладны пошук</a>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row <#if !allow_grammardb>d-none</#if> word-select-variants">
+                <div class="form-group w-100">
+                    <label class="w-100 mb-0">З варыянтамі напісання 
+                    <sup><span class="badge badge-warning" data-toggle="tooltip" data-placement="bottom" title="aaaaaaaaaaaaaa aaa">?</span></sup>
                     <input class="ml-2" type="checkbox" name="allForms" onChange="KorpusUI.lemmaChange('inputword', this)"></label>
                 </div>
             </div>
             <div class="form-row">
-                <div class="form-inline form-group my-1">
-                    <label class="inputword-lemma-prompt">${messages.korpus_word_word}</label>
-                    <input type="text" placeholder="${messages.korpus_word_enter_here}" class="form-control ml-2" size="25" name="wordText">
+                <div class="form-inline form-group w-100">
+                    <label class="w-100">${messages.korpus_word_word} 
+                    <sup><span class="badge badge-warning" data-toggle="tooltip" data-placement="bottom" title="aaaaaaaaaaaaaa aaa">?</span></sup>
+                    <input type="text" placeholder="можна з '*' і '?'" class="form-control ml-2 w-100 word-select-wordprompt" size="10" name="wordText"></label>
                 </div>
             </div>
-            <div class="form-row <#if !allow_grammardb>d-none</#if> input-word-hidegrammar">
-                <div class="form-inline form-group my-1">
-                    <label>${messages.korpus_word_grammar}</label>
-                    <a href="#" class="form-control wordgram-display ml-2"
+            <div class="form-row <#if !allow_grammardb>d-none</#if> word-select-grammar">
+                <div class="form-inline form-group w-100 mb-0">
+                    <label class="w-100">${messages.korpus_word_grammar} 
+                        <sup><span class="badge badge-warning" data-toggle="tooltip" data-placement="bottom" title="aaaaaaaaaaaaaa aaa">?</span></sup>
+                        <a href="#" class="form-control wordgram-display ml-2 w-100" 
                         onClick="dialogWordGrammar = DialogWordGrammar.createParadigmTagsDialog(this, true); return false;">---</a>
+                    </label>
                 </div>
             </div>
-		</div>
-	</div>
+        </div>
+    </div>
 </div>

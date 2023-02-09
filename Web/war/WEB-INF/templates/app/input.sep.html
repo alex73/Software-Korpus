@@ -1,0 +1,23 @@
+<div class="inputsep" style="display: none" id="template-inputsep">
+    <div class="card word-select">
+        <span class="d-none sep-store-mode"></span>
+        <div class="card-body">
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false"> </button>
+                <div class="dropdown-menu">
+                    <span class="dropdown-item disabled">Знак прыпынку:</span> 
+                    <a class="dropdown-item" href="#" onClick="korpusui.setSepMode(this, ''); return false;">няважна</a> 
+                    <a class="dropdown-item" href="#" onClick="korpusui.setSepMode(this, 'NONE'); return false;">не мусіць быць</a>
+                    <div class="dropdown-divider"></div>
+                    <label class="dropdown-item"><input type="checkbox" onChange="korpusui.setSepMode(this, '§')" v='§'> пачатак сказу</label> 
+                    <label class="dropdown-item"><input type="checkbox" onChange="korpusui.setSepMode(this, ',')" v=','> ,</label>
+                    <label class="dropdown-item"><input type="checkbox" onChange="korpusui.setSepMode(this, ';')" v=';'> ;</label>
+                    <label class="dropdown-item"><input type="checkbox" onChange="korpusui.setSepMode(this, '.')" v='.'> .</label>
+                    <label class="dropdown-item"><input type="checkbox" onChange="korpusui.setSepMode(this, '!')" v='!'> !</label>
+                    <label class="dropdown-item"><input type="checkbox" onChange="korpusui.setSepMode(this, '?')" v='?'> ?</label>
+                </div>
+                <sup><span class="badge badge-warning" data-toggle="tooltip" data-placement="bottom" title="aaaaaaaaaaaaaa aaa">?</span></sup>
+            </div>
+        </div>
+    </div>
+</div>

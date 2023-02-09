@@ -27,6 +27,7 @@ import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.server.data.LatestMark;
 import org.alex73.korpus.server.data.StandardTextRequest;
 import org.alex73.korpus.server.data.WordRequest;
+import org.alex73.korpus.server.data.WordRequest.WordMode;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
 import org.alex73.korpus.server.engine.LuceneDriverRead.DocFilter;
 import org.alex73.korpus.server.engine.LuceneFields;
@@ -115,7 +116,7 @@ public class LuceneFilter {
         }
         if (w.word != null && w.word.length() > 0) {
             Query wq;
-            if (w.allForms) {
+            if (w.mode == WordMode.ALL_FORMS) {
                 BooleanQuery.Builder qLemmas = new BooleanQuery.Builder();
                 for (String lemma : w.lemmas) {
                     Term t = new Term(lf.fieldSentenceLemmas.name(), lemma);

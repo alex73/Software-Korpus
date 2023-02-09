@@ -23,15 +23,25 @@
 		    <div class="row">
 		      <#include "input.filter.korpus.html">
 		    </div>
-		    <div class="row">
-		      <#include "input.word.html">
-			  <#include "input.word.add.html">
-			  <#include "input.word.around.html">
-		    </div>
-		    <div id="partInputOrder" class="row oneword-hide">
-		      <#include "input.order.html">
-		    </div>
-		    <div class="row justify-content-end">
+            <#include "input.word.html">
+            <#include "input.sep.html">
+            <div id="divSearch">
+                <div id="korpus-words-rows">
+                    <#include "input.row.html">
+                    <div class="row bg-light justify-content-end korpus-words-searchonly">
+                        <button id="btnChainAddSentence" type="button" class="btn btn-outline-primary btn-sm mx-2" onClick="korpusui.chainsInParagraph = false; korpusui.addRow(true);">Дадаць словы у межах сказу</button>
+                        <button id="btnChainAddParagraph" type="button" class="btn btn-outline-primary btn-sm mx-2" onClick="korpusui.chainsInParagraph = true; korpusui.addRow(true);">Дадаць словы у межах абзацу</button>
+                    </div>
+                </div>
+            </div>
+            <div id="divCluster">
+                <div class="korpus-words-row-full">
+                    <div class="row korpus-words-row" style="align-items: center">
+                        <#include "input.word.around.html">
+                    </div>
+                </div>
+            </div>
+		    <div class="row justify-content-end mt-3">
 		      <button type="submit" class="btn btn-danger btn-lg">${messages.korpus_button_search}</button>
 		    </div>
 	    </form>

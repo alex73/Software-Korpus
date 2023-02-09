@@ -78,7 +78,7 @@ public class ProcessPrepareLucene extends BaseParallelProcessor<MessageParsedTex
 
                     MessageLuceneWrite.LuceneParagraphLang pol = new MessageLuceneWrite.LuceneParagraphLang();
                     pol.values = values.toArray(STRING_ARRAY);
-                    pol.lemmas = lemmas.toArray(STRING_ARRAY);
+                    // pol.lemmas = lemmas.toArray(STRING_ARRAY);
                     pol.dbGrammarTags = dbGrammarTags.toArray(STRING_ARRAY);
                     pol.dbGrammarTags = dbGrammarTags.toArray(STRING_ARRAY);
                     po.byLang.put(langs[l], pol);

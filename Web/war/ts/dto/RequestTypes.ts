@@ -4,8 +4,8 @@ class BaseParams {
 }
 
 class SearchParams extends BaseParams {
-    public words: WordRequest[];
-    public wordsOrder: string;
+    public chainsInParagraph: boolean;
+    public chains: ChainRequest[];
 }
 
 class ClusterParams extends BaseParams {

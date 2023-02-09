@@ -111,7 +111,7 @@ public class ProcessLuceneWriter extends BaseParallelProcessor<MessageLuceneWrit
                 for (LuceneFields.LuceneFieldsLang lf : fields.byLang.values()) {
                     lf.fieldSentenceValues.setTokenStream(EMPTY_STRINGARRAY_VALUE);
                     lf.fieldSentenceDBGrammarTags.setTokenStream(EMPTY_STRINGARRAY_VALUE);
-                    lf.fieldSentenceLemmas.setTokenStream(EMPTY_STRINGARRAY_VALUE);
+                    // lf.fieldSentenceLemmas.setTokenStream(EMPTY_STRINGARRAY_VALUE);
 
                     lf.fieldSentenceTextAuthor.setTokenStream(EMPTY_STRINGARRAY_VALUE);
                     lf.fieldSentenceTextSource.setStringValue("");
@@ -157,7 +157,7 @@ public class ProcessLuceneWriter extends BaseParallelProcessor<MessageLuceneWrit
                     LuceneFields.LuceneFieldsLang fl = fields.byLang.get(en.getKey());
                     fl.fieldSentenceValues.setTokenStream(new StringArrayTokenStream(en.getValue().values));
                     fl.fieldSentenceDBGrammarTags.setTokenStream(new StringArrayTokenStream(en.getValue().dbGrammarTags));
-                    fl.fieldSentenceLemmas.setTokenStream(new StringArrayTokenStream(en.getValue().lemmas));
+                    // fl.fieldSentenceLemmas.setTokenStream(new StringArrayTokenStream(en.getValue().lemmas));
                     fl.fieldSentenceTextAuthor.setTokenStream(new StringArrayTokenStream(langAuthors.toArray(EMPTY_STRINGARRAY)));
                     fl.fieldSentenceTextSource.setTokenStream(new StringArrayTokenStream(langSources.toArray(EMPTY_STRINGARRAY)));
                     setYearsRange(langCreationTime, fl.fieldSentenceTextCreationYear);
@@ -204,7 +204,7 @@ public class ProcessLuceneWriter extends BaseParallelProcessor<MessageLuceneWrit
             for (LuceneFields.LuceneFieldsLang lf : fields.byLang.values()) {
                 docSentence.add(lf.fieldSentenceValues);
                 docSentence.add(lf.fieldSentenceDBGrammarTags);
-                docSentence.add(lf.fieldSentenceLemmas);
+                // docSentence.add(lf.fieldSentenceLemmas);
                 docSentence.add(lf.fieldSentenceTextAuthor);
                 docSentence.add(lf.fieldSentenceTextSource);
                 docSentence.add(lf.fieldSentenceTextCreationYear);

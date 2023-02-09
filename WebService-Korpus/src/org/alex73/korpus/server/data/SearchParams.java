@@ -36,6 +36,6 @@ public class SearchParams implements Serializable {
 
     public String lang;
     public StandardTextRequest textStandard;
-    public List<WordRequest> words = new ArrayList<WordRequest>();
-    public WordsOrder wordsOrder = WordsOrder.PRESET;
+    public boolean chainsInParagraph;
+    public List<ChainRequest> chains = new ArrayList<>();
 }

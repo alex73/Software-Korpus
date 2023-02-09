@@ -33,10 +33,21 @@ public interface ILanguage {
     }
 
     interface INormalizer {
+        /**
+         * Выпраўленне толькі некаторых касметычных хібаў - націскі і апострафы да
+         * адзінай формы.
+         */
         String lightNormalized(CharSequence word);
 
+        /**
+         * Максімальная нармалізацыя - прывядзенне да адзінай формы, выкіданне мяккасці
+         * і г.д. Абавязкова патрабуе дадатковай праверкі на супадзенне.
+         */
         String superNormalized(String word);
 
+        /**
+         * Падлік хэшу (з максімальнай нармалізацыяй).
+         */
         int hash(String word);
 
         boolean isApostraf(char c);
