@@ -3,10 +3,12 @@ package org.alex73.korpus.server;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.alex73.korpus.languages.ILanguage;
 import org.alex73.korpus.languages.LanguageFactory;
+import org.alex73.korpus.server.data.ChainRequest;
 import org.alex73.korpus.server.data.ClusterParams;
 import org.alex73.korpus.server.data.ClusterResults;
 import org.alex73.korpus.server.data.WordRequest;
@@ -38,10 +40,14 @@ public class ClusterServiceImpl {
         w.word = lang.getNormalizer().lightNormalized(w.word);
         process.addWordFilter(params.lang, query, w);
 
+        ChainRequest chain = new ChainRequest();
+        chain.words = List.of(w);
+        WordsDetailsChecks check = new WordsDetailsChecks(lang, List.of(chain), false, ApplicationKorpus.instance.grFiller);
+
         process.search(query.build(), SEARCH_BLOCK, new LuceneDriverRead.DocFilter<Void>() {
             @Override
             public Void processDoc(int docID) throws Exception {
-                process(lang, docID, process);
+                process(check, docID, process);
                 return null;
             }
         });
@@ -49,7 +55,7 @@ public class ClusterServiceImpl {
         return createResults();
     }
 
-    private void process(ILanguage lang, int docID, LuceneFilter process) throws Exception {
+    private void process(WordsDetailsChecks check, int docID, LuceneFilter process) throws Exception {
         Document doc = process.getSentence(docID);
 
         Paragraph[] ps = parent.restoreText(doc);
@@ -57,7 +63,7 @@ public class ClusterServiceImpl {
         for (int pi = 0; pi < ps.length; pi++) {
             for (int i = 0; i < ps[pi].sentences.length; i++) {
                 for (int j = 0; j < ps[pi].sentences[i].words.length; j++) {
-                    if (WordsDetailsChecks.isOneWordMatchsParam(lang, params.word, (WordResult) ps[pi].sentences[i].words[j])) {
+                    if (check.isOneWordAllowed((WordResult) ps[pi].sentences[i].words[j])) {
                         process(ps[pi].sentences[i], j);
                     }
                 }
@@ -103,7 +109,7 @@ public class ClusterServiceImpl {
         String[] wordsAfter;
 
         public Result(Sentence w, int pos, int beforeCount, int afterCount) {
-            word = w.words[pos].normalized;
+            word = w.words[pos].word;
             if (word == null) {
                 word = "";
             }
@@ -111,11 +117,11 @@ public class ClusterServiceImpl {
             wordsAfter = new String[afterCount];
 
             for (int i = pos - 1, count = 0; i >= 0 && count < beforeCount; i--) {
-                wordsBefore[beforeCount - count - 1] = w.words[i].normalized;
+                wordsBefore[beforeCount - count - 1] = w.words[i].word;
                 count++;
             }
             for (int i = pos + 1, count = 0; i < w.words.length && count < afterCount; i++) {
-                wordsAfter[count] = w.words[i].normalized;
+                wordsAfter[count] = w.words[i].word;
                 count++;
             }
         }

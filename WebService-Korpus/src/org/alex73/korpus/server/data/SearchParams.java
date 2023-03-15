@@ -30,10 +30,6 @@ import java.util.List;
  */
 @SuppressWarnings("serial")
 public class SearchParams implements Serializable {
-    public enum WordsOrder {
-        PRESET, ANY_IN_SENTENCE, ANY_IN_PARAGRAPH
-    };
-
     public String lang;
     public StandardTextRequest textStandard;
     public boolean chainsInParagraph;

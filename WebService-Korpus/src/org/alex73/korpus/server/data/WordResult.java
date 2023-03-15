@@ -8,19 +8,12 @@ public class WordResult extends Word {
     public Boolean requestedWord;
 
     public WordResult(Word w) {
-        this.source = w.source;
-        this.normalized = w.normalized;
-        this.lemmas = w.lemmas;
-        this.tags = w.tags;
+        this.word = w.word;
         this.tail = w.tail;
     }
 
     @Override
     public String toString() {
-        if (source != null) {
-            return source + tail;
-        } else {
-            return normalized + tail;
-        }
+        return word + tail;
     }
 }

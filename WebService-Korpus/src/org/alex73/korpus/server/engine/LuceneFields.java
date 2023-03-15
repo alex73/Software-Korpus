@@ -49,20 +49,16 @@ public class LuceneFields {
     }
 
     public static class LuceneFieldsLang {
-        public Field fieldSentenceValues; // all supernormalized words from this paragraph
-        public Field fieldSentenceDBGrammarTags; // all grammar tags from this paragraph
-        // public Field fieldSentenceLemmas; // all lemmas from this paragraph - no need since we will find by all forms from grammar database
-        public Field fieldSentenceTextAuthor;
-        public Field fieldSentenceTextSource;
-        public IntRange fieldSentenceTextCreationYear;
-        public IntRange fieldSentenceTextPublishedYear;
+        public Field fieldWordWriteVariant; // all supernormalized words from this paragraph
+        public Field fieldTagsWriteVariant; // all grammar tags from this paragraph
+        public Field fieldTextAuthor;
+        public Field fieldTextSource;
+        public IntRange fieldTextCreationYear;
+        public IntRange fieldTextPublishedYear;
     }
 
-    public Field fieldSentenceTextSubcorpus;
-    // public FieldInt fieldSentenceTextIDOrder;
-    public Field fieldSentenceTextStyleGenre;
-    
-    // public Field fieldSentenceTextInfo;
+    public Field fieldTextSubcorpus;
+    public Field fieldTextStyleGenre;
 
     public Map<String, LuceneFieldsLang> byLang = new TreeMap<>();
     public Field fieldSentencePBinary;
@@ -74,20 +70,18 @@ public class LuceneFields {
             // words fields
             LuceneFieldsLang lf = new LuceneFieldsLang();
             byLang.put(lang, lf);
-            lf.fieldSentenceValues = new Field(lang + "_value", "", TYPE_NOTSTORED_INDEXED);
-            lf.fieldSentenceDBGrammarTags = new Field(lang + "_dbGrammarTag", "", TYPE_NOTSTORED_INDEXED);
-            // lf.fieldSentenceLemmas = new Field(lang + "_lemma", "", TYPE_NOTSTORED_INDEXED);
-            lf.fieldSentenceTextAuthor = new Field("textAuthor", "", TYPE_NOTSTORED_INDEXED);
-            lf.fieldSentenceTextSource = new Field("textSource", "", TYPE_NOTSTORED_INDEXED);
-            lf.fieldSentenceTextCreationYear = new IntRange("creationYear", new int[] { 0 }, new int[] { 0 });
-            lf.fieldSentenceTextPublishedYear = new IntRange("publishedYear", new int[] { 0 }, new int[] { 0 });
+            lf.fieldWordWriteVariant = new Field(lang + "_WordWriteVariant", "", TYPE_NOTSTORED_INDEXED);
+            lf.fieldTagsWriteVariant = new Field(lang + "_TagsWriteVariant", "", TYPE_NOTSTORED_INDEXED);
+            lf.fieldTextAuthor = new Field("textAuthor", "", TYPE_NOTSTORED_INDEXED);
+            lf.fieldTextSource = new Field("textSource", "", TYPE_NOTSTORED_INDEXED);
+            lf.fieldTextCreationYear = new IntRange("creationYear", new int[] { 0 }, new int[] { 0 });
+            lf.fieldTextPublishedYear = new IntRange("publishedYear", new int[] { 0 }, new int[] { 0 });
         }
         fieldSentencePBinary = new Field("pbinary", new byte[0], TYPE_STORED_NOTINDEXED);
 
         // korpus text fields for filtering
-        fieldSentenceTextSubcorpus = new Field("textSubcorpus", "", TYPE_NOTSTORED_INDEXED);
-        fieldSentenceTextStyleGenre = new Field("textStyleGenre", "", TYPE_NOTSTORED_INDEXED);
-//        fieldSentenceTextInfo = new Field("textInfo", new byte[0], TYPE_STORED_NOTINDEXED);
+        fieldTextSubcorpus = new Field("textSubcorpus", "", TYPE_NOTSTORED_INDEXED);
+        fieldTextStyleGenre = new Field("textStyleGenre", "", TYPE_NOTSTORED_INDEXED);
 
         fieldTextID = new FieldInt("textId", TYPE_STORED_INDEXED_INT);
     }

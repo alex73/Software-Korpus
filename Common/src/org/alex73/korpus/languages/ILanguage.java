@@ -8,6 +8,8 @@ import org.alex73.korpus.languages.DBTagsFactory.DBTagsGroup;
 import org.alex73.korpus.languages.DBTagsFactory.KeyValue;
 
 public interface ILanguage {
+    String getLanguage();
+
     IGrammarTags getTags();
 
     IDBTags getDbTags();
@@ -34,14 +36,20 @@ public interface ILanguage {
 
     interface INormalizer {
         /**
-         * Выпраўленне толькі некаторых касметычных хібаў - націскі і апострафы да
-         * адзінай формы.
+         * Выпраўляем толькі апострафы і злучкі, націскі адкідаем.
+         */
+        String znakNormalized(CharSequence word);
+
+        /**
+         * Невялікія выпраўленні: адкідае націскі, змяняе апострафы і злучкі на
+         * правільныя, ў напачатку -> у, й напачатку -> і, вялікія літары -> малыя, ґ ->
+         * г.
          */
         String lightNormalized(CharSequence word);
 
         /**
-         * Максімальная нармалізацыя - прывядзенне да адзінай формы, выкіданне мяккасці
-         * і г.д. Абавязкова патрабуе дадатковай праверкі на супадзенне.
+         * Максімальная нармалізацыя - lightNormalization і дадаткова адкідаем мяккія
+         * знакі, канвертуем мяккія галосныя ў цвёрдыя.
          */
         String superNormalized(String word);
 
@@ -53,14 +61,5 @@ public interface ILanguage {
         boolean isApostraf(char c);
 
         boolean isLetter(char c);
-
-        /**
-         * Параўноўвае слова ў базе(ці ўведзенае карыстальнікам слова) з словам у
-         * тэксце. Тут правяраюцца ўсе "несупярэчнасці": націскі, вялікія літары,
-         * апострафы, Г выбухная, Ў напачатку слова.
-         * 
-         * Націскі могуць быць альбо не быць як у базе, так і ў тэксце.
-         */
-        boolean equals(String dbWord, String anyWord);
     }
 }

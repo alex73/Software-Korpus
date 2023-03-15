@@ -61,8 +61,8 @@ public class ProcessStat extends BaseParallelProcessor<MessageParsedText> {
         for (Paragraph[] p : text.paragraphs) {
             for (Sentence se : p[textIndex].sentences) {
                 for (Word w : se.words) {
-                    String[] lemmas = w.lemmas == null || w.lemmas.isEmpty() ? null : RE_SPLIT.split(w.lemmas);
-                    wordsStat.addWord(w.normalized, lemmas);
+                    String[] lemmas = w.wordNormalized == null ? null : RE_SPLIT.split(w.wordNormalized);
+                    wordsStat.addWord(w.wordNormalized, lemmas);
                 }
             }
         }

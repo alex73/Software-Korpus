@@ -20,34 +20,45 @@ public class BelarusianWordNormalizerTest {
     }
 
     @Test
-    public void testEquals() {
-        assertTrue(wordNormalizer.equals("Ко\u0301", "Ко\u0301"));
-        assertTrue(wordNormalizer.equals("ко\u0301", "Ко\u0301"));
-        assertTrue(wordNormalizer.equals("Ко", "Ко"));
-        assertTrue(wordNormalizer.equals("Ко", "Ко"));
-        assertTrue(wordNormalizer.equals("Менск", "Менск"));
-        assertTrue(wordNormalizer.equals("шмат", "Шмат"));
-        assertTrue(wordNormalizer.equals("уэлс", "Ўэлс"));
-        assertTrue(wordNormalizer.equals("уэлс", "ўэлс"));
-        assertTrue(wordNormalizer.equals("Ўэлс", "Ўэлс"));
-        assertFalse(wordNormalizer.equals("Ўэлс", "ўэлс"));
-        assertFalse(wordNormalizer.equals("Ўэлс", "Уэлс"));
-        assertFalse(wordNormalizer.equals("шмат", "шматок"));
-        assertFalse(wordNormalizer.equals("шмат", "шматы"));
-        assertFalse(wordNormalizer.equals("шматы", "шмат"));
-        assertFalse(wordNormalizer.equals("шматок", "шмат"));
-        assertFalse(wordNormalizer.equals("шмат", "няшмат"));
-        assertFalse(wordNormalizer.equals("шмат", "шамк"));
-        assertTrue(wordNormalizer.equals("малы\u0301", "малы\u0301"));
-        assertTrue(wordNormalizer.equals("малы\u0301", "малы"));
-        assertFalse(wordNormalizer.equals("малы\u0301", "ма\u0301лы"));
-        assertTrue(wordNormalizer.equals("малы´", "малы"));
-        assertTrue(wordNormalizer.equals("малы´", "малы´"));
-        assertFalse(wordNormalizer.equals("малы´", "ма´лы"));
-        assertTrue(wordNormalizer.equals("малы", "ма\u0301лы"));
-        assertTrue(wordNormalizer.equals("малы", "ма\u0301лы\u0301"));
-        assertTrue(wordNormalizer.equals("Нью-Ё\u0301рк", "Нью-Ёрк"));
-        assertFalse(wordNormalizer.equals("Нью-Ё\u0301рк", "Нью-ёрк"));
-        assertTrue(wordNormalizer.equals("ВКПб", "ВКПб"));
+    public void testZnakNormalized() {
+        assertFalse(wordNormalizer.znakNormalized("ко\u0301").equals(wordNormalizer.znakNormalized("Ко\u0301")));
+        assertTrue(wordNormalizer.znakNormalized("ко\u02BC").equals(wordNormalizer.znakNormalized("ко\u2019")));
+    }
+
+    @Test
+    public void testLightNormalized() {
+        assertTrue(wordNormalizer.lightNormalized("Ко\u0301").equals(wordNormalizer.lightNormalized("Ко\u0301")));
+        assertTrue(wordNormalizer.lightNormalized("ко\u0301").equals(wordNormalizer.lightNormalized("Ко\u0301")));
+        assertTrue(wordNormalizer.lightNormalized("Ко").equals(wordNormalizer.lightNormalized("Ко")));
+        assertTrue(wordNormalizer.lightNormalized("Ко").equals(wordNormalizer.lightNormalized("Ко")));
+        assertTrue(wordNormalizer.lightNormalized("Менск").equals(wordNormalizer.lightNormalized("Менск")));
+        assertTrue(wordNormalizer.lightNormalized("шмат").equals(wordNormalizer.lightNormalized("Шмат")));
+        assertTrue(wordNormalizer.lightNormalized("уэлс").equals(wordNormalizer.lightNormalized("Ўэлс")));
+        assertTrue(wordNormalizer.lightNormalized("уэлс").equals(wordNormalizer.lightNormalized("ўэлс")));
+        assertTrue(wordNormalizer.lightNormalized("Ўэлс").equals(wordNormalizer.lightNormalized("Ўэлс")));
+        assertTrue(wordNormalizer.lightNormalized("Ўэлс").equals(wordNormalizer.lightNormalized("ўэлс")));
+        assertFalse(wordNormalizer.lightNormalized("шмат").equals(wordNormalizer.lightNormalized("шматок")));
+        assertFalse(wordNormalizer.lightNormalized("шмат").equals(wordNormalizer.lightNormalized("шматы")));
+        assertFalse(wordNormalizer.lightNormalized("шматы").equals(wordNormalizer.lightNormalized("шмат")));
+        assertFalse(wordNormalizer.lightNormalized("шматок").equals(wordNormalizer.lightNormalized("шмат")));
+        assertFalse(wordNormalizer.lightNormalized("шмат").equals(wordNormalizer.lightNormalized("няшмат")));
+        assertFalse(wordNormalizer.lightNormalized("шмат").equals(wordNormalizer.lightNormalized("шамк")));
+        assertTrue(wordNormalizer.lightNormalized("малы\u0301").equals(wordNormalizer.lightNormalized("малы\u0301")));
+        assertTrue(wordNormalizer.lightNormalized("малы\u0301").equals(wordNormalizer.lightNormalized("малы")));
+        assertTrue(wordNormalizer.lightNormalized("малы\u0301").equals(wordNormalizer.lightNormalized("ма\u0301лы")));
+        assertTrue(wordNormalizer.lightNormalized("малы´").equals(wordNormalizer.lightNormalized("малы")));
+        assertTrue(wordNormalizer.lightNormalized("малы´").equals(wordNormalizer.lightNormalized("малы´")));
+        assertTrue(wordNormalizer.lightNormalized("малы´").equals(wordNormalizer.lightNormalized("ма´лы")));
+        assertTrue(wordNormalizer.lightNormalized("малы").equals(wordNormalizer.lightNormalized("ма\u0301лы")));
+        assertTrue(wordNormalizer.lightNormalized("малы").equals(wordNormalizer.lightNormalized("ма\u0301лы\u0301")));
+        assertTrue(wordNormalizer.lightNormalized("Нью-Ё\u0301рк").equals(wordNormalizer.lightNormalized("Нью-Ёрк")));
+        assertTrue(wordNormalizer.lightNormalized("Нью-Ё\u0301рк").equals(wordNormalizer.lightNormalized("Нью-ёрк")));
+        assertTrue(wordNormalizer.lightNormalized("ВКПб").equals(wordNormalizer.lightNormalized("ВКПб")));
+    }
+
+    @Test
+    public void testSuperNormalized() {
+        assertTrue(wordNormalizer.superNormalized("сьнег").equals(wordNormalizer.superNormalized("снег")));
+        assertTrue(wordNormalizer.superNormalized("плян").equals(wordNormalizer.superNormalized("план")));
     }
 }

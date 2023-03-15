@@ -12,6 +12,10 @@ public class LanguageFactory {
         static final DBTagsFactory dbtf = new DBTagsFactory(bt);
         static final BelarusianWordNormalizer n = new BelarusianWordNormalizer();
 
+        public String getLanguage() {
+            return "bel";
+        }
+
         public ILanguage.IGrammarTags getTags() {
             return bt;
         }
@@ -30,6 +34,10 @@ public class LanguageFactory {
         static final RussianTags ts = new RussianTags();
         static final DBTagsFactory dbtf = new DBTagsFactory(ts);
         static final RussianWordNormalizer n = new RussianWordNormalizer();
+
+        public String getLanguage() {
+            return "rus";
+        }
 
         public ILanguage.IGrammarTags getTags() {
             return ts;

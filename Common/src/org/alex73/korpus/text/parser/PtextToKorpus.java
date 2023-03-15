@@ -73,11 +73,7 @@ public class PtextToKorpus {
                 } else if (w instanceof WordItem) {
                     WordItem wi = (WordItem) w;
                     Word wo = new Word();
-                    wo.normalized = wi.manualNormalized != null ? wi.manualNormalized : wi.lightNormalized;
-                    wo.source = wi.manualNormalized != null ? wi.lightNormalized : null;
-                    wo.lemmas = wi.manualLemma != null ? wi.manualLemma : wi.lemmas;
-                    wo.tags = wi.manualTag != null ? wi.manualTag : wi.tags;
-                    wo.type = wi.type;
+                    wo.word = wi.lightNormalized;
                     wo.tail = "";
                     words.add(wo);
                 } else if (w instanceof TailItem) {
@@ -90,8 +86,7 @@ public class PtextToKorpus {
                         }
                     } else {
                         Word wo = new Word();
-                        wo.source = null;
-                        wo.normalized = "";
+                        wo.word = null;
                         wo.tail = w.getText();
                         words.add(wo);
                     }
@@ -114,9 +109,9 @@ public class PtextToKorpus {
             }
         } else {
             Word wo = new Word();
-            wo.source = null;
-            wo.normalized = "";
+            wo.word = null;
             wo.tail = "{" + inlinePage + "}";
+            wo.type = Word.OtherType.PAZNAKA;
             words.add(wo);
         }
     }

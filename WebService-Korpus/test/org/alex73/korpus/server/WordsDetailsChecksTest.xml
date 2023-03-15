@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Wordlist>
+	<Paradigm pdgId="1034563" lemma="сне+г" tag="NCIINM1">
+		<Variant id="a" lemma="сне+г" slouniki="piskunou2012:179041" pravapis="A1957,A2008">
+			<Form tag="NS" slouniki="nazounik2008,sbm2012,tsblm1996,tsbm1984,krapivabr2012">сне+г</Form>
+			<Form tag="GS" type="nonstandard">снега</Form>
+			<Form tag="GS" slouniki="nazounik2008,sbm2012">сне+гу</Form>
+			<Form tag="DS" slouniki="nazounik2008,sbm2012">сне+гу</Form>
+			<Form tag="AS" slouniki="nazounik2008">сне+г</Form>
+			<Form tag="IS" slouniki="nazounik2008">сне+гам</Form>
+			<Form tag="LS" slouniki="nazounik2008,sbm2012">сне+зе</Form>
+			<Form tag="NP" slouniki="nazounik2008">снягі+</Form>
+			<Form tag="GP" slouniki="nazounik2008">сняго+ў</Form>
+			<Form tag="DP" slouniki="nazounik2008">сняга+м</Form>
+			<Form tag="AP" slouniki="nazounik2008">снягі+</Form>
+			<Form tag="IP" slouniki="nazounik2008">сняга+мі</Form>
+			<Form tag="LP" slouniki="nazounik2008">сняга+х</Form>
+		</Variant>
+		<Variant id="b" lemma="сьне+г" pravapis="T">
+			<Form tag="LP">сьне+гу</Form>
+		</Variant>
+	</Paradigm>
+</Wordlist>

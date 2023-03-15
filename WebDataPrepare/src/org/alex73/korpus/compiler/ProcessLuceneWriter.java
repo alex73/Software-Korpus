@@ -109,19 +109,18 @@ public class ProcessLuceneWriter extends BaseParallelProcessor<MessageLuceneWrit
             for (int i = 0; i < text.paragraphs.length; i++) {
                 LuceneFields fields = c.fields.get(i);
                 for (LuceneFields.LuceneFieldsLang lf : fields.byLang.values()) {
-                    lf.fieldSentenceValues.setTokenStream(EMPTY_STRINGARRAY_VALUE);
-                    lf.fieldSentenceDBGrammarTags.setTokenStream(EMPTY_STRINGARRAY_VALUE);
-                    // lf.fieldSentenceLemmas.setTokenStream(EMPTY_STRINGARRAY_VALUE);
+                    lf.fieldWordWriteVariant.setTokenStream(EMPTY_STRINGARRAY_VALUE);
+                    lf.fieldTagsWriteVariant.setTokenStream(EMPTY_STRINGARRAY_VALUE);
 
-                    lf.fieldSentenceTextAuthor.setTokenStream(EMPTY_STRINGARRAY_VALUE);
-                    lf.fieldSentenceTextSource.setStringValue("");
-                    setYearsRange(null, lf.fieldSentenceTextCreationYear);
-                    setYearsRange(null, lf.fieldSentenceTextPublishedYear);
+                    lf.fieldTextAuthor.setTokenStream(EMPTY_STRINGARRAY_VALUE);
+                    lf.fieldTextSource.setStringValue("");
+                    setYearsRange(null, lf.fieldTextCreationYear);
+                    setYearsRange(null, lf.fieldTextPublishedYear);
                 }
 
                 LuceneParagraph p = text.paragraphs[i];
-                fields.fieldSentenceTextSubcorpus.setStringValue(text.textInfo.subcorpus);
-                fields.fieldSentenceTextStyleGenre.setTokenStream(new StringArrayTokenStream(text.textInfo.styleGenres));
+                fields.fieldTextSubcorpus.setStringValue(text.textInfo.subcorpus);
+                fields.fieldTextStyleGenre.setTokenStream(new StringArrayTokenStream(text.textInfo.styleGenres));
 
                 for (Map.Entry<String, MessageLuceneWrite.LuceneParagraphLang> en : p.byLang.entrySet()) {
                     String langCreationTime = "";
@@ -155,13 +154,12 @@ public class ProcessLuceneWriter extends BaseParallelProcessor<MessageLuceneWrit
                     }
 
                     LuceneFields.LuceneFieldsLang fl = fields.byLang.get(en.getKey());
-                    fl.fieldSentenceValues.setTokenStream(new StringArrayTokenStream(en.getValue().values));
-                    fl.fieldSentenceDBGrammarTags.setTokenStream(new StringArrayTokenStream(en.getValue().dbGrammarTags));
-                    // fl.fieldSentenceLemmas.setTokenStream(new StringArrayTokenStream(en.getValue().lemmas));
-                    fl.fieldSentenceTextAuthor.setTokenStream(new StringArrayTokenStream(langAuthors.toArray(EMPTY_STRINGARRAY)));
-                    fl.fieldSentenceTextSource.setTokenStream(new StringArrayTokenStream(langSources.toArray(EMPTY_STRINGARRAY)));
-                    setYearsRange(langCreationTime, fl.fieldSentenceTextCreationYear);
-                    setYearsRange(langPublicationTime, fl.fieldSentenceTextPublishedYear);
+                    fl.fieldWordWriteVariant.setTokenStream(new StringArrayTokenStream(en.getValue().values));
+                    fl.fieldTagsWriteVariant.setTokenStream(new StringArrayTokenStream(en.getValue().dbGrammarTags));
+                    fl.fieldTextAuthor.setTokenStream(new StringArrayTokenStream(langAuthors.toArray(EMPTY_STRINGARRAY)));
+                    fl.fieldTextSource.setTokenStream(new StringArrayTokenStream(langSources.toArray(EMPTY_STRINGARRAY)));
+                    setYearsRange(langCreationTime, fl.fieldTextCreationYear);
+                    setYearsRange(langPublicationTime, fl.fieldTextPublishedYear);
                 }
                 fields.fieldSentencePBinary.setBytesValue(p.xml);
 
@@ -202,19 +200,17 @@ public class ProcessLuceneWriter extends BaseParallelProcessor<MessageLuceneWrit
             LuceneFields fields = c.fields.get(c.documents.size());
             Document docSentence = new Document();
             for (LuceneFields.LuceneFieldsLang lf : fields.byLang.values()) {
-                docSentence.add(lf.fieldSentenceValues);
-                docSentence.add(lf.fieldSentenceDBGrammarTags);
-                // docSentence.add(lf.fieldSentenceLemmas);
-                docSentence.add(lf.fieldSentenceTextAuthor);
-                docSentence.add(lf.fieldSentenceTextSource);
-                docSentence.add(lf.fieldSentenceTextCreationYear);
-                docSentence.add(lf.fieldSentenceTextPublishedYear);
+                docSentence.add(lf.fieldWordWriteVariant);
+                docSentence.add(lf.fieldTagsWriteVariant);
+                docSentence.add(lf.fieldTextAuthor);
+                docSentence.add(lf.fieldTextSource);
+                docSentence.add(lf.fieldTextCreationYear);
+                docSentence.add(lf.fieldTextPublishedYear);
             }
             docSentence.add(fields.fieldSentencePBinary);
 
-            docSentence.add(fields.fieldSentenceTextSubcorpus);
-            // docSentence.add(fieldSentenceTextIDOrder);
-            docSentence.add(fields.fieldSentenceTextStyleGenre);
+            docSentence.add(fields.fieldTextSubcorpus);
+            docSentence.add(fields.fieldTextStyleGenre);
 
             docSentence.add(fields.fieldTextID);
             c.documents.add(docSentence);

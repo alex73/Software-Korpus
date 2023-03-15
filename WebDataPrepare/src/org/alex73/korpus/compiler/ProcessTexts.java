@@ -46,7 +46,7 @@ public class ProcessTexts extends BaseParallelProcessor<MessageParsedText> {
                 for (int i = 0; i < text.textInfo.subtexts.length; i++) {
                     text.paragraphs[v][i].lang = text.textInfo.subtexts[i].lang;
                 }
-                grFiller.fill(Arrays.asList(text.paragraphs[v]));
+                grFiller.fill(text.paragraphs[v], true);
             }
             stat.accept(text);
             for (int i = 0; i < text.paragraphs[0].length; i += 500) {

@@ -40,7 +40,6 @@ public class ProcessPrepareLucene extends BaseParallelProcessor<MessageParsedTex
 
             Set<String> values = new HashSet<>();
             Set<String> dbGrammarTags = new HashSet<>();
-            Set<String> lemmas = new HashSet<>();
 
             MessageLuceneWrite out = new MessageLuceneWrite();
             out.textInfo = text.textInfo;
@@ -52,7 +51,6 @@ public class ProcessPrepareLucene extends BaseParallelProcessor<MessageParsedTex
                     ILanguage lang = LanguageFactory.get(langs[l]);
                     values.clear();
                     dbGrammarTags.clear();
-                    lemmas.clear();
                     for (int j = 0; j < text.paragraphs[i].length; j++) {
                         if (!langs[l].equals(text.textInfo.subtexts[j].lang)) {
                             continue; // other language
@@ -60,16 +58,11 @@ public class ProcessPrepareLucene extends BaseParallelProcessor<MessageParsedTex
                         Paragraph p = text.paragraphs[i][j];
                         for (Sentence se : p.sentences) {
                             for (Word w : se.words) {
-                                String wc = lang.getNormalizer().superNormalized(w.normalized);
+                                String wc = w.wordSuperNormalized;
                                 values.add(wc);
-                                if (w.tags != null && !w.tags.isEmpty()) {
-                                    for (String t : w.tags.split(";")) {
+                                if (w.tagsVariants != null) {
+                                    for (String t : w.tagsVariants.split(";")) {
                                         dbGrammarTags.add(lang.getDbTags().getDBTagString(t));
-                                    }
-                                }
-                                if (w.lemmas != null && !w.lemmas.isEmpty()) {
-                                    for (String t : w.lemmas.split(";")) {
-                                        lemmas.add(t);
                                     }
                                 }
                             }
@@ -78,8 +71,6 @@ public class ProcessPrepareLucene extends BaseParallelProcessor<MessageParsedTex
 
                     MessageLuceneWrite.LuceneParagraphLang pol = new MessageLuceneWrite.LuceneParagraphLang();
                     pol.values = values.toArray(STRING_ARRAY);
-                    // pol.lemmas = lemmas.toArray(STRING_ARRAY);
-                    pol.dbGrammarTags = dbGrammarTags.toArray(STRING_ARRAY);
                     pol.dbGrammarTags = dbGrammarTags.toArray(STRING_ARRAY);
                     po.byLang.put(langs[l], pol);
                 }

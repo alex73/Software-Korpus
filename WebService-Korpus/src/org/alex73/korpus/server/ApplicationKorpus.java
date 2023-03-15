@@ -26,6 +26,7 @@ import javax.ws.rs.core.Application;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.GrammarDB2;
 import org.alex73.korpus.base.GrammarFinder;
+import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.languages.DBTagsFactory.KeyValue;
 import org.alex73.korpus.languages.ILanguage;
@@ -52,6 +53,7 @@ public class ApplicationKorpus extends Application {
     private List<String> textInfos;
     public GrammarDB2 gr;
     public GrammarFinder grFinder;
+    public StaticGrammarFiller2 grFiller;
     public GrammarInitial grammarInitial;
     InitialData searchInitial;
     public Map<String, Set<String>> authorsByLemmas;
@@ -97,6 +99,7 @@ public class ApplicationKorpus extends Application {
             }
             System.out.println("GrammarDB loaded with " + gr.getAllParadigms().size() + " paradigms. Used memory: " + getUsedMemory());
             grFinder = new GrammarFinder(gr);
+            grFiller = new StaticGrammarFiller2(grFinder);
             System.out.println("GrammarDB indexed. Used memory: " + getUsedMemory());
             processKorpus = new LuceneFilter(korpusCache, languages);
             System.out.println("Lucene initialized for languages: " + Arrays.toString(languages));

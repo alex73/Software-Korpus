@@ -1,24 +1,3 @@
-/**************************************************************************
- Korpus - Corpus Linguistics Software.
-
- Copyright (C) 2013 Aleś Bułojčyk (alex73mail@gmail.com)
-
- This file is part of Korpus.
-
- Korpus is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
-
- Korpus is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
- **************************************************************************/
-
 package org.alex73.korpus.server;
 
 import java.text.Collator;
@@ -147,17 +126,19 @@ public class GrammarServiceImpl {
                 result.error = "Увядзіце слова для пошуку альбо удакладніце граматыку";
                 return result;
             }
-            Pattern reGrammar = null, reOutputGrammar = null;
+            WordsDetailsChecks check = new WordsDetailsChecks();
+
+            ThreadLocal<Pattern> reGrammar = null, reOutputGrammar = null;
             if (rq.grammar != null && !rq.grammar.isEmpty()) {
-                reGrammar = WordsDetailsChecks.getPatternRegexp(rq.grammar);
+                reGrammar = check.createPatternRegexp(rq.grammar);
             }
             if (rq.outputGrammar != null && !rq.outputGrammar.isEmpty()) {
-                reOutputGrammar = WordsDetailsChecks.getPatternRegexp(rq.outputGrammar);
+                reOutputGrammar = check.createPatternRegexp(rq.outputGrammar);
             }
             Stream<LemmaInfo> output;
             if (rq.word == null || WordsDetailsChecks.needWildcardRegexp(rq.word)) {
-                output = StreamSupport.stream(new SearchWidlcards(lang, rq.word, reGrammar, rq.multiForm, rq.fullDatabase, reOutputGrammar),
-                        false);
+                output = StreamSupport.stream(
+                        new SearchWidlcards(lang, check.createWildcardRegexp(rq.word), reGrammar, rq.multiForm, rq.fullDatabase, reOutputGrammar), false);
             } else {
                 output = searchExact(lang, rq.word, reGrammar, rq.multiForm, rq.fullDatabase, reOutputGrammar);
             }
@@ -239,20 +220,20 @@ public class GrammarServiceImpl {
 
     class SearchWidlcards extends Spliterators.AbstractSpliterator<LemmaInfo> {
         private final ILanguage lang;
-        private final Pattern re;
-        private final Pattern reGrammar;
+        private final ThreadLocal<Pattern> re;
+        private final ThreadLocal<Pattern> reGrammar;
         private final boolean multiform;
         private final boolean fullDatabase;
-        private final Pattern reOutputGrammar;
+        private final ThreadLocal<Pattern> reOutputGrammar;
         private final LinkedList<LemmaInfo> buffer = new LinkedList<>();
         private final List<Paradigm> data;
         private int dataPos;
 
-        public SearchWidlcards(ILanguage lang, String word, Pattern reGrammar, boolean multiform, boolean fullDatabase,
-                Pattern reOutputGrammar) {
+        public SearchWidlcards(ILanguage lang, ThreadLocal<Pattern> reWord, ThreadLocal<Pattern> reGrammar, boolean multiform, boolean fullDatabase,
+                ThreadLocal<Pattern> reOutputGrammar) {
             super(Long.MAX_VALUE, 0);
             this.lang = lang;
-            this.re = word == null ? null : WordsDetailsChecks.getWildcardRegexp(word.trim());
+            this.re = reWord;
             this.reGrammar = reGrammar;
             this.multiform = multiform;
             this.fullDatabase = fullDatabase;
@@ -265,8 +246,8 @@ public class GrammarServiceImpl {
             while (dataPos < data.size() && buffer.isEmpty()) {
                 Paradigm p = data.get(dataPos);
                 dataPos++;
-                createLemmaInfoFromParadigm(lang, p, s -> re == null || re.matcher(StressUtils.unstress(s)).matches(), multiform, fullDatabase,
-                        reOutputGrammar, reGrammar, buffer);
+                createLemmaInfoFromParadigm(lang, p, s -> re == null || re.get().matcher(lang.getNormalizer().lightNormalized(s)).matches(), multiform,
+                        fullDatabase, reOutputGrammar, reGrammar, buffer);
             }
             if (buffer.isEmpty()) {
                 return false;
@@ -276,20 +257,20 @@ public class GrammarServiceImpl {
         }
     }
 
-    private Stream<LemmaInfo> searchExact(ILanguage lang, String word, Pattern reGrammar, boolean multiform,
-            boolean fullDatabase, Pattern reOutputGrammar) {
+    private Stream<LemmaInfo> searchExact(ILanguage lang, String word, ThreadLocal<Pattern> reGrammar, boolean multiform, boolean fullDatabase,
+            ThreadLocal<Pattern> reOutputGrammar) {
         String normWord = wordNormalizer.lightNormalized(word.trim());
         Paradigm[] data = getApp().grFinder.getParadigms(normWord);
         List<LemmaInfo> result = new ArrayList<>();
         for (Paradigm p : data) {
-            createLemmaInfoFromParadigm(lang, p, s -> wordNormalizer.equals(normWord, s), multiform, fullDatabase, reOutputGrammar,
-                    reGrammar, result);
+            createLemmaInfoFromParadigm(lang, p, s -> normWord.equals(wordNormalizer.lightNormalized(s)), multiform, fullDatabase, reOutputGrammar, reGrammar,
+                    result);
         }
         return result.stream();
     }
 
-    private void createLemmaInfoFromParadigm(ILanguage lang, Paradigm p, Predicate<String> checkWord, boolean multiform,
-            boolean fullDatabase, Pattern reOutputGrammar, Pattern reGrammar, List<LemmaInfo> result) {
+    private void createLemmaInfoFromParadigm(ILanguage lang, Paradigm p, Predicate<String> checkWord, boolean multiform, boolean fullDatabase,
+            ThreadLocal<Pattern> reOutputGrammar, ThreadLocal<Pattern> reGrammar, List<LemmaInfo> result) {
         Set<String> found = new TreeSet<>();
         for (Variant v : p.getVariant()) {
             List<Form> forms = fullDatabase ? v.getForm() : FormsReadyFilter.getAcceptedForms(FormsReadyFilter.MODE.SHOW, p, v);
@@ -299,7 +280,7 @@ public class GrammarServiceImpl {
             if (multiform) {
                 for (Form f : forms) {
                     if (checkWord.test(f.getValue())) {
-                        if (reGrammar != null && !reGrammar.matcher(lang.getDbTags().getDBTagString(SetUtils.tag(p, v, f))).matches()) {
+                        if (reGrammar != null && !reGrammar.get().matcher(lang.getDbTags().getDBTagString(SetUtils.tag(p, v, f))).matches()) {
                             continue;
                         }
                         found.add(f.getValue());
@@ -310,7 +291,7 @@ public class GrammarServiceImpl {
                     if (reGrammar != null) {
                         boolean tagFound = false;
                         for (Form f : forms) {
-                            if (reGrammar.matcher(lang.getDbTags().getDBTagString(SetUtils.tag(p, v, f))).matches()) {
+                            if (reGrammar.get().matcher(lang.getDbTags().getDBTagString(SetUtils.tag(p, v, f))).matches()) {
                                 tagFound = true;
                                 break;
                             }
@@ -328,13 +309,12 @@ public class GrammarServiceImpl {
         }
     }
 
-    private void createLemmaInfo(ILanguage lang, Paradigm p, Variant v, String output, Pattern reOutputGrammar,
-            List<LemmaInfo> result) {
+    private void createLemmaInfo(ILanguage lang, Paradigm p, Variant v, String output, ThreadLocal<Pattern> reOutputGrammar, List<LemmaInfo> result) {
         String tag = SetUtils.tag(p, v);
         if (reOutputGrammar != null) {
             Set<String> found = new TreeSet<>();
             for (Form f : v.getForm()) {
-                if (reOutputGrammar.matcher(lang.getDbTags().getDBTagString(SetUtils.tag(p, v, f))).matches()) {
+                if (reOutputGrammar.get().matcher(lang.getDbTags().getDBTagString(SetUtils.tag(p, v, f))).matches()) {
                     found.add(f.getValue());
                 }
             }
@@ -401,7 +381,7 @@ public class GrammarServiceImpl {
             for (Paradigm p : getApp().grFinder.getParadigms(form)) {
                 for (Variant v : p.getVariant()) {
                     for (Form f : v.getForm()) {
-                        if (wordNormalizer.equals(f.getValue(), form)) {
+                        if (wordNormalizer.lightNormalized(f.getValue()).equals(form)) {
                             result.add(p.getLemma());
                             break;
                         }

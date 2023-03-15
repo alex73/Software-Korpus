@@ -51,7 +51,7 @@ public class TestSplitter3 {
 
     private void nextW(String word, String tail) {
         Word d = p.sentences[se].words[w];
-        assertEquals(word, d.normalized);
+        assertEquals(word, d.word);
         assertEquals(tail, d.tail);
         w++;
     }

@@ -1,8 +1,8 @@
 package org.alex73.korpus.base;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
@@ -12,7 +12,6 @@ import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.text.structure.corpus.Paragraph;
 import org.alex73.korpus.text.structure.corpus.Sentence;
 import org.alex73.korpus.text.structure.corpus.Word;
-import org.alex73.korpus.text.structure.files.WordItem;
 import org.alex73.korpus.utils.SetUtils;
 
 public class StaticGrammarFiller2 {
@@ -28,66 +27,52 @@ public class StaticGrammarFiller2 {
         this.finder = finder;
     }
 
-    public void fill(List<Paragraph> content) {
-        content.stream().forEach(p -> {
+    public GrammarFinder getFinder() {
+        return finder;
+    }
+
+    public void fill(Paragraph[] content, boolean fillTags) {
+        for (Paragraph p : content) {
             if (!"bel".equals(p.lang)) {
                 return;
             }
             for (Sentence se : p.sentences) {
                 for (Word w : se.words) {
-                    fill(w);
+                    fill(w, fillTags);
                 }
             }
-        });
-    }
-
-    private void fill(Word w) {
-        WordInfo wi;
-        if (w.lemmas == null && w.tags == null) {
-            wi = cache.get(w.normalized);
-            if (wi == null) {
-                wi = calculateWordInfo(w.normalized, null, null);
-                cache.put(w.normalized, wi);
-            }
-        } else {
-            wi = calculateWordInfo(w.normalized, w.lemmas, w.tags);
         }
-        w.lemmas = wi.lemmas;
-        w.tags = wi.tags;
     }
 
-    public void fill(WordItem w) {
-        WordInfo wi;
-        String expected = w.manualNormalized != null ? w.manualNormalized : w.lightNormalized;
-        if (w.manualLemma == null && w.manualTag == null) {
-            wi = cache.get(expected);
-            if (wi == null) {
-                wi = calculateWordInfo(expected, null, null);
-                cache.put(expected, wi);
-            }
-        } else {
-            wi = calculateWordInfo(expected, w.manualLemma, w.manualTag);
+    public void fill(Word w, boolean fillTags) {
+        if (w.type != null) {
+            return;
         }
-        w.lemmas = wi.lemmas;
-        w.tags = wi.tags;
-        w.variantIds = wi.variantIds;
+        WordInfo wi;
+        w.wordZnakNormalized = wordNormalizer.znakNormalized(w.word);
+        w.wordNormalized = wordNormalizer.lightNormalized(w.word);
+        w.wordSuperNormalized = wordNormalizer.superNormalized(w.word);
+        if (fillTags) {
+            wi = cache.computeIfAbsent(w.wordNormalized, wn -> createCacheEntry(w));
+            w.tagsNormalized = wi.tagsNormalized;
+            w.tagsVariants = wi.tagsWriteVariant;
+        }
     }
 
-    private WordInfo calculateWordInfo(String word, String manualLemma, String manualTag) {
-        StringBuilder lemmas = new StringBuilder();
-        StringBuilder dbTags = new StringBuilder();
-        StringBuilder variantIds = new StringBuilder();
-        for (Paradigm p : finder.getParadigms(word)) {
-            fillTagLemmas(word, manualLemma, manualTag, lemmas, variantIds, dbTags, p);
+    private WordInfo createCacheEntry(Word w) {
+        StringBuilder dbTagsNormalized = new StringBuilder();
+        StringBuilder dbTagsWriteVariant = new StringBuilder();
+        for (Paradigm p : finder.getParadigms(w.wordSuperNormalized)) {
+            fillTagLemmas(w.wordNormalized, dbTagsNormalized, p, wo -> wordNormalizer.lightNormalized(wo));
+            fillTagLemmas(w.wordSuperNormalized, dbTagsWriteVariant, p, wo -> wordNormalizer.superNormalized(wo));
         }
         WordInfo result = new WordInfo();
-        result.tags = dbTags.length() > 0 ? dbTags.toString().intern() : null;
-        result.lemmas = lemmas.length() > 0 ? lemmas.toString().intern() : null;
-        result.variantIds = variantIds.length() > 0 ? variantIds.toString().intern() : null;
+        result.tagsNormalized = dbTagsNormalized.length() > 0 ? dbTagsNormalized.toString().intern() : null;
+        result.tagsWriteVariant = dbTagsWriteVariant.length() > 0 ? dbTagsWriteVariant.toString().intern() : null;
         return result;
     }
 
-    public static void fillTagLemmas(String word, String manualLemma, String manualTag, StringBuilder lemmas, StringBuilder variantIds, StringBuilder dbTags, Paradigm p) {
+    public static void fillTagLemmas(String expectedWord, StringBuilder outputTags, Paradigm p, Function<String, String> normalize) {
         if (fillTheme != null) {
             if (!fillTheme.equals(p.getTheme())) {
                 return;
@@ -104,22 +89,14 @@ public class StaticGrammarFiller2 {
                 if (f.getValue().isEmpty()) {
                     continue;
                 }
-                if (manualLemma != null && !p.getLemma().equals(manualLemma)) {
-                    continue;
-                }
-                if (wordNormalizer.equals(f.getValue(), word)) {
+                if (expectedWord.equals(normalize.apply(f.getValue()))) {
                     String fTag = SetUtils.tag(p, v, f);
                     if (fillTagPrefix != null) {
                         if (!fTag.startsWith(fillTagPrefix)) {
                             continue;
                         }
                     }
-                    if (manualTag != null && !manualTag.equals(fTag)) {
-                        continue;
-                    }
-                    add(lemmas, p.getLemma());
-                    add(dbTags, fTag);
-                    add(variantIds, p.getPdgId() + v.getId());
+                    add(outputTags, fTag);
                 }
             }
         }
@@ -135,6 +112,6 @@ public class StaticGrammarFiller2 {
     }
 
     static class WordInfo {
-        String tags, lemmas, variantIds;
+        String tagsNormalized, tagsWriteVariant;
     }
 }
