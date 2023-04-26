@@ -42,7 +42,7 @@ public class PtextFileWriter {
                 for (ITextLineElement it : line) {
                     if (it instanceof WordItem) {
                         WordItem wi = (WordItem) it;
-                        write(wr, START_WORD, Splitter3.encodeString(wi.lightNormalized));
+                        write(wr, START_WORD, Splitter3.encodeString(wi.word));
                         if (wi.manualNormalized != null) {
                             write(wr, START_WORD_NORMALIZED, Splitter3.encodeString(wi.manualNormalized));
                         }

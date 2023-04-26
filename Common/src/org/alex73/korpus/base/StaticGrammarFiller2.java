@@ -45,13 +45,13 @@ public class StaticGrammarFiller2 {
     }
 
     public void fill(Word w, boolean fillTags) {
-        if (w.type != null) {
+        if (w.type != null || w.word == null) {
             return;
         }
         WordInfo wi;
-        w.wordZnakNormalized = wordNormalizer.znakNormalized(w.word);
-        w.wordNormalized = wordNormalizer.lightNormalized(w.word);
-        w.wordSuperNormalized = wordNormalizer.superNormalized(w.word);
+        w.wordZnakNormalized = wordNormalizer.znakNormalized(w.word, ILanguage.INormalizer.PRESERVE_NONE);
+        w.wordNormalized = wordNormalizer.lightNormalized(w.word, ILanguage.INormalizer.PRESERVE_NONE);
+        w.wordSuperNormalized = wordNormalizer.superNormalized(w.word, ILanguage.INormalizer.PRESERVE_NONE);
         if (fillTags) {
             wi = cache.computeIfAbsent(w.wordNormalized, wn -> createCacheEntry(w));
             w.tagsNormalized = wi.tagsNormalized;
@@ -63,8 +63,8 @@ public class StaticGrammarFiller2 {
         StringBuilder dbTagsNormalized = new StringBuilder();
         StringBuilder dbTagsWriteVariant = new StringBuilder();
         for (Paradigm p : finder.getParadigms(w.wordSuperNormalized)) {
-            fillTagLemmas(w.wordNormalized, dbTagsNormalized, p, wo -> wordNormalizer.lightNormalized(wo));
-            fillTagLemmas(w.wordSuperNormalized, dbTagsWriteVariant, p, wo -> wordNormalizer.superNormalized(wo));
+            fillTagLemmas(w.wordNormalized, dbTagsNormalized, p, wo -> wordNormalizer.lightNormalized(wo, ILanguage.INormalizer.PRESERVE_NONE));
+            fillTagLemmas(w.wordSuperNormalized, dbTagsWriteVariant, p, wo -> wordNormalizer.superNormalized(wo, ILanguage.INormalizer.PRESERVE_NONE));
         }
         WordInfo result = new WordInfo();
         result.tagsNormalized = dbTagsNormalized.length() > 0 ? dbTagsNormalized.toString().intern() : null;

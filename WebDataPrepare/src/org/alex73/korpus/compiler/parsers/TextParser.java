@@ -22,7 +22,7 @@ public class TextParser extends BaseParser {
     public void parse(Consumer<MessageParsedText> publisher, boolean headersOnly) throws Exception {
         byte[] data = Files.readAllBytes(file);
         MessageParsedText text = new MessageParsedText(1);
-        TextFileParser doc = new TextFileParser(new ByteArrayInputStream(data), headersOnly);
+        TextFileParser.OneText doc = new TextFileParser(new ByteArrayInputStream(data), headersOnly).oneTextExpected();
         text.textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString();
         text.textInfo.subcorpus = subcorpus;
         text.textInfo.subtexts[0].title = doc.headers.get("Title");

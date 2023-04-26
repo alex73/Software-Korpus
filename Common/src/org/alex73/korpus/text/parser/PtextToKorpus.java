@@ -73,7 +73,7 @@ public class PtextToKorpus {
                 } else if (w instanceof WordItem) {
                     WordItem wi = (WordItem) w;
                     Word wo = new Word();
-                    wo.word = wi.lightNormalized;
+                    wo.word = wi.word;
                     wo.tail = "";
                     words.add(wo);
                 } else if (w instanceof TailItem) {
@@ -100,20 +100,11 @@ public class PtextToKorpus {
     }
 
     private void addInlinePageNumber() {
-        if (!words.isEmpty()) {
-            Word prev = words.get(words.size() - 1);
-            if (prev.tail == null) {
-                prev.tail = "{" + inlinePage + "}";
-            } else {
-                prev.tail += "{" + inlinePage + "}";
-            }
-        } else {
-            Word wo = new Word();
-            wo.word = null;
-            wo.tail = "{" + inlinePage + "}";
-            wo.type = Word.OtherType.PAZNAKA;
-            words.add(wo);
-        }
+        Word wo = new Word();
+        wo.word = null;
+        wo.tail = "{" + inlinePage + "}";
+        wo.type = Word.OtherType.PAZNAKA;
+        words.add(wo);
     }
 
     public static Paragraph oneLine(TextLine line) {

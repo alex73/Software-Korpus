@@ -32,11 +32,21 @@ public class BinaryParagraphReader {
                     Word w = new Word();
                     w.word = readString();
                     w.tail = readString();
+                    w.type = readWordOtherType();
                     p.sentences[i].words[j] = w;
                 }
             }
         }
         return ps;
+    }
+
+    private Word.OtherType readWordOtherType() throws IOException {
+        byte v = in.readByte();
+        if (v == 0) {
+            return null;
+        } else {
+            return Word.OtherType.values()[v - 1];
+        }
     }
 
     private String readString() throws IOException {

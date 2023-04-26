@@ -29,8 +29,8 @@ public class Splitter3 {
         this.errors = errors;
     }
 
-    public TextLine parse(CharSequence para) {
-        this.para = para;
+    public TextLine parse(CharSequence input) {
+        para = input.toString().trim();
         result = new TextLine();
         currentWord.setLength(0);
         currentTail.setLength(0);
@@ -78,7 +78,7 @@ public class Splitter3 {
                     }
                     continue;
                 }
-                if (wordNormalizer.isLetter(currentChar)) {
+                if (wordNormalizer.isLetter(currentChar) || currentChar == '[' || currentChar == ']') {
                     if (currentTail.length() > 0) {
                         closeWord();
                     }
@@ -113,7 +113,7 @@ public class Splitter3 {
     private void closeWord() {
         if (currentWord.length() > 0) {
             WordItem w = new WordItem();
-            w.lightNormalized = wordNormalizer.lightNormalized(currentWord);
+            w.word = wordNormalizer.znakNormalized(currentWord, ILanguage.INormalizer.PRESERVE_NONE);
             result.add(w);
         }
         if (currentTail.length() > 0) {

@@ -64,7 +64,8 @@ public class KankardansParser extends BaseParser {
     private void flushText(Consumer<MessageParsedText> publisher, boolean headersOnly) {
         if (!text.isEmpty()) {
             MessageParsedText ti = new MessageParsedText(1);
-            TextFileParser doc = new TextFileParser(new ByteArrayInputStream(text.toString().getBytes(StandardCharsets.UTF_8)), headersOnly);
+            TextFileParser.OneText doc = new TextFileParser(new ByteArrayInputStream(text.toString().getBytes(StandardCharsets.UTF_8)), headersOnly)
+                    .oneTextExpected();
             ti.textInfo.subcorpus = subcorpus;
             ti.textInfo.textOrder = ++textOrder;
             ti.textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + textTitle;

@@ -53,9 +53,9 @@ public class WordRequest implements Serializable {
          */
         ALL_FORMS,
         /**
-         * Дакладны пошук: "слова"(з '*' і '?').
+         * Дакладны пошук: "слова"(з '*' і '?'), альбо "regexp".
          * 
-         * Мусяць працаваць '?'(1), '*'(0:).
+         * Мусяць працаваць '?'(1), '*'(0:). Але, калі пазначаны "рэгулярныя выразы", слова разглядаецца як regexp.
          * 
          * Нармалізацыя ўведзенага: znakNormalization - апострафы, злучкі, націскі
          * адкідаем.
@@ -74,6 +74,7 @@ public class WordRequest implements Serializable {
     public WordMode mode;
     public boolean variants;
     public String word;
+    public boolean regexp;
     public String grammar;
     public transient String[] forms; // спіс формаў з граматычнай базы калі шукаем ALL_FORMS
 

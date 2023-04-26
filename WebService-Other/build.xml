@@ -28,4 +28,23 @@
 
 	<target name="all" depends="clean,war"/>
 
+	<target name="fanetyka">
+		<delete dir="build/classes-fanetyka" failonerror="false" />
+		<mkdir dir="build/classes-fanetyka" />
+		<javac srcdir="src/org/alex73/fanetyka/impl:../Common/src" includes="**" encoding="utf-8" destdir="build/classes-fanetyka">
+			<classpath>
+				<fileset dir="war/WEB-INF/lib/" includes="*.jar"/>
+			</classpath>
+		</javac>
+		<copy todir="build/classes-fanetyka">
+			<fileset dir="src/org/alex73/fanetyka/impl" />
+			<fileset dir="../Common/src" />
+		</copy>
+		<jar destfile="build/fanetyka.jar" basedir="build/classes-fanetyka/">
+			<manifest>
+				<attribute name="Main-Class" value="org.alex73.fanetyka.impl.FanetykaText"/>
+			</manifest>
+		</jar>
+	</target>
+
 </project>

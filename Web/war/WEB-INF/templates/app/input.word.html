@@ -1,45 +1,57 @@
 <div class="inputword" style="display: none" id="template-inputword">
     <div class="card word-select">
         <span class="d-none wordgram-grammar-string"></span>
-        <span class="d-none word-store-mode">USUAL</span>
+        <span class="d-none word-store-mode">ALL_FORMS</span>
         <div class="card-body">
             <div class="float-right ml-3">
                 <button type="button" class="close" aria-label="Close" onClick="korpusui.removeWord(this); return false;">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="float-right ml-1">
-                <sup><span class="badge badge-warning" data-toggle="tooltip" data-placement="bottom" title="aaaaaaaaaaaaaa aaa">?</span></sup>
+            <div class="float-right ml-1"> <!--co=2 style='text-align: left; max-width: 0'-->
+                <sup><span class="badge badge-warning" data-toggle="tooltip" data-placement="bottom" data-html="true" title="
+                          <i>Звычайны пошук</i> - пошук слова без адрознення вялікай/малой літары, ґ/г, ў/у, й/і.<br>
+                          <i>Усе словаформы</i> - пошук па леме(пачатковай форме). Формы слова шукаюцца толькі ў гэтым рэжыме.<br>
+                          <i>Дакладны пошук</i> - пошук паводле дакладнага напісання (зважаем на вялікія/малыя літары, ґ/г, ў/у, й/і).<br>
+                          <i>Толькі граматыка</i> - пошук па граматычных характарыстыках.
+                        ">?</span></sup>
             </div>
             <div class="form-row word-select-dropdown">
                 <div class="dropdown form-group w-100">
-                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle w-100" type="button" data-toggle="dropdown" aria-expanded="false"
-                        title="bbbbbbb">Звычайны пошук</button>
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle w-100" type="button" data-toggle="dropdown" 
+                        aria-expanded="false">Усе словаформы</button>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item" onClick="korpusui.setWordMode(this, WordMode.USUAL)">Звычайны пошук</a> 
                         <a class="dropdown-item" onClick="korpusui.setWordMode(this, WordMode.ALL_FORMS)">Усе словаформы</a> 
+                        <a class="dropdown-item" onClick="korpusui.setWordMode(this, WordMode.USUAL)">Звычайны пошук</a> 
                         <a class="dropdown-item" onClick="korpusui.setWordMode(this, WordMode.EXACT)">Дакладны пошук</a>
+                        <a class="dropdown-item" onClick="korpusui.setWordMode(this, WordMode.GRAMMAR)">Толькі граматыка</a>
                     </div>
                 </div>
             </div>
             <div class="form-row <#if !allow_grammardb>d-none</#if> word-select-variants">
                 <div class="form-group w-100">
                     <label class="w-100 mb-0">З варыянтамі напісання 
-                    <sup><span class="badge badge-warning" data-toggle="tooltip" data-placement="bottom" title="aaaaaaaaaaaaaa aaa">?</span></sup>
-                    <input class="ml-2" type="checkbox" name="allForms" onChange="KorpusUI.lemmaChange('inputword', this)"></label>
+                    <sup><span class="badge badge-warning" data-toggle="tooltip" data-placement="bottom" title="Пошук з улікам мяккасці/цвёрдасці: сьнег/снег, план/плян">?</span></sup>
+                    <input class="ml-2" type="checkbox" name="variants"></label>
                 </div>
             </div>
-            <div class="form-row">
+            <div class="form-row word-select-word">
                 <div class="form-inline form-group w-100">
                     <label class="w-100">${messages.korpus_word_word} 
-                    <sup><span class="badge badge-warning" data-toggle="tooltip" data-placement="bottom" title="aaaaaaaaaaaaaa aaa">?</span></sup>
                     <input type="text" placeholder="можна з '*' і '?'" class="form-control ml-2 w-100 word-select-wordprompt" size="10" name="wordText"></label>
+                </div>
+            </div>
+            <div class="form-row word-select-regexp">
+                <div class="form-group w-100">
+                    <label class="w-100 mb-0">Рэгулярныя выразы 
+                    <sup><span class="badge badge-warning" data-toggle="tooltip" data-placement="bottom" title="Падрабязней пра рэгуярныя выразы">?</span></sup>
+                    <input class="ml-2" type="checkbox" name="regexp"></label>
                 </div>
             </div>
             <div class="form-row <#if !allow_grammardb>d-none</#if> word-select-grammar">
                 <div class="form-inline form-group w-100 mb-0">
                     <label class="w-100">${messages.korpus_word_grammar} 
-                        <sup><span class="badge badge-warning" data-toggle="tooltip" data-placement="bottom" title="aaaaaaaaaaaaaa aaa">?</span></sup>
+                        <sup><span class="badge badge-warning" data-toggle="tooltip" data-placement="bottom" title="Граматычная характарыстыка слова">?</span></sup>
                         <a href="#" class="form-control wordgram-display ml-2 w-100" 
                         onClick="dialogWordGrammar = DialogWordGrammar.createParadigmTagsDialog(this, true); return false;">---</a>
                     </label>

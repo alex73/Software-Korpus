@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="src" path="src-common"/>
 	<classpathentry kind="src" path="src-utils"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/Korpus-Common"/>
@@ -45,5 +46,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/reflectasm-1.10.1-shaded.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/txw2-2.3.5.jar"/>
 	<classpathentry kind="lib" path="lib-compile/jakarta.servlet-api-4.0.4.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

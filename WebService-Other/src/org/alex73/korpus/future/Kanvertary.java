@@ -67,7 +67,7 @@ public class Kanvertary {
         StringBuilder out = new StringBuilder();
         for (ITextLineElement el : line) {
             if (el instanceof WordItem w) {
-                String word = StressUtils.unstress(w.lightNormalized);
+                String word = StressUtils.unstress(w.word);
                 out.append(wordAccent(word));
             } else if (el instanceof SentenceSeparatorItem) {
             } else {
@@ -82,7 +82,7 @@ public class Kanvertary {
         if (StressUtils.syllCount(word) < 2) {
             return word;
         }
-        String wNormalized = NORMALIZER.lightNormalized(word);
+        String wNormalized = NORMALIZER.lightNormalized(word, ILanguage.INormalizer.PRESERVE_NONE);
         Set<Integer> stresses = new TreeSet<>();
         for (Paradigm p : ApplicationOther.instance.grFinder.getParadigms(word)) {
             for (Variant v : p.getVariant()) {
@@ -90,7 +90,7 @@ public class Kanvertary {
                     if (f.getValue().isEmpty()) {
                         continue;
                     }
-                    if (NORMALIZER.lightNormalized(f.getValue()).equals(wNormalized)) {
+                    if (NORMALIZER.lightNormalized(f.getValue(), ILanguage.INormalizer.PRESERVE_NONE).equals(wNormalized)) {
                         stresses.addAll(StressUtils.getAllStressesFromEnd(f.getValue()));
                     }
                 }

@@ -1,7 +1,8 @@
 enum WordMode {
 	USUAL = 'USUAL',
 	ALL_FORMS = 'ALL_FORMS',
-	EXACT = 'EXACT'
+	EXACT = 'EXACT',
+	GRAMMAR = 'GRAMMAR'
 };
 
 class ChainRequest {
@@ -13,5 +14,6 @@ class WordRequest {
 	public mode: string;
 	public variants: boolean;
 	public word: string = "";
+	public regexp: boolean;
 	public grammar: string = null;
 }

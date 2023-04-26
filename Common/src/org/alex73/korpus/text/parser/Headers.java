@@ -8,8 +8,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Headers {
-    private static Pattern RE_TAG = Pattern.compile("##([A-Za-z0-9]+):?(.*)");
-    private static Pattern RE_TAG_BEGIN = Pattern.compile("##([A-Za-z0-9]+)_BEGIN");
+    private static Pattern RE_TAG = Pattern.compile("##([^:]+):?(.*)");
+    private static Pattern RE_TAG_BEGIN = Pattern.compile("##([^:]+)_BEGIN");
 
     private List<String> lines = new ArrayList<>();
     private Map<String, String> values;
@@ -27,6 +27,20 @@ public class Headers {
             parse();
         }
         return values.get(key);
+    }
+
+    public void appendDefaultHeaders(Headers defaults) {
+        if (defaults.values == null) {
+            defaults.parse();
+        }
+        if (values == null) {
+            parse();
+        }
+        for (Map.Entry<String, String> en : defaults.values.entrySet()) {
+            if (!values.containsKey(en.getKey())) {
+                values.put(en.getKey(), en.getValue());
+            }
+        }
     }
 
     private void parse() {

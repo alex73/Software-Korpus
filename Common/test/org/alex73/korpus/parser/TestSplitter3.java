@@ -27,23 +27,47 @@ public class TestSplitter3 {
 
     @Test
     public void testText() {
-        p = PtextToKorpus.oneLine(new Splitter3(LanguageFactory.get("bel").getNormalizer(), true, errors).parse("- Адно, слова... А: потым ? 123 мо'' 'ак з'ява"));
+        p = PtextToKorpus
+                .oneLine(new Splitter3(LanguageFactory.get("bel").getNormalizer(), true, errors).parse("- Адно, слова... А: потым ? 123 мо'' 'ак з'ява"));
 
-        nextW("", "- ");
+        nextW(null, "- ");
         nextW("Адно", ", ");
         nextW("слова", "...");
         endSentence();
 
-        nextW("", " ");
+        nextW(null, " ");
         nextW("А", ": ");
         nextW("потым", " ?");
         endSentence();
 
-        nextW("", " ");
+        nextW(null, " ");
         nextW("123", " ");
         nextW("мо", "'' '");
         nextW("ак", " ");
         nextW("з\u02BCява", "");
+        endSentence();
+
+        endText();
+    }
+
+    @Test
+    public void testBracketsInside() {
+        p = PtextToKorpus.oneLine(new Splitter3(LanguageFactory.get("bel").getNormalizer(), true, errors).parse("Ад[н]о"));
+
+        nextW("Ад[н]о", "");
+        endSentence();
+
+        endText();
+    }
+
+    @Test
+    public void testBracketsOutside() {
+        p = PtextToKorpus.oneLine(new Splitter3(LanguageFactory.get("bel").getNormalizer(), true, errors).parse("Адно [ягонае слова] было"));
+
+        nextW("Адно", " ");
+        nextW("[ягонае", " ");
+        nextW("слова]", " ");
+        nextW("было", "");
         endSentence();
 
         endText();

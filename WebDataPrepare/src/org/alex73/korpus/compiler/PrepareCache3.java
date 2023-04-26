@@ -107,13 +107,14 @@ public class PrepareCache3 {
             Thread.sleep(5000);
             gr = GrammarDB2.empty();
         }
-        StaticGrammarFiller2 grFiller = new StaticGrammarFiller2(new GrammarFinder(gr));
+        GrammarFinder grFinder = new GrammarFinder(gr);
+        StaticGrammarFiller2 grFiller = new StaticGrammarFiller2(grFinder);
 
         LOG.info("2nd pass...");
         be = System.currentTimeMillis();
         ProcessLuceneWriter lucene = new ProcessLuceneWriter(h1.allLanguages, writeToLucene, cacheForProduction, OUTPUT, 8192);
         ProcessPrepareLucene prepareLucene = new ProcessPrepareLucene(lucene);
-        ProcessStat stat = new ProcessStat(processStat, OUTPUT);
+        ProcessStat stat = new ProcessStat(processStat, OUTPUT, grFinder);
         ProcessTexts t2 = new ProcessTexts(grFiller, prepareLucene, stat, textsCount);
         FilesReader r2 = new FilesReader(INPUT, false, t2);
         r2.finish(3 * 60);

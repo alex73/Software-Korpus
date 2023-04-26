@@ -10,6 +10,7 @@ public class WordResult extends Word {
     public WordResult(Word w) {
         this.word = w.word;
         this.tail = w.tail;
+        this.type = w.type;
     }
 
     @Override

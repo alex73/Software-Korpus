@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.fanetyka.impl.FanetykaText;
+import org.alex73.korpus.languages.ILanguage;
 import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.languages.belarusian.BelarusianComparators;
 import org.alex73.korpus.languages.belarusian.FormsReadyFilter;
@@ -28,7 +29,7 @@ public class Fanietycny extends FutureBaseServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String word = req.getPathInfo().substring(1);
-        word = LanguageFactory.get("bel").getNormalizer().lightNormalized(word.trim());
+        word = LanguageFactory.get("bel").getNormalizer().lightNormalized(word.trim(), ILanguage.INormalizer.PRESERVE_WILDCARDS);
         Pattern re = Pattern.compile(word.replace("+", "").replace("*", ".*").replace('?', '.'));
 
         List<Out> result = ApplicationOther.instance.gr.getAllParadigms().parallelStream().flatMap(p -> {

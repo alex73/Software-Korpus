@@ -27,7 +27,7 @@ public class TextFileWriter {
                 for (ITextLineElement it : line) {
                     if (it instanceof WordItem) {
                         WordItem wi = (WordItem) it;
-                        wr.write(Splitter3.encodeString(wi.lightNormalized));
+                        wr.write(Splitter3.encodeString(wi.word));
                     } else if (it instanceof TailItem) {
                         String tt = it.getText();
                         if (it == line.get(line.size() - 1)) {

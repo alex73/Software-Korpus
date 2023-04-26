@@ -35,23 +35,27 @@ public interface ILanguage {
     }
 
     interface INormalizer {
+        static final String PRESERVE_NONE = "?*";
+        static final String PRESERVE_WILDCARDS = "?*";
+        static final String PRESERVE_REGEXP = ".?*[]{},+()|^-0123456789";
+
         /**
          * Выпраўляем толькі апострафы і злучкі, націскі адкідаем.
          */
-        String znakNormalized(CharSequence word);
+        String znakNormalized(CharSequence word, String preserveChars);
 
         /**
          * Невялікія выпраўленні: адкідае націскі, змяняе апострафы і злучкі на
          * правільныя, ў напачатку -> у, й напачатку -> і, вялікія літары -> малыя, ґ ->
          * г.
          */
-        String lightNormalized(CharSequence word);
+        String lightNormalized(CharSequence word, String preserveChars);
 
         /**
          * Максімальная нармалізацыя - lightNormalization і дадаткова адкідаем мяккія
          * знакі, канвертуем мяккія галосныя ў цвёрдыя.
          */
-        String superNormalized(String word);
+        String superNormalized(String word, String preserveChars);
 
         /**
          * Падлік хэшу (з максімальнай нармалізацыяй).

@@ -82,6 +82,12 @@ body {
     color: red;
 }
 
+.tooltip-inner {
+    text-align: left;
+    max-width: 500px;
+}
+
+
 .table-borders td, .table-borders th {
 	border: 1px solid black;
 }

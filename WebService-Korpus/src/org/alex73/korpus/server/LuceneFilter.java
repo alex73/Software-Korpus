@@ -94,23 +94,43 @@ public class LuceneFilter {
             throw new RuntimeException("Corpus doesn't have " + textLanguage + " language");
         }
         ILanguage.INormalizer normalizer = LanguageFactory.get(textLanguage).getNormalizer();
-        if (w.word != null) {
-            String wn = normalizer.superNormalized(w.word);
-            Term wt = new Term(lf.fieldWordWriteVariant.name(), wn);
-            Query wq = WordsDetailsChecks.needWildcardRegexp(wn) ? new WildcardQuery(wt) : new TermQuery(wt);
-            query.add(wq, BooleanClause.Occur.MUST);
-        }
         if (w.forms != null) {
             BooleanQuery.Builder qforms = new BooleanQuery.Builder();
+            qforms.setMinimumNumberShouldMatch(1);
             for (String form : w.forms) {
-                Term t = new Term(lf.fieldWordWriteVariant.name(), normalizer.superNormalized(form));
+                Term t = new Term(lf.fieldWordWriteVariant.name(), normalizer.superNormalized(form, ILanguage.INormalizer.PRESERVE_NONE));
                 qforms.add(new TermQuery(t), BooleanClause.Occur.SHOULD);
             }
             query.add(qforms.build(), BooleanClause.Occur.MUST);
+        } else if (w.word != null) {
+            Query wq;
+            switch (WordsDetailsChecks.needMasks(w)) {
+            case NO: {
+                String wn = normalizer.superNormalized(w.word, ILanguage.INormalizer.PRESERVE_NONE);
+                Term wt = new Term(lf.fieldWordWriteVariant.name(), wn);
+                wq = new TermQuery(wt);
+            }
+                break;
+            case WILDCARDS: {
+                String wn = normalizer.superNormalized(w.word, ILanguage.INormalizer.PRESERVE_WILDCARDS);
+                Term wt = new Term(lf.fieldWordWriteVariant.name(), wn);
+                wq = new WildcardQuery(wt);
+            }
+                break;
+            case REGEX: {
+                String wn = normalizer.superNormalized(w.word, ILanguage.INormalizer.PRESERVE_REGEXP);
+                Term wt = new Term(lf.fieldWordWriteVariant.name(), wn);
+                wq = new RegexpQuery(wt);
+            }
+                break;
+            default:
+                throw new RuntimeException();
+            }
+            query.add(wq, BooleanClause.Occur.MUST);
         }
         if (w.grammar != null) {
             Term t = new Term(lf.fieldTagsWriteVariant.name(), w.grammar);
-            Query wq = new RegexpQuery(t); // TODO change to WildcardQuery
+            Query wq = new RegexpQuery(t);
             query.add(wq, BooleanClause.Occur.MUST);
         }
     }

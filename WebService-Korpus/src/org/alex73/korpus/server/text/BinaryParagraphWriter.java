@@ -26,6 +26,7 @@ public class BinaryParagraphWriter {
                     for (Word w : se.words) {
                         writeString(w.word);
                         writeString(w.tail);
+                        writeEnum(w.type);
                     }
                 }
             }
@@ -45,6 +46,14 @@ public class BinaryParagraphWriter {
 
     private void writeInt(int value) throws IOException {
         out.writeInt(value);
+    }
+
+    private void writeEnum(Enum<?> value) throws IOException {
+        if (value == null) {
+            out.writeByte(0);
+        } else {
+            out.writeByte(value.ordinal() + 1);
+        }
     }
 
     private void writeString(String str) throws IOException {

@@ -37,7 +37,6 @@ public class ClusterServiceImpl {
         process.addKorpusTextFilter(params.lang, query, params.textStandard);
 
         WordRequest w = params.word;
-        w.word = lang.getNormalizer().lightNormalized(w.word);
         process.addWordFilter(params.lang, query, w);
 
         ChainRequest chain = new ChainRequest();

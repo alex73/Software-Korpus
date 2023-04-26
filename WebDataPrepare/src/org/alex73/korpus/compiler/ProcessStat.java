@@ -10,22 +10,26 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
-import java.util.regex.Pattern;
 import java.util.zip.ZipOutputStream;
 
+import org.alex73.corpus.paradigm.Form;
+import org.alex73.corpus.paradigm.Paradigm;
+import org.alex73.corpus.paradigm.Variant;
+import org.alex73.korpus.base.IGrammarFinder;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.compiler.stat.StatWriting;
 import org.alex73.korpus.compiler.stat.WordsStat;
 import org.alex73.korpus.text.structure.corpus.Paragraph;
 import org.alex73.korpus.text.structure.corpus.Sentence;
 import org.alex73.korpus.text.structure.corpus.Word;
+import org.alex73.korpus.utils.StressUtils;
 
 public class ProcessStat extends BaseParallelProcessor<MessageParsedText> {
 
-    private static final Pattern RE_SPLIT = Pattern.compile(";");
-
+    private final IGrammarFinder grFinder;
     private final Path tempOutputDir;
     // stat by subcorpuses
     private final Map<String, TextStatInfo> textStatInfos = new HashMap<>();
@@ -33,9 +37,10 @@ public class ProcessStat extends BaseParallelProcessor<MessageParsedText> {
     private final Map<String, Set<String>> authorsByLemmas = new HashMap<>();
     private final Map<String, WordsStat> wordsStatsBySubcorpus = new HashMap<>();
 
-    public ProcessStat(boolean processStat, Path tempOutputDir) throws Exception {
+    public ProcessStat(boolean processStat, Path tempOutputDir, IGrammarFinder grFinder) throws Exception {
         super(8, 16);
         this.tempOutputDir = tempOutputDir;
+        this.grFinder = grFinder;
     }
 
     @Override
@@ -61,15 +66,35 @@ public class ProcessStat extends BaseParallelProcessor<MessageParsedText> {
         for (Paragraph[] p : text.paragraphs) {
             for (Sentence se : p[textIndex].sentences) {
                 for (Word w : se.words) {
-                    String[] lemmas = w.wordNormalized == null ? null : RE_SPLIT.split(w.wordNormalized);
-                    wordsStat.addWord(w.wordNormalized, lemmas);
+                    if (w.wordNormalized != null) {
+                        // can be null in case of tail or service mark
+                        wordsStat.addWord(w.wordNormalized, getLemmasByForm(w.wordNormalized));
+                    }
                 }
             }
         }
         return wordsStat;
     }
 
+    private Set<String> getLemmasByForm(String form) {
+        Set<String> result = new TreeSet<>();
+        for (Paradigm p : grFinder.getParadigms(form)) {
+            for (Variant v : p.getVariant()) {
+                for (Form f : v.getForm()) {
+                    if (StressUtils.unstress(f.getValue()).toLowerCase().equals(form)) {
+                        result.add(p.getLemma());
+                        break;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
     void addGlobalCounts(TextInfo textInfo, int textIndex, int wordsCount) {
+        TextStatInfo commonStatInfo = getTextStatInfo("");
+        commonStatInfo.texts.incrementAndGet();
+        commonStatInfo.words.addAndGet(wordsCount);
         TextStatInfo subcorpusStatInfo = getTextStatInfo(textInfo.subcorpus);
         subcorpusStatInfo.texts.incrementAndGet();
         subcorpusStatInfo.words.addAndGet(wordsCount);

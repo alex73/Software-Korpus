@@ -12,7 +12,7 @@
             </a>
         </td>
         <td>
-          {{for words}}<span wlemma="{{>lemmas}}" wcat="{{>tags}}" {{if requestedWord}}class="wordFound"{{/if}}>{{naciski:normalized}}</span>{{>tail}}{{/for}}
+          {{for words}}<span wlemma="{{>lemmas}}" wcat="{{>tags}}" {{if requestedWord}}class="wordFound"{{/if}}>{{naciski:word}}</span>{{>tail}}{{/for}}
         </td>
         <td class="text-center"><a href="#" {{if ~root.visitedList.indexOf(docId)>=0}} class="visited" {{/if}} onClick="dialogText = new DialogText(korpusService.resultSearch.rows[{{:#index}}], this); return false;">[...]</a></td>
       </tr>

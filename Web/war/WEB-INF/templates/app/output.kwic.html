@@ -12,13 +12,13 @@
         </a>
       </td>
       <td class="text-right">
-		{{for kwicBefore}}<span wlemma="{{>lemmas}}" wcat="{{>tags}}" {{if requestedWord}}class="wordFound"{{/if}}>{{>normalized}}</span>{{>tail}}{{/for}}
+		{{for kwicBefore}}<span wlemma="{{>lemmas}}" wcat="{{>tags}}" {{if requestedWord}}class="wordFound"{{/if}}>{{>word}}</span>{{>tail}}{{/for}}
       </td>
       <td class="text-center">
-		{{for kwicWords}}<span wlemma="{{>lemmas}}" wcat="{{>tags}}" {{if requestedWord}}class="wordFound"{{/if}}>{{>normalized}}</span>{{>tail}}{{/for}}
+		{{for kwicWords}}<span wlemma="{{>lemmas}}" wcat="{{>tags}}" {{if requestedWord}}class="wordFound"{{/if}}>{{>word}}</span>{{>tail}}{{/for}}
       </td>
       <td class="text-left">
-		{{for kwicAfter}}<span wlemma="{{>lemmas}}" wcat="{{>tags}}" {{if requestedWord}}class="wordFound"{{/if}}>{{>normalized}}</span>{{>tail}}{{/for}}
+		{{for kwicAfter}}<span wlemma="{{>lemmas}}" wcat="{{>tags}}" {{if requestedWord}}class="wordFound"{{/if}}>{{>word}}</span>{{>tail}}{{/for}}
       </td>
       <td class="text-center"><a href="#" {{if ~root.visitedList.indexOf(docId)>=0}} class="visited" {{/if}} onClick="dialogText = new DialogText(korpusService.resultKwic.rows[{{:#index}}], this); return false;">[...]</a></td>
 	</tr>

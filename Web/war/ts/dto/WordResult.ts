@@ -1,16 +1,13 @@
 class WordResult {
-  public source: string;
-  public normalized: string;
+  public word: string;
   public tail: string;
-  public lemmas: string;
-  public tags: string;
   public requestedWord: boolean;
 
   constructor(private text: string) {
-    this.normalized = text;
+    this.word = text;
   }
   getOutput(): string {
-    return this.source != null ? this.source : this.normalized;
+    return this.word;
   }
 }
 

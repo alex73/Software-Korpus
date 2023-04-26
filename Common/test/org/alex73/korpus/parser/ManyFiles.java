@@ -28,7 +28,7 @@ public class ManyFiles {
                 System.out.println(f);
                 List<String> expected = Files.readAllLines(f);
                 try (InputStream in = Files.newInputStream(f)) {
-                    TextFileParser text = new TextFileParser(in, false);
+                    TextFileParser.OneText text = new TextFileParser(in, false).oneTextExpected();
                     text.parse(LanguageFactory.get("bel"), false, null);
                     TextFileWriter.write(new File(TEMP), text.headers, text.lines);
                     List<String> created = Files.readAllLines(Paths.get(TEMP));

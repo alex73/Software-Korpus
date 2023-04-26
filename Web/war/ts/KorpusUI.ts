@@ -83,25 +83,38 @@ class KorpusUI {
 	}
 	setWordMode(from: HTMLElement, mode: string) {
 		const word: HTMLElement = from.closest(".word-select");
-		$('.word-store-mode').text(mode);
+		$(word.querySelector('.word-store-mode')).text(mode);
 		switch(mode) {
 			case WordMode.USUAL:
 				$(word.querySelector('.word-select-dropdown button')).text('Звычайны пошук');
 				$(word.querySelector('.word-select-variants')).show();
 				$(word.querySelector('.word-select-grammar')).show();
+				$(word.querySelector('.word-select-word')).show();
 				$(word.querySelector('.word-select-wordprompt')).attr('placeholder', "можна з '*' і '?'");
+				$(word.querySelector('.word-select-regexp')).hide();
 				break;
 			case WordMode.ALL_FORMS:
 				$(word.querySelector('.word-select-dropdown button')).text('Усе словаформы');
 				$(word.querySelector('.word-select-variants')).show();
 				$(word.querySelector('.word-select-grammar')).show();
+				$(word.querySelector('.word-select-word')).show();
 				$(word.querySelector('.word-select-wordprompt')).attr('placeholder', "адна з формаў");
+				$(word.querySelector('.word-select-regexp')).hide();
 				break;
 			case WordMode.EXACT:
 				$(word.querySelector('.word-select-dropdown button')).text('Дакладны пошук');
 				$(word.querySelector('.word-select-variants')).hide();
 				$(word.querySelector('.word-select-grammar')).hide();
+				$(word.querySelector('.word-select-word')).show();
 				$(word.querySelector('.word-select-wordprompt')).attr('placeholder', "можна з '*' і '?'");
+				$(word.querySelector('.word-select-regexp')).show();
+				break;
+			case WordMode.GRAMMAR:
+				$(word.querySelector('.word-select-dropdown button')).text('Толькі граматыка');
+				$(word.querySelector('.word-select-variants')).show();
+				$(word.querySelector('.word-select-grammar')).show();
+				$(word.querySelector('.word-select-word')).hide();
+				$(word.querySelector('.word-select-regexp')).hide();
 				break;
 		}
 	}
@@ -137,6 +150,7 @@ class KorpusUI {
 		newWord.style.display = 'block';
 		let row = fullrow.querySelector('.korpus-words-row');
 		let r = row.insertBefore(newWord, row.lastElementChild);
+		this.setWordMode(newWord.querySelector('.word-store-mode'), WordMode.ALL_FORMS);
 		this.repaintWordButtons();
 		return r;
 	}
@@ -147,6 +161,7 @@ class KorpusUI {
 		newSep.style.display = 'block';
 		let row = fullrow.querySelector('.korpus-words-row');
 		let r = row.insertBefore(newSep, row.lastElementChild);
+		this.repaintSeps();
 		return r;
 	}
 	addRow(initializeWords: boolean): HTMLElement {
@@ -167,6 +182,7 @@ class KorpusUI {
 		block.nextElementSibling.remove(); // remove separator after
 		block.remove();
 		this.repaintWordButtons();
+		this.repaintSeps();
 	}
 	removeRow(button: HTMLElement) {
 		const block: HTMLElement = button.closest(".korpus-words-row-full");
@@ -203,8 +219,34 @@ class KorpusUI {
 			}
 		});
 	}
-	static lemmaChange(type: string, cb: HTMLInputElement) {
-		cb.closest('.' + type).querySelector("." + type + "-lemma-prompt").textContent = cb.checked ? "Пачатковая форма" : "Слова";
+	repaintSeps() {
+		let rows: NodeListOf<HTMLElement> = this.getRows();
+		rows.forEach(e => {
+			var collectionSeps: NodeListOf<HTMLElement> = e.querySelectorAll(".inputsep:not(#template-inputsep)");
+			collectionSeps.forEach(sep => {
+				sep.querySelectorAll("input[type=checkbox]").forEach(cb => $(cb.parentNode).hide());
+			});
+			// first separator
+			collectionSeps.item(0).querySelectorAll("input[type=checkbox]").forEach(cb => {
+				if ("^,;".indexOf(cb.getAttribute('v')) >= 0) {
+					$(cb.parentNode).show();
+				}
+			});
+			for(let i=1; i<collectionSeps.length-1; i++) {
+				// middle separators
+				collectionSeps.item(i).querySelectorAll("input[type=checkbox]").forEach(cb => {
+					if (",;".indexOf(cb.getAttribute('v')) >= 0) {
+						$(cb.parentNode).show();
+					}
+				});
+			}
+			// last separator
+			collectionSeps.item(collectionSeps.length-1).querySelectorAll("input[type=checkbox]").forEach(cb => {
+				if (",;.!?$".indexOf(cb.getAttribute('v')) >= 0) {
+					$(cb.parentNode).show();
+				}
+			});
+		});
 	}
 	hideStatusError() {
 		$('#status').hide();
@@ -264,15 +306,18 @@ class KorpusUI {
 	collectWord(w: Element): WordRequest {
 		let wrq = new WordRequest();
 		wrq.mode = (<HTMLInputElement>w.querySelector(".word-store-mode")).innerText;
-		wrq.variants = (<HTMLInputElement>w.querySelector("input[type='checkbox']")).checked;
+		wrq.variants = (<HTMLInputElement>w.querySelector("input[name='variants']")).checked;
 		wrq.word = fulltrim((<HTMLInputElement>w.querySelector("input[type='text']")).value);
+		wrq.regexp = (<HTMLInputElement>w.querySelector("input[name='regexp']")).checked;
 		wrq.grammar = fulltrim((<HTMLElement>w.querySelector(".wordgram-grammar-string")).innerText);
 		return wrq;
 	}
 	restoreWord(w: WordRequest, el: Element) {
-		(<HTMLElement>el.querySelector(".word-store-mode")).innerText = w.mode ? w.mode : WordMode.USUAL;
-		(<HTMLInputElement>el.querySelector("input[type='checkbox']")).checked = w.variants;
+		this.setWordMode(<HTMLElement>el.querySelector(".word-store-mode"), w.mode ? w.mode : WordMode.ALL_FORMS);
+		//(<HTMLElement>el.querySelector(".word-store-mode")).innerText = w.mode ? w.mode : WordMode.ALL_FORMS;
+		(<HTMLInputElement>el.querySelector("input[name='variants']")).checked = w.variants;
 		(<HTMLInputElement>el.querySelector("input[type='text']")).value = w.word ? w.word : "";
+		(<HTMLInputElement>el.querySelector("input[name='regexp']")).checked = w.regexp;
 		(<HTMLElement>el.querySelector(".wordgram-grammar-string")).innerText = w.grammar ? w.grammar : "";
 		DialogWordGrammar.wordGrammarToText(w.grammar, el.querySelector(".wordgram-display"));
 	}
@@ -321,7 +366,7 @@ class KorpusUI {
 		document.getElementById('inputFilterAuthor').innerText = data && data.textStandard && data.textStandard.authors ? data.textStandard.authors.join(';') : "Усе";
 		document.getElementById('inputFilterSource').innerText = data && data.textStandard && data.textStandard.sources ? data.textStandard.sources.join(';') : "Усе";
 		document.getElementById('inputFilterStyle').innerText = data && data.textStandard && data.textStandard.stylegenres ? data.textStandard.stylegenres.join(';') : "Усе";
-		this.addWord(document.querySelector("#divCluster .korpus-words-row-full"));
+		let newWord = this.addWord(document.querySelector("#divCluster .korpus-words-row-full"));
 		switch (this.getMode()) {
 			case 'search':
 			case 'kwic':
@@ -346,8 +391,6 @@ class KorpusUI {
 				if (cp && cp.word) {
 					let w: HTMLElement = this.addWord(null);
 					(<HTMLInputElement>w.querySelector("input[type='text']")).value = cp.word.word ? cp.word.word : "";
-					//(<HTMLInputElement>w.querySelector("input[type='checkbox']")).checked = cp.word.allForms;
-					//(<HTMLElement>w.querySelector(".inputword-lemma-prompt")).textContent = cp.word.allForms ? "Пачатковая форма" : "Слова";
 					(<HTMLElement>w.querySelector(".wordgram-grammar-string")).innerText = cp.word.grammar ? cp.word.grammar : "";
 					DialogWordGrammar.wordGrammarToText(cp.word.grammar, w.querySelector(".wordgram-display"));
 				}

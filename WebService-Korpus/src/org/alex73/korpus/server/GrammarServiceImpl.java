@@ -106,7 +106,7 @@ public class GrammarServiceImpl {
             int lettersCount = 0;
             boolean hasStar = false;
             if (rq.word != null) {
-                hasStar = WordsDetailsChecks.needWildcardRegexp(rq.word);
+                hasStar = hasWildcards(rq.word);
                 for (char c : rq.word.toCharArray()) {
                     if ("абвгдеёжзійклмнопрстуўфхцчшыьэюя'".indexOf(Character.toLowerCase(c)) >= 0) {
                         lettersCount++;
@@ -136,7 +136,7 @@ public class GrammarServiceImpl {
                 reOutputGrammar = check.createPatternRegexp(rq.outputGrammar);
             }
             Stream<LemmaInfo> output;
-            if (rq.word == null || WordsDetailsChecks.needWildcardRegexp(rq.word)) {
+            if (rq.word == null || hasWildcards(rq.word)) {
                 output = StreamSupport.stream(
                         new SearchWidlcards(lang, check.createWildcardRegexp(rq.word), reGrammar, rq.multiForm, rq.fullDatabase, reOutputGrammar), false);
             } else {
@@ -203,7 +203,7 @@ public class GrammarServiceImpl {
             }
 
             if (result.output.isEmpty()) { // nothing found
-                if (rq.word != null && rq.grammar == null && !rq.multiForm && !WordsDetailsChecks.needWildcardRegexp(rq.word)) {// simple word search
+                if (rq.word != null && rq.grammar == null && !rq.multiForm && !hasWildcards(rq.word)) {// simple word search
                     Stream<LemmaInfo> output2 = searchExact(lang, rq.word, null, true, rq.fullDatabase, null);
                     if (output2.anyMatch(p -> true)) {
                         result.hasMultiformResult = true;
@@ -246,8 +246,9 @@ public class GrammarServiceImpl {
             while (dataPos < data.size() && buffer.isEmpty()) {
                 Paradigm p = data.get(dataPos);
                 dataPos++;
-                createLemmaInfoFromParadigm(lang, p, s -> re == null || re.get().matcher(lang.getNormalizer().lightNormalized(s)).matches(), multiform,
-                        fullDatabase, reOutputGrammar, reGrammar, buffer);
+                createLemmaInfoFromParadigm(lang, p,
+                        s -> re == null || re.get().matcher(lang.getNormalizer().lightNormalized(s, ILanguage.INormalizer.PRESERVE_WILDCARDS)).matches(),
+                        multiform, fullDatabase, reOutputGrammar, reGrammar, buffer);
             }
             if (buffer.isEmpty()) {
                 return false;
@@ -259,12 +260,12 @@ public class GrammarServiceImpl {
 
     private Stream<LemmaInfo> searchExact(ILanguage lang, String word, ThreadLocal<Pattern> reGrammar, boolean multiform, boolean fullDatabase,
             ThreadLocal<Pattern> reOutputGrammar) {
-        String normWord = wordNormalizer.lightNormalized(word.trim());
+        String normWord = wordNormalizer.lightNormalized(word.trim(), ILanguage.INormalizer.PRESERVE_NONE);
         Paradigm[] data = getApp().grFinder.getParadigms(normWord);
         List<LemmaInfo> result = new ArrayList<>();
         for (Paradigm p : data) {
-            createLemmaInfoFromParadigm(lang, p, s -> normWord.equals(wordNormalizer.lightNormalized(s)), multiform, fullDatabase, reOutputGrammar, reGrammar,
-                    result);
+            createLemmaInfoFromParadigm(lang, p, s -> normWord.equals(wordNormalizer.lightNormalized(s, ILanguage.INormalizer.PRESERVE_NONE)), multiform,
+                    fullDatabase, reOutputGrammar, reGrammar, result);
         }
         return result.stream();
     }
@@ -377,11 +378,11 @@ public class GrammarServiceImpl {
         System.out.println(">> Find lemmas by form " + form);
         Set<String> result = Collections.synchronizedSet(new TreeSet<>());
         try {
-            form = wordNormalizer.lightNormalized(form);
+            form = wordNormalizer.lightNormalized(form, ILanguage.INormalizer.PRESERVE_NONE);
             for (Paradigm p : getApp().grFinder.getParadigms(form)) {
                 for (Variant v : p.getVariant()) {
                     for (Form f : v.getForm()) {
-                        if (wordNormalizer.lightNormalized(f.getValue()).equals(form)) {
+                        if (wordNormalizer.lightNormalized(f.getValue(), ILanguage.INormalizer.PRESERVE_NONE).equals(form)) {
                             result.add(p.getLemma());
                             break;
                         }
@@ -444,5 +445,9 @@ public class GrammarServiceImpl {
     String revert(String s) {
         StringBuilder r = new StringBuilder(s);
         return r.reverse().toString();
+    }
+
+    private boolean hasWildcards(String w) {
+        return w.contains("*") || w.contains("?");
     }
 }

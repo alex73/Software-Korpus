@@ -37,8 +37,8 @@ import org.alex73.korpus.server.data.SearchResult;
 import org.alex73.korpus.server.data.SearchResults;
 import org.alex73.korpus.server.data.SearchTotalResult;
 import org.alex73.korpus.server.data.WordRequest;
-import org.alex73.korpus.server.data.WordResult;
 import org.alex73.korpus.server.data.WordRequest.WordMode;
+import org.alex73.korpus.server.data.WordResult;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
 import org.alex73.korpus.server.text.BinaryParagraphReader;
 import org.alex73.korpus.text.structure.corpus.Paragraph;
@@ -46,7 +46,6 @@ import org.alex73.korpus.utils.KorpusFileUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.BooleanQuery;
 
-//TODO Пошук па слове з улікам першага "ў" і вялікіх літар
 @Path("/korpus")
 public class SearchServiceImpl {
     private final static Logger LOGGER = Logger.getLogger(SearchServiceImpl.class.getName());
@@ -131,11 +130,13 @@ public class SearchServiceImpl {
             result.latest = latest;
             LOGGER.info("<< Result: found: " + result.foundIDs.length + " hasMore:" + result.hasMore);
             return result;
-        } catch (Throwable ex) {
-            LOGGER.log(Level.SEVERE, "<< Result error", ex);
+        } catch (ServerError ex) {
             SearchResult result = new SearchResult();
             result.error = ex.getMessage();
             return result;
+        } catch (Throwable ex) {
+            LOGGER.log(Level.SEVERE, "<< Result error", ex);
+            throw ServerError.internalError();
         }
     }
 
@@ -162,11 +163,13 @@ public class SearchServiceImpl {
             result.totalCount = found.size();
             LOGGER.info("<< Result: found: " + result.totalCount);
             return result;
-        } catch (Throwable ex) {
-            LOGGER.log(Level.SEVERE, "<< Result error", ex);
+        } catch (ServerError ex) {
             SearchTotalResult result = new SearchTotalResult();
             result.error = ex.getMessage();
             return result;
+        } catch (Throwable ex) {
+            LOGGER.log(Level.SEVERE, "<< Result error", ex);
+            throw ServerError.internalError();
         }
     }
 
@@ -180,7 +183,7 @@ public class SearchServiceImpl {
             ILanguage lang = LanguageFactory.get(params.lang);
             if (WordsDetailsChecks.isTooSimpleWord(params.word)) {
                 LOGGER.info("<< Request too simple");
-                throw new RuntimeException(ServerError.REQUIEST_TOO_SIMPLE);
+                throw ServerError.tooSimple();
             }
             findAllLemmas(lang, params.word);
 
@@ -188,9 +191,11 @@ public class SearchServiceImpl {
             ClusterResults res = new ClusterServiceImpl(this).calc(params, corpusFilter);
             LOGGER.info("<< Result clusters");
             return res;
+        } catch (ServerError ex) {
+            throw ex;
         } catch (Throwable ex) {
-            LOGGER.info("<< Result error: " + ex.getMessage());
-            throw new RuntimeException(ex);
+            LOGGER.log(Level.SEVERE, "<< Result error", ex);
+            throw ServerError.internalError();
         }
     }
 
@@ -221,9 +226,11 @@ public class SearchServiceImpl {
                 checks.isAllowed(result[i].text);
             }
             return result;
-        } catch (Exception ex) {
-            LOGGER.info("<< Result error: " + ex.getMessage());
-            throw new RuntimeException(ex);
+        } catch (ServerError ex) {
+            throw ex;
+        } catch (Throwable ex) {
+            LOGGER.log(Level.SEVERE, "<< Result error", ex);
+            throw ServerError.internalError();
         }
     }
 
@@ -258,7 +265,7 @@ public class SearchServiceImpl {
         // user can enter lemma of variant, but we need to find paradigm
         for (Paradigm p : ps) {
             for (Variant v : p.getVariant()) {
-                if (lang.getNormalizer().lightNormalized(v.getLemma()).equals(w.word)) {
+                if (lang.getNormalizer().lightNormalized(v.getLemma(), ILanguage.INormalizer.PRESERVE_NONE).equals(w.word)) {
                     p.getVariant().forEach(vv -> vv.getForm().forEach(f -> forms.add(f.getValue())));
                     break;
                 }
@@ -266,7 +273,7 @@ public class SearchServiceImpl {
         }
         forms.remove("");
         if (forms.isEmpty()) {
-            throw new RuntimeException(ServerError.REQUIEST_LEMMA_NOT_FOUND);
+            throw ServerError.lemmaNotFound(w.word);
         }
         w.forms = forms.toArray(String[]::new);
     }
@@ -283,7 +290,7 @@ public class SearchServiceImpl {
         }
         if (!enoughComplex) {
             LOGGER.info("<< Request too simple");
-            throw new RuntimeException(ServerError.REQUIEST_TOO_SIMPLE);
+            throw ServerError.tooSimple();
         }
     }
 

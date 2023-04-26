@@ -35,51 +35,54 @@ public class WordsDetailsChecksTest {
     }
 
     @Test
-    public void isOneWordMatches() throws Exception {
-        assertTrue(check(WordMode.USUAL, false, null, "снег", "снег"));
-        assertTrue(check(WordMode.USUAL, false, null, "Сне\u00B4г", "снег"));
-        assertTrue(check(WordMode.USUAL, false, null, "снег", "Сне\u00B4г"));
-        assertFalse(check(WordMode.USUAL, false, null, "снег", "сьнег"));
-        assertFalse(check(WordMode.USUAL, false, null, "снег", "снега"));
-        assertTrue(check(WordMode.USUAL, false, null, "снег?", "Снега"));
-        assertTrue(check(WordMode.USUAL, false, null, "снег*", "Снег"));
-        assertTrue(check(WordMode.USUAL, false, null, "снег*", "Снега"));
-        assertTrue(check(WordMode.USUAL, false, null, "увага", "ўвага"));
-        assertTrue(check(WordMode.USUAL, false, null, "ўвага", "увага"));
+    public void testOneWordMatches() throws Exception {
+        assertTrue(checkOneWordMatches(WordMode.USUAL, false, false, null, "снег", "снег"));
+        assertTrue(checkOneWordMatches(WordMode.USUAL, false, false, null, "Сне\u00B4г", "снег"));
+        assertTrue(checkOneWordMatches(WordMode.USUAL, false, false, null, "снег", "Сне\u00B4г"));
+        assertFalse(checkOneWordMatches(WordMode.USUAL, false, false, null, "снег", "сьнег"));
+        assertFalse(checkOneWordMatches(WordMode.USUAL, false, false, null, "снег", "снега"));
+        assertTrue(checkOneWordMatches(WordMode.USUAL, false, false, null, "снег?", "Снега"));
+        assertTrue(checkOneWordMatches(WordMode.USUAL, false, false, null, "снег*", "Снег"));
+        assertTrue(checkOneWordMatches(WordMode.USUAL, false, false, null, "снег*", "Снега"));
+        assertTrue(checkOneWordMatches(WordMode.USUAL, false, false, null, "увага", "ўвага"));
+        assertTrue(checkOneWordMatches(WordMode.USUAL, false, false, null, "ўвага", "увага"));
 
-        assertTrue(check(WordMode.EXACT, false, null, "сне\u00B4г", "снег"));
-        assertTrue(check(WordMode.EXACT, false, null, "снег", "сне\u00B4г"));
-        assertFalse(check(WordMode.EXACT, false, null, "снег*", "Снега"));
-        assertFalse(check(WordMode.EXACT, false, null, "снег*", "Снега"));
-        assertTrue(check(WordMode.EXACT, false, null, "ўвага", "ўвага"));
-        assertFalse(check(WordMode.EXACT, false, null, "увага", "ўвага"));
-        assertFalse(check(WordMode.EXACT, false, null, "ўвага", "увага"));
-        assertFalse(check(WordMode.EXACT, true, null, "снег", "сьнег"));
-        assertFalse(check(WordMode.EXACT, true, null, "снег", "Снег"));
+        assertTrue(checkOneWordMatches(WordMode.EXACT, false, false, null, "сне\u00B4г", "снег"));
+        assertTrue(checkOneWordMatches(WordMode.EXACT, false, false, null, "снег", "сне\u00B4г"));
+        assertFalse(checkOneWordMatches(WordMode.EXACT, false, false, null, "снег*", "Снега"));
+        assertFalse(checkOneWordMatches(WordMode.EXACT, false, false, null, "снег*", "Снега"));
+        assertTrue(checkOneWordMatches(WordMode.EXACT, false, false, null, "ўвага", "ўвага"));
+        assertFalse(checkOneWordMatches(WordMode.EXACT, false, false, null, "увага", "ўвага"));
+        assertFalse(checkOneWordMatches(WordMode.EXACT, false, false, null, "ўвага", "увага"));
+        assertFalse(checkOneWordMatches(WordMode.EXACT, true, false, null, "снег", "сьнег"));
+        assertFalse(checkOneWordMatches(WordMode.EXACT, true, false, null, "снег", "Снег"));
+        assertTrue(checkOneWordMatches(WordMode.EXACT, true, true, null, "сь?нег", "сьнег"));
+        assertTrue(checkOneWordMatches(WordMode.EXACT, true, true, null, "сне[гх]", "снег"));
 
-        assertTrue(check(WordMode.USUAL, true, null, "сьнег", "снег"));
-        assertTrue(check(WordMode.USUAL, true, null, "снег", "сьнег"));
-        assertTrue(check(WordMode.USUAL, true, null, "сьнег", "Снэ\u00B4г"));
-        assertFalse(check(WordMode.USUAL, true, null, "сьнег", "Сняг"));
+        assertTrue(checkOneWordMatches(WordMode.USUAL, true, false, null, "сьнег", "снег"));
+        assertTrue(checkOneWordMatches(WordMode.USUAL, true, false, null, "снег", "сьнег"));
+        assertTrue(checkOneWordMatches(WordMode.USUAL, true, false, null, "сьнег", "Снэ\u00B4г"));
+        assertFalse(checkOneWordMatches(WordMode.USUAL, true, false, null, "сьнег", "Сняг"));
 
-        assertTrue(check(WordMode.ALL_FORMS, false, null, "снег", "снягі"));
-        assertFalse(check(WordMode.ALL_FORMS, false, null, "снег", "снягіі"));
+        assertTrue(checkOneWordMatches(WordMode.ALL_FORMS, false, false, null, "снег", "снягі"));
+        assertFalse(checkOneWordMatches(WordMode.ALL_FORMS, false, false, null, "снег", "снягіі"));
 
-        assertFalse(check(WordMode.ALL_FORMS, false, null, "снег", "сьнягі"));
-        assertTrue(check(WordMode.ALL_FORMS, true, null, "снег", "сьнягі"));
+        assertFalse(checkOneWordMatches(WordMode.ALL_FORMS, false, false, null, "снег", "сьнягі"));
+        assertTrue(checkOneWordMatches(WordMode.ALL_FORMS, true, false, null, "снег", "сьнягі"));
 
-        assertFalse(check(WordMode.GRAMMAR, false, "N.........NP", null, "сьнягі"));
-        assertTrue(check(WordMode.GRAMMAR, true, "N.........NP", null, "сьнягі"));
-        assertTrue(check(WordMode.GRAMMAR, true, "N.........LP", null, "снегу"));
-        assertFalse(check(WordMode.GRAMMAR, false, "N.........LP", null, "снегу"));
+        assertFalse(checkOneWordMatches(WordMode.GRAMMAR, false, false, "N.........NP", null, "сьнягі"));
+        assertTrue(checkOneWordMatches(WordMode.GRAMMAR, true, false, "N.........NP", null, "сьнягі"));
+        assertTrue(checkOneWordMatches(WordMode.GRAMMAR, true, false, "N.........LP", null, "снегу"));
+        assertFalse(checkOneWordMatches(WordMode.GRAMMAR, false, false, "N.........LP", null, "снегу"));
     }
 
-    private boolean check(WordRequest.WordMode mode, boolean variants, String grammar, String rqWord, String word) {
+    private boolean checkOneWordMatches(WordRequest.WordMode mode, boolean variants, boolean regexp, String grammar, String rqWord, String word) {
         ILanguage bel = LanguageFactory.get("bel");
         WordRequest rq = new WordRequest();
         rq.mode = mode;
         rq.variants = variants;
         rq.word = rqWord;
+        rq.regexp = regexp;
         rq.grammar = grammar;
         ChainRequest chain = new ChainRequest();
         chain.words = List.of(rq);
@@ -87,20 +90,17 @@ public class WordsDetailsChecksTest {
         WordsDetailsChecks check = new WordsDetailsChecks(bel, List.of(chain), false, grFiller);
         WordResult rs = new WordResult(new Word());
         rs.word = word;
-        rs.wordNormalized = bel.getNormalizer().lightNormalized(rs.word);
-        rs.wordZnakNormalized = bel.getNormalizer().znakNormalized(rs.word);
-        rs.wordSuperNormalized = bel.getNormalizer().superNormalized(rs.word);
         return check.isOneWordAllowed(rs);
     }
 
     @Test
-    public void checkMultipleWords() {
-        assertTrue(check(List.of(List.of("снег"), List.of("навокал")), true, List.of(List.of("снег"), List.of("навокал"))));
-        assertTrue(check(List.of(List.of("снег"), List.of("навокал")), false, List.of(List.of("снег", "навокал"))));
-        assertFalse(check(List.of(List.of("снег"), List.of("навокал")), false, List.of(List.of("снег"), List.of("навокал"))));
+    public void testMultipleWords() {
+        assertTrue(checkMultipleWords(List.of(List.of("снег"), List.of("навокал")), true, List.of(List.of("снег"), List.of("навокал"))));
+        assertTrue(checkMultipleWords(List.of(List.of("снег"), List.of("навокал")), false, List.of(List.of("снег", "навокал"))));
+        assertFalse(checkMultipleWords(List.of(List.of("снег"), List.of("навокал")), false, List.of(List.of("снег"), List.of("навокал"))));
     }
 
-    private boolean check(List<List<String>> requires, boolean chainsInParagraph, List<List<String>> text) {
+    private boolean checkMultipleWords(List<List<String>> requires, boolean chainsInParagraph, List<List<String>> text) {
         ILanguage bel = LanguageFactory.get("bel");
         List<ChainRequest> chains = new ArrayList<>();
         for (List<String> ch : requires) {
@@ -135,14 +135,14 @@ public class WordsDetailsChecksTest {
     }
 
     @Test
-    public void checkWordsAround() {
-        assertTrue(check(List.of("снег", "навокал"), Arrays.asList("снег", "навокал")));
-        assertFalse(check(List.of("снег", "навокал"), Arrays.asList("снег", "ляжыць", "навокал")));
-        assertTrue(check(List.of("снег", "навокал"), Arrays.asList("снег", null, "навокал")));
-        assertFalse(check(List.of("снег", "навокал"), List.of("навокал", "снег")));
+    public void testWordsAround() {
+        assertTrue(checkWordsAround(List.of("снег", "навокал"), Arrays.asList("снег", "навокал")));
+        assertFalse(checkWordsAround(List.of("снег", "навокал"), Arrays.asList("снег", "ляжыць", "навокал")));
+        assertTrue(checkWordsAround(List.of("снег", "навокал"), Arrays.asList("снег", null, "навокал")));
+        assertFalse(checkWordsAround(List.of("снег", "навокал"), List.of("навокал", "снег")));
     }
 
-    private boolean check(List<String> ch, List<String> text) {
+    private boolean checkWordsAround(List<String> ch, List<String> text) {
         ILanguage bel = LanguageFactory.get("bel");
         ChainRequest chain = new ChainRequest();
         chain.words = ch.stream().map(w -> {
@@ -170,6 +170,52 @@ public class WordsDetailsChecksTest {
             } else {
                 p.sentences[0].words[j].word = text.get(j);
             }
+        }
+        return check.isAllowed(new Paragraph[] { p });
+    }
+
+    @Test
+    public void testSeparators() {
+        assertTrue(checkSeparators(Arrays.asList(null, "а", "$"), Arrays.asList("б", " ", "а", ".")));
+        assertTrue(checkSeparators(Arrays.asList(null, "а", "."), Arrays.asList("б", " ", "а", ".")));
+        assertFalse(checkSeparators(Arrays.asList(null, "а", ","), Arrays.asList("б", " ", "а", ".")));
+        assertFalse(checkSeparators(Arrays.asList(",", "а", null), Arrays.asList("б", " ", "а", ".")));
+        assertFalse(checkSeparators(Arrays.asList(null, "б", "$"), Arrays.asList("б", " ", "а", ".")));
+        assertTrue(checkSeparators(Arrays.asList("^", "а", null), Arrays.asList("а", " ", "б", ".")));
+        assertTrue(checkSeparators(Arrays.asList("^", "а", ""), Arrays.asList("а", " ", "б", ".")));
+        assertFalse(checkSeparators(Arrays.asList("^", "а", " "), Arrays.asList("а", " ", "б", ".")));
+        assertFalse(checkSeparators(Arrays.asList("^", "а", ""), Arrays.asList(null, "-", "а", " ", "б", ".")));
+        assertTrue(checkSeparators(Arrays.asList("-", "а", ""), Arrays.asList(null, "-", "а", " ", "б", ".")));
+        assertTrue(checkSeparators(Arrays.asList(",", "а", null), Arrays.asList(",б", ", ", "а", ".")));
+        assertFalse(checkSeparators(Arrays.asList(",", "а", null), Arrays.asList(",б", ": ", "а", ".")));
+    }
+
+    private boolean checkSeparators(List<String> expect, List<String> text) {
+        ILanguage bel = LanguageFactory.get("bel");
+        ChainRequest chain = new ChainRequest();
+        chain.words = new ArrayList<>();
+        chain.seps = new ArrayList<>();
+        chain.seps.add(expect.get(0));
+        for (int i = 1; i < expect.size(); i += 2) {
+            WordRequest rq = new WordRequest();
+            rq.mode = WordMode.USUAL;
+            rq.variants = false;
+            rq.word = expect.get(i);
+            chain.words.add(rq);
+            chain.seps.add(expect.get(i + 1));
+        }
+
+        WordsDetailsChecks check = new WordsDetailsChecks(bel, List.of(chain), false, grFiller);
+
+        Paragraph p = new Paragraph();
+        p.lang = "bel";
+        p.sentences = new Sentence[1];
+        p.sentences[0] = new Sentence();
+        p.sentences[0].words = new WordResult[text.size() / 2];
+        for (int i = 0; i < text.size(); i += 2) {
+            p.sentences[0].words[i / 2] = new WordResult(new Word());
+            p.sentences[0].words[i / 2].word = text.get(i);
+            p.sentences[0].words[i / 2].tail = text.get(i + 1);
         }
         return check.isAllowed(new Paragraph[] { p });
     }

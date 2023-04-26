@@ -28,7 +28,7 @@ public class TextArchiveParser extends BaseParser {
         Headers commonHeaders;
         if (Files.exists(headersFile)) {
             try (InputStream in = Files.newInputStream(headersFile)) {
-                TextFileParser fp = new TextFileParser(in, true);
+                TextFileParser.OneText fp = new TextFileParser(in, true).oneTextExpected();
                 commonHeaders = fp.headers;
             }
         } else {
@@ -41,9 +41,9 @@ public class TextArchiveParser extends BaseParser {
                 if (en.isDirectory()) {
                     continue;
                 }
-                TextFileParser doc;
+                TextFileParser.OneText doc;
                 try (InputStream in = new BufferedInputStream(zip.getInputStream(en))) {
-                    doc = new TextFileParser(in, headersOnly);
+                    doc = new TextFileParser(in, headersOnly).oneTextExpected();
                 }
                 MessageParsedText text = new MessageParsedText(1);
                 text.textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + en.getName();

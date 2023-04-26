@@ -12,6 +12,7 @@ import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.languages.ILanguage;
 import org.alex73.korpus.server.data.ChainRequest;
 import org.alex73.korpus.server.data.WordRequest;
+import org.alex73.korpus.server.data.WordRequest.WordMode;
 import org.alex73.korpus.server.data.WordResult;
 import org.alex73.korpus.text.structure.corpus.Paragraph;
 import org.alex73.korpus.text.structure.corpus.Sentence;
@@ -66,16 +67,16 @@ public class WordsDetailsChecks {
             switch (w.mode) {
             case USUAL:
                 if (w.variants) {
-                    String s = nullIfEmpty(lang.getNormalizer().superNormalized(w.word.trim()));
-                    if (needWildcardRegexp(s)) {
+                    String s = nullIfEmpty(lang.getNormalizer().superNormalized(w.word.trim(), ILanguage.INormalizer.PRESERVE_WILDCARDS));
+                    if (needMasks(w) != NEED_MASKS.NO) {
                         wordSuperNormalizedRegexp = createWildcardRegexp(s);
                     } else {
                         wordSuperNormalized = s;
                     }
                     grammarVariantRegexp = gr;
                 } else {
-                    String s = nullIfEmpty(lang.getNormalizer().lightNormalized(w.word.trim()));
-                    if (needWildcardRegexp(s)) {
+                    String s = nullIfEmpty(lang.getNormalizer().lightNormalized(w.word.trim(), ILanguage.INormalizer.PRESERVE_WILDCARDS));
+                    if (needMasks(w) != NEED_MASKS.NO) {
                         wordNormalizedRegexps = createWildcardRegexp(s);
                     } else {
                         wordNormalized = s;
@@ -93,11 +94,20 @@ public class WordsDetailsChecks {
                 }
                 break;
             case EXACT:
-                String s = nullIfEmpty(lang.getNormalizer().znakNormalized(w.word.trim()));
-                if (needWildcardRegexp(s)) {
-                    wordZnakRegexp = createWildcardRegexp(s);
-                } else {
-                    wordZnakNormalized = s;
+                switch (needMasks(w)) {
+                case NO:
+                    wordZnakNormalized = nullIfEmpty(lang.getNormalizer().znakNormalized(w.word.trim(), ILanguage.INormalizer.PRESERVE_NONE));
+                    break;
+                case WILDCARDS:
+                    wordZnakRegexp = createWildcardRegexp(
+                            nullIfEmpty(lang.getNormalizer().znakNormalized(w.word.trim(), ILanguage.INormalizer.PRESERVE_WILDCARDS)));
+                    break;
+                case REGEX:
+                    wordZnakRegexp = createPatternRegexp(
+                            nullIfEmpty(lang.getNormalizer().znakNormalized(w.word.trim(), ILanguage.INormalizer.PRESERVE_REGEXP)));
+                    break;
+                default:
+                    throw new RuntimeException();
                 }
                 break;
             case GRAMMAR:
@@ -121,12 +131,14 @@ public class WordsDetailsChecks {
          */
         private Set<String> getForms(String word, boolean variant) {
             Set<String> result = new HashSet<>();
-            String expected = variant ? lang.getNormalizer().superNormalized(word) : lang.getNormalizer().lightNormalized(word);
+            String expected = variant ? lang.getNormalizer().superNormalized(word, ILanguage.INormalizer.PRESERVE_NONE)
+                    : lang.getNormalizer().lightNormalized(word, ILanguage.INormalizer.PRESERVE_NONE);
             for (Paradigm p : grFiller.getFinder().getParadigms(word.trim())) {
                 boolean collectForms = false;
                 for (Variant v : p.getVariant()) {
                     for (Form f : v.getForm()) {
-                        String form = variant ? lang.getNormalizer().superNormalized(f.getValue()) : lang.getNormalizer().lightNormalized(f.getValue());
+                        String form = variant ? lang.getNormalizer().superNormalized(f.getValue(), ILanguage.INormalizer.PRESERVE_NONE)
+                                : lang.getNormalizer().lightNormalized(f.getValue(), ILanguage.INormalizer.PRESERVE_NONE);
                         if (expected.equals(form)) {
                             collectForms = true;
                             break;
@@ -136,7 +148,8 @@ public class WordsDetailsChecks {
                 if (collectForms) {
                     for (Variant v : p.getVariant()) {
                         for (Form f : v.getForm()) {
-                            String form = variant ? lang.getNormalizer().superNormalized(f.getValue()) : lang.getNormalizer().lightNormalized(f.getValue());
+                            String form = variant ? lang.getNormalizer().superNormalized(f.getValue(), ILanguage.INormalizer.PRESERVE_NONE)
+                                    : lang.getNormalizer().lightNormalized(f.getValue(), ILanguage.INormalizer.PRESERVE_NONE);
                             if (!form.isEmpty()) {
                                 result.add(form);
                             }
@@ -330,13 +343,20 @@ public class WordsDetailsChecks {
      * Returns list of words in case of matches, or null otherwise.
      */
     private WordResult[] isWordsMatchChain(ILanguage lang, ChainInternals chain, Sentence sentence, int position) {
+        if (sentence.words[position].type == Word.OtherType.PAZNAKA || sentence.words[position].wordNormalized == null) {
+            // should be started from exact this word
+            return null;
+        }
         WordResult[] checks = new WordResult[chain.words.length];
         int count = 0;
+        int positionAfter = 0;
         for (int i = position; i < sentence.words.length && count < checks.length; i++) {
-            if (sentence.words[i].type != Word.OtherType.PAZNAKA) { // прапускаем пазнакі
+            if (sentence.words[i].type != Word.OtherType.PAZNAKA && sentence.words[i].wordNormalized != null) {
+                // прапускаем пазнакі і пустыя знакі перад пачаткам сказу
                 checks[count] = (WordResult) sentence.words[i];
                 count++;
             }
+            positionAfter = i + 1;
         }
         if (count < checks.length) {
             return null; // недастаткова слоў
@@ -346,15 +366,11 @@ public class WordsDetailsChecks {
                 return null;
             }
         }
+        // TODO Калі пазначылі нейкія знакі прыпынку, хоць адзін з іх мусіць быць, і не
+        // мусіць быць ніякіх акрамя пазначаных.
         if (chain.separatorBefore != null) {
             // шукаем перад словамі
-            Word before = null;
-            for (int i = position - 1; i >= 0; i--) {
-                if (sentence.words[i].type != Word.OtherType.PAZNAKA) { // прапускаем пазнакі
-                    before = sentence.words[i];
-                    break;
-                }
-            }
+            Word before = getWordBefore(sentence, position - 1);
             if ("^".equals(chain.separatorBefore)) {
                 if (before != null) {
                     return null;
@@ -363,19 +379,51 @@ public class WordsDetailsChecks {
                 if (before == null) {
                     return null;
                 }
-                // TODO check value
+                if (!isOneSepMatches(chain.separatorBefore, before)) {
+                    return null;
+                }
             }
         }
         for (int i = 0; i < checks.length; i++) {
-            if (!isOneSepMatches(chain.words[i].separatorAfter, checks[i])) {
+            if (i == checks.length - 1 && "$".equals(chain.words[i].separatorAfter)) {
+                // шукаем канец сказу пасля апошняга слову
+                Word after = getWordAfter(sentence, positionAfter);
+                if (after != null) {
+                    return null;
+                }
+            } else if (!isOneSepMatches(chain.words[i].separatorAfter, checks[i])) {
                 return null;
             }
         }
         return checks;
     }
 
-    private boolean isOneSepMatches(String requiredSeparator, WordResult wordResult) {
-        return true; // TODO
+    private Word getWordBefore(Sentence sentence, int position) {
+        for (int i = position; i >= 0; i--) {
+            if (sentence.words[i].type != Word.OtherType.PAZNAKA) { // прапускаем пазнакі
+                return sentence.words[i];
+            }
+        }
+        return null;
+    }
+
+    private Word getWordAfter(Sentence sentence, int position) {
+        for (int i = position; i < sentence.words.length; i++) {
+            if (sentence.words[i].type != Word.OtherType.PAZNAKA) { // прапускаем пазнакі
+                return sentence.words[i];
+            }
+        }
+        return null;
+    }
+
+    private boolean isOneSepMatches(String requiredSeparator, Word wordResult) {
+        if (requiredSeparator == null || requiredSeparator.isEmpty()) {
+            return true;
+        }
+        if ("NONE".equals(requiredSeparator) && wordResult.tail.isBlank()) {
+            return true;
+        }
+        return requiredSeparator.equals(wordResult.tail.replace(" ", ""));
     }
 
     public static boolean isTooSimpleWord(WordRequest w) {
@@ -389,11 +437,21 @@ public class WordsDetailsChecks {
         }
     }
 
-    public static boolean needWildcardRegexp(String word) {
-        if (word == null) {
-            return false;
+    public enum NEED_MASKS {
+        NO, WILDCARDS, REGEX
+    };
+
+    public static NEED_MASKS needMasks(WordRequest w) {
+        if (w.word == null) {
+            return NEED_MASKS.NO;
         }
-        return word.contains("*") || word.contains("?");
+        if (w.regexp && w.mode == WordMode.EXACT) {
+            return NEED_MASKS.REGEX;
+        }
+        if (w.word.contains("*") || w.word.contains("?")) {
+            return NEED_MASKS.WILDCARDS;
+        }
+        return NEED_MASKS.NO;
     }
 
     private static String nullIfEmpty(String s) {
@@ -432,3 +490,5 @@ public class WordsDetailsChecks {
         };
     }
 }
+
+//TODO квадратныя дужки ў тэксце адкідаць

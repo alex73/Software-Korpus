@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.alex73.korpus.utils.StressUtils;
 import org.xerial.snappy.SnappyOutputStream;
 
 public class WordsStat {
@@ -47,21 +46,14 @@ public class WordsStat {
         byFormTempFile.close();
     }
 
-    public void addWord(String value, String[] lemmas) {
+    public void addWord(String normalizedValue, Set<String> lemmas) {
         wordsCount++;
-
-        String normalizedValue = StressUtils.unstress(value).toLowerCase();
-        if (!normalizedValue.isEmpty()) {
-            if (normalizedValue.charAt(0) == 'ў') {
-                normalizedValue = 'у' + normalizedValue.substring(1);
-            }
-        }
 
         if (byForm != null && !normalizedValue.isEmpty()) {
             byForm.computeIfAbsent(normalizedValue, v -> new AtomicInteger()).incrementAndGet();
         }
 
-        if (lemmas == null) {
+        if (lemmas.isEmpty()) {
             if (byUnknown != null) {
                 // TODO адкідаць пустыя словы, нумары, лацінку,
                 if (normalizedValue.isEmpty()) {
@@ -80,7 +72,7 @@ public class WordsStat {
                 allLemmas.add(lemma);
             }
             if (byLemma != null) {
-                float part = 1.0f / lemmas.length;
+                float part = 1.0f / lemmas.size();
                 for (String lemma : lemmas) {
                     if (lemma.isEmpty()) {
                         continue;

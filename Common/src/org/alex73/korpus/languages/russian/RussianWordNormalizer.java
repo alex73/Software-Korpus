@@ -14,10 +14,14 @@ public class RussianWordNormalizer extends BelarusianWordNormalizer {
     }
 
     @Override
-    public String lightNormalized(CharSequence word) {
+    public String lightNormalized(CharSequence word, String preserveChars) {
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < word.length(); i++) {
             char c = word.charAt(i);
+            if (preserveChars.indexOf(c) >= 0) {
+                str.append(c);
+                continue;
+            }
             c = c < LITENORMALIZE.length ? LITENORMALIZE[c] : 0;
             if (c > 0) {
                 str.append(c);

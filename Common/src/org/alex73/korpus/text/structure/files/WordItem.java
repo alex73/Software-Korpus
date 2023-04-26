@@ -4,7 +4,7 @@ import org.alex73.korpus.text.structure.corpus.Word.OtherType;
 
 public class WordItem implements ITextLineElement {
     /** Зыходнае слова ў тэксце з мінімальным прывядзеннем да стандартнага запісу: выпраўленне апострафаў. Мусіць абавязкова быць. */
-    public String lightNormalized;
+    public String word;
     /** Зыходнае слова ў тэксце, выпраўленае карыстальнікам для пошуку ў базе, накшталт "мн-о-о-о-га"->"многа". Толькі калі карыстальнік абраў. */
     public String manualNormalized;
 
@@ -26,17 +26,17 @@ public class WordItem implements ITextLineElement {
     }
 
     public WordItem(String text) {
-        lightNormalized = text;
+        word = text;
     }
 
     @Override
     public String getText() {
-        return lightNormalized;
+        return word;
     }
 
     public WordItem clone() {
         WordItem r = new WordItem();
-        r.lightNormalized = lightNormalized;
+        r.word = word;
         r.manualNormalized = manualNormalized;
         r.lemmas = lemmas;
         r.tags = tags;

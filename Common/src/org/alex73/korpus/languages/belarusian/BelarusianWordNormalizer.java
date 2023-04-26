@@ -1,24 +1,3 @@
-/**************************************************************************
- Korpus - Corpus Linguistics Software.
-
- Copyright (C) 2013 Aleś Bułojčyk (alex73mail@gmail.com)
-
- This file is part of Korpus.
-
- Korpus is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
-
- Korpus is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
- **************************************************************************/
-
 package org.alex73.korpus.languages.belarusian;
 
 import java.util.Map;
@@ -27,9 +6,9 @@ import org.alex73.korpus.languages.ILanguage;
 
 public class BelarusianWordNormalizer implements ILanguage.INormalizer {
     public static final char pravilny_nacisk = '\u0301';
-    protected final String usie_naciski = pravilny_nacisk + "\u00B4";
+    public static final String usie_naciski = pravilny_nacisk + "\u00B4";
     public static final char pravilny_apostraf = '\u02BC';
-    private final String usie_apostrafy = pravilny_apostraf + "\'\u2019";
+    public static final String usie_apostrafy = pravilny_apostraf + "\'\u2019";
     private final String letters = usie_naciski + usie_apostrafy
             + "-ёйцукенгшўзхфывапролджэячсмітьъбющиЁЙЦУКЕНГШЎЗХФЫВАПРОЛДЖЭЯЧСМІТЬЪБЮЩИqwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789";
 
@@ -46,11 +25,6 @@ public class BelarusianWordNormalizer implements ILanguage.INormalizer {
             }
         }
 
-        // Пошук
-        ZNAKNORMALIZE['?'] = '?';
-        ZNAKNORMALIZE['*'] = '*';
-        LITENORMALIZE['?'] = '?';
-        LITENORMALIZE['*'] = '*';
         // Правільны апостраф - 02BC
         for (char c : usie_apostrafy.toCharArray()) {
             ZNAKNORMALIZE[c] = pravilny_apostraf;
@@ -91,10 +65,14 @@ public class BelarusianWordNormalizer implements ILanguage.INormalizer {
     }
 
     @Override
-    public String znakNormalized(CharSequence word) {
+    public String znakNormalized(CharSequence word, String preserveChars) {
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < word.length(); i++) {
             char c = word.charAt(i);
+            if (preserveChars.indexOf(c) >= 0) {
+                str.append(c);
+                continue;
+            }
             c = c < ZNAKNORMALIZE.length ? ZNAKNORMALIZE[c] : 0;
             if (c > 0) {
                 str.append(c);
@@ -104,10 +82,14 @@ public class BelarusianWordNormalizer implements ILanguage.INormalizer {
     }
 
     @Override
-    public String lightNormalized(CharSequence word) {
+    public String lightNormalized(CharSequence word, String preserveChars) {
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < word.length(); i++) {
             char c = word.charAt(i);
+            if (preserveChars.indexOf(c) >= 0) {
+                str.append(c);
+                continue;
+            }
             c = c < LITENORMALIZE.length ? LITENORMALIZE[c] : 0;
             if (c > 0) {
                 if (str.length() == 0) {
@@ -127,10 +109,14 @@ public class BelarusianWordNormalizer implements ILanguage.INormalizer {
     }
 
     @Override
-    public String superNormalized(String word) {
+    public String superNormalized(String word, String preserveChars) {
         StringBuilder str = new StringBuilder();
         for (int i = 0; i < word.length(); i++) {
             char c = word.charAt(i);
+            if (preserveChars.indexOf(c) >= 0) {
+                str.append(c);
+                continue;
+            }
             c = c < SUPERNORMALIZE.length ? SUPERNORMALIZE[c] : 0;
             if (c > 0) {
                 str.append(c);

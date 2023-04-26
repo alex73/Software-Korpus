@@ -20,7 +20,7 @@ public class SkarynaParser extends BaseParser {
     @Override
     public void parse(Consumer<MessageParsedText> publisher, boolean headersOnly) throws Exception {
         byte[] data = Files.readAllBytes(file);
-        TextFileParser doc = new TextFileParser(new ByteArrayInputStream(data), headersOnly);
+        TextFileParser.OneText doc = new TextFileParser(new ByteArrayInputStream(data), headersOnly).oneTextExpected();
         MessageParsedText text = new MessageParsedText(1);
         text.textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString();
         text.textInfo.subcorpus = subcorpus;
