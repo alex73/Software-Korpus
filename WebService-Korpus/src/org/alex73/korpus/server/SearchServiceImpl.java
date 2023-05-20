@@ -223,7 +223,7 @@ public class SearchServiceImpl {
                 result[i].doc = restoreTextInfo(doc);
                 result[i].text = restoreText(doc);
                 // mark result words
-                checks.isAllowed(result[i].text);
+                checks.isAllowed(result[i].doc, result[i].text);
             }
             return result;
         } catch (ServerError ex) {
@@ -260,6 +260,7 @@ public class SearchServiceImpl {
         if (w.mode != WordMode.ALL_FORMS) {
             return;
         }
+        w.word = lang.getNormalizer().lightNormalized(w.word, ILanguage.INormalizer.PRESERVE_NONE);
         Set<String> forms = new TreeSet<>();
         Paradigm[] ps = getApp().grFinder.getParadigms(w.word);
         // user can enter lemma of variant, but we need to find paradigm
@@ -301,8 +302,9 @@ public class SearchServiceImpl {
             public Integer processDoc(int docID) {
                 try {
                     Document doc = getApp().processKorpus.getSentence(docID);
+                    TextInfo textInfo = getApp().getTextInfo(getApp().processKorpus.getTextID(doc));
                     Paragraph[] text = restoreText(doc);
-                    return checks.isAllowed(text) ? docID : null;
+                    return checks.isAllowed(textInfo, text) ? docID : null;
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }

@@ -117,6 +117,14 @@ public class BelarusianWordNormalizer implements ILanguage.INormalizer {
                 str.append(c);
                 continue;
             }
+            if (c == 'щ' || c == 'Щ') {
+                str.append("шч");
+                continue;
+            }
+            if (c == 'и' || c == 'И') {
+                str.append("і");
+                continue;
+            }
             c = c < SUPERNORMALIZE.length ? SUPERNORMALIZE[c] : 0;
             if (c > 0) {
                 str.append(c);

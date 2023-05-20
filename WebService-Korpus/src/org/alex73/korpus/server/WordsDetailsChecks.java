@@ -9,6 +9,7 @@ import org.alex73.corpus.paradigm.Form;
 import org.alex73.corpus.paradigm.Paradigm;
 import org.alex73.corpus.paradigm.Variant;
 import org.alex73.korpus.base.StaticGrammarFiller2;
+import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.languages.ILanguage;
 import org.alex73.korpus.server.data.ChainRequest;
 import org.alex73.korpus.server.data.WordRequest;
@@ -246,7 +247,8 @@ public class WordsDetailsChecks {
     /**
      * For checking words from texts.
      */
-    public WordsDetailsChecks(ILanguage lang, List<ChainRequest> inputChains, boolean chainsInParagraph, StaticGrammarFiller2 grFiller) {
+    public WordsDetailsChecks(ILanguage lang, List<ChainRequest> inputChains, boolean chainsInParagraph,
+            StaticGrammarFiller2 grFiller) {
         this.lang = lang;
         this.chains = new ChainInternals[inputChains.size()];
         this.chainsInParagraph = chainsInParagraph;
@@ -259,7 +261,12 @@ public class WordsDetailsChecks {
     /**
      * Is the document corresponding with search criteria ?
      */
-    public boolean isAllowed(Paragraph[] resultText) {
+    public boolean isAllowed(TextInfo textInfo, Paragraph[] resultText) {
+        for (TextInfo.Subtext tis : textInfo.subtexts) {
+            if (ApplicationKorpus.instance.isAuthorsBlacklisted(tis.authors)) {
+                return false;
+            }
+        }
         // fill normalization and tags
         grFiller.fill(resultText, needCheckTags);
 
@@ -313,7 +320,12 @@ public class WordsDetailsChecks {
         return chainFound;
     }
 
-    public boolean isOneWordAllowed(WordResult wordResult) {
+    public boolean isOneWordAllowed(TextInfo textInfo, WordResult wordResult) {
+        for (TextInfo.Subtext tis : textInfo.subtexts) {
+            if (ApplicationKorpus.instance.isAuthorsBlacklisted(tis.authors)) {
+                return false;
+            }
+        }
         grFiller.fill(wordResult, needCheckTags);
 
         if (chains.length != 1 || chains[0].words.length != 1) {

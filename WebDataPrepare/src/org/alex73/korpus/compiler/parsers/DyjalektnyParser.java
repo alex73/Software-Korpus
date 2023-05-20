@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 
 import org.alex73.korpus.compiler.MessageParsedText;
 import org.alex73.korpus.compiler.PrepareCache3;
+import org.alex73.korpus.compiler.ProcessTexts;
 import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.TextFileParser;
@@ -28,14 +29,14 @@ public class DyjalektnyParser extends BaseParser {
                 MessageParsedText text = new MessageParsedText(1);
                 text.textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + '_' + textIndex;
                 text.textInfo.subcorpus = subcorpus;
-                text.textInfo.subtexts[0].details = doc.headers.get("Раён");
-                text.textInfo.subtexts[0].source = doc.headers.get("Інфармант");
+                text.textInfo.subtexts[0].headers = doc.headers.getAll();
+                text.textInfo.subtexts[0].source = doc.headers.get("Крыніца");
                 String s;
                 if ((s = doc.headers.get("Збіральнік")) != null) {
                     text.textInfo.subtexts[0].authors = splitAndTrim(s);
                 }
                 text.textInfo.subtexts[0].creationTime = getAndCheckYears(doc.headers.get("Год запісу"));
-                text.textInfo.subtexts[0].textLabel = text.textInfo.subtexts[0].details;
+                ProcessTexts.preprocessor.constructTextPassport(text.textInfo, text.textInfo.subtexts[0]);
 
                 if (!headersOnly) {
                     doc.parse(LanguageFactory.get(getLang(text.textInfo.subtexts[0].lang)), true, PrepareCache3.errors);

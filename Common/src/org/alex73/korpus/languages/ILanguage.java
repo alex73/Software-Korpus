@@ -35,7 +35,8 @@ public interface ILanguage {
     }
 
     interface INormalizer {
-        static final String PRESERVE_NONE = "?*";
+        static final String PRESERVE_NONE = "";
+        static final String PRESERVE_VISUAL = "[]";
         static final String PRESERVE_WILDCARDS = "?*";
         static final String PRESERVE_REGEXP = ".?*[]{},+()|^-0123456789";
 

@@ -8,7 +8,7 @@
       <tr <#if active == 'paralelny'>{{if subdocIndex == 0}}style="border-top: solid 1px blue"{{/if}}</#if> >
         <td style="color: #337ab7; white-space: nowrap;">
             <a tabindex="0" href="#" onClick="new PopoverBiblio(event, korpusService.resultSearch.rows[{{:#index}}].doc, korpusService.resultSearch.rows[{{:#index}}].subdoc, korpusService.resultSearch.rows[{{:#index}}].origText.page); return false;">
-                {{titleShort:subdoc.textLabel}}
+                {{titleShort:subdoc.label}}
             </a>
         </td>
         <td>

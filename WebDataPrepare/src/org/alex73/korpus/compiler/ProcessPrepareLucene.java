@@ -43,6 +43,11 @@ public class ProcessPrepareLucene extends BaseParallelProcessor<MessageParsedTex
 
             MessageLuceneWrite out = new MessageLuceneWrite();
             out.textInfo = text.textInfo;
+            for (TextInfo.Subtext st : text.textInfo.subtexts) {
+                if (st.label == null) {
+                    throw new RuntimeException("No text label for " + text.textInfo.sourceFilePath);
+                }
+            }
             out.paragraphs = new MessageLuceneWrite.LuceneParagraph[text.paragraphs.length];
             for (int i = 0; i < text.paragraphs.length; i++) {
                 MessageLuceneWrite.LuceneParagraph po = new MessageLuceneWrite.LuceneParagraph();

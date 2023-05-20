@@ -11,6 +11,8 @@ public interface ITextsPreprocessor {
 
     void preprocess(MessageParsedText text);
 
+    void constructTextPassport(TextInfo textInfo, TextInfo.Subtext subText);
+
     static void shuffle(Paragraph[][] list) {
         Random random = new Random();
         for (int i = list[0].length; i > 1; i--) {

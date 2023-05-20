@@ -1,7 +1,11 @@
 class PopoverBiblio extends BasePopover {
 	constructor(event, doc:TextInfo, subdoc: Subtext, page: number) {
 		super();
-		const html = $.templates("#template-biblio").render({ doc: doc, subdoc: subdoc, page: page });
+		
+		let html = subdoc.passport;
+		html = html.replace("{{page}}", page ? (" (старонка "+page+")") : "");
+		korpusService.initial.subcorpuses.forEach(kv => html = html.replace("{{subcorpus:"+kv.key+"}}", kv.value.replace(/\|\|.+/g, '')));
+		
 		$('#dialog-biblio-details').html(html);
 		let popover: HTMLElement = document.getElementById('dialog-biblio');
 

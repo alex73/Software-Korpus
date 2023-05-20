@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.languages.ILanguage;
 import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.server.data.ChainRequest;
@@ -56,13 +57,13 @@ public class ClusterServiceImpl {
 
     private void process(WordsDetailsChecks check, int docID, LuceneFilter process) throws Exception {
         Document doc = process.getSentence(docID);
-
+        TextInfo textInfo = ApplicationKorpus.instance.getTextInfo(process.getTextID(doc));
         Paragraph[] ps = parent.restoreText(doc);
 
         for (int pi = 0; pi < ps.length; pi++) {
             for (int i = 0; i < ps[pi].sentences.length; i++) {
                 for (int j = 0; j < ps[pi].sentences[i].words.length; j++) {
-                    if (check.isOneWordAllowed((WordResult) ps[pi].sentences[i].words[j])) {
+                    if (check.isOneWordAllowed(textInfo, (WordResult) ps[pi].sentences[i].words[j])) {
                         process(ps[pi].sentences[i], j);
                     }
                 }

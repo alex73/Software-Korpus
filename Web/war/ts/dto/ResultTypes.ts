@@ -251,15 +251,13 @@ class TextInfo {
 
 class Subtext {
     public source: string;
-    public url: string;
     public authors: string[];
-    public title: string;
-    public translators: string[];
     public lang: string;
     public langOrig: string;
-    public edition: string;
     public creationTime: string;
     public publicationTime: string;
+    public label: string;
+    public passport: string;
 }
 
 class ClusterResult {

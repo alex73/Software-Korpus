@@ -81,7 +81,7 @@ public class ProcessStat extends BaseParallelProcessor<MessageParsedText> {
         for (Paradigm p : grFinder.getParadigms(form)) {
             for (Variant v : p.getVariant()) {
                 for (Form f : v.getForm()) {
-                    if (StressUtils.unstress(f.getValue()).toLowerCase().equals(form)) {
+                    if (fastCompareWithoutStress(f.getValue(), form)) {
                         result.add(p.getLemma());
                         break;
                     }
@@ -89,6 +89,36 @@ public class ProcessStat extends BaseParallelProcessor<MessageParsedText> {
             }
         }
         return result;
+    }
+
+    private boolean fastCompareWithoutStress(String s1, String s2) {
+        int p1 = 0, p2 = 0;
+        while (true) {
+            char c1 = p1 < s1.length() ? s1.charAt(p1) : 0;
+            char c2 = p2 < s2.length() ? s2.charAt(p2) : 0;
+            if (c1 == 0 && c2 == 0) {
+                return true;
+            }
+            if (StressUtils.STRESS_CHARS.indexOf(c1) >= 0) {
+                p1++;
+                continue;
+            }
+            if (StressUtils.STRESS_CHARS.indexOf(c2) >= 0) {
+                p2++;
+                continue;
+            }
+            if (Character.isUpperCase(c1)) {
+                c1 = Character.toLowerCase(c1);
+            }
+            if (Character.isUpperCase(c2)) {
+                c2 = Character.toLowerCase(c2);
+            }
+            if (c1 != c2) {
+                return false;
+            }
+            p1++;
+            p2++;
+        }
     }
 
     void addGlobalCounts(TextInfo textInfo, int textIndex, int wordsCount) {

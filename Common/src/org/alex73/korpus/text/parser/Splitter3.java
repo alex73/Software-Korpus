@@ -113,7 +113,7 @@ public class Splitter3 {
     private void closeWord() {
         if (currentWord.length() > 0) {
             WordItem w = new WordItem();
-            w.word = wordNormalizer.znakNormalized(currentWord, ILanguage.INormalizer.PRESERVE_NONE);
+            w.word = wordNormalizer.znakNormalized(currentWord, ILanguage.INormalizer.PRESERVE_VISUAL);
             result.add(w);
         }
         if (currentTail.length() > 0) {

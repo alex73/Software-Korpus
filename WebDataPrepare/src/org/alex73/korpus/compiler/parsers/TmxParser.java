@@ -14,6 +14,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.alex73.korpus.compiler.MessageParsedText;
 import org.alex73.korpus.compiler.PrepareCache3;
+import org.alex73.korpus.compiler.ProcessTexts;
 import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.Splitter3;
@@ -46,15 +47,18 @@ public class TmxParser extends BaseParser {
             if (!parsed.properties.containsKey("title")) {
                 throw new Exception("'title' property is not defined in " + file);
             }
-            text.textInfo.subtexts[i].title = parsed.properties.get("title").get(langs[i]);
             String s;
             if ((s = parsed.properties.computeIfAbsent("authors", a -> Map.of()).get(langs[i])) != null) {
                 text.textInfo.subtexts[i].authors = splitAndTrim(s);
             }
+            String edition = null;
             if ((s = parsed.properties.computeIfAbsent("edition", a -> Map.of()).get(langs[i])) != null) {
-                text.textInfo.subtexts[0].edition = s;
+                edition = s;
             }
-            text.textInfo.subtexts[i].textLabel = text.textInfo.subtexts[i].title;
+            text.textInfo.subtexts[i].headers = new TreeMap<>();
+            text.textInfo.subtexts[i].headers.put("Title", parsed.properties.get("title").get(langs[i]));
+            text.textInfo.subtexts[i].headers.put("Edition", edition);
+            ProcessTexts.preprocessor.constructTextPassport(text.textInfo, text.textInfo.subtexts[i]);
         }
 
         AuthorsUtil.fixAuthors(text.textInfo.subtexts[0]);

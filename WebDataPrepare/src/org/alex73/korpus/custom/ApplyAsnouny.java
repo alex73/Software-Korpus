@@ -3,7 +3,6 @@ package org.alex73.korpus.custom;
 import java.text.Collator;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Locale;
 
 import org.alex73.korpus.base.TextInfo;
@@ -42,39 +41,37 @@ public class ApplyAsnouny implements ITextsPreprocessor {
             if (o1 == o2) {
                 return 0;
             }
-            int c = Integer.compare(subcorpuses.indexOf(o1.subcorpus), subcorpuses.indexOf(o2.subcorpus));
+            SUBCORPUSES s1 = SUBCORPUSES.valueOf(o1.subcorpus);
+            SUBCORPUSES s2 = SUBCORPUSES.valueOf(o2.subcorpus);
+            int c = s1.ordinal() - s2.ordinal();
             if (c == 0) {
-                switch (o1.subcorpus) {
-                case "teksty":
+                switch (s1) {
+                case teksty:
                     c = teksty.compare(o1, o2);
                     break;
-                case "pieraklady":
+                case pieraklady:
                     c = pieraklady.compare(o1, o2);
                     break;
-                case "wiki":
+                case wiki:
                     c = wiki.compare(o1, o2);
                     break;
-                case "sajty":
+                case sajty:
                     c = sajty.compare(o1, o2);
                     break;
-                case "nierazabranaje":
+                case nierazabranaje:
                     c = nierazabranaje.compare(o1, o2);
                     break;
-                case "kankardans":
+                case kankardans:
                     c = kankardans.compare(o1, o2);
                     break;
-                case "dyjalektny":
+                case dyjalektny:
                     c = dyjalektny.compare(o1, o2);
                     break;
-                case "skaryna":
+                case skaryna:
                     c = skaryna.compare(o1, o2);
                     break;
                 default:
-                    if (o1.subcorpus.startsWith("wiki")) {
-                        c = wiki.compare(o1, o2);
-                    } else {
-                        throw new RuntimeException("Unknown subcorpus: " + o1.subcorpus);
-                    }
+                    throw new RuntimeException("Unknown subcorpus: " + o1.subcorpus);
                 }
             }
             if (c == 0) {
@@ -87,7 +84,108 @@ public class ApplyAsnouny implements ITextsPreprocessor {
         };
     }
 
-    static final List<String> subcorpuses = Arrays.asList("skaryna", "kankardans", "teksty", "pieraklady", "sajty", "wiki", "nierazabranaje", "dyjalektny");
+    @Override
+    public void constructTextPassport(TextInfo textInfo, TextInfo.Subtext subText) {
+        StringBuilder s = new StringBuilder();
+        addHeader(s, "Падкорпус", "{{subcorpus:" + textInfo.subcorpus + "}}");
+
+        SUBCORPUSES sub = SUBCORPUSES.valueOf(textInfo.subcorpus);
+        switch (sub) {
+        case teksty:
+        case pieraklady: {
+            String authors = null;
+            subText.label = null;
+            if (sub == SUBCORPUSES.pieraklady) {
+                subText.label = subText.headers.get("Translators");
+            } else if (subText.authors != null) {
+                authors = String.join(",", Arrays.asList(subText.authors));
+                subText.label = authors;
+            }
+            if (subText.label == null) {
+                subText.label = "———";
+            }
+            addHeader(s, "URL", subText.headers.get("URL"));
+            addHeader(s, "Аўтары", authors);
+            addHeader(s, "Перакладчык", subText.headers.get("Translators"));
+            addHeader(s, "Пераклад з", subText.headers.get("LangOrig"));
+            addHeader(s, "Назва", subText.headers.get("Title") + "{{page}}");
+            addHeader(s, "Стыль/жанр", subText.headers.get("StyleGenre"));
+            addHeader(s, "Выданне", subText.headers.get("Edition"));
+            addHeader(s, "Файл", subText.headers.get("File"));
+            addHeader(s, "Час стварэння", subText.headers.get("CreationYear"));
+            addHeader(s, "Час публікацыі", subText.headers.get("PublicationYear"));
+            break;
+        }
+        case wiki:
+            subText.label = subText.source;
+            addHeader(s, "URL", subText.headers.get("URL"));
+            addHeader(s, "Крыніца", subText.source);
+            addHeader(s, "Назва", subText.headers.get("Title"));
+            break;
+        case skaryna:
+            subText.label = subText.headers.get("Title");
+            addHeader(s, "Назва", subText.headers.get("Title"));
+            break;
+        case dyjalektny:
+            subText.label = subText.headers.get("Раён");
+            addHeader(s, "Вобласць", subText.headers.get("Вобласць"));
+            addHeader(s, "Раён", subText.headers.get("Раён"));
+            addHeader(s, "Месца", subText.headers.get("Месца"));
+            addHeader(s, "Дыялект", subText.headers.get("Дыялект, група гаворак"));
+            addHeader(s, "Збіральнік", subText.headers.get("Збіральнік"));
+            addHeader(s, "Год запісу", subText.headers.get("Год запісу"));
+            addHeader(s, "Тэкст расшыфраваў", subText.headers.get("Тэкст расшыфраваў"));
+            addHeader(s, "Год нараджэння", subText.headers.get("Інфармант-год нараджэння"));
+            addHeader(s, "Месца нараджэння інфарманта", subText.headers.get("Інфармант-месца нараджэння"));
+            addHeader(s, "Дзе жыў інфарманта", subText.headers.get("Інфармант-дзе жыў"));
+            addHeader(s, "Пол інфарманта", subText.headers.get("Інфармант-пол"));
+            addHeader(s, "Нацыянальнасць інфарманта", subText.headers.get("Інфармант-нацыянальнасць"));
+            addHeader(s, "Веравызнанне інфарманта", subText.headers.get("Інфармант-веравызнанне"));
+            addHeader(s, "Адукацыя інфарманта", subText.headers.get("Інфармант-адукацыя"));
+            addHeader(s, "Паходжанне бацькоў інфарманта", subText.headers.get("Інфармант-паходжанне бацькоў"));
+            addHeader(s, "Тып тэксту інфарманта", subText.headers.get("Тып тэксту"));
+            addHeader(s, "Крыніца", subText.headers.get("Крыніца"));
+            break;
+        case sajty:
+            subText.label = subText.source;
+            addHeader(s, "URL", subText.headers.get("URL"));
+            addHeader(s, "Назва", subText.headers.get("Title"));
+            addHeader(s, "Крыніца", subText.source);
+            addHeader(s, "Час публікацыі", subText.headers.get("PublicationYear"));
+            break;
+        case kankardans: {
+            String authors = null;
+            subText.label = null;
+            if (subText.authors != null) {
+                authors = String.join(",", Arrays.asList(subText.authors));
+                subText.label = authors;
+            }
+            if (subText.label == null) {
+                subText.label = "———";
+            }
+            addHeader(s, "Аўтар", authors);
+            addHeader(s, "Назва", subText.headers.get("Title") + "{{page}}");
+            addHeader(s, "Час стварэння", subText.headers.get("CreationYear"));
+            addHeader(s, "Час публікацыі", subText.headers.get("PublicationYear"));
+            break;
+        }
+        default:
+            throw new RuntimeException("Unknown subcorpus: " + textInfo.subcorpus);
+        }
+        subText.passport = s.toString();
+    }
+
+    private void addHeader(StringBuilder s, String title, String value) {
+        if (value == null || value.isBlank()) {
+            return;
+        }
+        s.append("<div><b>" + title + ":</b> " + value + "</div>");
+    }
+
+    enum SUBCORPUSES {
+        skaryna, kankardans, teksty, pieraklady, sajty, wiki, nierazabranaje, dyjalektny
+    };
+
     static final Collator BE = Collator.getInstance(new Locale("be"));
 
     Comparator<TextInfo> teksty = (o1, o2) -> {
@@ -98,7 +196,7 @@ public class ApplyAsnouny implements ITextsPreprocessor {
             c = compareAuthors(o1, o2);
         }
         if (c == 0) {
-            c = BE.compare(o1.subtexts[0].title, o2.subtexts[0].title);
+            c = BE.compare(o1.subtexts[0].headers.get("Title"), o2.subtexts[0].headers.get("Title"));
         }
         return c;
     };
@@ -109,26 +207,38 @@ public class ApplyAsnouny implements ITextsPreprocessor {
             c = compareAuthors(o1, o2);
         }
         if (c == 0) {
-            c = BE.compare(o1.subtexts[0].title, o2.subtexts[0].title);
+            c = BE.compare(o1.subtexts[0].headers.get("Title"), o2.subtexts[0].headers.get("Title"));
         }
         return c;
     };
     Comparator<TextInfo> wiki = (o1, o2) -> {
         int c = o1.subcorpus.compareTo(o2.subcorpus);
         if (c == 0) {
-            c = BE.compare(o1.subtexts[0].title, o2.subtexts[0].title);
+            c = BE.compare(o1.subtexts[0].headers.get("Title"), o2.subtexts[0].headers.get("Title"));
         }
         return c;
     };
     Comparator<TextInfo> dyjalektny = (o1, o2) -> {
-        int c = BE.compare(o1.subtexts[0].details, o2.subtexts[0].details);
+        if (o1.subtexts[0].headers.get("Раён") == null) {
+            throw new RuntimeException("Нявызначаны загаловак 'Раён' у " + o1.sourceFilePath);
+        }
+        if (o2.subtexts[0].headers.get("Раён") == null) {
+            throw new RuntimeException("Нявызначаны загаловак 'Раён' у " + o2.sourceFilePath);
+        }
+        if (o1.subtexts[0].source == null) {
+            throw new RuntimeException("Нявызначаны загаловак 'Крыніца' у " + o1.sourceFilePath);
+        }
+        if (o2.subtexts[0].source == null) {
+            throw new RuntimeException("Нявызначаны загаловак 'Крыніца' у " + o2.sourceFilePath);
+        }
+        int c = BE.compare(o1.subtexts[0].headers.get("Раён"), o2.subtexts[0].headers.get("Раён"));
         if (c == 0) {
             c = BE.compare(o1.subtexts[0].source, o2.subtexts[0].source);
         }
         return c;
     };
     Comparator<TextInfo> skaryna = (o1, o2) -> {
-        int c = BE.compare(o1.subtexts[0].title, o2.subtexts[0].title);
+        int c = BE.compare(o1.subtexts[0].headers.get("Title"), o2.subtexts[0].headers.get("Title"));
         return c;
     };
     Comparator<TextInfo> kankardans = (o1, o2) -> {

@@ -4,12 +4,12 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
 import org.alex73.korpus.compiler.MessageParsedText;
 import org.alex73.korpus.compiler.PrepareCache3;
+import org.alex73.korpus.compiler.ProcessTexts;
 import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.TextFileParser;
@@ -69,14 +69,15 @@ public class KankardansParser extends BaseParser {
             ti.textInfo.subcorpus = subcorpus;
             ti.textInfo.textOrder = ++textOrder;
             ti.textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + textTitle;
-            ti.textInfo.subtexts[0].title = doc.headers.get("Title");
             String s;
             if ((s = doc.headers.get("Authors")) != null) {
                 ti.textInfo.subtexts[0].authors = splitAndTrim(s);
             }
             ti.textInfo.subtexts[0].creationTime = getAndCheckYears(doc.headers.get("CreationYear"));
             ti.textInfo.subtexts[0].publicationTime = getAndCheckYears(doc.headers.get("PublicationYear"));
-            ti.textInfo.subtexts[0].textLabel = ti.textInfo.subtexts[0].authors != null ? String.join(",", Arrays.asList(ti.textInfo.subtexts[0].authors)) : "———";
+            ti.textInfo.subtexts[0].headers = doc.headers.getAll();
+            AuthorsUtil.fixAuthors(ti.textInfo.subtexts[0]);
+            ProcessTexts.preprocessor.constructTextPassport(ti.textInfo, ti.textInfo.subtexts[0]);
             if (!headersOnly) {
                 doc.parse(LanguageFactory.get(getLang(ti.textInfo.subtexts[0].lang)), false, PrepareCache3.errors);
                 ti.paragraphs = get1LangParagraphs(new PtextToKorpus(doc.lines, false).paragraphs);

@@ -12,6 +12,7 @@ import java.util.zip.ZipFile;
 
 import org.alex73.korpus.compiler.MessageParsedText;
 import org.alex73.korpus.compiler.PrepareCache3;
+import org.alex73.korpus.compiler.ProcessTexts;
 import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.text.parser.Headers;
 import org.alex73.korpus.text.parser.PtextToKorpus;
@@ -49,17 +50,12 @@ public class TextArchiveParser extends BaseParser {
                 text.textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + en.getName();
                 text.textInfo.subcorpus = subcorpus;
                 text.textInfo.subtexts[0].source = commonHeaders.get("Source");
-                text.textInfo.subtexts[0].title = doc.headers.get("Title");
-                text.textInfo.subtexts[0].url = doc.headers.get("URL");
                 text.textInfo.subtexts[0].publicationTime = getAndCheckYears(doc.headers.get("PublicationYear"));
-                text.textInfo.subtexts[0].textLabel = text.textInfo.subtexts[0].source;
                 String s;
                 if ((s = doc.headers.get("StyleGenre")) != null) {
                     text.textInfo.styleGenres = splitAndTrim(s);
                 }
-                if (text.textInfo.subtexts[0].title == null) {
-                    text.textInfo.subtexts[0].title = "";
-                }
+                ProcessTexts.preprocessor.constructTextPassport(text.textInfo, text.textInfo.subtexts[0]);
                 if (!headersOnly) {
                     doc.parse(LanguageFactory.get(getLang(text.textInfo.subtexts[0].lang)), true, PrepareCache3.errors);
                     text.paragraphs = get1LangParagraphs(new PtextToKorpus(doc.lines, true).paragraphs);

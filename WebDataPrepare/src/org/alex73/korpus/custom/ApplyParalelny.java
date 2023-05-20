@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.Locale;
 
 import org.alex73.korpus.base.TextInfo;
+import org.alex73.korpus.base.TextInfo.Subtext;
 import org.alex73.korpus.compiler.ITextsPreprocessor;
 import org.alex73.korpus.compiler.MessageParsedText;
 import org.alex73.korpus.compiler.PrepareCache3;
@@ -33,6 +34,17 @@ public class ApplyParalelny implements ITextsPreprocessor {
         };
     }
 
+    @Override
+    public void constructTextPassport(TextInfo textInfo, Subtext subText) {
+        StringBuilder s = new StringBuilder();
+
+        subText.label = subText.headers.get("Title");
+        addHeader(s, "Назва", subText.headers.get("Title"));
+        addHeader(s, "Выданне", subText.headers.get("Edition"));
+
+        subText.passport = s.toString();
+    }
+
     private String getBelarusianTitle(TextInfo ti) {
         String r = null;
         for (TextInfo.Subtext st : ti.subtexts) {
@@ -40,13 +52,20 @@ public class ApplyParalelny implements ITextsPreprocessor {
                 if (r != null) {
                     throw new RuntimeException("Too many belarusian texts for " + ti.sourceFilePath);
                 }
-                r = st.title;
+                r = st.label;
             }
         }
         if (r == null) {
             throw new RuntimeException("No belarusian text for " + ti.sourceFilePath);
         }
         return r;
+    }
+
+    private void addHeader(StringBuilder s, String title, String value) {
+        if (value == null || value.isBlank()) {
+            return;
+        }
+        s.append("<div><b>" + title + ":</b> " + value + "</div>");
     }
 
     public static void main(String[] args) throws Exception {

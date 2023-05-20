@@ -43,16 +43,16 @@
             <span class="badge badge-info" data-toggle="tooltip" data-placement="top" title="{{>desc}}">{{>name}}</span>
           {{/for}}
           </div>
-          <div>
+          <div>e
           {{for authors}}
             <a class="badge badge-secondary" data-toggle="tooltip" data-placement="top" target="_blank"
-            title="Націсніце на імя каб знайсці ўжыванні" href='korpus.html#search:{"textStandard":{"authors":["{{>name}}"]},"words":[{"word":"{{>~root.details.lemma}}","allForms":true}]}'>{{>displayName}}</a>
+            title="Націсніце на імя каб знайсці ўжыванні" href='korpus.html#search:{"textStandard":{"authors":["{{>name}}"]},"lang":"bel","chains":[{"words":[{"word":"{{>~root.details.lemma}}","mode":"ALL_FORMS"}],"seps":[null,null]}]}'>{{>displayName}}</a>
           {{/for}}
           {{if authorsOtherCount > 0}}
             <span class="badge badge-secondary" data-toggle="tooltip" data-placement="top"
             title="{{>authorsOtherList}}">+{{>authorsOtherCount}}</span>
           {{/if}}
-            <a class="badge badge-warning" target="_blank" href='korpus.html#search:{"words":[{"word":"{{>~root.details.lemma}}","allForms":true}]}'>усе аўтары</a>
+            <a class="badge badge-warning" target="_blank" href='korpus.html#search:{"lang":"bel","chains":[{"words":[{"word":"{{>~root.details.lemma}}","mode":"ALL_FORMS"}],"seps":[null,null]}]}'>усе аўтары</a>
           </div>
         </div>
       {{/if}}

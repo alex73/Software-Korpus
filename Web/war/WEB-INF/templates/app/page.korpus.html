@@ -14,15 +14,15 @@
   </ul>
 <br/>
     <!--alert *ngIf="serviceSearch.errorSearch" type="danger">{{serviceSearch.errorSearch}}</alert-->
-    <div id="error" class="alert alert-danger fade show" role="alert"></div>
     <div id="status" class="alert alert-info fade show" role="alert"></div>
 
     <!--div class="tab-content" (select)="serviceSearch.selectSearch()" [active]="serviceSearch.typeSearch == 'search'"-->
 	    <button id="btnShowSearch" type="button" style="display: none;" class="btn btn-secondary btn-block" onClick="korpusui.maximizeHeader()">${messages.korpus_search_criteria} <img src="icons/down.svg"/></button>
 	    <form id="divInputSearch" onSubmit="korpusService.search(); return false;">
-		    <div class="row">
-		      <#include "input.filter.korpus.html">
-		    </div>
+            <div class="row">
+                <button class="btn btn-light btn-block" type="button" data-toggle="collapse" data-target="#divInputFilterText" aria-expanded="false" aria-controls="divInputFilterText">Фільтр тэкстаў</button>
+                <#include "input.filter.korpus.html">
+            </div>
             <#include "input.word.html">
             <#include "input.sep.html">
             <div id="divSearch">
@@ -41,6 +41,9 @@
                     </div>
                 </div>
             </div>
+
+            <div id="error" class="alert alert-danger fade show my-3" role="alert"></div>
+
 		    <div class="row justify-content-end mt-3">
 		      <button type="submit" class="btn btn-danger btn-lg">${messages.korpus_button_search}</button>
 		    </div>

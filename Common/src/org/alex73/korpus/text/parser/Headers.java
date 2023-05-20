@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +28,13 @@ public class Headers {
             parse();
         }
         return values.get(key);
+    }
+
+    public Map<String, String> getAll() {
+        if (values == null) {
+            parse();
+        }
+        return new TreeMap<>(values);
     }
 
     public void appendDefaultHeaders(Headers defaults) {

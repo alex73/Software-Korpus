@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import javax.xml.stream.XMLInputFactory;
@@ -13,6 +14,7 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.alex73.korpus.compiler.MessageParsedText;
 import org.alex73.korpus.compiler.PrepareCache3;
+import org.alex73.korpus.compiler.ProcessTexts;
 import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.text.parser.PtextToKorpus;
 import org.alex73.korpus.text.parser.Splitter3;
@@ -107,9 +109,8 @@ public class WikiParser extends BaseParser {
         ti.textInfo.subcorpus = subcorpus;
         ti.textInfo.sourceFilePath = PrepareCache3.INPUT.relativize(file).toString() + "!" + inTitle;
         ti.textInfo.subtexts[0].source = source;
-        ti.textInfo.subtexts[0].url = urlPrefix + title;
-        ti.textInfo.subtexts[0].title = title;
-        ti.textInfo.subtexts[0].textLabel = ti.textInfo.subtexts[0].source;
+        ti.textInfo.subtexts[0].headers = Map.of("URL", urlPrefix + title, "Title", title);
+        ProcessTexts.preprocessor.constructTextPassport(ti.textInfo, ti.textInfo.subtexts[0]);
         if (!headersOnly) {
             text = fixText(text);
             List<Paragraph> paragraphs = new ArrayList<>();

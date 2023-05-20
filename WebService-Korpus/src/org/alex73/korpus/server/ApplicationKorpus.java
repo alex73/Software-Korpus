@@ -50,7 +50,7 @@ public class ApplicationKorpus extends Application {
 
     private List<String> settings;
     private Properties stat;
-    private List<String> textInfos;
+    private List<TextInfo> textInfos;
     public GrammarDB2 gr;
     public GrammarFinder grFinder;
     public StaticGrammarFiller2 grFiller;
@@ -58,6 +58,7 @@ public class ApplicationKorpus extends Application {
     InitialData searchInitial;
     public Map<String, Set<String>> authorsByLemmas;
     public List<LemmaInfo.Author> authors;
+    private Set<String> blacklistedAuthors;
 
     public LuceneFilter processKorpus;
 
@@ -210,7 +211,9 @@ public class ApplicationKorpus extends Application {
             if (key.startsWith("authors.")) {
                 String subcorpus = key.substring(8);
                 String value = stat.getProperty(key);
-                searchInitial.authors.put(subcorpus, Arrays.asList(value.split(";")));
+                List<String> subcorpusAuthors = new ArrayList<>(Arrays.asList(value.split(";")));
+                subcorpusAuthors.removeAll(blacklistedAuthors);
+                searchInitial.authors.put(subcorpus, subcorpusAuthors);
             } else if (key.startsWith("sources.")) {
                 String subcorpus = key.substring(8);
                 String value = stat.getProperty(key);
@@ -263,7 +266,10 @@ public class ApplicationKorpus extends Application {
     }
 
     protected void readTextInfos() throws Exception {
-        textInfos = KorpusFileUtils.readGzip(Paths.get(korpusCache + "/texts.jsons.gz"));
+        textInfos = new ArrayList<>();
+        for (String s : KorpusFileUtils.readGzip(Paths.get(korpusCache + "/texts.jsons.gz"))) {
+            textInfos.add(new ObjectMapper().readValue(s, TextInfo.class));
+        }
 
         authorsByLemmas = new HashMap<>();
         KorpusFileUtils.readGzip(Paths.get(korpusCache + "/lemma-authors.list.gz")).forEach(s -> {
@@ -307,14 +313,40 @@ public class ApplicationKorpus extends Application {
             }
             authors.add(a);
         }
+        for (String line : settings) {
+            if (line.isBlank()) {
+                continue;
+            }
+            int eq = line.indexOf('=');
+            if (eq < 0) {
+                throw new RuntimeException();
+            }
+            String key=line.substring(0,eq).trim();
+            if (!"authors.blacklist".equals(key)) {
+                continue;
+            }
+            blacklistedAuthors = new HashSet<>();
+            for (String a : line.substring(eq + 1).split(";")) {
+                a = a.trim().replaceAll("\\s+", " ");
+                blacklistedAuthors.add(a);
+            }
+        }
     }
 
     public TextInfo getTextInfo(int pos) {
-        try {
-            return new ObjectMapper().readValue(textInfos.get(pos), TextInfo.class);
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
+        return textInfos.get(pos);
+    }
+
+    public boolean isAuthorsBlacklisted(String[] authors) {
+        if (authors == null) {
+            return false;
         }
+        for (String a : authors) {
+            if (blacklistedAuthors.contains(a)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @PreDestroy

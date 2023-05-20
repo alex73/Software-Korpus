@@ -41,8 +41,8 @@ public class ProcessHeaders extends BaseParallelProcessor<MessageParsedText> {
                 st.creationTimeLatest();
                 st.publicationTimeLatest();
                 ProcessTexts.preprocessor.preprocess(text);
-                if (st.textLabel == null) {
-                    throw new RuntimeException("textLabel нявызначаны ў " + text.textInfo.sourceFilePath);
+                if (st.label == null || st.passport == null) {
+                    throw new RuntimeException("label ці пашпарт нявызначаныя ў " + text.textInfo.sourceFilePath);
                 }
                 if (!allLanguages.contains(st.lang)) {
                     // check contains for better performance

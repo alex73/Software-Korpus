@@ -10,7 +10,7 @@ import java.util.TreeMap;
 import org.alex73.korpus.base.TextInfo;
 
 public class AuthorsUtil {
-    private static Map<String, String> authorsIndex = new HashMap<>();
+    private static Map<String, Map<String, String>> authors = new HashMap<>();
 
     public static void init(Path dir) throws Exception {
         Files.find(dir, Integer.MAX_VALUE,
@@ -26,7 +26,7 @@ public class AuthorsUtil {
                 s = s.trim();
                 if (s.isEmpty()) {
                     addAuthorToIndex(tags);
-                    tags.clear();
+                    tags = new TreeMap<>();
                 } else if (!s.startsWith("##")) {
                     continue;
                 } else {
@@ -47,24 +47,36 @@ public class AuthorsUtil {
 
     private static void addAuthorToIndex(Map<String, String> tags) {
         String author = tags.get("Author");
-        String authorIndex = tags.get("AuthorIndex");
-        if (author != null && authorIndex != null) {
-            if (authorsIndex.put(author, authorIndex) != null) {
-                throw new RuntimeException("Duplicate author in list: " + tags);
-            }
+        if (author == null) {
+            return;
+        }
+        if (authors.put(author, tags) != null) {
+            throw new RuntimeException("Duplicate author in list: " + tags);
         }
     }
 
-    public static void fixAuthors(TextInfo.Subtext textInfo) {
+    public static synchronized void fixAuthors(TextInfo.Subtext textInfo) {
         if (textInfo.authors != null) {
             for (int i = 0; i < textInfo.authors.length; i++) {
-                String replaced = authorsIndex.get(textInfo.authors[i]);
+                Map<String, String> tags = authors.get(textInfo.authors[i]);
+                if (tags == null) {
+                    tags = Map.of("Author", textInfo.authors[i]);
+                }
+                String replaced = tags.get("AuthorIndexStandard");
+                if (replaced == null) {
+                    replaced = tags.get("AuthorIndex");
+                }
                 if (replaced != null) {
                     textInfo.authors[i] = replaced;
                 } else {
-                    String[] a = textInfo.authors[i].split("\\s+");
+                    String standard = tags.get("AuthorStandard");
+                    if (standard == null) {
+                        standard = tags.get("Author");
+                    }
+                    String[] a = standard.split("\\s+");
                     switch (a.length) {
                     case 1:
+                        textInfo.authors[i] = a[0];
                         break;
                     case 2:
                         textInfo.authors[i] = a[1] + ' ' + a[0];
