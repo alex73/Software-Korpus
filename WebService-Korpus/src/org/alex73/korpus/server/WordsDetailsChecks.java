@@ -29,10 +29,10 @@ import org.alex73.korpus.text.structure.corpus.Word;
  * Methods of instance can be executed in multiple threads.
  */
 public class WordsDetailsChecks {
-    private final ILanguage lang;
-    private final ChainInternals[] chains;
-    private final boolean chainsInParagraph;
-    private final StaticGrammarFiller2 grFiller;
+    private ILanguage lang;
+    private ChainInternals[] chains;
+    private boolean chainsInParagraph;
+    private StaticGrammarFiller2 grFiller;
     private boolean needCheckTags;
 
     /**
@@ -44,9 +44,13 @@ public class WordsDetailsChecks {
 
         public ChainInternals(ChainRequest chain) {
             this.words = new WordInternals[chain.words.size()];
-            this.separatorBefore = chain.seps.get(0);
+            if (chain.seps != null) {
+                this.separatorBefore = chain.seps.get(0);
+            } else {
+                this.separatorBefore = null;
+            }
             for (int i = 0; i < chain.words.size(); i++) {
-                this.words[i] = new WordInternals(chain.words.get(i), chain.seps.get(i + 1));
+                this.words[i] = new WordInternals(chain.words.get(i), chain.seps == null ? null : chain.seps.get(i + 1));
             }
         }
     }
@@ -237,25 +241,36 @@ public class WordsDetailsChecks {
     /**
      * Only for checking words from grammar database.
      */
-    public WordsDetailsChecks() {
-        this.lang = null;
-        this.chains = null;
-        this.chainsInParagraph = false;
-        this.grFiller = null;
+    private WordsDetailsChecks() {
+    }
+
+    public static WordsDetailsChecks createForGrammarDB() {
+        return new WordsDetailsChecks();
     }
 
     /**
      * For checking words from texts.
      */
-    public WordsDetailsChecks(ILanguage lang, List<ChainRequest> inputChains, boolean chainsInParagraph,
-            StaticGrammarFiller2 grFiller) {
-        this.lang = lang;
-        this.chains = new ChainInternals[inputChains.size()];
-        this.chainsInParagraph = chainsInParagraph;
-        this.grFiller = grFiller;
-        for (int i = 0; i < chains.length; i++) {
-            chains[i] = new ChainInternals(inputChains.get(i));
+    public static WordsDetailsChecks createForSearch(ILanguage lang, List<ChainRequest> inputChains, boolean chainsInParagraph, StaticGrammarFiller2 grFiller) {
+        WordsDetailsChecks r = new WordsDetailsChecks();
+        r.lang = lang;
+        r.chains = new ChainInternals[inputChains.size()];
+        r.chainsInParagraph = chainsInParagraph;
+        r.grFiller = grFiller;
+        for (int i = 0; i < r.chains.length; i++) {
+            r.chains[i] = r.new ChainInternals(inputChains.get(i));
         }
+        return r;
+    }
+
+    public static WordsDetailsChecks createForCluster(ILanguage lang, ChainRequest inputChain, StaticGrammarFiller2 grFiller) {
+        WordsDetailsChecks r = new WordsDetailsChecks();
+        r.lang = lang;
+        r.grFiller = grFiller;
+        r.chains = new ChainInternals[1];
+        inputChain.seps = null;
+        r.chains[0] = r.new ChainInternals(inputChain);
+        return r;
     }
 
     /**

@@ -51,6 +51,7 @@ public class TextArchiveParser extends BaseParser {
                 text.textInfo.subcorpus = subcorpus;
                 text.textInfo.subtexts[0].source = commonHeaders.get("Source");
                 text.textInfo.subtexts[0].publicationTime = getAndCheckYears(doc.headers.get("PublicationYear"));
+                text.textInfo.subtexts[0].headers = doc.headers.getAll();
                 String s;
                 if ((s = doc.headers.get("StyleGenre")) != null) {
                     text.textInfo.styleGenres = splitAndTrim(s);

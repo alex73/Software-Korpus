@@ -42,7 +42,7 @@ public class ClusterServiceImpl {
 
         ChainRequest chain = new ChainRequest();
         chain.words = List.of(w);
-        WordsDetailsChecks check = new WordsDetailsChecks(lang, List.of(chain), false, ApplicationKorpus.instance.grFiller);
+        WordsDetailsChecks check = WordsDetailsChecks.createForCluster(lang, chain, ApplicationKorpus.instance.grFiller);
 
         process.search(query.build(), SEARCH_BLOCK, new LuceneDriverRead.DocFilter<Void>() {
             @Override

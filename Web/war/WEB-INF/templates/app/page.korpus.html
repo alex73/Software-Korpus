@@ -13,10 +13,8 @@
   </li>
   </ul>
 <br/>
-    <!--alert *ngIf="serviceSearch.errorSearch" type="danger">{{serviceSearch.errorSearch}}</alert-->
     <div id="status" class="alert alert-info fade show" role="alert"></div>
 
-    <!--div class="tab-content" (select)="serviceSearch.selectSearch()" [active]="serviceSearch.typeSearch == 'search'"-->
 	    <button id="btnShowSearch" type="button" style="display: none;" class="btn btn-secondary btn-block" onClick="korpusui.maximizeHeader()">${messages.korpus_search_criteria} <img src="icons/down.svg"/></button>
 	    <form id="divInputSearch" onSubmit="korpusService.search(); return false;">
             <div class="row">
@@ -49,7 +47,7 @@
 		    </div>
 	    </form>
 	    
-	<div id="divSpisy" class="d-none">
+	<div id="divSpisy">
 		<div class="card">
 			<div class="card-body">
 				<div>

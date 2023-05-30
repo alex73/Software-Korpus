@@ -153,6 +153,12 @@ public class ApplyAsnouny implements ITextsPreprocessor {
             addHeader(s, "Крыніца", subText.source);
             addHeader(s, "Час публікацыі", subText.headers.get("PublicationYear"));
             break;
+        case nierazabranaje:
+            subText.label = subText.source;
+            addHeader(s, "URL", subText.headers.get("URL"));
+            addHeader(s, "Назва", subText.headers.get("Title"));
+            addHeader(s, "Крыніца", subText.source);
+            break;
         case kankardans: {
             String authors = null;
             subText.label = null;

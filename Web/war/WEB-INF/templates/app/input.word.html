@@ -43,8 +43,16 @@
             </div>
             <div class="form-row word-select-regexp">
                 <div class="form-group w-100">
-                    <label class="w-100 mb-0">Рэгулярныя выразы 
-                    <sup><span class="badge badge-warning" data-toggle="tooltip" data-placement="bottom" title="Падрабязней пра рэгуярныя выразы">?</span></sup>
+                    <label class="w-100 mb-0">Рэгулярныя выразы
+                    <sup><span class="badge badge-warning" data-toggle="tooltip" data-placement="bottom" data-html="true" title="
+                              Рэгулярныя выразы дазваляюць шукаць складаныя камбінацыі літар:<br>
+                              [дтц] - “д”, “т”, або “ц” (напрыклад: “пара[дз]а” - знойдзе “парада” і “параза”)<br>
+                              [^дтц] - любая літара, за выключэннем “д”, “т”, і “ц”<br>
+                              н? - н, няма ці ёсць 1 раз<br>
+                              н* - н, няма ці ёсць любая колькасць літар “н”<br>
+                              н+ - н, мусіць быць 1 раз ці болей<br>
+                              і г.д.
+                        ">?</span></sup>
                     <input class="ml-2" type="checkbox" name="regexp"></label>
                 </div>
             </div>

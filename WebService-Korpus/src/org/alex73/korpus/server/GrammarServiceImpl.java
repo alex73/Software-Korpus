@@ -126,7 +126,7 @@ public class GrammarServiceImpl {
                 result.error = "Увядзіце слова для пошуку альбо удакладніце граматыку";
                 return result;
             }
-            WordsDetailsChecks check = new WordsDetailsChecks();
+            WordsDetailsChecks check = WordsDetailsChecks.createForGrammarDB();
 
             ThreadLocal<Pattern> reGrammar = null, reOutputGrammar = null;
             if (rq.grammar != null && !rq.grammar.isEmpty()) {

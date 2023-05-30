@@ -17,7 +17,7 @@ class GrammarService {
 		fetch('rest/localization')
 			.then(r => {
 				if (!r.ok) {
-					korpusui.showError("Памылка запыту лакалізацыі звестак: " + r.status + " " + r.statusText);
+					korpusui.showError("Памылка запыту лакалізацыі звестак. Звярніцеся да распрацоўшчыкаў");
 				} else {
 					r.json().then(json => {
 						localization = json[document.documentElement.lang];
@@ -32,7 +32,7 @@ class GrammarService {
       fetch(this.callPrefix + '/grammar/initial')
       .then(r => {
         if (!r.ok) {
-          grammarui.showError("Памылка запыту пачатковых звестак: " + r.status + " " + r.statusText);
+          grammarui.showError("Памылка запыту пачатковых звестак. Звярніцеся да распрацоўшчыкаў");
         } else {
           r.json().then(json => {
             this.initial = json;
@@ -77,7 +77,7 @@ class GrammarService {
     })
       .then(r => {
         if (!r.ok) {
-          grammarui.showError("Памылка пошуку: " + r.status + " " + r.statusText);
+          grammarui.showError("Памылка сервера. Звярніцеся да распрацоўшчыкаў");
         } else {
           r.json().then(json => {
             this.result = json;
@@ -112,7 +112,7 @@ class GrammarService {
     fetch(url)
       .then(r => {
         if (!r.ok) {
-          grammarui.showError("Памылка пошуку: " + r.status + " " + r.statusText);
+          grammarui.showError("Памылка сервера. Звярніцеся да распрацоўшчыкаў");
         } else {
           r.json().then(json => {
             grammarui.hideStatusError();

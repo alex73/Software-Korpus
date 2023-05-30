@@ -13,7 +13,7 @@ public class ServerError extends RuntimeException {
     }
 
     public static ServerError internalError() {
-        return new ServerError("Памылка сервера. Звярнімцеся да распрацоўшчыкаў");
+        return new ServerError("Памылка сервера. Звярніцеся да распрацоўшчыкаў");
     }
 
     public static ServerError tooSimple() {

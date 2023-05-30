@@ -58,7 +58,7 @@ class KorpusService {
 		fetch('rest/localization')
 			.then(r => {
 				if (!r.ok) {
-					korpusui.showError("Памылка запыту лакалізацыі звестак: " + r.status + " " + r.statusText);
+					korpusui.showError("Памылка запыту лакалізацыі звестак. Звярніцеся да распрацоўшчыкаў");
 				} else {
 					r.json().then(json => {
 						localization = json[document.documentElement.lang];
@@ -73,7 +73,7 @@ class KorpusService {
 		fetch(this.callPrefix + '/korpus/initial')
 			.then(r => {
 				if (!r.ok) {
-					korpusui.showError("Памылка запыту пачатковых звестак: " + r.status + " " + r.statusText);
+					korpusui.showError("Памылка запыту пачатковых звестак. Звярніцеся да распрацоўшчыкаў");
 				} else {
 					r.json().then(json => {
 						this.initial = json;
@@ -155,11 +155,15 @@ class KorpusService {
 		})
 			.then(r => {
 				if (!r.ok) {
-					korpusui.showError("Памылка пошуку: " + r.status + " " + r.statusText);
+					korpusui.showError("Памылка сервера. Звярніцеся да распрацоўшчыкаў");
 				} else {
 					r.json().then(json => {
-						korpusui.hideStatusError();
 						let rs: ClusterResult = json;
+						if (rs.error != null) {
+							korpusui.showError("Памылка: " + rs.error);
+							return;
+						}
+						korpusui.hideStatusError();
 						if (rs.rows.length > 0) {
 							this.resultCluster = new ClusterResult(rs.rows);
 							korpusui.showOutput();
@@ -187,7 +191,7 @@ class KorpusService {
 		})
 			.then(r => {
 				if (!r.ok) {
-					korpusui.showError("Памылка пошуку: " + r.status + " " + r.statusText);
+					korpusui.showError("Памылка сервера. Звярніцеся да распрацоўшчыкаў");
 				} else {
 					r.json().then(json => {
 						let rs: SearchResult = json;
@@ -245,7 +249,7 @@ class KorpusService {
             .then(r => {
                 $('.place-calc img').replaceWith('');
                 if (!r.ok) {
-                    korpusui.showError("Памылка пошуку: " + r.status + " " + r.statusText);
+                    korpusui.showError("Памылка сервера. Звярніцеся да распрацоўшчыкаў");
                 } else {
                     r.json().then(json => {
                         let rs: SearchTotalResult = json;
@@ -276,7 +280,7 @@ class KorpusService {
 		})
 			.then(r => {
 				if (!r.ok) {
-					korpusui.showError("Памылка: " + r.status + " " + r.statusText);
+					korpusui.showError("Памылка сервера. Звярніцеся да распрацоўшчыкаў");
 				} else {
 					r.json().then(json => {
 						switch (this.requestedTypeSearch) {
@@ -299,10 +303,10 @@ class KorpusService {
 	}
 	loadSpis(subcorpus: string, after: any) {
 		$('#desc').hide();
-		fetch(this.callPrefix + '/korpus/freq?subcorpus=' + subcorpus)
+		fetch(this.callPrefix + '/korpus/freq/' + subcorpus)
 			.then(r => {
 				if (!r.ok) {
-					korpusui.showError("Памылка запыту звестак падкорпуса: " + r.status + " " + r.statusText);
+					korpusui.showError("Памылка сервера. Звярніцеся да распрацоўшчыкаў");
 				} else {
 					r.json().then(json => {
 						korpusui.hideStatusError();

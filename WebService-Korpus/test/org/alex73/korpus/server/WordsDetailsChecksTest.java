@@ -88,7 +88,7 @@ public class WordsDetailsChecksTest {
         ChainRequest chain = new ChainRequest();
         chain.words = List.of(rq);
         chain.seps = Arrays.asList(null, null);
-        WordsDetailsChecks check = new WordsDetailsChecks(bel, List.of(chain), false, grFiller);
+        WordsDetailsChecks check = WordsDetailsChecks.createForSearch(bel, List.of(chain), false, grFiller);
         WordResult rs = new WordResult(new Word());
         rs.word = word;
         return check.isOneWordAllowed(new TextInfo(), rs);
@@ -119,7 +119,7 @@ public class WordsDetailsChecksTest {
             chains.add(chain);
         }
 
-        WordsDetailsChecks check = new WordsDetailsChecks(bel, chains, chainsInParagraph, grFiller);
+        WordsDetailsChecks check = WordsDetailsChecks.createForSearch(bel, chains, chainsInParagraph, grFiller);
 
         Paragraph p = new Paragraph();
         p.lang = "bel";
@@ -157,7 +157,7 @@ public class WordsDetailsChecksTest {
         chain.seps.add(null);
         ch.forEach(w -> chain.seps.add(null));
 
-        WordsDetailsChecks check = new WordsDetailsChecks(bel, List.of(chain), false, grFiller);
+        WordsDetailsChecks check = WordsDetailsChecks.createForSearch(bel, List.of(chain), false, grFiller);
 
         Paragraph p = new Paragraph();
         p.lang = "bel";
@@ -206,7 +206,7 @@ public class WordsDetailsChecksTest {
             chain.seps.add(expect.get(i + 1));
         }
 
-        WordsDetailsChecks check = new WordsDetailsChecks(bel, List.of(chain), false, grFiller);
+        WordsDetailsChecks check = WordsDetailsChecks.createForSearch(bel, List.of(chain), false, grFiller);
 
         Paragraph p = new Paragraph();
         p.lang = "bel";

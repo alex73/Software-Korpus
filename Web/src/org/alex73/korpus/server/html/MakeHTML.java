@@ -27,7 +27,7 @@ import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateNotFoundException;
 
 @SuppressWarnings("serial")
-@WebServlet(name = "HTML", urlPatterns = { "*.html" })
+@WebServlet(name = "HTML", urlPatterns = { "*.html", "*.txt" })
 public class MakeHTML extends HttpServlet {
     private Configuration cfg;
 
@@ -59,21 +59,25 @@ public class MakeHTML extends HttpServlet {
         try {
             String path = req.getServletPath();
 
-            String lang;
-            ResourceBundle messages;
-            if (path.endsWith(".en.html")) {
-                lang = "en";
-                messages = ApplicationWeb.instance.messagesEn;
-            } else {
-                lang = "be";
-                messages = ApplicationWeb.instance.messagesBe;
-            }
             String templatePath = path.replaceAll("\\..+$", "") + "-base.html";
-            Template t = cfg.getTemplate(templatePath);
             Map<String, Object> context = new TreeMap<>();
-            context.put("lang", lang);
-            context.put("messages", messages);
-            resp.setContentType("text/html; charset=UTF-8");
+            Template t = cfg.getTemplate(templatePath);
+            if (path.endsWith(".txt")) {
+                resp.setContentType("text/plain; charset=UTF-8");
+            } else {
+                String lang;
+                ResourceBundle messages;
+                if (path.endsWith(".en.html")) {
+                    lang = "en";
+                    messages = ApplicationWeb.instance.messagesEn;
+                } else {
+                    lang = "be";
+                    messages = ApplicationWeb.instance.messagesBe;
+                }
+                context.put("lang", lang);
+                context.put("messages", messages);
+                resp.setContentType("text/html; charset=UTF-8");
+            }
             try (OutputStreamWriter wr = new OutputStreamWriter(resp.getOutputStream(), "UTF-8")) {
                 t.process(context, wr);
             } catch (TemplateException ex) {

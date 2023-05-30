@@ -261,6 +261,7 @@ class Subtext {
 }
 
 class ClusterResult {
+    public error: string;
     public rows: ClusterRow[];
     constructor(r:ClusterRow[]) {
       this.rows = r;

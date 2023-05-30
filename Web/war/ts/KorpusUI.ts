@@ -268,13 +268,13 @@ class KorpusUI {
 	private collectFromScreenBase(p: BaseParams) {
 		p.lang = this.currentFindLanguage;
 		p.textStandard.subcorpuses = KorpusUI.separatedStringToArray(document.getElementById('inputFilterCorpus').innerText);
-		p.textStandard.authors = $('#inputFilterAuthorShow').is(":visible") ? KorpusUI.separatedStringToArray(document.getElementById('inputFilterAuthor').innerText) : null;
-		p.textStandard.sources = $('#inputFilterSourceShow').is(":visible") ? KorpusUI.separatedStringToArray(document.getElementById('inputFilterSource').innerText) : null;
-		p.textStandard.stylegenres = $('#inputFilterStyleShow').is(":visible") ? KorpusUI.separatedStringToArray(document.getElementById('inputFilterStyle').innerText) : null;
-		p.textStandard.yearWrittenFrom = $('#inputFilterYearWrittenShow').is(":visible") ? fulltrim((<HTMLInputElement>document.getElementById('inputFilterYearWrittenFrom')).value) : null;
-		p.textStandard.yearWrittenTo = $('#inputFilterYearWrittenShow').is(":visible") ? fulltrim((<HTMLInputElement>document.getElementById('inputFilterYearWrittenTo')).value) : null;
-		p.textStandard.yearPublishedFrom = $('#inputFilterYearPublishedShow').is(":visible") ? fulltrim((<HTMLInputElement>document.getElementById('inputFilterYearPublishedFrom')).value) : null;
-		p.textStandard.yearPublishedTo = $('#inputFilterYearPublishedShow').is(":visible") ? fulltrim((<HTMLInputElement>document.getElementById('inputFilterYearPublishedTo')).value) : null;
+		p.textStandard.authors = $('#inputFilterAuthorShow').css('display') != 'none' ? KorpusUI.separatedStringToArray(document.getElementById('inputFilterAuthor').innerText) : null;
+		p.textStandard.sources = $('#inputFilterSourceShow').css('display') != 'none' ? KorpusUI.separatedStringToArray(document.getElementById('inputFilterSource').innerText) : null;
+		p.textStandard.stylegenres = $('#inputFilterStyleShow').css('display') != 'none' ? KorpusUI.separatedStringToArray(document.getElementById('inputFilterStyle').innerText) : null;
+		p.textStandard.yearWrittenFrom = $('#inputFilterYearWrittenShow').css('display') != 'none' ? fulltrim((<HTMLInputElement>document.getElementById('inputFilterYearWrittenFrom')).value) : null;
+		p.textStandard.yearWrittenTo = $('#inputFilterYearWrittenShow').css('display') != 'none' ? fulltrim((<HTMLInputElement>document.getElementById('inputFilterYearWrittenTo')).value) : null;
+		p.textStandard.yearPublishedFrom = $('#inputFilterYearPublishedShow').css('display') != 'none' ? fulltrim((<HTMLInputElement>document.getElementById('inputFilterYearPublishedFrom')).value) : null;
+		p.textStandard.yearPublishedTo = $('#inputFilterYearPublishedShow').css('display') != 'none' ? fulltrim((<HTMLInputElement>document.getElementById('inputFilterYearPublishedTo')).value) : null;
 	}
 	collectFromScreenSearch(): SearchParams {
 		let requestedParams: SearchParams = new SearchParams();
@@ -389,7 +389,7 @@ class KorpusUI {
 			case 'cluster':
 				let cp: ClusterParams = <ClusterParams>data;
 				if (cp && cp.word) {
-					let w: HTMLElement = this.addWord(null);
+					let w: HTMLElement = newWord;// this.addWord(newWord);
 					(<HTMLInputElement>w.querySelector("input[type='text']")).value = cp.word.word ? cp.word.word : "";
 					(<HTMLElement>w.querySelector(".wordgram-grammar-string")).innerText = cp.word.grammar ? cp.word.grammar : "";
 					DialogWordGrammar.wordGrammarToText(cp.word.grammar, w.querySelector(".wordgram-display"));

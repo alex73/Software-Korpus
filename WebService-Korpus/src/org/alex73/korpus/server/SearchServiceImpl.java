@@ -5,8 +5,10 @@ import java.nio.file.Paths;
 import java.text.Collator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -16,8 +18,8 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
@@ -51,6 +53,8 @@ public class SearchServiceImpl {
     private final static Logger LOGGER = Logger.getLogger(SearchServiceImpl.class.getName());
     private static final Collator BE = Collator.getInstance(new Locale("be"));
 
+    private static final Map<String, List<FreqSpisResult>> freqsBySubcorpus = new ConcurrentHashMap<>();
+
     @Context
     HttpServletRequest request;
 
@@ -71,27 +75,35 @@ public class SearchServiceImpl {
         }
     }
 
-    @Path("freq")
+    @Path("freq/{subcorpus}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<FreqSpisResult> getFrequences(@QueryParam("subcorpus") String subcorpus) throws Exception {
+    public List<FreqSpisResult> getFrequences(@PathParam("subcorpus") String subcorpus) throws Exception {
         LOGGER.info("getFrequences from " + request.getRemoteAddr());
-        try {
-            List<String> data = KorpusFileUtils.readZip(Paths.get(getApp().korpusCache).resolve("stat-freq.zip"), "forms/freq." + subcorpus + ".tab");
-            return data.stream().map(s -> {
-                int p = s.indexOf('=');
-                FreqSpisResult r = new FreqSpisResult();
-                r.w = s.substring(0, p);
-                r.c = Integer.parseInt(s.substring(p + 1));
-                return r;
-            }).sorted((a, b) -> BE.compare(a.w, b.w)).collect(Collectors.toList());
-        } catch (FileNotFoundException ex) {
-            LOGGER.log(Level.SEVERE, "getFrequences", ex);
+
+        List<FreqSpisResult> result = freqsBySubcorpus.computeIfAbsent(subcorpus, sc -> {
+            try {
+                List<String> data = KorpusFileUtils.readZip(Paths.get(getApp().korpusCache).resolve("stat-freq.zip"), "forms/freq." + sc + ".tab");
+                return data.stream().map(s -> {
+                    int p = s.indexOf('=');
+                    FreqSpisResult r = new FreqSpisResult();
+                    r.w = s.substring(0, p);
+                    r.c = Integer.parseInt(s.substring(p + 1));
+                    return r;
+                }).sorted((a, b) -> BE.compare(a.w, b.w)).collect(Collectors.toList());
+            } catch (FileNotFoundException ex) {
+                LOGGER.log(Level.SEVERE, "getFrequences", ex);
+                return null;
+            } catch (Exception ex) {
+                LOGGER.log(Level.SEVERE, "getFrequences", ex);
+                throw new RuntimeException(ex);
+            }
+        });
+
+        if (result == null) {
             throw new Exception("Data not found for subcorpus '" + subcorpus + "'");
-        } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "getFrequences", ex);
-            throw ex;
         }
+        return result;
     }
 
     public static class SearchRequest {
@@ -192,7 +204,9 @@ public class SearchServiceImpl {
             LOGGER.info("<< Result clusters");
             return res;
         } catch (ServerError ex) {
-            throw ex;
+            ClusterResults result = new ClusterResults();
+            result.error = ex.getMessage();
+            return result;
         } catch (Throwable ex) {
             LOGGER.log(Level.SEVERE, "<< Result error", ex);
             throw ServerError.internalError();
@@ -213,7 +227,7 @@ public class SearchServiceImpl {
         SearchParams params = rq.params;
         int[] list = rq.list;
         params.chains.forEach(ch -> ch.words.forEach(w -> findAllLemmas(lang, w)));
-        WordsDetailsChecks checks = new WordsDetailsChecks(lang, params.chains, params.chainsInParagraph, getApp().grFiller);
+        WordsDetailsChecks checks = WordsDetailsChecks.createForSearch(lang, params.chains, params.chainsInParagraph, getApp().grFiller);
         try {
             SearchResults[] result = new SearchResults[list.length];
             for (int i = 0; i < list.length; i++) {
@@ -296,7 +310,7 @@ public class SearchServiceImpl {
     }
 
     private LuceneDriverRead.DocFilter<Integer> filterFoundDocumentsByChains(SearchParams params, ILanguage lang) {
-        WordsDetailsChecks checks = new WordsDetailsChecks(lang, params.chains, params.chainsInParagraph, getApp().grFiller);
+        WordsDetailsChecks checks = WordsDetailsChecks.createForSearch(lang, params.chains, params.chainsInParagraph, getApp().grFiller);
         return new LuceneDriverRead.DocFilter<>() {
 
             public Integer processDoc(int docID) {
