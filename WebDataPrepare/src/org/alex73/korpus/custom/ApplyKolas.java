@@ -53,7 +53,7 @@ public class ApplyKolas implements ITextsPreprocessor {
 
         subText.label = subText.headers.get("Title");
         addHeader(s, "Аўтары", String.join(",", Arrays.asList(subText.authors)));
-        addHeader(s, "Перакладчык", subText.headers.get("Translators"));
+        addHeader(s, "Перакладчык", subText.headers.get("Translation"));
         addHeader(s, "Пераклад з", subText.headers.get("LangOrig"));
         addHeader(s, "Назва", subText.headers.get("Title") + "{{page}}");
         addHeader(s, "Стыль/жанр", subText.headers.get("StyleGenre"));

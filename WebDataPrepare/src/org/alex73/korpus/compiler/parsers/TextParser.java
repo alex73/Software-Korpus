@@ -41,8 +41,13 @@ public class TextParser extends BaseParser {
             return;
         }
         String s;
-        if ((s = doc.headers.get("Authors")) != null) {
-            text.textInfo.subtexts[0].authors = splitAndTrim(s);
+        if (text.textInfo.subtexts[0].langOrig != null) {
+            // пераклад
+            if ((s = doc.headers.get("Translation")) != null) {
+                text.textInfo.subtexts[0].authors = splitAndTrim(s);
+            }
+        } else {
+            text.textInfo.subtexts[0].authors = splitAndTrim(doc.headers.get("Authors"));
         }
         if ((s = doc.headers.get("StyleGenre")) != null) {
             text.textInfo.styleGenres = splitAndTrim(s);

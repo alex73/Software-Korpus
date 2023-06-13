@@ -189,12 +189,12 @@ public class PrepareCache3 {
         }
 
         @Override
-        public synchronized void reportError(String error, Throwable ex) {
-            String key = ex == null ? error : error + ": " + ex.getMessage();
+        public synchronized void reportError(String place, String error, Throwable ex) {
+            String key = error + " in '" + place + "'";
             synchronized (errorsList) {
                 errorsList.add(key);
             }
-            System.err.println(error);
+            System.err.println(key);
             if (ex != null) {
                 ex.printStackTrace();
             }

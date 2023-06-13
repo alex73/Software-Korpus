@@ -17,7 +17,7 @@ public class TestSplitter3 {
     IProcess errors = new IProcess() {
 
         @Override
-        public void reportError(String error, Throwable ex) {
+        public void reportError(String place, String error, Throwable ex) {
         }
 
         @Override

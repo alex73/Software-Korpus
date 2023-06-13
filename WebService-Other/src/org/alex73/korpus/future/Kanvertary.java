@@ -59,7 +59,7 @@ public class Kanvertary {
             }
 
             @Override
-            public synchronized void reportError(String error, Throwable ex) {
+            public synchronized void reportError(String place, String error, Throwable ex) {
                 throw new RuntimeException(ex);
             }
         });

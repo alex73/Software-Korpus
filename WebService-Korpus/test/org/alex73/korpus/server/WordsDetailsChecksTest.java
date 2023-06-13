@@ -91,7 +91,9 @@ public class WordsDetailsChecksTest {
         WordsDetailsChecks check = WordsDetailsChecks.createForSearch(bel, List.of(chain), false, grFiller);
         WordResult rs = new WordResult(new Word());
         rs.word = word;
-        return check.isOneWordAllowed(new TextInfo(), rs);
+        TextInfo ti = new TextInfo();
+        ti.subtexts = new TextInfo.Subtext[0];
+        return check.isOneWordAllowed(ti, rs);
     }
 
     @Test
@@ -132,7 +134,9 @@ public class WordsDetailsChecksTest {
                 p.sentences[i].words[j].word = text.get(i).get(j);
             }
         }
-        return check.isAllowed(new TextInfo(), new Paragraph[] { p });
+        TextInfo ti = new TextInfo();
+        ti.subtexts = new TextInfo.Subtext[0];
+        return check.isAllowed(ti, new Paragraph[] { p });
     }
 
     @Test
@@ -172,7 +176,9 @@ public class WordsDetailsChecksTest {
                 p.sentences[0].words[j].word = text.get(j);
             }
         }
-        return check.isAllowed(new TextInfo(), new Paragraph[] { p });
+        TextInfo ti = new TextInfo();
+        ti.subtexts = new TextInfo.Subtext[0];
+        return check.isAllowed(ti, new Paragraph[] { p });
     }
 
     @Test
@@ -218,6 +224,8 @@ public class WordsDetailsChecksTest {
             p.sentences[0].words[i / 2].word = text.get(i);
             p.sentences[0].words[i / 2].tail = text.get(i + 1);
         }
-        return check.isAllowed(new TextInfo(), new Paragraph[] { p });
+        TextInfo ti = new TextInfo();
+        ti.subtexts = new TextInfo.Subtext[0];
+        return check.isAllowed(ti, new Paragraph[] { p });
     }
 }

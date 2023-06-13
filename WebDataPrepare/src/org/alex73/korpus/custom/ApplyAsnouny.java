@@ -25,7 +25,7 @@ public class ApplyAsnouny implements ITextsPreprocessor {
 
         if ("teksty".equals(text.textInfo.subcorpus) && text.textInfo.subtexts[0].langOrig != null) {
             // падкорпус перакладаў
-            text.textInfo.subcorpus = "pieraklady";
+            text.textInfo.subcorpus = SUBCORPUSES.pieraklady.name();
         }
     }
 
@@ -93,20 +93,13 @@ public class ApplyAsnouny implements ITextsPreprocessor {
         switch (sub) {
         case teksty:
         case pieraklady: {
-            String authors = null;
-            subText.label = null;
-            if (sub == SUBCORPUSES.pieraklady) {
-                subText.label = subText.headers.get("Translators");
-            } else if (subText.authors != null) {
-                authors = String.join(",", Arrays.asList(subText.authors));
-                subText.label = authors;
-            }
+            subText.label = subText.headers.get("Authors");
             if (subText.label == null) {
                 subText.label = "———";
             }
             addHeader(s, "URL", subText.headers.get("URL"));
-            addHeader(s, "Аўтары", authors);
-            addHeader(s, "Перакладчык", subText.headers.get("Translators"));
+            addHeader(s, "Аўтары", subText.headers.get("Authors"));
+            addHeader(s, "Перакладчык", subText.headers.get("Translation"));
             addHeader(s, "Пераклад з", subText.headers.get("LangOrig"));
             addHeader(s, "Назва", subText.headers.get("Title") + "{{page}}");
             addHeader(s, "Стыль/жанр", subText.headers.get("StyleGenre"));
@@ -135,9 +128,9 @@ public class ApplyAsnouny implements ITextsPreprocessor {
             addHeader(s, "Збіральнік", subText.headers.get("Збіральнік"));
             addHeader(s, "Год запісу", subText.headers.get("Год запісу"));
             addHeader(s, "Тэкст расшыфраваў", subText.headers.get("Тэкст расшыфраваў"));
-            addHeader(s, "Год нараджэння", subText.headers.get("Інфармант-год нараджэння"));
+            addHeader(s, "Год нараджэння інфарманта", subText.headers.get("Інфармант-год нараджэння"));
             addHeader(s, "Месца нараджэння інфарманта", subText.headers.get("Інфармант-месца нараджэння"));
-            addHeader(s, "Дзе жыў інфарманта", subText.headers.get("Інфармант-дзе жыў"));
+            addHeader(s, "Дзе жыў інфармант", subText.headers.get("Інфармант-дзе жыў"));
             addHeader(s, "Пол інфарманта", subText.headers.get("Інфармант-пол"));
             addHeader(s, "Нацыянальнасць інфарманта", subText.headers.get("Інфармант-нацыянальнасць"));
             addHeader(s, "Веравызнанне інфарманта", subText.headers.get("Інфармант-веравызнанне"));

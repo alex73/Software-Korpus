@@ -9,6 +9,7 @@ import java.util.function.Consumer;
 
 import org.alex73.korpus.compiler.parsers.IParser;
 import org.alex73.korpus.compiler.parsers.ParserFactory;
+import org.alex73.korpus.text.parser.ParsingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,9 +43,15 @@ public class FilesReader extends BaseParallelProcessor<Path> {
             String rel = inputDirectory.relativize(file).toString();
             IParser parser = ParserFactory.getParser(rel, file);
             if (parser == null) {
-                throw new Exception("Unknown parser for " + rel, null);
+                PrepareCache3.errors.reportError(file.toString(), "Unknown parser for " + rel, null);
             } else {
-                parser.parse(processParser, headersOnly);
+                try {
+                    parser.parse(processParser, headersOnly);
+                } catch (ParsingException ex) {
+                    PrepareCache3.errors.reportError(file.toString(), ex.getMessage(), null);
+                } catch (Throwable ex) {
+                    PrepareCache3.errors.reportError(file.toString(), ex.getMessage(), ex);
+                }
             }
             LOG.trace("Finished file " + file);
         });

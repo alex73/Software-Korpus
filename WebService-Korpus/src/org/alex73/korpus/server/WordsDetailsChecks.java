@@ -45,7 +45,8 @@ public class WordsDetailsChecks {
         public ChainInternals(ChainRequest chain) {
             this.words = new WordInternals[chain.words.size()];
             if (chain.seps != null) {
-                this.separatorBefore = chain.seps.get(0);
+                String s = chain.seps.get(0);
+                this.separatorBefore = s == null || s.isEmpty() ? null : s;
             } else {
                 this.separatorBefore = null;
             }

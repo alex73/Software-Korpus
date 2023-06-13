@@ -53,6 +53,13 @@ public class AuthorsUtil {
         if (authors.put(author, tags) != null) {
             throw new RuntimeException("Duplicate author in list: " + tags);
         }
+        String authorStandard = tags.get("AuthorStandard");
+        if (authorStandard == null) {
+            return;
+        }
+        if (authors.put(authorStandard, tags) != null) {
+            throw new RuntimeException("Duplicate author in list: " + tags);
+        }
     }
 
     public static synchronized void fixAuthors(TextInfo.Subtext textInfo) {
@@ -60,7 +67,7 @@ public class AuthorsUtil {
             for (int i = 0; i < textInfo.authors.length; i++) {
                 Map<String, String> tags = authors.get(textInfo.authors[i]);
                 if (tags == null) {
-                    tags = Map.of("Author", textInfo.authors[i]);
+                    throw new RuntimeException("Unknown author: " + textInfo.authors[i]);
                 }
                 String replaced = tags.get("AuthorIndexStandard");
                 if (replaced == null) {

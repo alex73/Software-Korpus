@@ -11,6 +11,8 @@ import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.alex73.korpus.text.parser.ParsingException;
+
 public class KorpusDateTime {
     static final DatatypeFactory DTFACTORY;
     static {
@@ -91,16 +93,16 @@ public class KorpusDateTime {
                 d2 = DTFACTORY.newXMLGregorianCalendarDate(Integer.parseInt(m.group(4)), Integer.parseInt(m.group(3)),
                         DatatypeConstants.FIELD_UNDEFINED, DatatypeConstants.FIELD_UNDEFINED);
             } else {
-                throw new RuntimeException("Wrong date format: " + date);
+                throw new ParsingException("Wrong date format: " + date);
             }
             if (d1.compare(d2) > 0) {
-                throw new RuntimeException("Wrong date format: " + date);
+                throw new ParsingException("Wrong date format: " + date);
             }
             pairs.add(new Pair(d1, d2));
         }
         for (int i = 1; i < pairs.size(); i++) {
             if (pairs.get(i - 1).to.compare(pairs.get(i).from) > 0) {
-                throw new RuntimeException("Wrong date format: " + date);
+                throw new ParsingException("Wrong date format: " + date);
             }
         }
     }

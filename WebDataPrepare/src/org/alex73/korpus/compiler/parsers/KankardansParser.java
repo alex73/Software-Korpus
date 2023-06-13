@@ -72,6 +72,11 @@ public class KankardansParser extends BaseParser {
             String s;
             if ((s = doc.headers.get("Authors")) != null) {
                 ti.textInfo.subtexts[0].authors = splitAndTrim(s);
+                for (int i = 0; i < ti.textInfo.subtexts[0].authors.length; i++) {
+                    if (ti.textInfo.subtexts[0].authors[i].endsWith("?")) {
+                        ti.textInfo.subtexts[0].authors[i] = ti.textInfo.subtexts[0].authors[i].replaceAll("\\?$", "");
+                    }
+                }
             }
             ti.textInfo.subtexts[0].creationTime = getAndCheckYears(doc.headers.get("CreationYear"));
             ti.textInfo.subtexts[0].publicationTime = getAndCheckYears(doc.headers.get("PublicationYear"));
