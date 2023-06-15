@@ -64,7 +64,9 @@ public class ProcessPrepareLucene extends BaseParallelProcessor<MessageParsedTex
                         for (Sentence se : p.sentences) {
                             for (Word w : se.words) {
                                 String wc = w.wordSuperNormalized;
-                                values.add(wc);
+                                if (wc != null) {
+                                    values.add(wc);
+                                }
                                 if (w.tagsVariants != null) {
                                     for (String t : w.tagsVariants.split(";")) {
                                         dbGrammarTags.add(lang.getDbTags().getDBTagString(t));

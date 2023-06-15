@@ -184,7 +184,7 @@ public class ProcessLuceneWriter extends BaseParallelProcessor<MessageLuceneWrit
 
     private void setYearsRange(String date, IntRange rangeField) {
         if (date == null || date.isEmpty()) {
-            rangeField.setRangeValues(new int[] { Integer.MIN_VALUE }, new int[] { Integer.MAX_VALUE });
+            rangeField.setRangeValues(new int[] { Integer.MAX_VALUE }, new int[] { Integer.MAX_VALUE });
         } else {
             KorpusDateTime dt = new KorpusDateTime(date);
             rangeField.setRangeValues(new int[] { dt.getEarliestYear() }, new int[] { dt.getLatestYear() });

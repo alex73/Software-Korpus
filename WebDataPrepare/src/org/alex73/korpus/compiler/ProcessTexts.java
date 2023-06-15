@@ -49,7 +49,7 @@ public class ProcessTexts extends BaseParallelProcessor<MessageParsedText> {
                 grFiller.fill(text.paragraphs[v], true);
             }
             stat.accept(text);
-            for (int i = 0; i < text.paragraphs[0].length; i += 500) {
+            for (int i = 0; i < text.paragraphs.length; i += 500) {
                 MessageParsedText portion = new MessageParsedText(text.textInfo.subtexts.length);
                 portion.textInfo = text.textInfo;
                 portion.paragraphs = Arrays.copyOfRange(text.paragraphs, i, Math.min(text.paragraphs.length, i + 500));
