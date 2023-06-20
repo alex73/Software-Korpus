@@ -39,7 +39,6 @@ public class OcrTextParser extends BaseParser {
                 text.textInfo.subcorpus = subcorpus;
                 text.textInfo.subtexts[0].source = doc.headers.get("Source");
                 text.textInfo.subtexts[0].headers = doc.headers.getAll();
-                AuthorsUtil.fixAuthors(text.textInfo.subtexts[0]);
                 ProcessTexts.preprocessor.constructTextPassport(text.textInfo, text.textInfo.subtexts[0]);
                 if (headersOnly) {
                     // ProcessHeaders.process(textInfo);

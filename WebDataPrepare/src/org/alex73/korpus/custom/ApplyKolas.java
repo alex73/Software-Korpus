@@ -1,7 +1,6 @@
 package org.alex73.korpus.custom;
 
 import java.text.Collator;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Locale;
 
@@ -52,7 +51,7 @@ public class ApplyKolas implements ITextsPreprocessor {
         StringBuilder s = new StringBuilder();
 
         subText.label = subText.headers.get("Title");
-        addHeader(s, "Аўтары", String.join(",", Arrays.asList(subText.authors)));
+        addHeader(s, "Аўтар", ApplyAsnouny.parseThenJoinAuthors(subText.headers.get("Authors")));
         addHeader(s, "Перакладчык", subText.headers.get("Translation"));
         addHeader(s, "Пераклад з", subText.headers.get("LangOrig"));
         addHeader(s, "Назва", subText.headers.get("Title") + "{{page}}");

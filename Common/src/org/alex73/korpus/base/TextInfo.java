@@ -26,7 +26,7 @@ public class TextInfo implements Serializable {
     public static class Subtext {
         public String source; // крыніца: толькі для сайтаў і неразабраных
         //URL public String url; // спасылка на знешні сайт, калі ёсць
-        public String[] authors; // аўтары
+        public String[] authors; // аўтары, у перавёрнутым выглядзе, афіцыйным правапісам
         //public String title; // назва: заўсёды
         //Translators public String[] translators; // перакладчыкі
         public String lang, langOrig; // мова тэксту, мова зыходнага тэксту

@@ -41,14 +41,8 @@ public class TextParser extends BaseParser {
             return;
         }
         String s;
-        if (text.textInfo.subtexts[0].langOrig != null) {
-            // пераклад
-            if ((s = doc.headers.get("Translation")) != null) {
-                text.textInfo.subtexts[0].authors = splitAndTrim(s);
-            }
-        } else {
-            text.textInfo.subtexts[0].authors = splitAndTrim(doc.headers.get("Authors"));
-        }
+        boolean tr = text.textInfo.subtexts[0].langOrig != null; // пераклад
+        text.textInfo.subtexts[0].authors = AuthorsUtil.reverseNames(AuthorsUtil.parseAuthors(doc.headers.get(tr ? "Translation" : "Authors")));
         if ((s = doc.headers.get("StyleGenre")) != null) {
             text.textInfo.styleGenres = splitAndTrim(s);
         }
@@ -56,7 +50,6 @@ public class TextParser extends BaseParser {
         text.textInfo.subtexts[0].creationTime = getAndCheckYears(doc.headers.get("CreationYear"));
         text.textInfo.subtexts[0].publicationTime = getAndCheckYears(doc.headers.get("PublicationYear"));
 
-        AuthorsUtil.fixAuthors(text.textInfo.subtexts[0]);
         ProcessTexts.preprocessor.constructTextPassport(text.textInfo, text.textInfo.subtexts[0]);
         if (!headersOnly) {
             doc.parse(LanguageFactory.get(getLang(text.textInfo.subtexts[0].lang)), true, PrepareCache3.errors);

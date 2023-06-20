@@ -3,11 +3,10 @@ package org.alex73.korpus.compiler.parsers;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-
-import org.alex73.korpus.base.TextInfo;
 
 public class AuthorsUtil {
     private static Map<String, Map<String, String>> authors = new HashMap<>();
@@ -62,37 +61,65 @@ public class AuthorsUtil {
         }
     }
 
-    public static synchronized void fixAuthors(TextInfo.Subtext textInfo) {
-        if (textInfo.authors != null) {
-            for (int i = 0; i < textInfo.authors.length; i++) {
-                Map<String, String> tags = authors.get(textInfo.authors[i]);
-                if (tags == null) {
-                    throw new RuntimeException("Unknown author: " + textInfo.authors[i]);
+    /**
+     * Разбірае вядомыя імёны аўтараў, і перарабляе ў афіцыйны правапіс.
+     */
+    public static String[] parseAuthors(String s) {
+        if (s == null || s.isBlank()) {
+            return null;
+        }
+        String[] list = s.split(";");
+        for (int i = 0; i < list.length; i++) {
+            list[i] = list[i].trim().replaceAll("\\?$", "");
+            if (list[i].isEmpty()) {
+                throw new RuntimeException("Wrong list data: " + Arrays.toString(list));
+            }
+            Map<String, String> tags = authors.get(list[i]);
+            if (tags == null) {
+                throw new RuntimeException("Невядомы аўтар: " + list[i]);
+            }
+            list[i] = tags.getOrDefault("AuthorStandard", tags.get("Author"));
+        }
+        return list;
+    }
+
+    /**
+     * Пераварочвае імёны аўтараў каб прозвішча ішло першым - для фільтраў пошуку.
+     */
+    public static String[] reverseNames(String[] au) {
+        if (au == null) {
+            return null;
+        }
+        String[] list = new String[au.length];
+        for (int i = 0; i < list.length; i++) {
+            Map<String, String> tags = authors.get(au[i]);
+            if (tags == null) {
+                throw new RuntimeException("Невядомы аўтар: " + list[i]);
+            }
+            String replaced = tags.get("AuthorIndexStandard");
+            if (replaced == null) {
+                replaced = tags.get("AuthorIndex");
+            }
+            if (replaced != null) {
+                list[i] = replaced;
+            } else {
+                String standard = tags.get("AuthorStandard");
+                if (standard == null) {
+                    standard = tags.get("Author");
                 }
-                String replaced = tags.get("AuthorIndexStandard");
-                if (replaced == null) {
-                    replaced = tags.get("AuthorIndex");
-                }
-                if (replaced != null) {
-                    textInfo.authors[i] = replaced;
-                } else {
-                    String standard = tags.get("AuthorStandard");
-                    if (standard == null) {
-                        standard = tags.get("Author");
-                    }
-                    String[] a = standard.split("\\s+");
-                    switch (a.length) {
-                    case 1:
-                        textInfo.authors[i] = a[0];
-                        break;
-                    case 2:
-                        textInfo.authors[i] = a[1] + ' ' + a[0];
-                        break;
-                    default:
-                        throw new RuntimeException("Impossible to index author: " + textInfo.authors[i]);
-                    }
+                String[] a = standard.split("\\s+");
+                switch (a.length) {
+                case 1:
+                    list[i] = a[0];
+                    break;
+                case 2:
+                    list[i] = a[1] + ' ' + a[0];
+                    break;
+                default:
+                    throw new RuntimeException("Impossible to index author: " + list[i]);
                 }
             }
         }
+        return list;
     }
 }

@@ -2,7 +2,6 @@ package org.alex73.korpus.languages;
 
 import org.alex73.korpus.languages.belarusian.BelarusianTags;
 import org.alex73.korpus.languages.belarusian.BelarusianWordNormalizer;
-import org.alex73.korpus.languages.russian.RussianTags;
 import org.alex73.korpus.languages.russian.RussianWordNormalizer;
 
 public class LanguageFactory {
@@ -31,8 +30,6 @@ public class LanguageFactory {
     };
 
     private static ILanguage russian = new ILanguage() {
-        static final RussianTags ts = new RussianTags();
-        static final DBTagsFactory dbtf = new DBTagsFactory(ts);
         static final RussianWordNormalizer n = new RussianWordNormalizer();
 
         public String getLanguage() {
@@ -40,12 +37,12 @@ public class LanguageFactory {
         }
 
         public ILanguage.IGrammarTags getTags() {
-            return ts;
+            return null;
         }
 
         @Override
         public IDBTags getDbTags() {
-            return dbtf;
+            return null;
         }
 
         public INormalizer getNormalizer() {

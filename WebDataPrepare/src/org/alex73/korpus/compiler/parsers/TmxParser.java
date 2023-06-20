@@ -48,9 +48,6 @@ public class TmxParser extends BaseParser {
                 throw new Exception("'title' property is not defined in " + file);
             }
             String s;
-            if ((s = parsed.properties.computeIfAbsent("authors", a -> Map.of()).get(langs[i])) != null) {
-                text.textInfo.subtexts[i].authors = splitAndTrim(s);
-            }
             String edition = null;
             if ((s = parsed.properties.computeIfAbsent("edition", a -> Map.of()).get(langs[i])) != null) {
                 edition = s;
@@ -61,7 +58,6 @@ public class TmxParser extends BaseParser {
             ProcessTexts.preprocessor.constructTextPassport(text.textInfo, text.textInfo.subtexts[i]);
         }
 
-        AuthorsUtil.fixAuthors(text.textInfo.subtexts[0]);
         if (!headersOnly) {
             List<Paragraph[]> result = new ArrayList<>();
             for (Map<String, String> seg : parsed.segments) {

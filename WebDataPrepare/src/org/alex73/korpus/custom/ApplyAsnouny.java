@@ -1,7 +1,6 @@
 package org.alex73.korpus.custom;
 
 import java.text.Collator;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Locale;
 
@@ -10,6 +9,7 @@ import org.alex73.korpus.compiler.ITextsPreprocessor;
 import org.alex73.korpus.compiler.MessageParsedText;
 import org.alex73.korpus.compiler.PrepareCache3;
 import org.alex73.korpus.compiler.ProcessTexts;
+import org.alex73.korpus.compiler.parsers.AuthorsUtil;
 
 public class ApplyAsnouny implements ITextsPreprocessor {
     @Override
@@ -93,13 +93,10 @@ public class ApplyAsnouny implements ITextsPreprocessor {
         switch (sub) {
         case teksty:
         case pieraklady: {
-            subText.label = subText.headers.get("Authors");
-            if (subText.label == null) {
-                subText.label = "———";
-            }
+            subText.label = subText.authors != null ? String.join(",", subText.authors) : "———";
             addHeader(s, "URL", subText.headers.get("URL"));
-            addHeader(s, "Аўтары", subText.headers.get("Authors"));
-            addHeader(s, "Перакладчык", subText.headers.get("Translation"));
+            addHeader(s, "Аўтары", parseThenJoinAuthors(subText.headers.get("Authors")));
+            addHeader(s, "Перакладчык", parseThenJoinAuthors(subText.headers.get("Translation")));
             addHeader(s, "Пераклад з", subText.headers.get("LangOrig"));
             addHeader(s, "Назва", subText.headers.get("Title") + "{{page}}");
             addHeader(s, "Стыль/жанр", subText.headers.get("StyleGenre"));
@@ -153,16 +150,8 @@ public class ApplyAsnouny implements ITextsPreprocessor {
             addHeader(s, "Крыніца", subText.source);
             break;
         case kankardans: {
-            String authors = null;
-            subText.label = null;
-            if (subText.authors != null) {
-                authors = String.join(",", Arrays.asList(subText.authors));
-                subText.label = authors;
-            }
-            if (subText.label == null) {
-                subText.label = "———";
-            }
-            addHeader(s, "Аўтар", authors);
+            subText.label = subText.authors != null ? String.join(",", subText.authors) : "———";
+            addHeader(s, "Аўтар", parseThenJoinAuthors(subText.headers.get("Authors")));
             addHeader(s, "Назва", subText.headers.get("Title") + "{{page}}");
             addHeader(s, "Час стварэння", subText.headers.get("CreationYear"));
             addHeader(s, "Час публікацыі", subText.headers.get("PublicationYear"));
@@ -305,6 +294,14 @@ public class ApplyAsnouny implements ITextsPreprocessor {
             }
         }
         return c;
+    }
+
+    static String parseThenJoinAuthors(String authors) {
+        String[] list = AuthorsUtil.parseAuthors(authors);
+        if (list == null) {
+            return null;
+        }
+        return String.join(",", list);
     }
 
     static int compare(String s1, String s2) {

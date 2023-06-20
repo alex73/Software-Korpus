@@ -74,12 +74,6 @@ class KorpusUI {
 		this.currentFindLanguage = lang;
 
 		$('#parallel_'+lang).prop("checked", true);
-
-		// remove all words
-		if ($(".inputword:visible").length > 0) {
-			$(".inputword:visible").remove();
-			this.addRow(true);
-		}
 	}
 	setWordMode(from: HTMLElement, mode: string) {
 		const word: HTMLElement = from.closest(".word-select");

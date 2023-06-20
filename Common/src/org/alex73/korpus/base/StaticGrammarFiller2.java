@@ -33,12 +33,9 @@ public class StaticGrammarFiller2 {
 
     public void fill(Paragraph[] content, boolean fillTags) {
         for (Paragraph p : content) {
-            if (!"bel".equals(p.lang)) {
-                return;
-            }
             for (Sentence se : p.sentences) {
                 for (Word w : se.words) {
-                    fill(w, fillTags);
+                    fill(w, fillTags && "bel".equals(p.lang));
                 }
             }
         }

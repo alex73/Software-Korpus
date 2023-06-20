@@ -122,6 +122,23 @@ public class SearchServiceImpl {
             SearchParams params = rq.params;
             LatestMark latest = rq.latest;
             checkEnoughComplex(params);
+            SearchResult result = new SearchResult();
+            if (lang.getDbTags() == null) {
+                // non-Belarusian language
+                params.chains.forEach(ch -> ch.words.forEach(w -> {
+                    if (w.mode == WordMode.ALL_FORMS || w.grammar != null) {
+                        LOGGER.info("<< Grammar request for non-Belarusian language");
+                        result.error = "Запыт для рускай мовы не можа выкарыстоўваць словаформы ці граматыку. Абярыце іншы рэжым.";
+                    }
+                    if (w.variants) {
+                        LOGGER.info("<< Grammar request for non-Belarusian language");
+                        result.error = "Запыт для рускай мовы не можа адбывацца з варыянтамі напісання. Абярыце іншы рэжым.";
+                    }
+                }));
+            }
+            if (result.error!=null) {
+                return result;
+            }
             params.chains.forEach(ch -> ch.words.forEach(w -> findAllLemmas(lang, w)));
 
             BooleanQuery.Builder query = new BooleanQuery.Builder();
@@ -133,7 +150,6 @@ public class SearchServiceImpl {
                 latest = new LatestMark();
             }
             List<Integer> found = process.search(query.build(), latest, Settings.KORPUS_SEARCH_RESULT_PAGE, filterFoundDocumentsByChains(rq.params, lang));
-            SearchResult result = new SearchResult();
             result.hasMore = found.size() >= Settings.KORPUS_SEARCH_RESULT_PAGE;
             result.foundIDs = new int[found.size()];
             for (int i = 0; i < result.foundIDs.length; i++) {
