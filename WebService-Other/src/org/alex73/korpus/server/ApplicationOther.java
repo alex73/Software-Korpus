@@ -23,6 +23,7 @@ public class ApplicationOther extends Application {
     public GrammarDB2 gr;
     public GrammarFinder grFinder;
     private List<String> settings;
+    public String synthUrl;
 
     public Map<Character, Set<String>> skipGrammar;
 
@@ -46,6 +47,10 @@ public class ApplicationOther extends Application {
             String grammarDb = (String) xmlNode.lookup("GRAMMAR_DB");
             if (grammarDb == null) {
                 throw new Exception("GRAMMAR_DB is not defined");
+            }
+            synthUrl = (String) xmlNode.lookup("SYNTH_URL");
+            if (synthUrl == null) {
+                throw new Exception("SYNTH_URL is not defined");
             }
             if (!grammarDb.isEmpty()) {
                 gr = GrammarDB2.initializeFromDir(grammarDb);

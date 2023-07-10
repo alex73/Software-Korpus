@@ -34,7 +34,7 @@ public class TextInfo implements Serializable {
        // public String details; // дэталі
         //public String file; // файл на зыходнай старонцы
         public String creationTime, publicationTime; // дата стварэння і публікацыі
-        public String label, passport; // пазнака назвы і поўны пашпарт
+        public String label, passport, title; // пазнака, поўны пашпарт і загаловак тэкста
 
         public transient Map<String, String> headers;
         private transient Long creationTimeLatest, creationTimeEarliest;

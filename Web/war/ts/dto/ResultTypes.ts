@@ -258,6 +258,7 @@ class Subtext {
     public publicationTime: string;
     public label: string;
     public passport: string;
+    public title: string;
 }
 
 class ClusterResult {

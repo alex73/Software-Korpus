@@ -1,7 +1,7 @@
 class DialogText {
 	constructor(row: ResultSearchOutRow, target: HTMLElement) {
 		const html = $.templates("#template-text").render({
-			biblio: row.doc,
+			title: row.subdoc.title,
 			detailsText: row.origText
 		});
 		$('#dialog-text').html(html);

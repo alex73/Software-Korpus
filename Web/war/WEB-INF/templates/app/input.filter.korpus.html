@@ -1,5 +1,5 @@
 <div class="card collapse" style="width: 100%" id="divInputFilterText">
-    <div class="card-body" *ngIf="serviceSearch.inputCorpusType == 'MAIN'">
+    <div class="card-body">
             <div class="form-group row my-1" id="parallel-filter" style="display: none">
                 <label for="inputFilterYearPublishedFrom" class="col-sm-4 col-md-3 col-lg-2 col-form-label">${messages.korpus_filter_lang}</label>
                 <div class="col-sm-8 col-md-9 col-lg-10">
@@ -61,15 +61,12 @@
                 </div>
             </div>
     </div>
-    <!--div class="panel-body" *ngIf="serviceSearch.inputCorpusType == 'UNSORTED'">
+    <!--div class="panel-body">
         <div class="form-horizontal">
             <div class="form-group">
                 <label for="inputFilterOther" class="col-sm-2 control-label">Частка</label>
                 <div class="col-sm-10">
-                    <input id="inputFilterOther"
-                           *ngIf="serviceSearch.initial"
-                           [(ngModel)]="serviceSearch.inputTextUnprocessed.volume"
-                           class="form-control">
+                    <input id="inputFilterOther" class="form-control">
                 </div>
             </div>
         </div>

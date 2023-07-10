@@ -31,7 +31,7 @@
 	<target name="fanetyka">
 		<delete dir="build/classes-fanetyka" failonerror="false" />
 		<mkdir dir="build/classes-fanetyka" />
-		<javac srcdir="src/org/alex73/fanetyka/impl:../Common/src" includes="**" encoding="utf-8" destdir="build/classes-fanetyka">
+		<javac debug="on" srcdir="src/org/alex73/fanetyka/impl:../Common/src" includes="**" encoding="utf-8" destdir="build/classes-fanetyka">
 			<classpath>
 				<fileset dir="war/WEB-INF/lib/" includes="*.jar"/>
 			</classpath>
@@ -44,6 +44,16 @@
 			<manifest>
 				<attribute name="Main-Class" value="org.alex73.fanetyka.impl.FanetykaText"/>
 			</manifest>
+			<zipgroupfileset dir="war/WEB-INF/lib/" includes="kryo-*.jar" />
+			<zipgroupfileset dir="war/WEB-INF/lib/" includes="objenesis-*.jar" />
+			<zipgroupfileset dir="war/WEB-INF/lib/" includes="reflectasm-*.jar" />
+			<zipgroupfileset dir="war/WEB-INF/lib/" includes="minlog-*.jar" />
+			<zipgroupfileset dir="war/WEB-INF/lib/" includes="jakarta.xml.bind-api-*.jar" />
+			<!--zipgroupfileset dir="war/WEB-INF/lib/" includes="istack-commons-runtime-*.jar" />
+			<zipgroupfileset dir="war/WEB-INF/lib/" includes="jakarta.activation-*.jar" />
+			<zipgroupfileset dir="war/WEB-INF/lib/" includes="jaxb-runtime-*.jar" />
+			<zipgroupfileset dir="war/WEB-INF/lib/" includes="txw2-*.jar" /-->
+			<zipfileset dir="../../GrammarDB/" includes="db.cache" />
 		</jar>
 	</target>
 

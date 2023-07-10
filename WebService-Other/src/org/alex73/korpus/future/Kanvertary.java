@@ -1,5 +1,10 @@
 package org.alex73.korpus.future;
 
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -38,7 +43,6 @@ public class Kanvertary {
             if (text.isBlank()) {
                 throw new Exception("Пусты тэкст");
             }
-
             FanetykaText f = new FanetykaText(ApplicationOther.instance.grFinder, text.replace('+', BelarusianWordNormalizer.pravilny_nacisk).replaceAll("[-‒‒–]", "-"));
 
             return "<div>Вынікі канвертавання (IPA):</div><div style='font-size: 150%'>" + f.ipa.replace("\n", "<br/>")
@@ -76,6 +80,34 @@ public class Kanvertary {
         }
 
         return out.toString();
+    }
+
+    @POST
+    @Path("synth")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces("audio/wav")
+    public byte[] synth(String text) throws Exception {
+        if (text.isBlank()) {
+            throw new Exception("Пусты тэкст");
+        }
+        if (text.length() > 2000) {
+            text = text.substring(0, 2000);
+        }
+
+        try {
+            FanetykaText f = new FanetykaText(ApplicationOther.instance.grFinder,
+                    text.replace('+', BelarusianWordNormalizer.pravilny_nacisk).replaceAll("[-‒‒–]", "-"));
+
+            synchronized (ApplicationOther.instance.synthUrl) { // prevent server high load
+                URL url = new URI(ApplicationOther.instance.synthUrl + "?text=" + URLEncoder.encode(f.ipa, StandardCharsets.UTF_8)).toURL();
+                try (InputStream in = url.openStream()) {
+                    return in.readAllBytes();
+                }
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw ex;
+        }
     }
 
     String wordAccent(String word) {

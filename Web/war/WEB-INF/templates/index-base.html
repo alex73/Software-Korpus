@@ -3,6 +3,11 @@
 
     <div class="container">
 
+    <span style="color: #0C8349">10.07.2023</span> 
+        <#if lang=='be'> - У раздзеле "<a href="fanetyka.html">Фанетычны канвертар і сінтэз маўлення</a>" з'явілася магчымасць карыстацца сінтэзатарам беларускага маўлення.
+        <#elseif lang='en'> - <a href="fanetyka.html">Speech synthesis</a> based on the Belarusian Mozilla Common Voice is added.
+        </#if><br/>
+
     <span style="color: #0C8349">29.05.2023</span>
         <#if lang=='be'> - Змены ў праекце:
         <#elseif lang='en'> - Changes:
@@ -106,6 +111,37 @@
             </div>
             <div class="p-2">
                 <div class="card h-100">
+                    <div class="card-header h6"><a href="spell.html"><#if lang=='be'>Праверка правапісу +анлайн<#elseif lang='en'>Spell checker +web UI</#if></a></div>
+                    <div class="card-body">
+                        <img src="images/spellchecker.png"/>
+                        <p><#if lang=='be'>Анлайнавы сэрвіс, які дапаможа вам пазбавіцца памылак у тэксце, напісаным па-беларуску афіцыйным правапісам. Таксама на старонцы сэрвісу 
+                            вы зможаце спампаваць праграму праверкі арфаграфіі для розных браўзераў, Windows (уключна з Skype, Microsoft office і г.д.), LibreOffice/OpenOffice, 
+                            Mozilla Firefox/Thunderbird.
+                        <#elseif lang='en'>An online service that will help you get rid of errors in the text written in Belarusian official spelling. 
+                            Also you can download a spell checker for different browsers, Windows (including Skype, Microsoft office, etc.), LibreOffice/OpenOffice, Mozilla Firefox/Thunderbird.
+                        </#if></p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-2">
+                <div class="card h-100">
+                    <div class="card-header h6"><a href="fanetyka.html"><#if lang=='be'>Фанетычны канвертар і сінтэз маўлення<#elseif lang='en'>Phonetic converter and voice synthesis</#if></a></div>
+                    <div class="card-body">
+                        <img src="images/fanietycny.png"/>
+                        <p><#if lang=='be'>
+                            <p>Анлайнавы канвертар слоў і тэкстаў беларускай мовы у фанетычную транскрыпцыю з выкарыстаннем Між­на­род­на­га фанетычнага алфавіта (IPA) 
+                            і беларускай школьнай транскрыпцыі.</p>
+                            <p>Сінтэз маўлення зроблены на падставе беларускага Mozilla Common Voice.</p>
+                        <#elseif lang='en'>
+                            <p>The online converter of Belarusian words and texts to phonetic transcription using International Phonetic Alphabet (IPA) and 
+                            Belarusian school transription system.</p>
+                            <p>Speech synthesis based on the Belarusian Mozilla Common Voice.</p>
+                        </#if></p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-2">
+                <div class="card h-100">
                     <div class="card-header h6"><a target="_blank" href="https://biblija.bnkorpus.info/"><#if lang=='be'>Біблійны корпус<#elseif lang='en'>Bible Corpus</#if></a></div>
                     <div class="card-body">
                         <img src="images/biblijny.png"/>
@@ -135,20 +171,6 @@
                             This digital reproduction of the work contains the original and updated registers, the original text and appendices to it. 
                             They are supplemented with critical, biographical and bibliographic materials. The publication offers full-text and keyword search. 
                             It is intended for linguists, historians, ethnographers, folklorists and all who are interested in the Belarusian language.
-                        </#if></p>
-                    </div>
-                </div>
-            </div>
-            <div class="p-2">
-                <div class="card h-100">
-                    <div class="card-header h6"><a href="spell.html"><#if lang=='be'>Праверка правапісу +анлайн<#elseif lang='en'>Spell checker +web UI</#if></a></div>
-                    <div class="card-body">
-                        <img src="images/spellchecker.png"/>
-                        <p><#if lang=='be'>Анлайнавы сэрвіс, які дапаможа вам пазбавіцца памылак у тэксце, напісаным па-беларуску афіцыйным правапісам. Таксама на старонцы сэрвісу 
-                            вы зможаце спампаваць праграму праверкі арфаграфіі для розных браўзераў, Windows (уключна з Skype, Microsoft office і г.д.), LibreOffice/OpenOffice, 
-                            Mozilla Firefox/Thunderbird.
-                        <#elseif lang='en'>An online service that will help you get rid of errors in the text written in Belarusian official spelling. 
-                            Also you can download a spell checker for different browsers, Windows (including Skype, Microsoft office, etc.), LibreOffice/OpenOffice, Mozilla Firefox/Thunderbird.
                         </#if></p>
                     </div>
                 </div>
@@ -185,21 +207,6 @@
                             and catalogues of almost any type. SloŭnikPlus (https://sourceforge.net/p/korpus/dict/) is based on modern technologies 
                             and significantly improves dictionary creation process. It makes work faster, comfortable, and more effective in comparison 
                             with usual dictionary creation.
-                        </#if></p>
-                    </div>
-                </div>
-            </div>
-            <div class="p-2">
-                <div class="card h-100">
-                    <div class="card-header h6"><a href="fanetyka.html"><#if lang=='be'>Фанетычны канвертар<#elseif lang='en'>Phonetic converter</#if></a></div>
-                    <div class="card-body">
-                        <img src="images/fanietycny.png"/>
-                        <p><#if lang=='be'>
-                            Анлайнавы канвертар слоў і тэкстаў беларускай мовы у фанетычную транскрыпцыю з выкарыстаннем Міжнароднага фанетычнага алфавіта (IPA) 
-                            і беларускай школьнай транскрыпцыі.
-                        <#elseif lang='en'>
-                            The online converter of Belarusian words and texts to phonetic transcription using International Phonetic Alphabet (IPA) and 
-                            Belarusian school transription system.
                         </#if></p>
                     </div>
                 </div>

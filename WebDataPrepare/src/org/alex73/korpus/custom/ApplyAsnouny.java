@@ -94,8 +94,10 @@ public class ApplyAsnouny implements ITextsPreprocessor {
         case teksty:
         case pieraklady: {
             subText.label = subText.authors != null ? String.join(",", subText.authors) : "———";
-            addHeader(s, "URL", subText.headers.get("URL"));
-            addHeader(s, "Аўтары", parseThenJoinAuthors(subText.headers.get("Authors")));
+            String textAuthors = parseThenJoinAuthors(subText.headers.get("Authors"));
+            subText.title = (textAuthors == null ? "" : (textAuthors + ".")) + subText.headers.get("Title") + "{{page}}";
+            addHeader(s, "URL", url(subText.headers.get("URL")));
+            addHeader(s, "Аўтары", textAuthors);
             addHeader(s, "Перакладчык", parseThenJoinAuthors(subText.headers.get("Translation")));
             addHeader(s, "Пераклад з", subText.headers.get("LangOrig"));
             addHeader(s, "Назва", subText.headers.get("Title") + "{{page}}");
@@ -108,16 +110,19 @@ public class ApplyAsnouny implements ITextsPreprocessor {
         }
         case wiki:
             subText.label = subText.source;
-            addHeader(s, "URL", subText.headers.get("URL"));
+            subText.title = subText.headers.get("Title");
+            addHeader(s, "URL", url(subText.headers.get("URL")));
             addHeader(s, "Крыніца", subText.source);
             addHeader(s, "Назва", subText.headers.get("Title"));
             break;
         case skaryna:
             subText.label = subText.headers.get("Title");
+            subText.title = subText.headers.get("Title");
             addHeader(s, "Назва", subText.headers.get("Title"));
             break;
         case dyjalektny:
             subText.label = subText.headers.get("Раён");
+            subText.title = subText.headers.get("Раён");
             addHeader(s, "Вобласць", subText.headers.get("Вобласць"));
             addHeader(s, "Раён", subText.headers.get("Раён"));
             addHeader(s, "Месца", subText.headers.get("Месца"));
@@ -138,19 +143,22 @@ public class ApplyAsnouny implements ITextsPreprocessor {
             break;
         case sajty:
             subText.label = subText.source;
-            addHeader(s, "URL", subText.headers.get("URL"));
+            subText.title = subText.headers.get("Title");
+            addHeader(s, "URL", url(subText.headers.get("URL")));
             addHeader(s, "Назва", subText.headers.get("Title"));
             addHeader(s, "Крыніца", subText.source);
             addHeader(s, "Час публікацыі", subText.headers.get("PublicationYear"));
             break;
         case nierazabranaje:
             subText.label = subText.source;
-            addHeader(s, "URL", subText.headers.get("URL"));
-            addHeader(s, "Назва", subText.headers.get("Title"));
+            subText.title = subText.headers.get("Title");
+            addHeader(s, "URL", url(subText.headers.get("URL")));
+            addHeader(s, "Назва", subText.headers.get("Title") + "{{page}}");
             addHeader(s, "Крыніца", subText.source);
             break;
         case kankardans: {
             subText.label = subText.authors != null ? String.join(",", subText.authors) : "———";
+            subText.title = subText.headers.get("Title");
             addHeader(s, "Аўтар", parseThenJoinAuthors(subText.headers.get("Authors")));
             addHeader(s, "Назва", subText.headers.get("Title") + "{{page}}");
             addHeader(s, "Час стварэння", subText.headers.get("CreationYear"));
@@ -161,6 +169,13 @@ public class ApplyAsnouny implements ITextsPreprocessor {
             throw new RuntimeException("Unknown subcorpus: " + textInfo.subcorpus);
         }
         subText.passport = s.toString();
+    }
+
+    private String url(String url) {
+        if (url == null) {
+            return null;
+        }
+        return "<a href='" + url + "'>" + url + "</a>";
     }
 
     private void addHeader(StringBuilder s, String title, String value) {

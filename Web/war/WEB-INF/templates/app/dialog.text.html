@@ -1,8 +1,8 @@
 <script id="template-text" type="text/x-jsrender">
-  <div class="modal-dialog modal-xl" *ngIf="detailsText">
+  <div class="modal-dialog modal-xl">
     <div class="modal-content">
       <div class="modal-header">
-        <h4 *ngIf="biblio" class="modal-title pull-left">{{>biblio.authors}}. {{>biblio.title}}</h4>
+        <h4 class="modal-title pull-left">{{>title}}</h4>
         <button type="button" class="close pull-right" aria-label="Close" onClick="dialogText.cancel()">
           <span aria-hidden="true">&times;</span>
         </button>
