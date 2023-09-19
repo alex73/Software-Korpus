@@ -14,13 +14,6 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>src-common</name>
-			<type>2</type>
-			<location>/home/alex/gits/Software-Korpus/Common/src</location>
-		</link>
-	</linkedResources>
 	<filteredResources>
 		<filter>
 			<id>1607927314336</id>

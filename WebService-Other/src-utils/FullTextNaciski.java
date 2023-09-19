@@ -5,11 +5,11 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.alex73.grammardb.GrammarDB2;
+import org.alex73.grammardb.GrammarFinder;
 import org.alex73.grammardb.StressUtils;
 import org.alex73.grammardb.structures.Form;
 import org.alex73.grammardb.structures.Paradigm;
 import org.alex73.grammardb.structures.Variant;
-import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.languages.ILanguage;
 import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.text.parser.IProcess;

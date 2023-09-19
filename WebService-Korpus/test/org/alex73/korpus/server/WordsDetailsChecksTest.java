@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.alex73.grammardb.GrammarDB2;
-import org.alex73.korpus.base.GrammarFinder;
+import org.alex73.grammardb.GrammarFinder;
 import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.languages.ILanguage;

@@ -15,7 +15,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 import org.alex73.grammardb.GrammarDB2;
-import org.alex73.korpus.base.GrammarFinder;
+import org.alex73.grammardb.GrammarFinder;
 
 @ApplicationPath("rest")
 public class ApplicationOther extends Application {

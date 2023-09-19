@@ -24,11 +24,11 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 import org.alex73.grammardb.GrammarDB2;
+import org.alex73.grammardb.GrammarFinder;
 import org.alex73.grammardb.SetUtils;
 import org.alex73.grammardb.structures.Variant;
 import org.alex73.grammardb.tags.IGrammarTags;
 import org.alex73.grammardb.tags.TagLetter;
-import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.languages.DBTagsFactory.KeyValue;

@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.zip.ZipOutputStream;
 
+import org.alex73.grammardb.GrammarFinder;
 import org.alex73.grammardb.StressUtils;
 import org.alex73.grammardb.structures.Form;
 import org.alex73.grammardb.structures.Paradigm;
@@ -29,7 +30,7 @@ import org.alex73.korpus.text.structure.corpus.Word;
 
 public class ProcessStat extends BaseParallelProcessor<MessageParsedText> {
 
-    private final IGrammarFinder grFinder;
+    private final GrammarFinder grFinder;
     private final Path tempOutputDir;
     // stat by subcorpuses
     private final Map<String, TextStatInfo> textStatInfos = new HashMap<>();
@@ -37,7 +38,7 @@ public class ProcessStat extends BaseParallelProcessor<MessageParsedText> {
     private final Map<String, Set<String>> authorsByLemmas = new HashMap<>();
     private final Map<String, WordsStat> wordsStatsBySubcorpus = new HashMap<>();
 
-    public ProcessStat(boolean processStat, Path tempOutputDir, IGrammarFinder grFinder) throws Exception {
+    public ProcessStat(boolean processStat, Path tempOutputDir, GrammarFinder grFinder) throws Exception {
         super(8, 16);
         this.tempOutputDir = tempOutputDir;
         this.grFinder = grFinder;
