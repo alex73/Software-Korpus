@@ -27,19 +27,21 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.alex73.grammardb.tags.BelarusianTags;
+import org.alex73.grammardb.tags.IGrammarTags;
+import org.alex73.grammardb.tags.TagLetter;
 import org.alex73.korpus.languages.ILanguage.IDBTags;
-import org.alex73.korpus.languages.belarusian.BelarusianTags;
 
 /**
  * Зьбірае усе магчымыя назвы груп і ўсе магчымыя літары тэгаў ва ўсіх
  * варыянтах.
  */
 public class DBTagsFactory implements IDBTags {
-    private final ILanguage.IGrammarTags grammarTags;
+    private final IGrammarTags grammarTags;
     public final List<KeyValue> wordTypes = new ArrayList<KeyValue>();
     public final Map<Character, DBTagsGroup> tagGroupsByWordType = new TreeMap<Character, DBTagsGroup>();
 
-    protected DBTagsFactory(ILanguage.IGrammarTags grammarTags) {
+    protected DBTagsFactory(IGrammarTags grammarTags) {
         this.grammarTags = grammarTags;
         for (TagLetter.OneLetterInfo li : grammarTags.getRoot().letters) {
             wordTypes.add(new KeyValue(Character.toString(li.letter), li.description));

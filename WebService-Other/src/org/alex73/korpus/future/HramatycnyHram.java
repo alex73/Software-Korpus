@@ -6,20 +6,20 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import org.alex73.corpus.paradigm.Form;
-import org.alex73.corpus.paradigm.Paradigm;
-import org.alex73.corpus.paradigm.Variant;
-import org.alex73.korpus.languages.ILanguage;
+import org.alex73.grammardb.SetUtils;
+import org.alex73.grammardb.StressUtils;
+import org.alex73.grammardb.structures.Form;
+import org.alex73.grammardb.structures.Paradigm;
+import org.alex73.grammardb.structures.Variant;
+import org.alex73.grammardb.tags.IGrammarTags;
 import org.alex73.korpus.languages.LanguageFactory;
-import org.alex73.korpus.utils.SetUtils;
-import org.alex73.korpus.utils.StressUtils;
 
 /**
  * Фармаванне граматыкі для граматычнага слоўніка.
  */
 public class HramatycnyHram {
     
-    static private final ILanguage.IGrammarTags BEL_TAGS = LanguageFactory.get("bel").getTags();
+    static private final IGrammarTags BEL_TAGS = LanguageFactory.get("bel").getTags();
     
     private StringBuilder text = new StringBuilder();
     private List<Group> groups = new ArrayList<>();

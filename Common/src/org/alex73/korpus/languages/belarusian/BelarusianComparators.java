@@ -2,7 +2,7 @@ package org.alex73.korpus.languages.belarusian;
 
 import java.util.Comparator;
 
-import org.alex73.korpus.utils.StressUtils;
+import org.alex73.grammardb.StressUtils;
 
 public class BelarusianComparators {
 

@@ -4,15 +4,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-import org.alex73.corpus.paradigm.Form;
-import org.alex73.corpus.paradigm.Paradigm;
-import org.alex73.corpus.paradigm.Variant;
+import org.alex73.grammardb.SetUtils;
+import org.alex73.grammardb.structures.Form;
+import org.alex73.grammardb.structures.Paradigm;
+import org.alex73.grammardb.structures.Variant;
 import org.alex73.korpus.languages.ILanguage;
 import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.text.structure.corpus.Paragraph;
 import org.alex73.korpus.text.structure.corpus.Sentence;
 import org.alex73.korpus.text.structure.corpus.Word;
-import org.alex73.korpus.utils.SetUtils;
 
 public class StaticGrammarFiller2 {
     public static boolean fillParadigmOnly;

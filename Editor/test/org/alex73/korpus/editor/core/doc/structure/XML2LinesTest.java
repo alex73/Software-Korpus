@@ -1,17 +1,20 @@
 package org.alex73.korpus.editor.core.doc.structure;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.text.AbstractDocument.Content;
+
 import org.alex73.korpus.text.TextIO;
+import org.alex73.korpus.text.structure.files.ITextLineElement;
+import org.alex73.korpus.text.structure.files.InlineTag;
 import org.alex73.korpus.text.structure.files.LongTagItem;
 import org.alex73.korpus.text.structure.files.SentenceSeparatorItem;
-import org.alex73.korpus.text.xml.Content;
-import org.alex73.korpus.text.xml.ITextLineElement;
-import org.alex73.korpus.text.xml.InlineTag;
 import org.alex73.korpus.text.xml.S;
 import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.XMLText;

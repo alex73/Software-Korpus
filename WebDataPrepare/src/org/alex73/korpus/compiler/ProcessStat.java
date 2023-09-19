@@ -15,9 +15,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.zip.ZipOutputStream;
 
-import org.alex73.corpus.paradigm.Form;
-import org.alex73.corpus.paradigm.Paradigm;
-import org.alex73.corpus.paradigm.Variant;
+import org.alex73.grammardb.StressUtils;
+import org.alex73.grammardb.structures.Form;
+import org.alex73.grammardb.structures.Paradigm;
+import org.alex73.grammardb.structures.Variant;
 import org.alex73.korpus.base.IGrammarFinder;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.compiler.stat.StatWriting;
@@ -25,7 +26,6 @@ import org.alex73.korpus.compiler.stat.WordsStat;
 import org.alex73.korpus.text.structure.corpus.Paragraph;
 import org.alex73.korpus.text.structure.corpus.Sentence;
 import org.alex73.korpus.text.structure.corpus.Word;
-import org.alex73.korpus.utils.StressUtils;
 
 public class ProcessStat extends BaseParallelProcessor<MessageParsedText> {
 

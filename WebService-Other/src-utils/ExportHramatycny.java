@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.alex73.corpus.paradigm.Form;
-import org.alex73.corpus.paradigm.Variant;
-import org.alex73.korpus.base.GrammarDB2;
+import org.alex73.grammardb.FormsReadyFilter;
+import org.alex73.grammardb.GrammarDB2;
+import org.alex73.grammardb.structures.Form;
+import org.alex73.grammardb.structures.Variant;
 import org.alex73.korpus.future.Hramatycny.Out;
-import org.alex73.korpus.languages.belarusian.FormsReadyFilter;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;

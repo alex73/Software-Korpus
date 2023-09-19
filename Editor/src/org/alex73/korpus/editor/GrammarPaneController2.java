@@ -2,7 +2,6 @@ package org.alex73.korpus.editor;
 
 import java.awt.Component;
 import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
@@ -28,26 +27,25 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
-import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
 import javax.xml.bind.Marshaller;
 
-import org.alex73.corpus.paradigm.Form;
-import org.alex73.corpus.paradigm.FormType;
-import org.alex73.corpus.paradigm.Paradigm;
-import org.alex73.corpus.paradigm.Variant;
-import org.alex73.korpus.base.GrammarDB2;
+import org.alex73.grammardb.GrammarDB2;
+import org.alex73.grammardb.SetUtils;
+import org.alex73.grammardb.structures.Form;
+import org.alex73.grammardb.structures.FormType;
+import org.alex73.grammardb.structures.Paradigm;
+import org.alex73.grammardb.structures.Variant;
+import org.alex73.grammardb.tags.BelarusianTags;
+import org.alex73.grammardb.tags.TagLetter;
 import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.editor.grammar.GrammarConstructor;
 import org.alex73.korpus.editor.grammar.GrammarConstructor.PVW;
 import org.alex73.korpus.editor.ui.GrammarPane2;
 import org.alex73.korpus.editor.ui.ShowXMLDialog;
-import org.alex73.korpus.languages.TagLetter;
-import org.alex73.korpus.languages.belarusian.BelarusianTags;
 import org.alex73.korpus.languages.belarusian.BelarusianWordNormalizer;
-import org.alex73.korpus.utils.SetUtils;
 
 /**
  * Кіруе разгортваннем слоў.

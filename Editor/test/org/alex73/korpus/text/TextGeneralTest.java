@@ -3,8 +3,9 @@ package org.alex73.korpus.text;
 import java.io.File;
 import java.io.InputStream;
 
+import javax.swing.text.AbstractDocument.Content;
+
 import org.alex73.korpus.text.parser.IProcess;
-import org.alex73.korpus.text.xml.Content;
 import org.alex73.korpus.text.xml.P;
 import org.alex73.korpus.text.xml.Poetry;
 import org.alex73.korpus.text.xml.Se;

@@ -23,21 +23,22 @@ import javax.naming.InitialContext;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
-import org.alex73.corpus.paradigm.Variant;
-import org.alex73.korpus.base.GrammarDB2;
+import org.alex73.grammardb.GrammarDB2;
+import org.alex73.grammardb.SetUtils;
+import org.alex73.grammardb.structures.Variant;
+import org.alex73.grammardb.tags.IGrammarTags;
+import org.alex73.grammardb.tags.TagLetter;
 import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.languages.DBTagsFactory.KeyValue;
 import org.alex73.korpus.languages.ILanguage;
 import org.alex73.korpus.languages.LanguageFactory;
-import org.alex73.korpus.languages.TagLetter;
 import org.alex73.korpus.server.data.GrammarInitial;
 import org.alex73.korpus.server.data.GrammarInitial.GrammarLetter;
 import org.alex73.korpus.server.data.InitialData;
 import org.alex73.korpus.shared.LemmaInfo;
 import org.alex73.korpus.utils.KorpusFileUtils;
-import org.alex73.korpus.utils.SetUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -124,7 +125,7 @@ public class ApplicationKorpus extends Application {
     }
 
     void prepareInitialGrammar() throws Exception {
-        ILanguage.IGrammarTags tags = LanguageFactory.get("bel").getTags();
+        IGrammarTags tags = LanguageFactory.get("bel").getTags();
         ILanguage.IDBTags dbtf = LanguageFactory.get("bel").getDbTags();
         grammarInitial = new GrammarInitial();
         grammarInitial.grammarTree = new TreeMap<>();

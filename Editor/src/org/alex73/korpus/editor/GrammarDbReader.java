@@ -24,7 +24,7 @@ package org.alex73.korpus.editor;
 
 import javax.swing.SwingWorker;
 
-import org.alex73.korpus.base.GrammarDB2;
+import org.alex73.grammardb.GrammarDB2;
 
 /**
  * Чытае граматычную базу з файлаў.

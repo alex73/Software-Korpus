@@ -2,8 +2,8 @@ package org.alex73.korpus.languages;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
+import org.alex73.grammardb.tags.IGrammarTags;
 import org.alex73.korpus.languages.DBTagsFactory.DBTagsGroup;
 import org.alex73.korpus.languages.DBTagsFactory.KeyValue;
 
@@ -15,16 +15,6 @@ public interface ILanguage {
     IDBTags getDbTags();
 
     INormalizer getNormalizer();
-
-    interface IGrammarTags {
-        TagLetter getRoot();
-
-        List<String> describe(String codeBegin, Set<String> excludeGroups);
-
-        char getValueOfGroup(String code, String group);
-
-        TagLetter getNextAfter(String codeBegin);
-    }
 
     interface IDBTags {
         String getDBTagString(String grammarTag);

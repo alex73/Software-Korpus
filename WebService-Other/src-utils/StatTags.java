@@ -1,10 +1,10 @@
 import java.util.HashMap;
 import java.util.Map;
 
-import org.alex73.corpus.paradigm.Form;
-import org.alex73.corpus.paradigm.Variant;
-import org.alex73.korpus.base.GrammarDB2;
-import org.alex73.korpus.utils.SetUtils;
+import org.alex73.grammardb.GrammarDB2;
+import org.alex73.grammardb.SetUtils;
+import org.alex73.grammardb.structures.Form;
+import org.alex73.grammardb.structures.Variant;
 
 public class StatTags {
 

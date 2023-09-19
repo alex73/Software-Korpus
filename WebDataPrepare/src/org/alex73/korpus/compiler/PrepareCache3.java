@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 import java.util.zip.ZipOutputStream;
 
-import org.alex73.korpus.base.GrammarDB2;
+import org.alex73.grammardb.GrammarDB2;
 import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.compiler.parsers.AuthorsUtil;

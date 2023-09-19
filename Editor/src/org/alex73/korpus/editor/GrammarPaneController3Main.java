@@ -26,11 +26,14 @@ import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 import javax.xml.bind.Marshaller;
 
-import org.alex73.corpus.paradigm.Form;
-import org.alex73.corpus.paradigm.FormType;
-import org.alex73.corpus.paradigm.Paradigm;
-import org.alex73.corpus.paradigm.Variant;
-import org.alex73.korpus.base.GrammarDB2;
+import org.alex73.grammardb.GrammarDB2;
+import org.alex73.grammardb.SetUtils;
+import org.alex73.grammardb.structures.Form;
+import org.alex73.grammardb.structures.FormType;
+import org.alex73.grammardb.structures.Paradigm;
+import org.alex73.grammardb.structures.Variant;
+import org.alex73.grammardb.tags.BelarusianTags;
+import org.alex73.grammardb.tags.TagLetter;
 import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.editor.GrammarPaneController2.DocumentChanger;
 import org.alex73.korpus.editor.GrammarPaneController2.Model;
@@ -38,9 +41,6 @@ import org.alex73.korpus.editor.grammar.GrammarConstructor;
 import org.alex73.korpus.editor.grammar.GrammarConstructor.PVW;
 import org.alex73.korpus.editor.ui.GrammarPane3;
 import org.alex73.korpus.editor.ui.ShowXMLDialog;
-import org.alex73.korpus.languages.TagLetter;
-import org.alex73.korpus.languages.belarusian.BelarusianTags;
-import org.alex73.korpus.utils.SetUtils;
 
 public class GrammarPaneController3Main {
 

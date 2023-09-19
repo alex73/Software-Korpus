@@ -16,5 +16,6 @@
 	<classpathentry kind="lib" path="lib/jaxb/jakarta.xml.bind-api-2.3.3.jar"/>
 	<classpathentry kind="lib" path="lib/jaxb/jaxb-runtime-2.3.5.jar"/>
 	<classpathentry kind="lib" path="lib/jaxb/txw2-2.3.5.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

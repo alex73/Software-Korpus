@@ -24,10 +24,7 @@ package org.alex73.korpus.editor.core.doc.structure;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.File;
-
-import org.alex73.korpus.base.GrammarDB2;
-import org.alex73.korpus.editor.core.doc.structure.Line;
+import org.alex73.grammardb.GrammarDB2;
 import org.alex73.korpus.text.xml.S;
 import org.alex73.korpus.text.xml.W;
 import org.alex73.korpus.text.xml.Z;

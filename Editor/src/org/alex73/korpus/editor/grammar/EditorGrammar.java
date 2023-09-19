@@ -21,15 +21,15 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 
-import org.alex73.corpus.paradigm.Form;
-import org.alex73.corpus.paradigm.Paradigm;
-import org.alex73.corpus.paradigm.Variant;
-import org.alex73.corpus.paradigm.Wordlist;
-import org.alex73.korpus.base.GrammarDB2;
-import org.alex73.korpus.base.GrammarDBSaver;
+import org.alex73.grammardb.GrammarDB2;
+import org.alex73.grammardb.GrammarDBSaver;
+import org.alex73.grammardb.SetUtils;
+import org.alex73.grammardb.structures.Form;
+import org.alex73.grammardb.structures.Paradigm;
+import org.alex73.grammardb.structures.Variant;
+import org.alex73.grammardb.structures.Wordlist;
+import org.alex73.grammardb.themes.Theme;
 import org.alex73.korpus.base.StaticGrammarFiller2;
-import org.alex73.korpus.editor.core.Theme;
-import org.alex73.korpus.utils.SetUtils;
 
 public class EditorGrammar {
     static final String HEADER_PREFIX = "=====";

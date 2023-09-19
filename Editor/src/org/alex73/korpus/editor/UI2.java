@@ -16,7 +16,7 @@ import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.undo.UndoManager;
 
-import org.alex73.korpus.base.GrammarDB2;
+import org.alex73.grammardb.GrammarDB2;
 import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.editor.grammar.EditorGrammar;

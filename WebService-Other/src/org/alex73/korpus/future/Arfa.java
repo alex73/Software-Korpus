@@ -14,14 +14,14 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.alex73.corpus.paradigm.Form;
-import org.alex73.corpus.paradigm.Variant;
+import org.alex73.grammardb.FormsReadyFilter;
+import org.alex73.grammardb.StressUtils;
+import org.alex73.grammardb.structures.Form;
+import org.alex73.grammardb.structures.Variant;
 import org.alex73.korpus.languages.ILanguage;
 import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.languages.belarusian.BelarusianComparators;
-import org.alex73.korpus.languages.belarusian.FormsReadyFilter;
 import org.alex73.korpus.server.ApplicationOther;
-import org.alex73.korpus.utils.StressUtils;
 
 @SuppressWarnings("serial")
 @WebServlet(urlPatterns = { "/arfa/*" })

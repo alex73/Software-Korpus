@@ -4,10 +4,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.alex73.corpus.paradigm.Form;
-import org.alex73.corpus.paradigm.Paradigm;
-import org.alex73.corpus.paradigm.Variant;
-import org.alex73.korpus.base.GrammarDB2;
+import org.alex73.grammardb.GrammarDB2;
+import org.alex73.grammardb.StressUtils;
+import org.alex73.grammardb.structures.Form;
+import org.alex73.grammardb.structures.Paradigm;
+import org.alex73.grammardb.structures.Variant;
 import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.languages.ILanguage;
 import org.alex73.korpus.languages.LanguageFactory;
@@ -17,7 +18,6 @@ import org.alex73.korpus.text.structure.files.ITextLineElement;
 import org.alex73.korpus.text.structure.files.SentenceSeparatorItem;
 import org.alex73.korpus.text.structure.files.TextLine;
 import org.alex73.korpus.text.structure.files.WordItem;
-import org.alex73.korpus.utils.StressUtils;
 
 public class FullTextNaciski {
     private final static ILanguage.INormalizer NORMALIZER = LanguageFactory.get("bel").getNormalizer();

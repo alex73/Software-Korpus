@@ -7,10 +7,10 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import org.alex73.grammardb.tags.TagLetter;
 import org.alex73.korpus.languages.DBTagsFactory;
 import org.alex73.korpus.languages.DBTagsFactory.DBTagsGroup;
 import org.alex73.korpus.languages.LanguageFactory;
-import org.alex73.korpus.languages.TagLetter;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;

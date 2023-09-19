@@ -38,7 +38,7 @@ import java.util.TreeSet;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 
-import org.alex73.korpus.editor.core.Theme;
+import org.alex73.grammardb.themes.Theme;
 import org.alex73.korpus.editor.ui.ThemesDialog;
 
 /**

@@ -31,7 +31,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
@@ -49,7 +48,7 @@ import javax.swing.text.Element;
 import javax.swing.text.PlainDocument;
 import javax.swing.text.ViewFactory;
 
-import org.alex73.korpus.base.GrammarDB2;
+import org.alex73.grammardb.GrammarDB2;
 import org.alex73.korpus.base.GrammarFinder;
 import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3;

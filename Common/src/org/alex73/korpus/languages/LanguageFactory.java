@@ -1,6 +1,7 @@
 package org.alex73.korpus.languages;
 
-import org.alex73.korpus.languages.belarusian.BelarusianTags;
+import org.alex73.grammardb.tags.BelarusianTags;
+import org.alex73.grammardb.tags.IGrammarTags;
 import org.alex73.korpus.languages.belarusian.BelarusianWordNormalizer;
 import org.alex73.korpus.languages.russian.RussianWordNormalizer;
 
@@ -15,7 +16,7 @@ public class LanguageFactory {
             return "bel";
         }
 
-        public ILanguage.IGrammarTags getTags() {
+        public IGrammarTags getTags() {
             return bt;
         }
 
@@ -36,7 +37,7 @@ public class LanguageFactory {
             return "rus";
         }
 
-        public ILanguage.IGrammarTags getTags() {
+        public IGrammarTags getTags() {
             return null;
         }
 
