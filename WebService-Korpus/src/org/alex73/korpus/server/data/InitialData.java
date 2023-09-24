@@ -20,6 +20,7 @@ public class InitialData {
     public List<Stat> stat;
     public String[] kankardansnyjaSpisy;
     public String preselectedSubcorpuses;
+    public Map<String, String[]> showControls;
 
     public static class Stat {
         public String name;

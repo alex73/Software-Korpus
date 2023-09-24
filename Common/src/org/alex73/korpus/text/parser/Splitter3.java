@@ -1,7 +1,5 @@
 package org.alex73.korpus.text.parser;
 
-import java.text.ParseException;
-
 import org.alex73.korpus.languages.ILanguage;
 import org.alex73.korpus.text.structure.files.ITextLineElement;
 import org.alex73.korpus.text.structure.files.InlineTag;

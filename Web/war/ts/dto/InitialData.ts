@@ -10,6 +10,7 @@ class InitialData {
     public kankardansnyjaSpisy: string[];
     public preselectedSubcorpuses: string;
     public localization: { [key:string]:{ [key:string]:string; } };
+    public showControls: { [key:string]:string[]; };
 }
 
 class InitialDataStat {

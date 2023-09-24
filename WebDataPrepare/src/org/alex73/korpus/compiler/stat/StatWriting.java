@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.zip.ZipOutputStream;
 
-import org.alex73.korpus.compiler.ProcessStat.TextStatInfo;
+import org.alex73.korpus.compiler.Step3Stat.TextStatInfo;
 import org.alex73.korpus.utils.KorpusFileUtils;
 import org.xerial.snappy.SnappyInputStream;
 
@@ -47,26 +47,30 @@ public class StatWriting {
         KorpusFileUtils.writeGzip(dir.resolve("lemma-authors.list.gz"), lemmas.stream().map(le -> le + '=' + String.join(";", authorsByLemmas.get(le))));
     }
 
-    public static void mergeCounts(Collection<Path> snappyFiles, ZipOutputStream out, String entryName) throws Exception {
-        Map<String, AtomicInteger> wordCounts = new HashMap<>();
-        for (Path snappyFile : snappyFiles) {
-            try (BufferedReader in = new BufferedReader(
-                    new InputStreamReader(new SnappyInputStream(new BufferedInputStream(Files.newInputStream(snappyFile), 1024 * 1024))))) {
-                String s;
-                while ((s = in.readLine()) != null) {
-                    int p = s.lastIndexOf('=');
-                    if (p < 0) {
-                        throw new Exception("Wrong line: " + s);
+    public static void mergeCounts(Collection<Path> snappyFiles, ZipOutputStream out, String entryName) {
+        try {
+            Map<String, AtomicInteger> wordCounts = new HashMap<>();
+            for (Path snappyFile : snappyFiles) {
+                try (BufferedReader in = new BufferedReader(
+                        new InputStreamReader(new SnappyInputStream(new BufferedInputStream(Files.newInputStream(snappyFile), 1024 * 1024))))) {
+                    String s;
+                    while ((s = in.readLine()) != null) {
+                        int p = s.lastIndexOf('=');
+                        if (p < 0) {
+                            throw new Exception("Wrong line: " + s);
+                        }
+                        String w = s.substring(0, p);
+                        int c = Integer.parseInt(s.substring(p + 1));
+                        wordCounts.computeIfAbsent(w, word -> new AtomicInteger()).addAndGet(c);
                     }
-                    String w = s.substring(0, p);
-                    int c = Integer.parseInt(s.substring(p + 1));
-                    wordCounts.computeIfAbsent(w, word -> new AtomicInteger()).addAndGet(c);
                 }
             }
-        }
-        synchronized (out) {
-            KorpusFileUtils.writeZip(out, entryName,
-                    wordCounts.entrySet().stream().sorted((a, b) -> Integer.compare(b.getValue().get(), a.getValue().get())).map(en -> en.toString()));
+            synchronized (out) {
+                KorpusFileUtils.writeZip(out, entryName,
+                        wordCounts.entrySet().stream().sorted((a, b) -> Integer.compare(b.getValue().get(), a.getValue().get())).map(en -> en.toString()));
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
         }
     }
 

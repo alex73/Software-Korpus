@@ -13,6 +13,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.alex73.korpus.text.parser.ParsingException;
 
+import org.alex73.korpus.text.parser.ParsingException;
+
 public class KorpusDateTime {
     static final DatatypeFactory DTFACTORY;
     static {

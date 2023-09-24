@@ -1,7 +1,10 @@
 package org.alex73.korpus.compiler.stat;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -14,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.xerial.snappy.SnappyOutputStream;
 
 public class WordsStat {
-    private OutputStream byFormTempFile;
+    private Writer byFormTempFile;
     private int wordsCount;
     private Set<String> allLemmas = null;
     private Map<String, ParadigmStat> byLemma = null;
@@ -33,7 +36,8 @@ public class WordsStat {
         byForm = new HashMap<>();
         if (tempFile != null) {
             try {
-                byFormTempFile = new SnappyOutputStream(Files.newOutputStream(tempFile), 1024 * 1024);
+                byFormTempFile = new BufferedWriter(new OutputStreamWriter(new SnappyOutputStream(Files.newOutputStream(tempFile)), StandardCharsets.UTF_8),
+                        1024 * 1024);
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
@@ -97,7 +101,7 @@ public class WordsStat {
         for (Map.Entry<String, AtomicInteger> en : stat.byForm.entrySet()) {
             byForm.computeIfAbsent(en.getKey(), f -> new AtomicInteger()).addAndGet(en.getValue().get());
         }
-        if (byForm.size() > 100000) {
+        if (byForm.size() > 1000000) {
             writeToFile();
             byForm.clear();
         }
@@ -105,9 +109,9 @@ public class WordsStat {
 
     private void writeToFile() throws IOException {
         for (Map.Entry<String, AtomicInteger> en : byForm.entrySet()) {
-            byFormTempFile.write(en.getKey().getBytes());
+            byFormTempFile.write(en.getKey());
             byFormTempFile.write('=');
-            byFormTempFile.write(Integer.toString(en.getValue().get()).getBytes());
+            byFormTempFile.write(Integer.toString(en.getValue().get()));
             byFormTempFile.write('\n');
         }
     }

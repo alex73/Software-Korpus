@@ -10,17 +10,10 @@ public class TextInfo implements Serializable {
     public String subcorpus;
     public transient String sourceFilePath; // source file ID
     public String[] styleGenres; // styles and genres
-    public transient int textOrder; // only for sort texts inside one file
+    public transient int globalTextOrder;
     public Subtext[] subtexts;
 
     public TextInfo() {
-    }
-
-    public TextInfo(int parallelCount) {
-        subtexts = new Subtext[parallelCount];
-        for (int i = 0; i < subtexts.length; i++) {
-            subtexts[i] = new Subtext();
-        }
     }
 
     public static class Subtext {
@@ -36,7 +29,6 @@ public class TextInfo implements Serializable {
         public String creationTime, publicationTime; // дата стварэння і публікацыі
         public String label, passport, title; // пазнака, поўны пашпарт і загаловак тэкста
 
-        public transient Map<String, String> headers;
         private transient Long creationTimeLatest, creationTimeEarliest;
         private transient Long publicationTimeLatest, publicationTimeEarliest;
 

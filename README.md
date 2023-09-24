@@ -4,6 +4,7 @@ Korpus
 “Korpus” is software for processing and viewing [text corpuses](https://en.wikipedia.org/wiki/Text_corpus), that contains several parts:
 
 * Text editor (with grammar database editor)
+* Parsers
 * Compiler
 * Search UI
 
@@ -40,6 +41,10 @@ With this combined process, text corpus can be improved step-by-step. You can ad
 Editor
 ------
 Editor is just Java+SwingUI program, i.e. usual program for local execution. It will be wrong way to create web-based software for that, since only few peoples will use this software, and they will require fastest and useful complex interface for editing.
+
+Parsers
+-------
+Parsers are set of scripts that convert several text formants into CTF format.
 
 Compiler
 --------

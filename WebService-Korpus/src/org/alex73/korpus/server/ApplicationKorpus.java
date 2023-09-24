@@ -190,8 +190,9 @@ public class ApplicationKorpus extends Application {
         searchInitial.subcorpuses = new ArrayList<>();
         searchInitial.authors = new TreeMap<>();
         searchInitial.sources = new TreeMap<>();
+        searchInitial.showControls = new TreeMap<>();
         for (String line : settings) {
-            if (line.isBlank()) {
+            if (line.isBlank() || line.startsWith("#")) {
                 continue;
             }
             int eq = line.indexOf('=');
@@ -206,6 +207,11 @@ public class ApplicationKorpus extends Application {
             }
             if (line.startsWith("preselected_subcorpuses=")) {
                 searchInitial.preselectedSubcorpuses = line.substring(24).trim();
+            }
+            if (line.startsWith("show_controls.")) {
+                String k = line.substring("show_controls.".length(), eq);
+                String v = line.substring(eq + 1);
+                searchInitial.showControls.put(k, v.split(","));
             }
         }
         for (String key : (Set<String>) (Set<?>) stat.keySet()) {
@@ -315,7 +321,7 @@ public class ApplicationKorpus extends Application {
             authors.add(a);
         }
         for (String line : settings) {
-            if (line.isBlank()) {
+            if (line.isBlank() || line.startsWith("#")) {
                 continue;
             }
             int eq = line.indexOf('=');

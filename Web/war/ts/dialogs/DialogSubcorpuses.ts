@@ -39,19 +39,11 @@ class DialogSubcorpuses {
 			$('#inputFilterSourceShow').hide();
 			$('#inputFilterYearWrittenShow').hide();
 			$('#inputFilterYearPublishedShow').hide();
-			if (subcorpuses.indexOf('teksty') >= 0 || subcorpuses.indexOf('pieraklady') >= 0) {
-				$('#inputFilterAuthorShow').show();
-				$('#inputFilterStyleShow').show();
-				$('#inputFilterYearWrittenShow').show();
-				$('#inputFilterYearPublishedShow').show();
-			}
-			if (subcorpuses.indexOf('sajty') >= 0) {
-				$('#inputFilterSourceShow').show();
-				$('#inputFilterYearPublishedShow').show();
-			}
-            if (subcorpuses.indexOf('nierazabranaje') >= 0) {
-                $('#inputFilterSourceShow').show();
-            }
+			subcorpuses.forEach(sc => {
+				if (korpusService.initial.showControls[sc]) {
+					korpusService.initial.showControls[sc].forEach(c => $('#'+c).show());
+				}
+			});
 		} else {
 			$('#inputFilterAuthorShow').show();
 			$('#inputFilterStyleShow').show();

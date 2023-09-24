@@ -3,7 +3,7 @@
 
 	<target name="javac">
 		<mkdir dir="build/classes" />
-		<javac srcdir="src:../Common/src" includes="**" encoding="utf-8" destdir="build/classes">
+		<javac srcdir="src:src-corpus-engine:../Common/src" includes="**" encoding="utf-8" destdir="build/classes">
 			<classpath>
 				<fileset dir="war/WEB-INF/lib/" includes="*.jar"/>
 				<fileset dir="lib-compile" includes="**/*.jar"/>
@@ -11,6 +11,7 @@
 		</javac>
 		<copy todir="build/classes">
 			<fileset dir="src" />
+			<fileset dir="src-corpus-engine" />
 			<fileset dir="../Common/src" />
 		</copy>
 		<!--copy file="../GrammarDB/db.cache" todir="build/classes" /-->

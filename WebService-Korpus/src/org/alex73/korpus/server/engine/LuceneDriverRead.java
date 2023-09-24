@@ -24,7 +24,6 @@ package org.alex73.korpus.server.engine;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.alex73.korpus.server.data.LatestMark;
 import org.apache.lucene.document.Document;
@@ -48,7 +47,7 @@ public class LuceneDriverRead extends LuceneFields {
     protected IndexSearcher indexSearcher;
 
     public LuceneDriverRead(String rootDir, String[] languages) throws Exception {
-        super(Set.of(languages));
+        super(languages);
         dir = new NIOFSDirectory(Paths.get(rootDir));
 
         directoryReader = DirectoryReader.open(dir);

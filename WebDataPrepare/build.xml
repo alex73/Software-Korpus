@@ -7,12 +7,10 @@
 
 	<target name="build">
 		<mkdir dir="build/classes" />
-		<javac srcdir="src:../Common/src/" encoding="utf-8" destdir="build/classes" nowarn="true" debug="true" debuglevel="lines,vars,source">
+		<javac srcdir="src:src-corpus-engine:../Common/src/" encoding="utf-8" destdir="build/classes" nowarn="true" debug="true" debuglevel="lines,vars,source">
 			<classpath>
 				<fileset dir="lib" includes="**/*.jar" />
-				<pathelement location="../Web/build/classes" />
 				<fileset dir="../Common/lib/" includes="**/*.jar" />
-				<fileset dir="../Web/libs/" includes="**/*.jar" />
 			</classpath>
 		</javac>
 		<copy todir="build/classes">
@@ -23,16 +21,13 @@
 	<target name="all" depends="clean,build"/>
 
 	<target name="run">
-		<java failonerror="true" fork="true" dir=".." classname="org.alex73.korpus.compiler.PrepareCache3">
+		<java failonerror="true" fork="true" dir=".." classname="org.alex73.korpus.compiler.PrepareCache4">
 			<classpath>
 				<pathelement location="build/classes"/>
-				<pathelement location="../Web/build/classes" />
 				<fileset dir="lib/" includes="**/*.jar" />
 				<fileset dir="../Common/lib/" includes="**/*.jar" />
-				<fileset dir="../Web/libs/" includes="**/*.jar" />
 			</classpath>
-			<jvmarg line="-Xmx22g"/>
-			<arg line="--input=/home/alex/Korpus --output=/home/alex/Korpus-cache --grammardb=/home/alex/gits/GrammarDB --prod=true"/>
+			<arg line="--input=/home/alex/Korpus --languages=bel --output=/home/alex/Korpus-cache --grammardb=/home/alex/gits/GrammarDB/data --prod=true"/>
 		</java>
 	</target>
 </project>
