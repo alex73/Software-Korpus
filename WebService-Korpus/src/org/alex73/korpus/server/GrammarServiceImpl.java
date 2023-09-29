@@ -137,6 +137,7 @@ public class GrammarServiceImpl {
             }
             Stream<LemmaInfo> output;
             if (rq.word == null || hasWildcards(rq.word)) {
+                rq.word = wordNormalizer.lightNormalized(rq.word.trim(), ILanguage.INormalizer.PRESERVE_WILDCARDS);
                 output = StreamSupport.stream(
                         new SearchWidlcards(lang, check.createWildcardRegexp(rq.word), reGrammar, rq.multiForm, rq.fullDatabase, reOutputGrammar), false);
             } else {
