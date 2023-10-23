@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.alex73.korpus.base.Ctf;
-import org.alex73.korpus.parsers.utils.AuthorsUtil;
 import org.alex73.korpus.parsers.utils.Output;
 import org.alex73.korpus.parsers.utils.TextFileHeaders;
 
@@ -30,7 +29,6 @@ public class KankardansParser {
             System.err.println("KankardansParser <каталог з файлами наладаў аўтараў> <файл з канкардансам> <файл каб захаваць падкорпус>");
             System.exit(1);
         }
-        AuthorsUtil.init(Path.of(args[0]));
         os = new Output(Path.of(args[2]));
         parse(Path.of(args[1]));
         os.close();
@@ -86,14 +84,14 @@ public class KankardansParser {
     static void flushText() throws Exception {
         if (text != null) {
             Ctf.Language la = text.languages[0];
-            la.authors = AuthorsUtil.reverseNames(AuthorsUtil.parseAuthors(headers.get("Authors")));
+            la.authors = Authors.autaryIndexes(headers.get("Authors"));
             la.creationTime = headers.get("CreationYear");
             la.publicationTime = headers.get("PublicationYear");
 
             la.label = la.authors != null ? String.join(",", la.authors) : "———";
             la.title = headers.get("Title") + "{{page}}";
             List<String> s = new ArrayList<>();
-            TextFileHeaders.addHeader(s, "Аўтар", TextFileHeaders.parseThenJoinAuthors(headers.get("Authors")));
+            TextFileHeaders.addHeader(s, "Аўтар", Authors.autaryPravapis(headers.get("Authors")));
             TextFileHeaders.addHeader(s, "Аўтар вядомы як", headers.get("Aka"));
             TextFileHeaders.addHeader(s, "Назва", headers.get("Title") + "{{page}}");
             TextFileHeaders.addHeader(s, "Час стварэння", headers.get("CreationYear"));

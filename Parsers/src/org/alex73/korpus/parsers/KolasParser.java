@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.alex73.korpus.base.Ctf;
-import org.alex73.korpus.parsers.utils.AuthorsUtil;
 import org.alex73.korpus.parsers.utils.Output;
 import org.alex73.korpus.parsers.utils.TextFileHeaders;
 import org.alex73.korpus.parsers.utils.TextFileParser;
@@ -22,7 +21,6 @@ public class KolasParser {
             System.err.println("KolasParser <каталог з файлами наладаў аўтараў> <каталог з зыходнымі файламі> <файл каб захаваць падкорпус>");
             System.exit(1);
         }
-        AuthorsUtil.init(Path.of(args[0]));
 
         Path in = Path.of(args[1]);
         List<Path> files = Files
@@ -75,17 +73,17 @@ public class KolasParser {
         Ctf.Language la = tf.text.languages[0];
 
         String sa;
-        la.authors = AuthorsUtil.reverseNames(AuthorsUtil.parseAuthors(doc.headers.get(langOrig != null ? "Translation" : "Authors")));
+        la.authors = Authors.autaryIndexes(doc.headers.get(langOrig != null ? "Translation" : "Authors"));
         if ((sa = doc.headers.get("StyleGenre")) != null) {
             tf.text.styleGenres = TextFileHeaders.splitAndTrim(sa);
         }
 
         la.label = la.authors != null ? String.join(",", la.authors) : "———";
-        String textAuthors = TextFileHeaders.parseThenJoinAuthors(doc.headers.get("Authors"));
+        String textAuthors = Authors.autaryPravapis(doc.headers.get("Authors"));
         la.title = (textAuthors == null ? "" : (textAuthors + ".")) + doc.headers.get("Title");
         List<String> s = new ArrayList<>();
         TextFileHeaders.addHeader(s, "Аўтары", textAuthors);
-        TextFileHeaders.addHeader(s, "Перакладчык", TextFileHeaders.parseThenJoinAuthors(doc.headers.get("Translation")));
+        TextFileHeaders.addHeader(s, "Перакладчык", Authors.autaryPravapis(doc.headers.get("Translation")));
         TextFileHeaders.addHeader(s, "Пераклад з", doc.headers.get("LangOrig"));
         TextFileHeaders.addHeader(s, "Назва", doc.headers.get("Title"));
         TextFileHeaders.addHeader(s, "Стыль/жанр", doc.headers.get("StyleGenre"));

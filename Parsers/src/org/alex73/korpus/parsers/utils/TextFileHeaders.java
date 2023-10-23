@@ -78,14 +78,6 @@ public class TextFileHeaders {
         return list;
     }
 
-    public static String parseThenJoinAuthors(String authors) {
-        String[] list = AuthorsUtil.parseAuthors(authors);
-        if (list == null) {
-            return null;
-        }
-        return String.join(",", list);
-    }
-
     public static void addHeader(List<String> out, String name, String value) {
         if (value != null && !value.isBlank()) {
             out.add(name + ":" + value);
