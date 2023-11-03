@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.alex73.korpus.base.Ctf.Page;
 import org.alex73.korpus.utils.BOMBufferedReader;
 
 /**
@@ -23,7 +24,9 @@ public class TextFileParser {
 
     public class OneText {
         public final TextFileHeaders headers;
-        public final List<String> paragraphs = new ArrayList<>();
+        public final List<Page> pages = new ArrayList<>();
+        private final List<String> paragraphs = new ArrayList<>();
+        private String pageNum;
         private boolean inHTML;
 
         OneText() throws Exception {
@@ -74,10 +77,15 @@ public class TextFileParser {
                     if (s.startsWith("##Footnote:") || s.startsWith("##Endnote:") || s.startsWith("##AddImage:")) {
                         continue;
                     }
+                    if (s.startsWith("##Page:")) {
+                        flushPage();
+                        pageNum = s.substring(s.indexOf(':')).trim();
+                        continue;
+                    }
                     if (s.startsWith("##Center:") || s.startsWith("##Sign:") || s.matches("##(Sub)*Chapter:.+") || s.startsWith("##TheatreComment:")) {
                         s = s.substring(s.indexOf(':')).trim();
                     }
-                    if (s.startsWith("##")) {
+                    if (s.startsWith("##") && s.matches("##[A-Za-z0-9]+:.+")) {
                         throw new RuntimeException("Невядомы тэг " + s + " у радку #" + currentLine);
                     }
                 }
@@ -96,6 +104,17 @@ public class TextFileParser {
             }
             if (p != null) {
                 throw new RuntimeException("Незакрыты блок ##Poetry у радку #" + currentLine);
+            }
+            flushPage();
+        }
+
+        private void flushPage() {
+            if (!paragraphs.isEmpty()) {
+                Page p = new Page();
+                p.pageNum = pageNum;
+                p.paragraphs = paragraphs.toArray(new String[0]);
+                pages.add(p);
+                paragraphs.clear();
             }
         }
 

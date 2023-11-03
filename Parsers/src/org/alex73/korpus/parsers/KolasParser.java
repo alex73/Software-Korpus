@@ -17,12 +17,12 @@ public class KolasParser {
     static List<TF> texty = new ArrayList<>();
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 3) {
-            System.err.println("KolasParser <каталог з файлами наладаў аўтараў> <каталог з зыходнымі файламі> <файл каб захаваць падкорпус>");
+        if (args.length != 2) {
+            System.err.println("KolasParser <каталог з зыходнымі файламі> <каталог каб захаваць падкорпус>");
             System.exit(1);
         }
 
-        Path in = Path.of(args[1]);
+        Path in = Path.of(args[0]);
         List<Path> files = Files
                 .find(in, Integer.MAX_VALUE, (p, a) -> a.isRegularFile() && p.toString().toLowerCase().endsWith(".text"), FileVisitOption.FOLLOW_LINKS).sorted()
                 .toList();
@@ -36,7 +36,7 @@ public class KolasParser {
         }
 
 //        Collections.sort(texts, (o1, o2) -> BE.compare(o1.text.title, o2.text.title));
-        Path fo1 = Path.of(args[2]);
+        Path fo1 = Path.of(args[1], "10.kolas.zip");
         try (Output os = new Output(fo1)) {
             for (TF tf : texty) {
                 os.write(tf.file, tf.text);
@@ -69,7 +69,7 @@ public class KolasParser {
         }
 
         TF tf = new TF();
-        tf.text.setParagraphs("bel", doc.paragraphs);
+        tf.text.setPages("bel", doc.pages);
         Ctf.Language la = tf.text.languages[0];
 
         String sa;

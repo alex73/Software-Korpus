@@ -66,7 +66,7 @@ public class BelarusianWordNormalizer implements ILanguage.INormalizer {
 
     @Override
     public String znakNormalized(CharSequence word, String preserveChars) {
-        StringBuilder str = new StringBuilder();
+        StringBuilder str = new StringBuilder(word.length());
         for (int i = 0; i < word.length(); i++) {
             char c = word.charAt(i);
             if (preserveChars.indexOf(c) >= 0) {
@@ -83,7 +83,7 @@ public class BelarusianWordNormalizer implements ILanguage.INormalizer {
 
     @Override
     public String lightNormalized(CharSequence word, String preserveChars) {
-        StringBuilder str = new StringBuilder();
+        StringBuilder str = new StringBuilder(word.length());
         for (int i = 0; i < word.length(); i++) {
             char c = word.charAt(i);
             if (preserveChars.indexOf(c) >= 0) {
@@ -110,7 +110,7 @@ public class BelarusianWordNormalizer implements ILanguage.INormalizer {
 
     @Override
     public String superNormalized(String word, String preserveChars) {
-        StringBuilder str = new StringBuilder();
+        StringBuilder str = new StringBuilder(word.length());
         for (int i = 0; i < word.length(); i++) {
             char c = word.charAt(i);
             if (preserveChars.indexOf(c) >= 0) {

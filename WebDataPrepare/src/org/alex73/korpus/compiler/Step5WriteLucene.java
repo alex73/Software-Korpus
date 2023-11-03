@@ -4,11 +4,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import org.alex73.korpus.base.TextInfo;
@@ -34,24 +35,26 @@ import org.slf4j.LoggerFactory;
 public class Step5WriteLucene {
     private static final Logger LOG = LoggerFactory.getLogger(Step5WriteLucene.class);
 
-    static final int INSTANCE_COUNT = 8;
-
     private static Path rootDir;
     private static String[] allLanguages;
     private static boolean realWrite;
     private static boolean cacheForProduction;
     private static int bufferSizeMb;
     private static double bufferSizeMbEachInstance;
-    private static List<LuceneContext> contexts = Collections.synchronizedList(new ArrayList<>());
 
     private static final String[] EMPTY_STRINGARRAY = new String[0];
     private static final StringArrayTokenStream EMPTY_STRINGARRAY_VALUE = new StringArrayTokenStream(new String[0]);
 
-    private static ThreadLocal<LuceneContext> context = new ThreadLocal<>() {
-        @Override
-        protected LuceneContext initialValue() {
-            LuceneContext r = new LuceneContext();
-            contexts.add(r);
+    private static LinkedList<LuceneContext> lucenePool = new LinkedList<>();
+    private static AtomicInteger lucenePoolIndex = new AtomicInteger();
+
+    private static LuceneContext getLuceneContext() {
+        LuceneContext r;
+        synchronized (lucenePool) {
+            r = lucenePool.poll();
+        }
+        if (r == null) {
+            r = new LuceneContext();
             if (realWrite) {
                 IndexWriterConfig config = new IndexWriterConfig();
                 config.setCommitOnClose(true);
@@ -62,116 +65,103 @@ public class Step5WriteLucene {
                 config.setMergePolicy(NoMergePolicy.INSTANCE);
                 config.setMergeScheduler(NoMergeScheduler.INSTANCE);
                 try {
-                    r.path = rootDir.resolve(Thread.currentThread().getName());
+                    r.path = rootDir.resolve("lucene-" + lucenePoolIndex.addAndGet(1));
                     r.dir = new NIOFSDirectory(r.path);
                     r.indexWriter = new IndexWriter(r.dir, config);
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
             }
-            return r;
         }
-    };
+        return r;
+    }
 
-    public static void init(String[] languages, boolean rw, boolean cfp, Path outDir, int bs) {
+    public static void init(int instanceCount, String[] languages, boolean rw, boolean cfp, Path outDir, int bs) {
         allLanguages = languages;
         realWrite = rw;
         cacheForProduction = cfp;
         rootDir = outDir;
         bufferSizeMb = bs;
-        bufferSizeMbEachInstance = bufferSizeMb * 1.0 / INSTANCE_COUNT;
+        bufferSizeMbEachInstance = bufferSizeMb * 1.0 / instanceCount;
         LOG.info("Lucene will use " + bufferSizeMb + "mb");
     }
 
     public static void run(MessageLuceneWrite text) throws Exception {
-        LuceneContext c = context.get();
-        grow(text.paragraphs.length);
-        for (int i = 0; i < text.paragraphs.length; i++) {
-            LuceneFields fields = c.fields.get(i);
-            for (LuceneFields.LuceneFieldsLang lf : fields.byLang.values()) {
-                lf.fieldWordWriteVariant.setTokenStream(EMPTY_STRINGARRAY_VALUE);
-                lf.fieldTagsWriteVariant.setTokenStream(EMPTY_STRINGARRAY_VALUE);
+        try (LuceneContext c = getLuceneContext()) {
+            grow(c, text.paragraphs.length);
+            for (int i = 0; i < text.paragraphs.length; i++) {
+                LuceneFields fields = c.fields.get(i);
+                for (LuceneFields.LuceneFieldsLang lf : fields.byLang.values()) {
+                    lf.fieldWordWriteVariant.setTokenStream(EMPTY_STRINGARRAY_VALUE);
+                    lf.fieldTagsWriteVariant.setTokenStream(EMPTY_STRINGARRAY_VALUE);
 
-                lf.fieldTextAuthor.setTokenStream(EMPTY_STRINGARRAY_VALUE);
-                lf.fieldTextSource.setStringValue("");
-                setYearsRange(null, lf.fieldTextCreationYear);
-                setYearsRange(null, lf.fieldTextPublishedYear);
-            }
+                    lf.fieldTextAuthor.setTokenStream(EMPTY_STRINGARRAY_VALUE);
+                    lf.fieldTextSource.setStringValue("");
+                    setYearsRange(null, lf.fieldTextCreationYear);
+                    setYearsRange(null, lf.fieldTextPublishedYear);
+                }
 
-            LuceneParagraph p = text.paragraphs[i];
-            fields.fieldTextSubcorpus.setStringValue(text.textInfo.subcorpus);
-            fields.fieldTextStyleGenre.setTokenStream(new StringArrayTokenStream(text.textInfo.styleGenres));
+                LuceneParagraph p = text.paragraphs[i];
+                fields.fieldTextSubcorpus.setStringValue(text.textInfo.subcorpus);
+                fields.fieldTextStyleGenre.setTokenStream(new StringArrayTokenStream(text.textInfo.styleGenres));
 
-            for (Map.Entry<String, MessageLuceneWrite.LuceneParagraphLang> en : p.byLang.entrySet()) {
-                String langCreationTime = "";
-                String langPublicationTime = "";
-                Set<String> langAuthors = new TreeSet<>();
-                Set<String> langSources = new TreeSet<>();
-                for (TextInfo.Subtext st : text.textInfo.subtexts) {
-                    if (!en.getKey().equals(st.lang)) {
-                        continue;
-                    }
-                    if (st.creationTime != null) {
-                        langCreationTime += ';' + st.creationTime;
-                    }
-                    if (st.publicationTime != null) {
-                        langPublicationTime += ';' + st.publicationTime;
-                    }
-                    if (st.authors != null) {
-                        for (String a : st.authors) {
-                            langAuthors.add(a);
+                for (Map.Entry<String, MessageLuceneWrite.LuceneParagraphLang> en : p.byLang.entrySet()) {
+                    String langCreationTime = "";
+                    String langPublicationTime = "";
+                    Set<String> langAuthors = new TreeSet<>();
+                    Set<String> langSources = new TreeSet<>();
+                    for (TextInfo.Subtext st : text.textInfo.subtexts) {
+                        if (!en.getKey().equals(st.lang)) {
+                            continue;
+                        }
+                        if (st.creationTime != null) {
+                            langCreationTime += ';' + st.creationTime;
+                        }
+                        if (st.publicationTime != null) {
+                            langPublicationTime += ';' + st.publicationTime;
+                        }
+                        if (st.authors != null) {
+                            for (String a : st.authors) {
+                                langAuthors.add(a);
+                            }
+                        }
+                        if (st.source != null) {
+                            langSources.add(st.source);
                         }
                     }
-                    if (st.source != null) {
-                        langSources.add(st.source);
+                    if (!langCreationTime.isEmpty()) {
+                        langCreationTime = langCreationTime.substring(1);
                     }
-                }
-                if (!langCreationTime.isEmpty()) {
-                    langCreationTime = langCreationTime.substring(1);
-                }
-                if (!langPublicationTime.isEmpty()) {
-                    langPublicationTime = langPublicationTime.substring(1);
-                }
+                    if (!langPublicationTime.isEmpty()) {
+                        langPublicationTime = langPublicationTime.substring(1);
+                    }
 
-                LuceneFields.LuceneFieldsLang fl = fields.byLang.get(en.getKey());
-                fl.fieldWordWriteVariant.setTokenStream(new StringArrayTokenStream(en.getValue().values));
-                fl.fieldTagsWriteVariant.setTokenStream(new StringArrayTokenStream(en.getValue().dbGrammarTags));
-                fl.fieldTextAuthor.setTokenStream(new StringArrayTokenStream(langAuthors.toArray(EMPTY_STRINGARRAY)));
-                fl.fieldTextSource.setTokenStream(new StringArrayTokenStream(langSources.toArray(EMPTY_STRINGARRAY)));
-                setYearsRange(langCreationTime, fl.fieldTextCreationYear);
-                setYearsRange(langPublicationTime, fl.fieldTextPublishedYear);
+                    LuceneFields.LuceneFieldsLang fl = fields.byLang.get(en.getKey());
+                    fl.fieldWordWriteVariant.setTokenStream(new StringArrayTokenStream(en.getValue().values));
+                    fl.fieldTagsWriteVariant.setTokenStream(new StringArrayTokenStream(en.getValue().dbGrammarTags));
+                    fl.fieldTextAuthor.setTokenStream(new StringArrayTokenStream(langAuthors.toArray(EMPTY_STRINGARRAY)));
+                    fl.fieldTextSource.setTokenStream(new StringArrayTokenStream(langSources.toArray(EMPTY_STRINGARRAY)));
+                    setYearsRange(langCreationTime, fl.fieldTextCreationYear);
+                    setYearsRange(langPublicationTime, fl.fieldTextPublishedYear);
+                }
+                fields.fieldSentencePBinary.setBytesValue(p.xml);
+                fields.fieldTextID.setIntValue(text.textInfo.globalTextOrder);
             }
-            fields.fieldSentencePBinary.setBytesValue(p.xml);
-            fields.fieldTextID.setIntValue(text.textInfo.globalTextOrder);
-        }
 
-        if (c.indexWriter != null) {
-            try {
-                // System.out.println("Add " + text.paragraphs.length + " for " +
-                // text.textInfo.title);
-                c.indexWriter.addDocuments(c.documents.subList(0, text.paragraphs.length));
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
+            if (c.indexWriter != null) {
+                try {
+                    // System.out.println("Add " + text.paragraphs.length + " for " +
+                    // text.textInfo.title);
+                    c.indexWriter.addDocuments(c.documents.subList(0, text.paragraphs.length));
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         }
     }
 
     public static void finish() throws Exception {
-        contexts.parallelStream().forEach(c -> {
-            if (c.indexWriter != null) {
-                try {
-                    c.indexWriter.close();
-                    c.dir.close();
-                    c.indexWriter = null;
-                    c.dir = null;
-                    c.documents.clear();
-                    c.documents = null;
-                } catch (Throwable ex) {
-                    LOG.error("", ex);
-                    throw new RuntimeException(ex);
-                }
-            }
-        });
+        lucenePool.parallelStream().forEach(c -> c.forget());
     }
 
     private static void setYearsRange(String date, IntRange rangeField) {
@@ -183,8 +173,7 @@ public class Step5WriteLucene {
         }
     }
 
-    private static void grow(int capacity) {
-        LuceneContext c = context.get();
+    private static void grow(LuceneContext c, int capacity) {
         while (c.fields.size() < capacity) {
             c.fields.add(new LuceneFields(allLanguages));
         }
@@ -221,7 +210,7 @@ public class Step5WriteLucene {
         Directory[] partDirs;
         try (Directory dir = new NIOFSDirectory(rootDir)) {
             try (IndexWriter indexWriter = new IndexWriter(dir, config)) {
-                partDirs = contexts.stream().map(c -> {
+                partDirs = lucenePool.stream().map(c -> {
                     try {
                         return new NIOFSDirectory(c.path);
                     } catch (IOException ex) {
@@ -238,7 +227,7 @@ public class Step5WriteLucene {
         for (Directory d : partDirs) {
             d.close();
         }
-        for (LuceneContext c : contexts) {
+        for (LuceneContext c : lucenePool) {
             try (Stream<Path> ls = Files.list(c.path)) {
                 for (Path f : ls.toList()) {
                     Files.delete(f);
@@ -248,11 +237,36 @@ public class Step5WriteLucene {
         }
     }
 
-    static class LuceneContext {
+    static class LuceneContext implements AutoCloseable {
         Path path;
         IndexWriter indexWriter;
         NIOFSDirectory dir;
         List<LuceneFields> fields = new ArrayList<>();
         List<Document> documents = new ArrayList<>();
+
+        void forget() {
+            if (indexWriter != null) {
+                try {
+                    indexWriter.close();
+                    dir.close();
+                    indexWriter = null;
+                    dir = null;
+                    documents.clear();
+                    documents = null;
+                    fields.clear();
+                    fields = null;
+                } catch (Throwable ex) {
+                    LOG.error("", ex);
+                    throw new RuntimeException(ex);
+                }
+            }
+        }
+
+        @Override
+        public void close() throws Exception {
+            synchronized (lucenePool) {
+                lucenePool.add(this);
+            }
+        }
     }
 }

@@ -1,7 +1,7 @@
 package org.alex73.korpus.base;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 import org.alex73.grammardb.GrammarFinder;
@@ -15,13 +15,17 @@ import org.alex73.korpus.text.structure.corpus.Paragraph;
 import org.alex73.korpus.text.structure.corpus.Sentence;
 import org.alex73.korpus.text.structure.corpus.Word;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
 public class StaticGrammarFiller2 {
     public static boolean fillParadigmOnly;
     public static String fillTagPrefix;
     public static String fillTheme;
 
     private final GrammarFinder finder;
-    private final Map<String, WordInfo> cache = new ConcurrentHashMap<>(1024 * 1024, 0.75f, 4);
+    private final Cache<String, WordInfo> cache = CacheBuilder.newBuilder().maximumSize(512 * 1024).build();
+
     private static final ILanguage.INormalizer wordNormalizer = LanguageFactory.get("bel").getNormalizer();
 
     public StaticGrammarFiller2(GrammarFinder finder) {
@@ -46,14 +50,22 @@ public class StaticGrammarFiller2 {
         if (w.type != null || w.word == null) {
             return;
         }
-        WordInfo wi;
         w.wordZnakNormalized = wordNormalizer.znakNormalized(w.word, ILanguage.INormalizer.PRESERVE_NONE);
         w.wordNormalized = wordNormalizer.lightNormalized(w.word, ILanguage.INormalizer.PRESERVE_NONE);
         w.wordSuperNormalized = wordNormalizer.superNormalized(w.word, ILanguage.INormalizer.PRESERVE_NONE);
         if (fillTags) {
-            wi = cache.computeIfAbsent(w.wordNormalized, wn -> createCacheEntry(w));
-            w.tagsNormalized = wi.tagsNormalized;
-            w.tagsVariants = wi.tagsWriteVariant;
+            try {
+                WordInfo wi = cache.get(w.wordNormalized, new Callable<WordInfo>() {
+                    @Override
+                    public WordInfo call() throws Exception {
+                        return createCacheEntry(w);
+                    }
+                });
+                w.tagsNormalized = wi.tagsNormalized;
+                w.tagsVariants = wi.tagsWriteVariant;
+            } catch (ExecutionException ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
 

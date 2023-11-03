@@ -22,7 +22,7 @@ public class DyjalektnyParser {
 
     public static void main(String[] args) throws Exception {
         if (args.length != 2) {
-            System.err.println("DyjalektnyParser <каталог з зыходнымі файламі> <файл каб захаваць падкорпус>");
+            System.err.println("DyjalektnyParser <каталог з зыходнымі файламі> <каталог каб захаваць падкорпус>");
             System.exit(1);
         }
         Path in = Path.of(args[0]);
@@ -40,7 +40,7 @@ public class DyjalektnyParser {
             }
             return c;
         });
-        Path fo = Path.of(args[1]);
+        Path fo = Path.of(args[1], "08.dyjalektny.zip");
         try (Output os = new Output(fo)) {
             int idx = 0;
             for (TF tf : texts) {
@@ -58,7 +58,7 @@ public class DyjalektnyParser {
             TextFileParser allDocs = new TextFileParser(new ByteArrayInputStream(data));
             for (TextFileParser.OneText doc : allDocs.texts) {
                 TF result = new TF();
-                result.text.setParagraphs("bel", doc.paragraphs);
+                result.text.setPages("bel", doc.pages);
                 result.filePrefix = file.getFileName().toString().replaceAll("\\.text$", "");
                 result.indexInFile = ++indexInFile;
                 result.rajon = doc.headers.get("Раён");

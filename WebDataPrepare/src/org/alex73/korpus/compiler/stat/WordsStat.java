@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.alex73.korpus.compiler.Step3Stat;
 import org.xerial.snappy.SnappyOutputStream;
 
 public class WordsStat {
@@ -45,7 +46,7 @@ public class WordsStat {
     }
 
     public synchronized void closeFile() throws IOException {
-        writeToFile();
+        flush();
         byFormTempFile.flush();
         byFormTempFile.close();
     }
@@ -101,19 +102,19 @@ public class WordsStat {
         for (Map.Entry<String, AtomicInteger> en : stat.byForm.entrySet()) {
             byForm.computeIfAbsent(en.getKey(), f -> new AtomicInteger()).addAndGet(en.getValue().get());
         }
-        if (byForm.size() > 1000000) {
-            writeToFile();
-            byForm.clear();
+        if (byForm.size() > Step3Stat.MAX_STAT_IN_MEMORY) {
+            flush();
         }
     }
 
-    private void writeToFile() throws IOException {
+    public synchronized void flush() throws IOException {
         for (Map.Entry<String, AtomicInteger> en : byForm.entrySet()) {
             byFormTempFile.write(en.getKey());
             byFormTempFile.write('=');
             byFormTempFile.write(Integer.toString(en.getValue().get()));
             byFormTempFile.write('\n');
         }
+        byForm.clear();
     }
 
     public int getWordsCount() {

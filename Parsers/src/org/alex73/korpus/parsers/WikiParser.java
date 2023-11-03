@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -13,6 +14,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
 
 import org.alex73.korpus.base.Ctf;
+import org.alex73.korpus.base.Ctf.Page;
 import org.alex73.korpus.parsers.utils.Output;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
@@ -36,11 +38,11 @@ public class WikiParser {
 
     public static void main(String[] args) throws Exception {
         if (args.length != 2) {
-            System.err.println("WikiParser <каталог з зыходнымі файламі> <файл каб захаваць падкорпус>");
+            System.err.println("WikiParser <каталог з зыходнымі файламі> <каталог каб захаваць падкорпус>");
             System.exit(1);
         }
         Path in = Path.of(args[0]);
-        Path out = Path.of(args[1]);
+        Path out = Path.of(args[1], "06.wiki.zip");
         os = new Output(out);
         parse(in.resolve("bewiki-latest-pages-articles.xml.bz2"));
         parse(in.resolve("be_x_oldwiki-latest-pages-articles.xml.bz2"));
@@ -137,7 +139,9 @@ public class WikiParser {
         }
 
         Ctf result = new Ctf();
-        result.setParagraphs("bel", paragraphs);
+        Page p = new Page();
+        p.paragraphs = paragraphs.toArray(new String[0]);
+        result.setPages("bel", Arrays.asList(p));
         result.languages[0].label = source;
         result.languages[0].title = title;
         result.languages[0].headers = new String[] { "Крыніца:" + source, "URL:" + urlPrefix + title, "Назва:" + title };

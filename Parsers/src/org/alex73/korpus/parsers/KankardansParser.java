@@ -25,12 +25,12 @@ public class KankardansParser {
     static Map<String, String> headers = new TreeMap<>();
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 3) {
-            System.err.println("KankardansParser <каталог з файлами наладаў аўтараў> <файл з канкардансам> <файл каб захаваць падкорпус>");
+        if (args.length != 2) {
+            System.err.println("KankardansParser <файл з канкардансам> <каталог каб захаваць падкорпус>");
             System.exit(1);
         }
-        os = new Output(Path.of(args[2]));
-        parse(Path.of(args[1]));
+        os = new Output(Path.of(args[1], "02.kankardans.zip"));
+        parse(Path.of(args[0]));
         os.close();
     }
 

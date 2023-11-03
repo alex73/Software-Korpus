@@ -28,6 +28,7 @@ import org.alex73.korpus.text.structure.corpus.Sentence;
 import org.alex73.korpus.text.structure.corpus.Word;
 
 public class Step3Stat {
+    public static final int MAX_STAT_IN_MEMORY = 100000;
 
     private static GrammarFinder grFinder;
     private static Path tempOutputDir;
@@ -143,6 +144,12 @@ public class Step3Stat {
             TextStatInfo subcorpusSource = getTextStatInfo(textInfo.subcorpus + "." + textInfo.subtexts[textIndex].source);
             subcorpusSource.texts.incrementAndGet();
             subcorpusSource.words.addAndGet(wordsCount);
+        }
+    }
+
+    public static void flush() throws Exception {
+        for (WordsStat ws : wordsStatsBySubcorpus.values()) {
+            ws.flush();
         }
     }
 

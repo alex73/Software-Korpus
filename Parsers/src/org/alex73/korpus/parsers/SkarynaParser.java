@@ -19,7 +19,7 @@ public class SkarynaParser {
 
     public static void main(String[] args) throws Exception {
         if (args.length != 2) {
-            System.err.println("SkarynaParser <каталог з зыходнымі файламі> <файл каб захаваць падкорпус>");
+            System.err.println("SkarynaParser <каталог з зыходнымі файламі> <каталог каб захаваць падкорпус>");
             System.exit(1);
         }
         Path in = Path.of(args[0]);
@@ -28,7 +28,7 @@ public class SkarynaParser {
         }
 
         Collections.sort(texts, (o1, o2) -> BE.compare(o1.text.languages[0].title, o2.text.languages[0].title));
-        Path fo = Path.of(args[1]);
+        Path fo = Path.of(args[1], "01.skaryna.zip");
         try (Output os = new Output(fo)) {
             for (TF tf : texts) {
                 os.write(tf.file, tf.text);
@@ -48,7 +48,7 @@ public class SkarynaParser {
             TextFileParser.OneText doc = new TextFileParser(new ByteArrayInputStream(data)).oneTextExpected();
 
             TF tf = new TF();
-            tf.text.setParagraphs("bel", doc.paragraphs);
+            tf.text.setPages("bel", doc.pages);
             tf.file = file.getFileName().toString().replaceAll("\\.text$", ".ctf");
             tf.text.languages[0].title = doc.headers.get("Title");
             if (tf.text.languages[0].title == null) {

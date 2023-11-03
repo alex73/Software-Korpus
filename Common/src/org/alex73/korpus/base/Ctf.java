@@ -23,12 +23,10 @@ public class Ctf {
         public String paragraphs[];
     }
 
-    public void setParagraphs(String lang, List<String> paragraphs) {
+    public void setPages(String lang, List<Page> pages) {
         languages = new Language[1];
         languages[0] = new Language();
         languages[0].lang = lang;
-        languages[0].pages = new Page[1];
-        languages[0].pages[0] = new Page();
-        languages[0].pages[0].paragraphs = paragraphs.toArray(new String[0]);
+        languages[0].pages = pages.toArray(new Page[0]);
     }
 }

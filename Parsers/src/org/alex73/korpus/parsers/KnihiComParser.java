@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.alex73.korpus.base.Ctf;
+import org.alex73.korpus.base.Ctf.Page;
 import org.alex73.korpus.parsers.utils.HtmlKnihiComParser;
 import org.alex73.korpus.parsers.utils.Output;
 import org.alex73.korpus.parsers.utils.TextFileHeaders;
@@ -32,7 +34,7 @@ public class KnihiComParser {
 
     public static void main(String[] args) throws Exception {
         if (args.length != 2) {
-            System.err.println("KnihiComParser <каталог з файламі knihi.com> <выніковы каталог з падкорпусамі>");
+            System.err.println("KnihiComParser <каталог з файламі knihi.com> <каталог з падкорпусамі>");
             System.exit(1);
         }
 
@@ -54,14 +56,14 @@ public class KnihiComParser {
         }
 
         Collections.sort(teksty, tekstySort);
-        Path fo1 = Path.of(args[1], "04.teksty.zip");
+        Path fo1 = Path.of(args[1], "03.teksty.zip");
         try (Output os = new Output(fo1)) {
             for (TF tf : teksty) {
                 os.write(tf.file, tf.text);
             }
         }
         Collections.sort(pieraklady, pierakladySort);
-        Path fo2 = Path.of(args[1], "05.pieraklady.zip");
+        Path fo2 = Path.of(args[1], "04.pieraklady.zip");
         try (Output os = new Output(fo2)) {
             for (TF tf : pieraklady) {
                 os.write(tf.file, tf.text);
@@ -102,7 +104,9 @@ public class KnihiComParser {
             tf.pieraklad = true;
         }
 
-        tf.text.setParagraphs("bel", doc.textLines);
+        Page p = new Page();
+        p.paragraphs = doc.textLines.toArray(new String[0]);
+        tf.text.setPages("bel", Arrays.asList(p));
         Ctf.Language la = tf.text.languages[0];
 
         String sa;

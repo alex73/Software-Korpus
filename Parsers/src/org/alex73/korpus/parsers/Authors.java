@@ -18,14 +18,14 @@ public class Authors {
         }
     }
 
-    static String[] autaryIndexes(String au) {
+    public static String[] autaryIndexes(String au) {
         if (au == null || au.isBlank()) {
             return null;
         }
         String[] textAuthors = au.split(";");
         String[] authorIndexes = new String[textAuthors.length];
         for (int i = 0; i < textAuthors.length; i++) {
-            String a = textAuthors[i].trim().replaceAll("\\s+", " ");
+            String a = autaryPravapis(textAuthors[i].trim().replaceAll("\\s+", " "));
             String index = autary.author2index.get(a);
             if (index == null) {
                 String[] nm = a.split(" ");
@@ -45,7 +45,7 @@ public class Authors {
         return authorIndexes;
     }
 
-    static String autaryPravapis(String au) {
+    public static String autaryPravapis(String au) {
         if (au == null || au.isBlank()) {
             return null;
         }

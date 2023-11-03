@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -18,6 +19,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
@@ -43,8 +45,7 @@ public class PrepareCache4 {
     public static boolean writeToLucene = true;
     public static boolean processStat = true;
 
-    static ExecutorService executor;
-
+    static int cores;
     static GrammarFinder grFinder;
     static StaticGrammarFiller2 grFiller;
 
@@ -83,14 +84,12 @@ public class PrepareCache4 {
         emptyDir(OUTPUT);
         loadGrammarDB();
 
-        int cores = Runtime.getRuntime().availableProcessors();
-        executor = new ThreadPoolExecutor(cores, cores, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(cores * 2),
-                new WaitPolicy(1, TimeUnit.HOURS));
+        cores = Runtime.getRuntime().availableProcessors();
 
         Step1Split.init(languages, errors);
         Step2Grammar.init(grFiller);
         Step3Stat.init(OUTPUT, grFinder);
-        Step5WriteLucene.init(languages, writeToLucene, cacheForProduction, OUTPUT, 8192);
+        Step5WriteLucene.init(cores, languages, writeToLucene, cacheForProduction, OUTPUT, 2 * 1024);
 
         LOG.info("Process...");
         long be = System.currentTimeMillis();
@@ -101,8 +100,6 @@ public class PrepareCache4 {
         // ProcessTexts t2 = new ProcessTexts(grFiller, prepareLucene, stat,
         // textsCount);
         parseZips();
-        executor.shutdown();
-        executor.awaitTermination(1, TimeUnit.HOURS);
 
         writeTextHeaders();
 
@@ -164,22 +161,45 @@ public class PrepareCache4 {
         List<Path> files = Files.list(INPUT).filter(p -> p.toString().endsWith(".zip")).sorted().toList();
         for (Path file : files) {
             LOG.info("Read zip " + file);
+            long before = System.currentTimeMillis();
 
-            String subcorpus = file.getFileName().toString().replaceAll("^[0-9]+\\.", "").replaceAll("\\.zip$", "");
-            try (ZipInputStream in = new ZipInputStream(Files.newInputStream(file))) {
-                ZipEntry ze = null;
-                while ((ze = in.getNextEntry()) != null) {
-                    byte[] data = in.readAllBytes();
-                    String fn = file.getFileName() + "!" + ze.getName();
-                    int gto = textInfos.size();
-                    textInfos.add(null);
-                    executor.execute(() -> {
-                        processText(subcorpus, gto, fn, data);
-                    });
+            int totalFilesInZip = 0;
+            try (ZipFile zipFile = new ZipFile(file.toFile())) {
+                for (Enumeration<? extends ZipEntry> en = zipFile.entries(); en.hasMoreElements(); en.nextElement()) {
+                    totalFilesInZip++;
                 }
             }
 
-            LOG.info("Finished zip " + file);
+            try (ExecutorService executor = new ThreadPoolExecutor(cores, cores, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(cores * 2),
+                    new WaitPolicy(1, TimeUnit.HOURS))) {
+
+                long prevDumpTime = System.currentTimeMillis();
+                int processedFiles = 0;
+                String subcorpus = file.getFileName().toString().replaceAll("^[0-9]+\\.", "").replaceAll("\\.zip$", "");
+                try (ZipInputStream in = new ZipInputStream(Files.newInputStream(file))) {
+                    ZipEntry ze = null;
+                    while ((ze = in.getNextEntry()) != null) {
+                        byte[] data = in.readAllBytes();
+                        String fn = file.getFileName() + "!" + ze.getName();
+                        int gto = textInfos.size();
+                        textInfos.add(null);
+                        executor.execute(() -> {
+                            processText(subcorpus, gto, fn, data);
+                        });
+                        processedFiles++;
+                        if (prevDumpTime + 60000 < System.currentTimeMillis()) {
+                            prevDumpTime = System.currentTimeMillis();
+                            LOG.info("  processed " + processedFiles + " files from " + totalFilesInZip);
+                        }
+                    }
+                }
+                executor.shutdown();
+                executor.awaitTermination(1, TimeUnit.HOURS);
+            }
+            Step3Stat.flush();
+
+            long after = System.currentTimeMillis();
+            LOG.info("Finished zip " + file + ", processing time: " + (after - before) / 1000 + "s");
         }
     }
 
