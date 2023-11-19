@@ -79,11 +79,11 @@ public class TextFileParser {
                     }
                     if (s.startsWith("##Page:")) {
                         flushPage();
-                        pageNum = s.substring(s.indexOf(':')).trim();
+                        pageNum = s.substring(s.indexOf(':') + 1).trim();
                         continue;
                     }
                     if (s.startsWith("##Center:") || s.startsWith("##Sign:") || s.matches("##(Sub)*Chapter:.+") || s.startsWith("##TheatreComment:")) {
-                        s = s.substring(s.indexOf(':')).trim();
+                        s = s.substring(s.indexOf(':') + 1).trim();
                     }
                     if (s.startsWith("##") && s.matches("##[A-Za-z0-9]+:.+")) {
                         throw new RuntimeException("Невядомы тэг " + s + " у радку #" + currentLine);

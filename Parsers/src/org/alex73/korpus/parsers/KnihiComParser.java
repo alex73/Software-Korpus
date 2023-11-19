@@ -44,7 +44,8 @@ public class KnihiComParser {
                 .toList();
 
         for (Path file : files) {
-            TF tf = parse(file);
+            String url = "https://knihi.com/" + in.relativize(file).toString();
+            TF tf = parse(file, url);
             if (tf != null) {
                 tf.file = in.relativize(file).toString().replaceAll("\\.html$", ".ctf");
                 if (tf.pieraklad) {
@@ -77,7 +78,7 @@ public class KnihiComParser {
         Ctf text = new Ctf();
     }
 
-    static TF parse(Path file) throws Exception {
+    static TF parse(Path file, String url) throws Exception {
         System.out.println("Чытаем " + file + "...");
 
         byte[] data = Files.readAllBytes(file);
@@ -127,6 +128,7 @@ public class KnihiComParser {
         TextFileHeaders.addHeader(s, "Выданне", doc.headers.get("Edition"));
         TextFileHeaders.addHeader(s, "Час стварэння", doc.headers.get("CreationYear"));
         TextFileHeaders.addHeader(s, "Час публікацыі", doc.headers.get("PublicationYear"));
+        TextFileHeaders.addHeader(s, "URL", "<a href='" + url + "'>" + url + "</a>");
         la.headers = s.toArray(new String[0]);
 
         la.creationTime = doc.headers.get("CreationYear");

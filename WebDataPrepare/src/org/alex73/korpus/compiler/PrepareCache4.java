@@ -205,7 +205,7 @@ public class PrepareCache4 {
 
     static void processText(String subcorpus, int globalTextOrder, String fn, byte[] data) {
         try {
-            MessageParsedText outText = Step1Split.run(data);
+            MessageParsedText outText = Step1Split.run(data, subcorpus);
             textInfos.set(globalTextOrder, outText.textInfo);
             outText.textInfo.subcorpus = subcorpus;
             outText.textInfo.globalTextOrder = globalTextOrder;

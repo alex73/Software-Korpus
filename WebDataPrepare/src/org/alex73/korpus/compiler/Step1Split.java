@@ -49,7 +49,7 @@ public class Step1Split {
         }
     }
 
-    public static MessageParsedText run(byte[] bytes) throws Exception {
+    public static MessageParsedText run(byte[] bytes, String subcorpus) throws Exception {
         Ctf ctf = gsons.get().fromJson(new String(bytes, StandardCharsets.UTF_8), Ctf.class);
 
         MessageParsedText outText = new MessageParsedText(ctf.languages.length);
@@ -59,7 +59,7 @@ public class Step1Split {
         for (int la = 0; la < ctf.languages.length; la++) {
             Ctf.Language ctfLang = ctf.languages[la];
 
-            outText.textInfo.subtexts[la] = convertTextInfo(ctfLang);
+            outText.textInfo.subtexts[la] = convertTextInfo(ctfLang, subcorpus);
 
             Splitter3 splitter = splitters.get(ctfLang.lang).get();
             if (splitter == null) {
@@ -86,7 +86,7 @@ public class Step1Split {
         return outText;
     }
 
-    static TextInfo.Subtext convertTextInfo(Ctf.Language lang) {
+    static TextInfo.Subtext convertTextInfo(Ctf.Language lang, String subcorpus) {
         TextInfo.Subtext r = new TextInfo.Subtext();
         r.authors = lang.authors;
         r.creationTime = lang.creationTime;
@@ -97,14 +97,13 @@ public class Step1Split {
         r.title = lang.title;
 
         StringBuilder passport = new StringBuilder();
+        passport.append("<b>Падкорпус:</b> {{subcorpus:" + subcorpus + "}}");
         for (String h : lang.headers) {
             int p = h.indexOf(':');
             if (p < 0) {
                 throw new RuntimeException("Няправільны загаловак тэкста: " + h);
             }
-            if (!passport.isEmpty()) {
-                passport.append("<br/>");
-            }
+            passport.append("<br/>");
             passport.append("<b>").append(h.substring(0, p).trim()).append(":</b> ").append(h.substring(p + 1).trim());
         }
         r.passport = passport.toString();
