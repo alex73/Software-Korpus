@@ -116,11 +116,11 @@ public class KnihiComParser {
         }
 
         la.authors = Authors.autaryIndexes(doc.headers.get(langOrig != null ? "Translation" : "Authors"));
-        String authors = Authors.autaryPravapis(doc.headers.get(langOrig != null ? "Translation" : "Authors"));
+        String authors = Authors.autaryPravapis(doc.headers.get("Authors"));
         la.label = la.authors != null ? String.join(",", la.authors) : "———";
-        la.title = (authors == null ? "" : (authors + ".")) + doc.headers.get("Title");
+        la.title = (authors == null ? "" : (authors + ". ")) + doc.headers.get("Title");
         List<String> s = new ArrayList<>();
-        TextFileHeaders.addHeader(s, "Аўтары", Authors.autaryPravapis(doc.headers.get("Authors")));
+        TextFileHeaders.addHeader(s, "Аўтары", authors);
         TextFileHeaders.addHeader(s, "Перакладчык", Authors.autaryPravapis(doc.headers.get("Translation")));
         TextFileHeaders.addHeader(s, "Пераклад з", doc.headers.get("LangOrig"));
         TextFileHeaders.addHeader(s, "Назва", doc.headers.get("Title"));

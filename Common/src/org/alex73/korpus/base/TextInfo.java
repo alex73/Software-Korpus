@@ -1,7 +1,6 @@
 package org.alex73.korpus.base;
 
 import java.io.Serializable;
-import java.util.Map;
 
 import org.alex73.korpus.utils.KorpusDateTime;
 

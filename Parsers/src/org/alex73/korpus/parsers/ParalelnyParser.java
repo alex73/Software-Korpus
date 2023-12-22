@@ -22,7 +22,7 @@ public class ParalelnyParser {
 
     public static void main(String[] args) throws Exception {
         if (args.length != 2) {
-            System.err.println("ParalelnyParser <каталог з зыходнымі файламі> <файл каб захаваць падкорпус>");
+            System.err.println("ParalelnyParser <каталог з зыходнымі файламі> <каталог каб захаваць падкорпус>");
             System.exit(1);
         }
         Path in = Path.of(args[0]);
@@ -36,7 +36,7 @@ public class ParalelnyParser {
         }
 
         Collections.sort(texts, (a, b) -> BE.compare(a.text.languages[1].title, b.text.languages[1].title));
-        Path fo = Path.of(args[1]).resolve("paralelny.zip");
+        Path fo = Path.of(args[1]).resolve("01.zakanadaustva.zip");
         try (Output os = new Output(fo)) {
             for (TF tf : texts) {
                 os.write(tf.file, tf.text);
@@ -75,21 +75,20 @@ public class ParalelnyParser {
         }
 
         Ctf result = new Ctf();
-        result.languages[0].label = data1.get(0);
-        result.languages[0].title = data1.get(0) + " / " + data2.get(1);
-        result.languages[0].headers = new String[] { "Назва:" + data1.get(0), "Выданне:" + data1.get(1) };
-        result.languages[1].label = data2.get(0);
-        result.languages[1].title = data2.get(0) + " / " + data2.get(1);
-        result.languages[1].headers = new String[] { "Назва:" + data2.get(0), "Выданне:" + data2.get(1) };
-
         result.languages = new Ctf.Language[2];
         result.languages[0] = new Ctf.Language();
         result.languages[0].lang = "rus";
+        result.languages[0].label = data1.get(0);
+        result.languages[0].title = data1.get(0) + " / " + data2.get(1);
+        result.languages[0].headers = new String[] { "Назва:" + data1.get(0), "Выданне:" + data1.get(1) };
         result.languages[0].pages = new Ctf.Page[1];
         result.languages[0].pages[0] = new Ctf.Page();
         result.languages[0].pages[0].paragraphs = data1.toArray(new String[0]);
         result.languages[1] = new Ctf.Language();
         result.languages[1].lang = "bel";
+        result.languages[1].label = data2.get(0);
+        result.languages[1].title = data2.get(0) + " / " + data2.get(1);
+        result.languages[1].headers = new String[] { "Назва:" + data2.get(0), "Выданне:" + data2.get(1) };
         result.languages[1].pages = new Ctf.Page[1];
         result.languages[1].pages[0] = new Ctf.Page();
         result.languages[1].pages[0].paragraphs = data2.toArray(new String[0]);

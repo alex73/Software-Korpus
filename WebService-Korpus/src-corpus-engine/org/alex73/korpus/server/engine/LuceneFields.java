@@ -65,16 +65,20 @@ public class LuceneFields {
     public FieldInt fieldTextID;
 
     public LuceneFields(String[] allLanguages) {
-        for (String lang : allLanguages) {
+        for (int l = 0; l < allLanguages.length; l++) {
+            String lang = allLanguages[l];
             // words fields
             LuceneFieldsLang lf = new LuceneFieldsLang();
             byLang.put(lang, lf);
             lf.fieldWordWriteVariant = new Field(lang + "_WordWriteVariant", "", TYPE_NOTSTORED_INDEXED);
             lf.fieldTagsWriteVariant = new Field(lang + "_TagsWriteVariant", "", TYPE_NOTSTORED_INDEXED);
-            lf.fieldTextAuthor = new Field("textAuthor", "", TYPE_NOTSTORED_INDEXED);
-            lf.fieldTextSource = new Field("textSource", "", TYPE_NOTSTORED_INDEXED);
-            lf.fieldTextCreationYear = new IntRange("creationYear", new int[] { 0 }, new int[] { 0 });
-            lf.fieldTextPublishedYear = new IntRange("publishedYear", new int[] { 0 }, new int[] { 0 });
+            if (l == 0) {
+                // толькі для першай мовы
+                lf.fieldTextAuthor = new Field("textAuthor", "", TYPE_NOTSTORED_INDEXED);
+                lf.fieldTextSource = new Field("textSource", "", TYPE_NOTSTORED_INDEXED);
+                lf.fieldTextCreationYear = new IntRange("creationYear", new int[] { 0 }, new int[] { 0 });
+                lf.fieldTextPublishedYear = new IntRange("publishedYear", new int[] { 0 }, new int[] { 0 });
+            }
         }
         fieldSentencePBinary = new Field("pbinary", new byte[0], TYPE_STORED_NOTINDEXED);
 

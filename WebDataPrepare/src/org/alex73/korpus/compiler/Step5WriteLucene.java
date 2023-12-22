@@ -95,10 +95,18 @@ public class Step5WriteLucene {
                     lf.fieldWordWriteVariant.setTokenStream(EMPTY_STRINGARRAY_VALUE);
                     lf.fieldTagsWriteVariant.setTokenStream(EMPTY_STRINGARRAY_VALUE);
 
-                    lf.fieldTextAuthor.setTokenStream(EMPTY_STRINGARRAY_VALUE);
-                    lf.fieldTextSource.setStringValue("");
-                    setYearsRange(null, lf.fieldTextCreationYear);
-                    setYearsRange(null, lf.fieldTextPublishedYear);
+                    if (lf.fieldTextAuthor != null) {
+                        lf.fieldTextAuthor.setTokenStream(EMPTY_STRINGARRAY_VALUE);
+                    }
+                    if (lf.fieldTextSource != null) {
+                        lf.fieldTextSource.setStringValue("");
+                    }
+                    if (lf.fieldTextCreationYear != null) {
+                        setYearsRange(null, lf.fieldTextCreationYear);
+                    }
+                    if (lf.fieldTextPublishedYear != null) {
+                        setYearsRange(null, lf.fieldTextPublishedYear);
+                    }
                 }
 
                 LuceneParagraph p = text.paragraphs[i];
@@ -139,10 +147,18 @@ public class Step5WriteLucene {
                     LuceneFields.LuceneFieldsLang fl = fields.byLang.get(en.getKey());
                     fl.fieldWordWriteVariant.setTokenStream(new StringArrayTokenStream(en.getValue().values));
                     fl.fieldTagsWriteVariant.setTokenStream(new StringArrayTokenStream(en.getValue().dbGrammarTags));
-                    fl.fieldTextAuthor.setTokenStream(new StringArrayTokenStream(langAuthors.toArray(EMPTY_STRINGARRAY)));
-                    fl.fieldTextSource.setTokenStream(new StringArrayTokenStream(langSources.toArray(EMPTY_STRINGARRAY)));
-                    setYearsRange(langCreationTime, fl.fieldTextCreationYear);
-                    setYearsRange(langPublicationTime, fl.fieldTextPublishedYear);
+                    if (fl.fieldTextAuthor != null) {
+                        fl.fieldTextAuthor.setTokenStream(new StringArrayTokenStream(langAuthors.toArray(EMPTY_STRINGARRAY)));
+                    }
+                    if (fl.fieldTextSource != null) {
+                        fl.fieldTextSource.setTokenStream(new StringArrayTokenStream(langSources.toArray(EMPTY_STRINGARRAY)));
+                    }
+                    if (fl.fieldTextCreationYear != null) {
+                        setYearsRange(langCreationTime, fl.fieldTextCreationYear);
+                    }
+                    if (fl.fieldTextPublishedYear != null) {
+                        setYearsRange(langPublicationTime, fl.fieldTextPublishedYear);
+                    }
                 }
                 fields.fieldSentencePBinary.setBytesValue(p.xml);
                 fields.fieldTextID.setIntValue(text.textInfo.globalTextOrder);
@@ -183,10 +199,18 @@ public class Step5WriteLucene {
             for (LuceneFields.LuceneFieldsLang lf : fields.byLang.values()) {
                 docSentence.add(lf.fieldWordWriteVariant);
                 docSentence.add(lf.fieldTagsWriteVariant);
-                docSentence.add(lf.fieldTextAuthor);
-                docSentence.add(lf.fieldTextSource);
-                docSentence.add(lf.fieldTextCreationYear);
-                docSentence.add(lf.fieldTextPublishedYear);
+                if (lf.fieldTextAuthor != null) {
+                    docSentence.add(lf.fieldTextAuthor);
+                }
+                if (lf.fieldTextSource != null) {
+                    docSentence.add(lf.fieldTextSource);
+                }
+                if (lf.fieldTextCreationYear != null) {
+                    docSentence.add(lf.fieldTextCreationYear);
+                }
+                if (lf.fieldTextPublishedYear != null) {
+                    docSentence.add(lf.fieldTextPublishedYear);
+                }
             }
             docSentence.add(fields.fieldSentencePBinary);
 

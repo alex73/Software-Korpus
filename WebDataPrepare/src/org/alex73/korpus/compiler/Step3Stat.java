@@ -30,6 +30,8 @@ import org.alex73.korpus.text.structure.corpus.Word;
 public class Step3Stat {
     public static final int MAX_STAT_IN_MEMORY = 100000;
 
+    private static final String LANG = "bel";
+
     private static GrammarFinder grFinder;
     private static Path tempOutputDir;
     // stat by subcorpuses
@@ -45,6 +47,9 @@ public class Step3Stat {
 
     public static void run(MessageParsedText text) throws Exception {
         for (int i = 0; i < text.textInfo.subtexts.length; i++) {
+            if (!LANG.equals(text.languages[i].lang)) {
+                continue;
+            }
             WordsStat stat = calcWordsStat(text, i);
             getWordsStatBySubcorpus(text.textInfo.subcorpus).mergeFrom(stat);
             addGlobalCounts(text.textInfo, i, stat.getWordsCount());

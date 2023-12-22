@@ -17,8 +17,6 @@ public class Step4PrepareLucene {
     public static MessageLuceneWrite run(MessageParsedText text) throws Exception {
         BinaryParagraphWriter pwr = new BinaryParagraphWriter();
 
-        String[] langs = getAllSubtextLanguages(text.textInfo);
-
         Set<String> values = new HashSet<>();
         Set<String> dbGrammarTags = new HashSet<>();
 
@@ -34,8 +32,8 @@ public class Step4PrepareLucene {
             MessageLuceneWrite.LuceneParagraph po = new MessageLuceneWrite.LuceneParagraph();
             out.paragraphs[i] = po;
             po.xml = pwr.write(getParagraphsByIndex(text, i));
-            for (int l = 0; l < langs.length; l++) {
-                ILanguage lang = LanguageFactory.get(langs[l]);
+            for (int l = 0; l < text.languages.length; l++) {
+                ILanguage lang = LanguageFactory.get(text.languages[l].lang);
                 values.clear();
                 dbGrammarTags.clear();
                 Paragraph p = text.languages[l].paragraphs[i];
@@ -56,7 +54,7 @@ public class Step4PrepareLucene {
                 MessageLuceneWrite.LuceneParagraphLang pol = new MessageLuceneWrite.LuceneParagraphLang();
                 pol.values = values.toArray(new String[0]);
                 pol.dbGrammarTags = dbGrammarTags.toArray(new String[0]);
-                po.byLang.put(langs[l], pol);
+                po.byLang.put(text.languages[l].lang, pol);
             }
         }
 
