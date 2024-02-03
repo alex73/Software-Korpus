@@ -91,7 +91,7 @@ public class HtmlKnihiComParser {
             }
             line = parseLine(line);
             if (poetryStarted) {
-                if (!line.replace("&nbsp;", " ").isBlank()) {
+                if (line.replace("&nbsp;", " ").isBlank()) {
                     textLines.add(poetryBlock);
                     poetryBlock = "";
                 } else {

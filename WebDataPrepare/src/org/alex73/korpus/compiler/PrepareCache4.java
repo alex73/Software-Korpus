@@ -17,6 +17,8 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -157,6 +159,8 @@ public class PrepareCache4 {
         grFiller = new StaticGrammarFiller2(grFinder);
     }
 
+    static final Pattern RE_ZIP = Pattern.compile("[0-9]+\\.([^\\.]+)\\..+");
+
     static void parseZips() throws Exception {
         List<Path> files = Files.list(INPUT).filter(p -> p.toString().endsWith(".zip")).sorted().toList();
         for (Path file : files) {
@@ -175,7 +179,11 @@ public class PrepareCache4 {
 
                 long prevDumpTime = System.currentTimeMillis();
                 int processedFiles = 0;
-                String subcorpus = file.getFileName().toString().replaceAll("^[0-9]+\\.", "").replaceAll("\\.zip$", "");
+                Matcher m = RE_ZIP.matcher(file.getFileName().toString());
+                if (!m.matches()) {
+                    throw new Exception("Unrecognized file name (expected like 123.subcorpus.details.zip): " + file.getFileName());
+                }
+                String subcorpus = m.group(1);
                 try (ZipInputStream in = new ZipInputStream(Files.newInputStream(file))) {
                     ZipEntry ze = null;
                     while ((ze = in.getNextEntry()) != null) {
