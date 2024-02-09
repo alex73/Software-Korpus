@@ -3,7 +3,7 @@
 
 	<target name="javac">
 		<mkdir dir="build/classes" />
-		<javac srcdir="src:src-corpus-engine:../Common/src" includes="**" encoding="utf-8" destdir="build/classes">
+		<javac srcdir="src:src-corpus-engine:../Common/src" includes="**" encoding="utf-8" destdir="build/classes" debug="true">
 			<classpath>
 				<fileset dir="war/WEB-INF/lib/" includes="*.jar"/>
 				<fileset dir="lib-compile" includes="**/*.jar"/>

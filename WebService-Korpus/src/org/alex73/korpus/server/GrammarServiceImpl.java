@@ -137,7 +137,9 @@ public class GrammarServiceImpl {
             }
             Stream<LemmaInfo> output;
             if (rq.word == null || hasWildcards(rq.word)) {
-                rq.word = wordNormalizer.lightNormalized(rq.word.trim(), ILanguage.INormalizer.PRESERVE_WILDCARDS);
+                if (rq.word != null) {
+                    rq.word = wordNormalizer.lightNormalized(rq.word, ILanguage.INormalizer.PRESERVE_WILDCARDS);
+                }
                 output = StreamSupport.stream(
                         new SearchWidlcards(lang, check.createWildcardRegexp(rq.word), reGrammar, rq.multiForm, rq.fullDatabase, reOutputGrammar), false);
             } else {
@@ -261,7 +263,7 @@ public class GrammarServiceImpl {
 
     private Stream<LemmaInfo> searchExact(ILanguage lang, String word, ThreadLocal<Pattern> reGrammar, boolean multiform, boolean fullDatabase,
             ThreadLocal<Pattern> reOutputGrammar) {
-        String normWord = wordNormalizer.lightNormalized(word.trim(), ILanguage.INormalizer.PRESERVE_NONE);
+        String normWord = wordNormalizer.lightNormalized(word, ILanguage.INormalizer.PRESERVE_NONE);
         Paradigm[] data = getApp().grFinder.getParadigms(normWord);
         List<LemmaInfo> result = new ArrayList<>();
         for (Paradigm p : data) {
