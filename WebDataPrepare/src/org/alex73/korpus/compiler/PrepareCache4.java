@@ -293,7 +293,7 @@ public class PrepareCache4 {
         }
     };
 
-    static class WaitPolicy implements RejectedExecutionHandler {
+    public static class WaitPolicy implements RejectedExecutionHandler {
         private final long timeout;
         private final TimeUnit unit;
 

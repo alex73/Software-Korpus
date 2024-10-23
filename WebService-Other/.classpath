@@ -47,5 +47,6 @@
 	<classpathentry kind="lib" path="lib-compile/jakarta.servlet-api-4.0.4.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/Fanetyka.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/linguistics.grammardb.reader-1.1.0.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

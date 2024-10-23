@@ -24,6 +24,7 @@ public class ApplicationOther extends Application {
     public GrammarFinder grFinder;
     private List<String> settings;
     public String synthUrl;
+    public String synthBookPrefix, synthBookDir, synthBookUrl;
 
     public Map<Character, Set<String>> skipGrammar;
 
@@ -51,6 +52,18 @@ public class ApplicationOther extends Application {
             synthUrl = (String) xmlNode.lookup("SYNTH_URL");
             if (synthUrl == null) {
                 throw new Exception("SYNTH_URL is not defined");
+            }
+            synthBookDir = (String) xmlNode.lookup("SYNTH_BOOK_DIR");
+            if (synthBookDir == null) {
+                throw new Exception("SYNTH_BOOK_DIR is not defined");
+            }
+            synthBookUrl = (String) xmlNode.lookup("SYNTH_BOOK_URL");
+            if (synthBookUrl == null) {
+                throw new Exception("SYNTH_BOOK_URL is not defined");
+            }
+            synthBookPrefix = (String) xmlNode.lookup("SYNTH_BOOK_PREFIX");
+            if (synthBookPrefix == null) {
+                throw new Exception("SYNTH_BOOK_PREFIX is not defined");
             }
             if (!grammarDb.isEmpty()) {
                 gr = GrammarDB2.initializeFromDir(grammarDb);

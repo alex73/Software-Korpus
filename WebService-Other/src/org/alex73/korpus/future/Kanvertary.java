@@ -5,6 +5,10 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -13,6 +17,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.alex73.fanetyka.impl.FanetykaText;
 import org.alex73.grammardb.StressUtils;
@@ -85,10 +90,13 @@ public class Kanvertary {
     @POST
     @Path("synth")
     @Consumes(MediaType.TEXT_PLAIN)
-    @Produces("audio/wav")
-    public byte[] synth(String text) throws Exception {
+    public Response synth(String text) throws Exception {
         if (text.isBlank()) {
             throw new Exception("Пусты тэкст");
+        }
+        if (text.trim().startsWith(ApplicationOther.instance.synthBookPrefix)) {
+            String r = processBook(text.trim().substring(ApplicationOther.instance.synthBookPrefix.length()).trim());
+            return Response.status(Response.Status.OK).type(MediaType.TEXT_PLAIN).entity(r).build();
         }
         if (text.length() > 2000) {
             text = text.substring(0, 2000);
@@ -101,13 +109,37 @@ public class Kanvertary {
             synchronized (ApplicationOther.instance.synthUrl) { // prevent server high load
                 URL url = new URI(ApplicationOther.instance.synthUrl + "?text=" + URLEncoder.encode(f.ipa, StandardCharsets.UTF_8)).toURL();
                 try (InputStream in = url.openStream()) {
-                    return in.readAllBytes();
+                    byte[] r = in.readAllBytes();
+                    return Response.status(Response.Status.OK).type("audio/wav").entity(r).build();
                 }
             }
         } catch (Exception ex) {
             ex.printStackTrace();
             throw ex;
         }
+    }
+
+    String processBook(String text) throws Exception {
+        String name = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date());
+        java.nio.file.Path dir = Paths.get(ApplicationOther.instance.synthBookDir).resolve(name);
+        Files.createDirectories(dir);
+        Files.writeString(dir.resolve("status.txt"), "Канвертацыя фанетыкі...");
+        new Thread() {
+            public void run() {
+                try {
+                    FanetykaText f = new FanetykaText(ApplicationOther.instance.grFinder,
+                            text.replace('+', BelarusianWordNormalizer.pravilny_nacisk).replaceAll("[-‒‒–]", "-"));
+                    Files.writeString(dir.resolve("in.txt"), f.ipa);
+                    Files.writeString(dir.resolve("status.txt"), "Чаканне пачатку агучкі...");
+                } catch (Exception ex) {
+                    try {
+                        Files.writeString(dir.resolve("status.txt"), "Памылка канвертацыі фанетыкі: " + ex.getMessage());
+                    } catch (Exception e) {
+                    }
+                }
+            }
+        }.start();
+        return "Кніга захаваная <a href='" + ApplicationOther.instance.synthBookUrl + name + "/'>тут</a> для апрацоўкі";
     }
 
     String wordAccent(String word) {

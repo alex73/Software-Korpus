@@ -47,6 +47,8 @@
 			<button type="submit" class="btn btn-warning btn-lg mx-3" onClick="reqSynth(); return false;">Агучыць</button>
 		</div>
 </form>
+<div id="status" style="color:red">
+</div>
 <div id="out">
 </div>
 <audio style="display: none" controls/>
@@ -60,6 +62,8 @@
 		win.focus();
 	}
 	function reqSynth() {
+		$("audio").hide();
+		$('#status').val('');
 		$('#spinner').show();
 		fetch(otherCallPrefix + '/conv/synth', {
 		      method: 'POST',
@@ -73,17 +77,26 @@
 		        if (!r.ok) {
 		        	alert("Памылка: " + r.status + " " + r.statusText);
 		        } else {
-		          r.blob().then(data => {
-		            //$("audio").attr('src', 'data:audio/wav;base64,'+btoa(unescape(encodeURIComponent(data))));
-		            $("audio").attr('src', URL.createObjectURL(data));
-		            $("audio").show();
-		            $("audio")[0].play();
-		          });
+		          if (r.headers.get("content-type").includes("text/plain")) {
+		            r.text().then(data => {
+		              $("#status").html(data);
+		            });
+		            $('#text').val('');
+		          } else {
+		            r.blob().then(data => {
+		              //$("audio").attr('src', 'data:audio/wav;base64,'+btoa(unescape(encodeURIComponent(data))));
+		              $("audio").attr('src', URL.createObjectURL(data));
+		              $("audio").show();
+		              $("audio")[0].play();
+		            });
+		          }
 		        }
 		      })
 		      .catch(err => alert("Памылка: " + err));
 	}
 	function req() {
+		$('#status').val('');
+		$("audio").hide();
 		let arg = $('#text').val();
 		if (arg.trim() != '' && !arg.includes(' ')) {
 			forvoword = arg.toLowerCase().replace('+','').replace('|','').replace('ґ','г');
@@ -110,6 +123,8 @@
 		      .catch(err => alert("Памылка: " + err));
 	}
 	function reqNaciski() {
+		$("audio").hide();
+		$('#status').val('');
 		let arg = $('#text').val();
 		fetch(otherCallPrefix + '/conv/naciski', {
 		      method: 'POST',

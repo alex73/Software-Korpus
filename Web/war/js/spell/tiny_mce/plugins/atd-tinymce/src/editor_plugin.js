@@ -369,7 +369,7 @@
            
             var langCode = $('#lang').val();
             // NOTE: this link won't work (as of March 2014) for false friend rules:
-            var ruleUrl = "http://community.languagetool.org/rule/show/" +
+            var ruleUrl = "https://community.languagetool.org/rule/show/" +
               encodeURI(errorDescription["id"]) + "?";
             if (errorDescription["subid"] && errorDescription["subid"] != 'null') {
               ruleUrl += "subId=" + encodeURI(errorDescription["subid"]) + "&";
