@@ -92,7 +92,7 @@ class KorpusService {
 		let ps = window.location.hash;
 		let mode = 'search';
 		if (ps.charAt(0) == '#') {
-			ps = ps.substring(1);
+			ps = decodeURIComponent(ps.substring(1));
 			let p = ps.indexOf(':');
 			if (p >= 0) {
 				mode = ps.substring(0, p);
@@ -103,7 +103,7 @@ class KorpusService {
 		}
 		let data;
 		try {
-			data = JSON.parse(decodeURI(ps));
+			data = JSON.parse(ps);
 		} catch (error) {
 			data = null;
 		}

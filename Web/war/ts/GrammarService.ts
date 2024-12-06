@@ -51,7 +51,7 @@ class GrammarService {
     }
     let data;
     try {
-      data = JSON.parse(decodeURI(ps));
+      data = JSON.parse(decodeURIComponent(ps));
     } catch (error) {
       data = null;
     }

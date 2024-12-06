@@ -154,6 +154,7 @@ public class Step1Split {
                 }
             }
         }
+        flushSentence(sentences, words);
         return sentences.toArray(new Sentence[0]);
     }
 

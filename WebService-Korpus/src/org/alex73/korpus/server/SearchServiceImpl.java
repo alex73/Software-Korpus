@@ -121,24 +121,9 @@ public class SearchServiceImpl {
             ILanguage lang = LanguageFactory.get(rq.params.lang);
             SearchParams params = rq.params;
             LatestMark latest = rq.latest;
+            params.chains.forEach(ch -> ch.words.forEach(w -> checkWord(lang, w)));
             checkEnoughComplex(params);
             SearchResult result = new SearchResult();
-            if (lang.getDbTags() == null) {
-                // non-Belarusian language
-                params.chains.forEach(ch -> ch.words.forEach(w -> {
-                    if (w.mode == WordMode.ALL_FORMS || w.grammar != null) {
-                        LOGGER.info("<< Grammar request for non-Belarusian language");
-                        result.error = "Запыт для рускай мовы не можа выкарыстоўваць словаформы ці граматыку. Абярыце іншы рэжым.";
-                    }
-                    if (w.variants) {
-                        LOGGER.info("<< Grammar request for non-Belarusian language");
-                        result.error = "Запыт для рускай мовы не можа адбывацца з варыянтамі напісання. Абярыце іншы рэжым.";
-                    }
-                }));
-            }
-            if (result.error!=null) {
-                return result;
-            }
             params.chains.forEach(ch -> ch.words.forEach(w -> findAllLemmas(lang, w)));
 
             BooleanQuery.Builder query = new BooleanQuery.Builder();
@@ -177,6 +162,7 @@ public class SearchServiceImpl {
         try {
             ILanguage lang = LanguageFactory.get(rq.params.lang);
             SearchParams params = rq.params;
+            params.chains.forEach(ch -> ch.words.forEach(w -> checkWord(lang, w)));
             checkEnoughComplex(params);
             params.chains.forEach(ch -> ch.words.forEach(w -> findAllLemmas(lang, w)));
 
@@ -209,6 +195,7 @@ public class SearchServiceImpl {
         LOGGER.info(">> Request clusters from " + request.getRemoteAddr());
         try {
             ILanguage lang = LanguageFactory.get(params.lang);
+            checkWord(lang, params.word);
             if (WordsDetailsChecks.isTooSimpleWord(params.word)) {
                 LOGGER.info("<< Request too simple");
                 throw ServerError.tooSimple();
@@ -322,6 +309,27 @@ public class SearchServiceImpl {
         if (!enoughComplex) {
             LOGGER.info("<< Request too simple");
             throw ServerError.tooSimple();
+        }
+    }
+
+    private void checkWord(ILanguage lang, WordRequest w) throws ServerError {
+        if (lang.getDbTags() == null) {
+            // non-Belarusian language
+            if (w.mode == WordMode.ALL_FORMS || w.grammar != null) {
+                LOGGER.info("<< Grammar request for non-Belarusian language");
+                throw ServerError.rusForms();
+            }
+            if (w.variants) {
+                LOGGER.info("<< Grammar request for non-Belarusian language");
+                throw ServerError.rusVariants();
+            }
+        }
+        if ((w.word == null || w.word.isBlank()) && w.mode != WordMode.GRAMMAR) {
+            if (w.grammar != null) {
+                throw ServerError.noWordButGrammar();
+            } else {
+                throw ServerError.noWord();
+            }
         }
     }
 
