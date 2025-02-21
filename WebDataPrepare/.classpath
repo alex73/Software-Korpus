@@ -12,7 +12,6 @@
 	<classpathentry kind="lib" path="lib/slf4j-simple-1.7.25.jar"/>
 	<classpathentry kind="lib" path="lib/jsoup-1.13.1.jar"/>
 	<classpathentry kind="lib" path="lib/jwarc-0.13.0.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/snappy-java-1.1.8.4.jar" sourcepath="/data/src/snappy-java-1.1.8.4-sources.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-core-8.9.0.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-queries-8.9.0.jar"/>

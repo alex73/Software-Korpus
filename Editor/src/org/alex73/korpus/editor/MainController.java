@@ -49,14 +49,13 @@ import javax.swing.text.PlainDocument;
 import javax.swing.text.ViewFactory;
 
 import org.alex73.grammardb.GrammarDB2;
-import org.alex73.korpus.base.GrammarFinder;
+import org.alex73.grammardb.GrammarFinder;
 import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyLineElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocument3.MyWordElement;
 import org.alex73.korpus.editor.core.doc.KorpusDocumentViewFactory;
 import org.alex73.korpus.editor.grammar.EditorGrammar;
-import org.alex73.korpus.text.parser.Headers;
 import org.alex73.korpus.text.parser.IProcess;
 import org.alex73.korpus.text.parser.PtextFileParser;
 import org.alex73.korpus.text.parser.PtextFileWriter;
@@ -65,6 +64,7 @@ import org.alex73.korpus.text.parser.TextFileWriter;
 import org.alex73.korpus.text.structure.corpus.Word.OtherType;
 import org.alex73.korpus.text.structure.files.TextLine;
 import org.alex73.korpus.text.structure.files.WordItem;
+import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Headers;
 
 public class MainController {
     static final int[] FONT_SIZES = new int[] { 10, 12, 16, 20, 24, 30, 36, 44 };

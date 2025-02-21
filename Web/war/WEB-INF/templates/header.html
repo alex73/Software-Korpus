@@ -1,5 +1,10 @@
 <!DOCTYPE html>
 <html lang="${lang}">
+<#if lang == "be">
+    <#assign langSuffix = "">
+<#else>
+    <#assign langSuffix = ".en">
+</#if>
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -40,15 +45,15 @@
           <ul class="navbar-nav ml-auto">
             <li class="nav-item">
                 <#if lang=='be'><a class="nav-link" href="${active}.en.html">English</a>
-                <#else><a class="nav-link" href="${active}.be.html">Па-беларуску</a>
+                <#else><a class="nav-link" href="${active}.html">Па-беларуску</a>
                 </#if>
             </li>
 
-            <li class="nav-item"><a class="nav-link" href="index.${lang}.html">${messages.header_about}</a></li>
-            <li class="nav-item"><a class="nav-link" href="korpus.${lang}.html">${messages.header_korpus}</a></li>
-            <li class="nav-item"><a class="nav-link" href="paralelny.${lang}.html">${messages.header_paralelny}</a></li>
-            <li class="nav-item"><a class="nav-link" href="grammar.${lang}.html">${messages.header_grammar}</a></li>
-            <li class="nav-item"><a class="nav-link" href="spell.${lang}.html">${messages.header_spell}</a></li>
+            <li class="nav-item"><a class="nav-link" href="index${langSuffix}.html">${messages.header_about}</a></li>
+            <li class="nav-item"><a class="nav-link" href="korpus${langSuffix}.html">${messages.header_korpus}</a></li>
+            <li class="nav-item"><a class="nav-link" href="paralelny${langSuffix}.html">${messages.header_paralelny}</a></li>
+            <li class="nav-item"><a class="nav-link" href="grammar.html">${messages.header_grammar}</a></li>
+            <li class="nav-item"><a class="nav-link" href="spell.html">${messages.header_spell}</a></li>
           </ul>
         </div>
       </div>

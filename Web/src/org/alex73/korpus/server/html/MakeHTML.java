@@ -27,7 +27,7 @@ import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateNotFoundException;
 
 @SuppressWarnings("serial")
-@WebServlet(name = "HTML", urlPatterns = { "*.html", "*.txt" })
+@WebServlet(name = "HTML", urlPatterns = { "*.html" })
 public class MakeHTML extends HttpServlet {
     private Configuration cfg;
 
