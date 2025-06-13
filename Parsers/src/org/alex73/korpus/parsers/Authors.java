@@ -3,8 +3,7 @@ package org.alex73.korpus.parsers;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.Reader;
-
-import org.alex73.korpus.parsers.KnihiComParser.Autary;
+import java.util.Map;
 
 import com.google.gson.Gson;
 
@@ -55,5 +54,10 @@ public class Authors {
             textAuthors[i] = autary.author2pravapis.getOrDefault(a, a);
         }
         return String.join(",", textAuthors);
+    }
+
+    static class Autary {
+        public Map<String, String> author2pravapis;
+        public Map<String, String> author2index;
     }
 }

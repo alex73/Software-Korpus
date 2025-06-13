@@ -38,7 +38,7 @@ public class Step3Stat {
     private static Map<String, TextStatInfo> textStatInfos = new HashMap<>();
     // authors by lemmas: Map<lemma, Set<author>>
     private static Map<String, Set<String>> authorsByLemmas = new HashMap<>();
-    private static Map<String, WordsStat> wordsStatsBySubcorpus = new HashMap<>();
+    public static Map<String, WordsStat> wordsStatsBySubcorpus = new HashMap<>();
 
     public static void init(Path tempDir, GrammarFinder finder) throws Exception {
         tempOutputDir = tempDir;

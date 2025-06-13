@@ -187,6 +187,9 @@ public class PrepareCache4 {
                 try (ZipInputStream in = new ZipInputStream(Files.newInputStream(file))) {
                     ZipEntry ze = null;
                     while ((ze = in.getNextEntry()) != null) {
+                        if (ze.isDirectory()) {
+                            continue;
+                        }
                         byte[] data = in.readAllBytes();
                         String fn = file.getFileName() + "!" + ze.getName();
                         int gto = textInfos.size();

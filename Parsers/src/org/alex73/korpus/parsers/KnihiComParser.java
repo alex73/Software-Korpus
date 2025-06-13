@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import org.alex73.korpus.base.Ctf;
 import org.alex73.korpus.base.Ctf.Page;
@@ -29,25 +28,18 @@ import org.alex73.korpus.utils.KorpusDateTime;
  */
 public class KnihiComParser {
 
-    static List<TF> teksty = new ArrayList<>();
-    static List<TF> pieraklady = new ArrayList<>();
+    List<TF> teksty = new ArrayList<>();
+    List<TF> pieraklady = new ArrayList<>();
 
-    public static void main(String[] args) throws Exception {
-        if (args.length != 2) {
-            System.err.println("KnihiComParser <каталог з файламі knihi.com> <каталог з падкорпусамі>");
-            System.exit(1);
-        }
-
-        Path in = Path.of(args[0]);
+    public void run(Path in, Path out) throws Exception {
         List<Path> files = Files
                 .find(in, Integer.MAX_VALUE, (p, a) -> a.isRegularFile() && p.toString().toLowerCase().endsWith(".html"), FileVisitOption.FOLLOW_LINKS).sorted()
                 .toList();
 
         for (Path file : files) {
             String url = "https://knihi.com/" + in.relativize(file).toString();
-            TF tf = parse(file, url);
-            if (tf != null) {
-                tf.file = in.relativize(file).toString().replaceAll("\\.html$", ".ctf");
+            TF tf = parse(in, file, url);
+            if (tf != null && allow(tf)) {
                 if (tf.pieraklad) {
                     pieraklady.add(tf);
                 } else {
@@ -56,15 +48,16 @@ public class KnihiComParser {
             }
         }
 
-        Collections.sort(teksty, tekstySort);
-        Path fo1 = Path.of(args[1], "03.teksty.zip");
+        Collections.sort(teksty, (t1, t2) -> tekstySort.compare(t1.text, t2.text));
+        Path fo1 = out.resolve("03.teksty.zip");
         try (Output os = new Output(fo1)) {
             for (TF tf : teksty) {
                 os.write(tf.file, tf.text);
             }
         }
+
         Collections.sort(pieraklady, pierakladySort);
-        Path fo2 = Path.of(args[1], "04.pieraklady.zip");
+        Path fo2 = out.resolve("04.pieraklady.zip");
         try (Output os = new Output(fo2)) {
             for (TF tf : pieraklady) {
                 os.write(tf.file, tf.text);
@@ -72,13 +65,17 @@ public class KnihiComParser {
         }
     }
 
-    static class TF {
-        String file;
-        boolean pieraklad;
-        Ctf text = new Ctf();
+    protected boolean allow(TF book) {
+        return true;
     }
 
-    static TF parse(Path file, String url) throws Exception {
+    public static class TF {
+        public String file;
+        public boolean pieraklad;
+        public Ctf text = new Ctf();
+    }
+
+    TF parse(Path in, Path file, String url) throws Exception {
         System.out.println("Чытаем " + file + "...");
 
         byte[] data = Files.readAllBytes(file);
@@ -101,6 +98,7 @@ public class KnihiComParser {
         }
 
         TF tf = new TF();
+        tf.file = in.relativize(file).toString().replaceAll("\\.html$", ".ctf");
         if (langOrig != null) {
             tf.pieraklad = true;
         }
@@ -137,21 +135,16 @@ public class KnihiComParser {
         return tf;
     }
 
-    static class Autary {
-        public Map<String, String> author2pravapis;
-        public Map<String, String> author2index;
-    }
-
     static final Collator BE = Collator.getInstance(Locale.forLanguageTag("be"));
-    static Comparator<TF> tekstySort = (o1, o2) -> {
+    public static Comparator<Ctf> tekstySort = (o1, o2) -> {
         // першыя - найбольш раннія па даце стварэння альбо даце выдання. не пазначана
         // дата - на канец
-        int c = Long.compare(earliestCreationPublication(o1.text, Long.MAX_VALUE), earliestCreationPublication(o2.text, Long.MAX_VALUE));
+        int c = Long.compare(earliestCreationPublication(o1, Long.MAX_VALUE), earliestCreationPublication(o2, Long.MAX_VALUE));
         if (c == 0) {
-            c = compareAuthors(o1.text, o2.text);
+            c = compareAuthors(o1, o2);
         }
         if (c == 0) {
-            c = BE.compare(o1.text.languages[0].title, o2.text.languages[0].title);
+            c = BE.compare(o1.languages[0].title, o2.languages[0].title);
         }
         return c;
     };

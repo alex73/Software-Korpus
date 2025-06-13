@@ -12,44 +12,47 @@ import org.alex73.korpus.parsers.utils.Output;
 import org.alex73.korpus.parsers.utils.TextFileHeaders;
 import org.alex73.korpus.parsers.utils.TextFileParser;
 
-public class KolasParser {
+/**
+ * Разбірае файлы фармату .text.
+ */
+public class TextFormatParser {
 
-    static List<TF> texty = new ArrayList<>();
+    protected List<TF> texty = new ArrayList<>();
 
-    public static void main(String[] args) throws Exception {
-        if (args.length != 2) {
-            System.err.println("KolasParser <каталог з зыходнымі файламі> <каталог каб захаваць падкорпус>");
-            System.exit(1);
-        }
-
-        Path in = Path.of(args[0]);
+    public void run(Path in, Path out) throws Exception {
         List<Path> files = Files
                 .find(in, Integer.MAX_VALUE, (p, a) -> a.isRegularFile() && p.toString().toLowerCase().endsWith(".text"), FileVisitOption.FOLLOW_LINKS).sorted()
                 .toList();
 
         for (Path file : files) {
-            TF tf = parse(file);
-            if (tf != null) {
-                tf.file = in.relativize(file).toString().replaceAll("\\.text$", ".ctf");
+            TF tf = parse(in, file);
+            if (tf != null && allow(tf)) {
                 texty.add(tf);
             }
         }
 
+        sort();
 //        Collections.sort(texts, (o1, o2) -> BE.compare(o1.text.title, o2.text.title));
-        Path fo1 = Path.of(args[1], "10.kolas.zip");
-        try (Output os = new Output(fo1)) {
+        try (Output os = new Output(out)) {
             for (TF tf : texty) {
                 os.write(tf.file, tf.text);
             }
         }
     }
 
-    static class TF {
-        String file;
-        Ctf text = new Ctf();
+    protected boolean allow(TF book) {
+        return true;
     }
 
-    static TF parse(Path file) throws Exception {
+    protected void sort() {
+    }
+
+    public static class TF {
+        public String file;
+        public Ctf text = new Ctf();
+    }
+
+    static TF parse(Path in, Path file) throws Exception {
         System.out.println("Чытаем " + file + "...");
 
         byte[] data = Files.readAllBytes(file);
@@ -69,6 +72,7 @@ public class KolasParser {
         }
 
         TF tf = new TF();
+        tf.file = in.relativize(file).toString().replaceAll("\\.text$", ".ctf");
         tf.text.setPages("bel", doc.pages);
         Ctf.Language la = tf.text.languages[0];
 
@@ -80,7 +84,7 @@ public class KolasParser {
 
         la.label = la.authors != null ? String.join(",", la.authors) : "———";
         String textAuthors = Authors.autaryPravapis(doc.headers.get("Authors"));
-        la.title = (textAuthors == null ? "" : (textAuthors + ".")) + doc.headers.get("Title");
+        la.title = (textAuthors == null ? "" : (textAuthors + ". ")) + doc.headers.get("Title");
         List<String> s = new ArrayList<>();
         TextFileHeaders.addHeader(s, "Аўтары", textAuthors);
         TextFileHeaders.addHeader(s, "Перакладчык", Authors.autaryPravapis(doc.headers.get("Translation")));
