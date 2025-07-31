@@ -27,7 +27,7 @@ import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.text.structure.corpus.Paragraph;
 
 /**
- * DTO for results of search by corpus documents.
+ * Гэты аб'ект перадаецца на web каб паказаць знойдзены радок.
  */
 @SuppressWarnings("serial")
 public class SearchResults implements Serializable {

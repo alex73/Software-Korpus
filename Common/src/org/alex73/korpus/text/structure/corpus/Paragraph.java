@@ -10,5 +10,6 @@ import java.io.Serializable;
 public class Paragraph implements Serializable {
     public String lang;
     public String page;
+    public String audioPreview;
     public Sentence[] sentences;
 }

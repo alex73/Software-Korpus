@@ -20,6 +20,7 @@ public class BinaryParagraphWriter {
             for (Paragraph p : ps) {
                 writeString(p.lang);
                 writeString(p.page);
+                writeString(p.audioPreview);
                 checkWriteShort(p.sentences.length, "Too many sentences in paragraph: ");
                 for (Sentence se : p.sentences) {
                     checkWriteShort(se.words.length, "Too many words in sentence: ");

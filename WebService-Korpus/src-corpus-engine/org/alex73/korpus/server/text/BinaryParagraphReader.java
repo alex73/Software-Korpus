@@ -24,6 +24,13 @@ public class BinaryParagraphReader {
             ps[pi] = p;
             p.lang = in.readUTF();
             p.page = in.readUTF();
+            if (p.page != null && p.page.isEmpty()) {
+                p.page = null;
+            }
+            p.audioPreview = in.readUTF();
+            if (p.audioPreview != null && p.audioPreview.isEmpty()) {
+                p.audioPreview = null;
+            }
             p.sentences = new Sentence[in.readShort()];
             for (int i = 0; i < p.sentences.length; i++) {
                 p.sentences[i] = new Sentence();

@@ -8,11 +8,16 @@
         </button>
       </div>
       <div class="modal-body" onClick="new PopoverWord(event);">
+        <div>
         {{for detailsText.sentences}}
           <span>
             {{for words}}<span wlemma="{{>lemmas}}" wcat="{{>tags}}" {{if requestedWord}}class="wordFound"{{/if}}>{{naciski:word}}</span>{{wordtail:tail}}{{/for}}
           </span>
         {{/for}}
+        </div>
+        <div style="width: 100%;">
+          <audio style="width: 100%;" controls src="{{>audio}}" preload="none" controlsList="nodownload"></audio>
+        </div>
       </div>
     </div>
   </div>

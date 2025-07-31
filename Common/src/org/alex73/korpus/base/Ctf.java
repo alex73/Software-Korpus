@@ -20,6 +20,7 @@ public class Ctf {
 
     public static class Page {
         public String pageNum;
+        public String audioPreview;
         public String paragraphs[];
     }
 

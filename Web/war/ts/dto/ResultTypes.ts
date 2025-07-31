@@ -13,6 +13,7 @@ class SearchResults {
       this.text = new Paragraph();
       this.text.lang = o.text[i].lang;
       this.text.page = o.text[i].page;
+      this.text.audioPreview = o.text[i].audioPreview;
       this.text.sentences = o.text[i].sentences;
     }
 }

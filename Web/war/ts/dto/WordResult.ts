@@ -15,8 +15,10 @@ class Sentence {
   public words: WordResult[];
 }
 
+// See org.alex73.korpus.text.structure.corpus.Paragraph.
 class Paragraph {
   public page: number;
   public lang: string;
+  public audioPreview: string;
   public sentences: Sentence[];
 }

@@ -74,6 +74,7 @@ public class Step1Split {
                     Paragraph p = new Paragraph();
                     p.lang = ctfLang.lang;
                     p.page = ctfPage.pageNum;
+                    p.audioPreview = ctfPage.audioPreview;
                     p.sentences = parseTextLine(line, inlinePage);
                     ps.add(p);
                 }
