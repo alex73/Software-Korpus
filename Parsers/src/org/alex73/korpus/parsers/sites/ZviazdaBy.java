@@ -42,7 +42,7 @@ public class ZviazdaBy extends SiteBase {
         p.paragraphs = paragraphs.toArray(new String[0]);
         result.setPages("bel", Arrays.asList(p));
         result.languages[0].label = "zviazda.by";
-        result.languages[0].source = "zviazda.by";
+        result.languages[0].sourceName = "zviazda.by";
         result.languages[0].title = title;
         result.languages[0].headers = new String[] { "Крыніца:zviazda.by", "URL:" + url, "Назва:" + title };
 

@@ -13,7 +13,8 @@ class SearchResults {
       this.text = new Paragraph();
       this.text.lang = o.text[i].lang;
       this.text.page = o.text[i].page;
-      this.text.audioPreview = o.text[i].audioPreview;
+      this.text.sourceLink = this.subdoc.sourceLinkBase == null || o.text[i].sourceLinkSuffix == null ? null : this.subdoc.sourceLinkBase + o.text[i].sourceLinkSuffix;
+      this.text.previewLink = this.subdoc.previewLinkBase == null || o.text[i].previewLinkSuffix == null ? null : this.subdoc.previewLinkBase + o.text[i].previewLinkSuffix;
       this.text.sentences = o.text[i].sentences;
     }
 }
@@ -251,7 +252,9 @@ class TextInfo {
 }
 
 class Subtext {
-    public source: string;
+    public sourceName: string;
+    public sourceLinkBase: string;
+    public previewLinkBase: string;
     public authors: string[];
     public lang: string;
     public langOrig: string;

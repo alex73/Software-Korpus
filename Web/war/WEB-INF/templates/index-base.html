@@ -3,77 +3,99 @@
 
     <div class="container">
 
+    <span style="color: #0C8349">30.08.2025</span>
+        <#if lang=='be'>У Нацыянальным корпусе беларускай мовы з’явілася новая магчымасць — пошук па аўдыя.
+            Цяпер, падключыўшы ў фільтры тэкстаў "Аўдыякорпус", вы атрымліваеце магчымасць:
+        <#elseif lang='en'>In the National Corpus of the Belarusian Language a new feature has been added — audio search.
+            Now, by enabling “Audiocorpus” in the text filter, you can:
+        </#if>
+    <ul style="margin: 0;">
+        <li><#if lang=='be'>убачыць расшыфраваны ўрывак з патрэбным словам;
+        <#elseif lang='en'>see a transcribed excerpt containing the word you need;
+        </#if></li>
+        <li><#if lang=='be'>праслухаць аўдыязапіс гэтага фрагмента;
+        <#elseif lang='en'>listen to the audio recording of that fragment;
+        </#if></li>
+        <li><#if lang=='be'>адкрыць поўную расшыфроўку тэксту, з якога ён узяты.
+        <#elseif lang='en'>open the full transcription of the text from which it was taken.
+        </#if></li>
+    </ul>
+    <#if lang=='be'>Аўдыякорпус дае ўнікальны доступ да жывой гаворкі і з’яўляецца каштоўнай крыніцай для даследчыкаў.
+    <#elseif lang='en'>The Audiocorpus provides unique access to spoken language and is a valuable resource for researchers.
+    </#if>
+    <br/>
+
     <span style="color: #0C8349">14.06.2025</span> 
         <#if lang=='be'> - Дададзены "Падкорпус тэкстаў 1918–1941 гг." Новы падкорпус змяшчае тэксты, створаныя ў перыяд з 1918 па 1941 год.
         <#elseif lang='en'> - The 'Subcorpus of Texts from 1918–1941' has been added. The new subcorpus contains texts created in the period from 1918 to 1941.
-        </#if><br/>
-
-    <span style="color: #0C8349">10.07.2023</span> 
-        <#if lang=='be'> - У раздзеле "<a href="fanetyka.html">Фанетычны канвертар і сінтэз маўлення</a>" з'явілася магчымасць карыстацца сінтэзатарам беларускага маўлення.
-        <#elseif lang='en'> - <a href="fanetyka.html">Speech synthesis</a> based on the Belarusian Mozilla Common Voice is added.
-        </#if><br/>
-
-    <span style="color: #0C8349">29.05.2023</span>
-        <#if lang=='be'> - Змены ў праекце:
-        <#elseif lang='en'> - Changes:
-        </#if>
-    <ul style="margin: 0;">
-        <li><#if lang=='be'>абноўлены інтэрфейс пошуку (цяпер можна шукаць з варыянтамі напісання, знакамі прыпынку, пры дапамозе рэгулярных выразаў)
-        <#elseif lang='en'>updated search interface (now you can search with spelling options, punctuation marks, regular expressions)
-        </#if></li>
-        <li><#if lang=='be'>дададзены тэксты 1920-1930х гадоў (~1,5 млн. слоў)
-        <#elseif lang='en'>added texts from the 1920s-1930s(~1.5m words)
-        </#if></li>
-        <li><#if lang=='be'>дададзены дыялектныя тэксты (~500 тыс. слоў)
-        <#elseif lang='en'>added dialect texts (~500k words)
-        </#if></li>
-        <li><#if lang=='be'>часова прыбраны неразабраныя тэксты
-        <#elseif lang='en'>temporarily removed unclassified texts
-        </#if></li>
-    </ul>
-    <span style="color: #0C8349">28.12.2022</span> 
-        <#if lang=='be'> - Дадаўся руска-беларускі паралельны корпус (пакуль утрымлівае толькі пераклады кодэксаў Рэспублікі Беларусь).
-        <#elseif lang='en'> - Parallel Russian-Belarusian corpus has been added (for now, it contains the codes of the Republic of Belarus).
         </#if><br/>
 
     <div id="more" style="display: flex; justify-content: flex-end">
         <a href="#" onClick="more(); return false"><#if lang=='be'>больш навін &gt;&gt;&gt;<#elseif lang='en'>more news &gt;&gt;&gt;</#if></a>
     </div>
     <div id="moreData" style="display: none">
-        <span style="color: #0C8349">09.09.2019</span>
-        <#if lang=='be'> - Абноўлены Беларускі N-корпус. Дадалося ~5000 тэкстаў аб'ёмам ~12 млн. словаўжыванняў. Аб'ём Асноўнага корпусу складае ~163 млн. словаўжыванняў. Аб'ём усяго корпусу (разам з неразабранымі тэкстамі) - ~337 млн. словаўжыванняў.
-        <#elseif lang='en'> - Belarusian N-corpus has been updated. ~5000 texts with a volume of ~12 million words were added. The volume of the main corpus is ~163 million words. The volume of the whole corpus (together with unclassified texts) is ~337 million usages.
-        </#if><br/>
-        <span style="color: #0C8349">05.08.2016</span>
-        <#if lang=='be'> - Корпус папоўнены публіцыстычнымі тэкстамі ~20 млн. словаўжыванняў. Агульны аб'ём корпусу - ~80 млн. словаўжыванняў.
-        <#elseif lang='en'> - The corpus is replenished with newspaper texts of ~ 20 million word usages. The total volume of the corpus is ~ 80 million words.
-        </#if>
-
-    <span style="color: #0C8349">04.11.2021</span>
-        <#if lang=='be'> - Вялікія змены ў праекце:
-        <#elseif lang='en'> - Significant changes:
-        </#if>
-    <ul style="margin: 0;">
-        <li><#if lang=='be'>Значна папоўнены корпус тэкстаў, дададзены новыя падкорпусы, істотна абноўлены інтэрфейс корпусу. Аб'ём корпусу ~177 млн. словаўжыванняў, разам з неразабранымі тэкстамі ~1.07 млрд. словаўжыванняў.
-        <#elseif lang='en'>Corpus of texts has been significantly expanded, new subcorpora have been added, and UI has been updated. The volume of the corpus is ~177 million word usages, together with unclassified texts ~1.07 billion word usages.
-        </#if></li>
-        <li><#if lang=='be'>Абноўлены інтэрфейс граматычнай базы, дадзена інфармацыя пра крыніцы слова.
-        <#elseif lang='en'>Grammar database UI has been updated, information about word sources was added.
-        </#if></li>
-        <li><#if lang=='be'>Дадаўся раздзел анлайн-праверкі беларускага правапісу, а таксама модулі праверкі для розных праграм і аперацыйных сістэм.
-        <#elseif lang='en'>Online Belarusian spell checker has been added spelling has been added, as well as verification plugins for various programs and operating systems.
-        </#if></li>
-        <li><#if lang=='be'>Дадаўся фанетычны канвертар (тэставая версія), які дазваляе канвертаваць тэксты ў транскрыпцыю.
-        <#elseif lang='en'>Added a phonetic converter (test version) that allows you to convert texts to transcription.
-        </#if></li>
-        <li><#if lang=='be'>Дадаліся праекты ў распрацоўцы, створаныя на падставе граматычнай базы (тэставая версія).
-        <#elseif lang='en'>Projects in development(test version) that based on grammar database has been added.
-        </#if></li>
-    </ul>
-    <span style="color: #0C8349">29.10.2021</span> 
-        <#if lang=='be'> - У выдавецтве «Тэхналогія» выйшла электроннае выданне «Граматычнай базы беларускай мовы», падрыхтаванае сектарам камп’ютарнай лінгвістыкі Інстытута мовазнаўства.
-        <#elseif lang='en'> - The publishing house "Technology" has published an electronic edition of the "Grammar Database of the Belarusian Language", prepared by the Department of Computer Linguistics of the Institute of Linguistics.
-        </#if><br/>
+        <span style="color: #0C8349">10.07.2023</span> 
+            <#if lang=='be'> - У раздзеле "<a href="fanetyka.html">Фанетычны канвертар і сінтэз маўлення</a>" з'явілася магчымасць карыстацца сінтэзатарам беларускага маўлення.
+            <#elseif lang='en'> - <a href="fanetyka.html">Speech synthesis</a> based on the Belarusian Mozilla Common Voice is added.
+            </#if><br/>
+    
+        <span style="color: #0C8349">29.05.2023</span>
+            <#if lang=='be'> - Змены ў праекце:
+            <#elseif lang='en'> - Changes:
+            </#if>
+        <ul style="margin: 0;">
+            <li><#if lang=='be'>абноўлены інтэрфейс пошуку (цяпер можна шукаць з варыянтамі напісання, знакамі прыпынку, пры дапамозе рэгулярных выразаў)
+            <#elseif lang='en'>updated search interface (now you can search with spelling options, punctuation marks, regular expressions)
+            </#if></li>
+            <li><#if lang=='be'>дададзены тэксты 1920-1930х гадоў (~1,5 млн. слоў)
+            <#elseif lang='en'>added texts from the 1920s-1930s(~1.5m words)
+            </#if></li>
+            <li><#if lang=='be'>дададзены дыялектныя тэксты (~500 тыс. слоў)
+            <#elseif lang='en'>added dialect texts (~500k words)
+            </#if></li>
+            <li><#if lang=='be'>часова прыбраны неразабраныя тэксты
+            <#elseif lang='en'>temporarily removed unclassified texts
+            </#if></li>
+        </ul>
+        <span style="color: #0C8349">28.12.2022</span> 
+            <#if lang=='be'> - Дадаўся руска-беларускі паралельны корпус (пакуль утрымлівае толькі пераклады кодэксаў Рэспублікі Беларусь).
+            <#elseif lang='en'> - Parallel Russian-Belarusian corpus has been added (for now, it contains the codes of the Republic of Belarus).
+            </#if><br/>
+    
+            <span style="color: #0C8349">09.09.2019</span>
+            <#if lang=='be'> - Абноўлены Беларускі N-корпус. Дадалося ~5000 тэкстаў аб'ёмам ~12 млн. словаўжыванняў. Аб'ём Асноўнага корпусу складае ~163 млн. словаўжыванняў. Аб'ём усяго корпусу (разам з неразабранымі тэкстамі) - ~337 млн. словаўжыванняў.
+            <#elseif lang='en'> - Belarusian N-corpus has been updated. ~5000 texts with a volume of ~12 million words were added. The volume of the main corpus is ~163 million words. The volume of the whole corpus (together with unclassified texts) is ~337 million usages.
+            </#if><br/>
+            <span style="color: #0C8349">05.08.2016</span>
+            <#if lang=='be'> - Корпус папоўнены публіцыстычнымі тэкстамі ~20 млн. словаўжыванняў. Агульны аб'ём корпусу - ~80 млн. словаўжыванняў.
+            <#elseif lang='en'> - The corpus is replenished with newspaper texts of ~ 20 million word usages. The total volume of the corpus is ~ 80 million words.
+            </#if><br/>
+    
+        <span style="color: #0C8349">04.11.2021</span>
+            <#if lang=='be'> - Вялікія змены ў праекце:
+            <#elseif lang='en'> - Significant changes:
+            </#if>
+        <ul style="margin: 0;">
+            <li><#if lang=='be'>Значна папоўнены корпус тэкстаў, дададзены новыя падкорпусы, істотна абноўлены інтэрфейс корпусу. Аб'ём корпусу ~177 млн. словаўжыванняў, разам з неразабранымі тэкстамі ~1.07 млрд. словаўжыванняў.
+            <#elseif lang='en'>Corpus of texts has been significantly expanded, new subcorpora have been added, and UI has been updated. The volume of the corpus is ~177 million word usages, together with unclassified texts ~1.07 billion word usages.
+            </#if></li>
+            <li><#if lang=='be'>Абноўлены інтэрфейс граматычнай базы, дадзена інфармацыя пра крыніцы слова.
+            <#elseif lang='en'>Grammar database UI has been updated, information about word sources was added.
+            </#if></li>
+            <li><#if lang=='be'>Дадаўся раздзел анлайн-праверкі беларускага правапісу, а таксама модулі праверкі для розных праграм і аперацыйных сістэм.
+            <#elseif lang='en'>Online Belarusian spell checker has been added spelling has been added, as well as verification plugins for various programs and operating systems.
+            </#if></li>
+            <li><#if lang=='be'>Дадаўся фанетычны канвертар (тэставая версія), які дазваляе канвертаваць тэксты ў транскрыпцыю.
+            <#elseif lang='en'>Added a phonetic converter (test version) that allows you to convert texts to transcription.
+            </#if></li>
+            <li><#if lang=='be'>Дадаліся праекты ў распрацоўцы, створаныя на падставе граматычнай базы (тэставая версія).
+            <#elseif lang='en'>Projects in development(test version) that based on grammar database has been added.
+            </#if></li>
+        </ul>
+        <span style="color: #0C8349">29.10.2021</span> 
+            <#if lang=='be'> - У выдавецтве «Тэхналогія» выйшла электроннае выданне «Граматычнай базы беларускай мовы», падрыхтаванае сектарам камп’ютарнай лінгвістыкі Інстытута мовазнаўства.
+            <#elseif lang='en'> - The publishing house "Technology" has published an electronic edition of the "Grammar Database of the Belarusian Language", prepared by the Department of Computer Linguistics of the Institute of Linguistics.
+            </#if><br/>
 
     </div>
         <hr/>

@@ -74,7 +74,8 @@ public class Step1Split {
                     Paragraph p = new Paragraph();
                     p.lang = ctfLang.lang;
                     p.page = ctfPage.pageNum;
-                    p.audioPreview = ctfPage.audioPreview;
+                    p.sourceLinkSuffix = ctfPage.sourceLinkSuffix;
+                    p.previewLinkSuffix = ctfPage.previewLinkSuffix;
                     p.sentences = parseTextLine(line, inlinePage);
                     ps.add(p);
                 }
@@ -94,7 +95,8 @@ public class Step1Split {
         r.label = lang.label;
         r.lang = lang.lang;
         r.publicationTime = lang.publicationTime;
-        r.source = lang.source;
+        r.sourceLinkBase = lang.sourceLinkBase;
+        r.previewLinkBase = lang.previewLinkBase;
         r.title = lang.title;
 
         StringBuilder passport = new StringBuilder();

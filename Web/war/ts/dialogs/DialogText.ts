@@ -3,7 +3,8 @@ class DialogText {
 		let page = row.origText.page;
 		const html = $.templates("#template-text").render({
 			title: row.subdoc.title.replace("{{page}}", page ? (" (старонка "+page+")") : ""),
-			audio: row.origText.audioPreview,
+			previewLink: row.origText.previewLink,
+			sourceLink: row.origText.sourceLink,
 			detailsText: row.origText
 		});
 		$('#dialog-text').html(html);

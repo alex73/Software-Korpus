@@ -19,6 +19,7 @@ class Sentence {
 class Paragraph {
   public page: number;
   public lang: string;
-  public audioPreview: string;
+  public previewLink: string;
+  public sourceLink: string;
   public sentences: Sentence[];
 }

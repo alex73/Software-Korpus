@@ -16,7 +16,9 @@ public class TextInfo implements Serializable {
     }
 
     public static class Subtext {
-        public String source; // крыніца: толькі для сайтаў і неразабраных
+        public String sourceName; // крыніца: толькі фільтраў
+        public String sourceLinkBase; // крыніца: толькі для сайтаў, неразабраных і аўдыё
+        public String previewLinkBase; // пачатак адрасу preview, толькі для audio
         //URL public String url; // спасылка на знешні сайт, калі ёсць
         public String[] authors; // аўтары, у перавёрнутым выглядзе, афіцыйным правапісам
         //public String title; // назва: заўсёды

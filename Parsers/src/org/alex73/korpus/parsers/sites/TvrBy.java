@@ -41,7 +41,7 @@ public class TvrBy extends SiteBase {
         p.paragraphs = paragraphs.toArray(new String[0]);
         result.setPages("bel", Arrays.asList(p));
         result.languages[0].label = "tvr.by";
-        result.languages[0].source = "tvr.by";
+        result.languages[0].sourceName = "tvr.by";
         result.languages[0].title = title;
         result.languages[0].headers = new String[] { "Крыніца:tvr.by", "URL:" + url, "Назва:" + title };
 

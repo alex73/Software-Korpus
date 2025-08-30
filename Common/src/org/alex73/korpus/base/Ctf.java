@@ -11,7 +11,9 @@ public class Ctf {
         public String lang;
         public String label, title;
         public String[] authors;
-        public String source;
+        public String sourceName;
+        public String sourceLinkBase;
+        public String previewLinkBase;
         public String creationTime, publicationTime;
         public String[] headers;
 
@@ -20,7 +22,8 @@ public class Ctf {
 
     public static class Page {
         public String pageNum;
-        public String audioPreview;
+        public String previewLinkSuffix;
+        public String sourceLinkSuffix;
         public String paragraphs[];
     }
 

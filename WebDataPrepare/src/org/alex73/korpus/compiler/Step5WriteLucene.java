@@ -133,8 +133,8 @@ public class Step5WriteLucene {
                                 langAuthors.add(a);
                             }
                         }
-                        if (st.source != null) {
-                            langSources.add(st.source);
+                        if (st.sourceName != null) {
+                            langSources.add(st.sourceName);
                         }
                     }
                     if (!langCreationTime.isEmpty()) {

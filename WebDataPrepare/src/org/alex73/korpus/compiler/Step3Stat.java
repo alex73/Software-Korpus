@@ -135,8 +135,8 @@ public class Step3Stat {
                 subcorpusStatInfo.authors.add(a);
             }
         }
-        if (textInfo.subtexts[textIndex].source != null) {
-            subcorpusStatInfo.sources.add(textInfo.subtexts[textIndex].source);
+        if (textInfo.subtexts[textIndex].sourceName != null) {
+            subcorpusStatInfo.sources.add(textInfo.subtexts[textIndex].sourceName);
         }
         if (textInfo.styleGenres != null) {
             Arrays.asList(textInfo.styleGenres).stream().map(s -> s.replaceAll("/.+", "")).sorted().distinct().forEach(s -> {
@@ -145,8 +145,8 @@ public class Step3Stat {
                 subcorpusStyleGenre.words.addAndGet(wordsCount);
             });
         }
-        if (textInfo.subtexts[textIndex].source != null) {
-            TextStatInfo subcorpusSource = getTextStatInfo(textInfo.subcorpus + "." + textInfo.subtexts[textIndex].source);
+        if (textInfo.subtexts[textIndex].sourceName != null) {
+            TextStatInfo subcorpusSource = getTextStatInfo(textInfo.subcorpus + "." + textInfo.subtexts[textIndex].sourceName);
             subcorpusSource.texts.incrementAndGet();
             subcorpusSource.words.addAndGet(wordsCount);
         }
