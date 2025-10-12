@@ -50,5 +50,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/failureaccess-1.0.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/guava-32.1.3-jre.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/linguistics.grammardb.reader-1.4.0.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

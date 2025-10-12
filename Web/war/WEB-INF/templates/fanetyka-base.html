@@ -74,6 +74,7 @@
 		    })
 		      .then(r => {
 		        $('#spinner').hide();
+		        $("#out").html('');
 		        if (!r.ok) {
 		        	alert("Памылка: " + r.status + " " + r.statusText);
 		        } else {
@@ -116,11 +117,16 @@
 		        	alert("Памылка: " + r.status + " " + r.statusText);
 		        } else {
 		          r.text().then(data => {
+		          data += '<button id="logShow" type="button" class="btn btn-secondary btn-sm btn-block" onclick="showLog();">Паказаць крокі канвертацыі</button>';
 		            $("#out").html(data);
 		          });
 		        }
 		      })
 		      .catch(err => alert("Памылка: " + err));
+	}
+	function showLog() {
+		$("#log").show();
+		$("#logShow").hide();
 	}
 	function reqNaciski() {
 		$("audio").hide();
@@ -134,6 +140,7 @@
 		      body: arg
 		    })
 		      .then(r => {
+		        $("#out").html('');
 		        if (!r.ok) {
 		        	alert("Памылка: " + r.status + " " + r.statusText);
 		        } else {

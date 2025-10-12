@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="src" path="src-utils"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/Korpus-Common"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
@@ -47,6 +46,6 @@
 	<classpathentry kind="lib" path="lib-compile/jakarta.servlet-api-4.0.4.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/Fanetyka.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/linguistics.grammardb.reader-1.1.0.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/linguistics.grammardb.reader-1.4.0.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

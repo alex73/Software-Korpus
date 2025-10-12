@@ -11,6 +11,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -37,22 +39,31 @@ import org.alex73.korpus.text.structure.files.WordItem;
 
 @Path("/conv")
 public class Kanvertary {
+    private final static Logger LOGGER = Logger.getLogger(Kanvertary.class.getName());
+
     private final static ILanguage.INormalizer NORMALIZER = LanguageFactory.get("bel").getNormalizer();
 
     @POST
     @Path("fanetyka")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces("text/html; charset=UTF-8")
-    public String fanetyka(String text) throws Exception {
+    public String fanetykaLog(String text) throws Exception {
         try {
             if (text.isBlank()) {
                 throw new Exception("Пусты тэкст");
             }
-            FanetykaText f = new FanetykaText(ApplicationOther.instance.grFinder, text.replace('+', BelarusianWordNormalizer.pravilny_nacisk).replaceAll("[-‒‒–]", "-"));
+            FanetykaText f = new FanetykaText(ApplicationOther.instance.grFinder,
+                    text.replace('+', BelarusianWordNormalizer.pravilny_nacisk).replaceAll("[-‒‒–]", "-"));
+            String o = "<div id='log' style='display: none'>";
+            for (String log : f.why) {
+                o += "<hr/>\n" + log;
+            }
+            o+="</div>";
 
             return "<div>Вынікі канвертавання (IPA):</div><div style='font-size: 150%'>" + f.ipa.replace("\n", "<br/>")
-                    + "</div><br/><div>Школьная транскрыпцыя:</div><div style='font-size: 150%'>" + f.skola.replace("\n", "<br/>") + "</div>";
+                    + "</div><br/><div>Школьная транскрыпцыя:</div><div style='font-size: 150%'>" + f.skola.replace("\n", "<br/>") + "</div>" + o;
         } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, "Памылка пры канвертаванні '" + text + "'", ex);
             return "Памылка: " + ex.getMessage();
         }
     }
