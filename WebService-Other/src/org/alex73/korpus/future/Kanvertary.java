@@ -118,7 +118,9 @@ public class Kanvertary {
                     text.replace('+', BelarusianWordNormalizer.pravilny_nacisk).replaceAll("[-‒‒–]", "-"));
 
             synchronized (ApplicationOther.instance.synthUrl) { // prevent server high load
-                URL url = new URI(ApplicationOther.instance.synthUrl + "?text=" + URLEncoder.encode(f.ipa, StandardCharsets.UTF_8)).toURL();
+                String ipa = f.ipa.replace("w", "u̯").replace("w", "u̯").replace("ɱ", "m").replace("β", "v").replace("ʋ", "v")
+                        .replace("\u031E", "").replace("\u032A", "").replace("\u0331", "").replace("\u035F", "");
+                URL url = new URI(ApplicationOther.instance.synthUrl + "?text=" + URLEncoder.encode(ipa, StandardCharsets.UTF_8)).toURL();
                 try (InputStream in = url.openStream()) {
                     byte[] r = in.readAllBytes();
                     return Response.status(Response.Status.OK).type("audio/wav").entity(r).build();
