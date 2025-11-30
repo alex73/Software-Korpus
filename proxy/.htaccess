@@ -1,5 +1,0 @@
-Options +FollowSymlinks
-Options -Indexes
-RewriteEngine on
-RewriteBase /
-RewriteRule ^(.*)$ http://korpusd.ns360.info:443/$1 [P]
