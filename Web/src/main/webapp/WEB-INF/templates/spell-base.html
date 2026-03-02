@@ -1,9 +1,9 @@
 <#assign active = "spell">
 <#include "header.html">
 
-<script type="text/javascript" src="https://languagetool.org/js/jquery-1.7.0.min.js"></script>
-<script type="text/javascript" src="https://languagetool.org/online-check/tiny_mce/tiny_mce.js"></script>
-<script type="text/javascript" src="https://languagetool.org/online-check/tiny_mce/plugins/atd-tinymce/editor_plugin2.js"></script>
+<script type="text/javascript" src="lt/jquery-1.7.0.min.js"></script>
+<script type="text/javascript" src="lt/tiny_mce.js"></script>
+<script type="text/javascript" src="lt/editor_plugin2.js"></script>
 
 <div class="container">
     <div style="font-size: 2em;text-align: center;">&nbsp;</div>
@@ -38,27 +38,27 @@
     Мы раім усталяваць праверку правапісу на свой камп'ютар у выглядзе дадатку <a href="https://languagetool.org/">LanguageTool</a> для наступных праграм :
     <div class="row justify-content-center">
         <a href="https://chrome.google.com/webstore/detail/grammar-and-spell-checker/oldceeleldhonbafppcapldpdifcinji" class="text-center p-3">
-            <img width="64" height="64" src="https://languagetool.org/images/add-on-chrome.png" />
+            <img width="64" height="64" src="lt/add-on-chrome.png" />
             <div>Chrome</div>
         </a>
         <a href="https://addons.mozilla.org/firefox/addon/languagetool/" class="text-center p-3">
-            <img width="64" height="64" src="https://languagetool.org/images/add-on-firefox.png" />
+            <img width="64" height="64" src="lt/add-on-firefox.png" />
             <div>Firefox</div>
         </a>
         <a href="https://apps.apple.com/app/id1534275760" class="text-center p-3">
-            <img width="64" height="64" src="https://languagetool.org/images/add-on-safari.png" />
+            <img width="64" height="64" src="lt/add-on-safari.png" />
             <div>Safari</div>
         </a>
         <a href="https://microsoftedge.microsoft.com/addons/detail/hfjadhjooeceemgojogkhlppanjkbobc" class="text-center p-3">
-            <img width="64" height="64" src="https://languagetool.org/images/add-on-edge.png" />
+            <img width="64" height="64" src="lt/add-on-edge.png" />
             <div>Edge</div>
         </a>
         <a href="https://addons.opera.com/extensions/details/grammar-and-spell-checker-languagetool/" class="text-center p-3">
-            <img width="64" height="64" src="https://languagetool.org/images/add-on-opera.png" />
+            <img width="64" height="64" src="lt/add-on-opera.png" />
             <div>Opera</div>
         </a>
         <a href="https://addons.thunderbird.net/thunderbird/addon/grammar-and-spell-checker/" class="text-center p-3">
-            <img width="64" height="64" src="https://languagetool.org/images/add-on-thunderbird.png" />
+            <img width="64" height="64" src="lt/add-on-thunderbird.png" />
             <div>Thunderbird</div>
         </a>
     </div>
@@ -76,27 +76,27 @@
     Таксама, LanguageTool мае інтэграцыю з праграмамі:
     <div class="row justify-content-center">
         <a href="https://extensions.libreoffice.org/en/extensions/show/languagetool" class="text-center p-3">
-            <img width="64" height="64"  src="https://languagetool.org/images/add-on-libre-office.png" />
+            <img width="64" height="64"  src="lt/add-on-libre-office.png" />
             <div>LibreOffice</div>
         </a>
         <a href="https://extensions.openoffice.org/project/languagetool" class="text-center p-3">
-            <img width="64" height="64"  src="https://languagetool.org/images/add-on-open-office.png" />
+            <img width="64" height="64"  src="lt/add-on-open-office.png" />
             <div>OpenOffice</div>
         </a>
         <a href="https://appsource.microsoft.com/product/office/wa104381727" class="text-center p-3">
-            <img width="64" height="64"  src="https://languagetool.org/images/add-on-word.png" />
+            <img width="64" height="64"  src="lt/add-on-word.png" />
             <div>Word</div>
         </a>
         <a href="https://gsuite.google.com/marketplace/app/grammar_and_spell_checker_languagetool/805250893316" class="text-center p-3">
-            <img width="64" height="64"  src="https://languagetool.org/images/add-on-docs.png" />
+            <img width="64" height="64"  src="lt/add-on-docs.png" />
             <div>Google Docs</div>
         </a>
         <a href="https://apps.apple.com/app/id1534275760" class="text-center p-3">
-            <img width="64" height="64"  src="https://languagetool.org/images/add-on-mac.png" />
+            <img width="64" height="64"  src="lt/add-on-mac.png" />
             <div>macOS</div>
         </a>
-        <a href="https://languagetool.org/download/windows-app/LanguageTool-1.0.2.exe" class="text-center p-3">
-            <img width="64" height="64"  src="https://languagetool.org/images/add-on-windows.png" />
+        <a href="https://languagetool.org/download/windows-app/LanguageTool-1.0.10.exe" class="text-center p-3">
+            <img width="64" height="64"  src="lt/add-on-windows.png" />
             <div>Windows</div>
         </a>
     </div>
@@ -145,9 +145,9 @@
         If you use your own server here and it's not running on the same domain 
         as the text form, make sure the server gets started with '--allow-origin ...' 
         and use 'https://your-server/v2/check' as URL: */
-     languagetool_rpc_url                 : "https://languagetool.org/api/v2/check",
+     languagetool_rpc_url                 : "/languagetool/api/v2/check",
      /* edit this file to customize how LanguageTool shows errors: */
-     languagetool_css_url : "https://languagetool.org/online-check/tiny_mce/plugins/atd-tinymce/css/content.css",
+     languagetool_css_url : "lt/content.css",
      /* this stuff is a matter of preference: */
      theme                              : "advanced",
      theme_advanced_buttons1            : "",
