@@ -12,6 +12,7 @@ public class Ctf {
         public String label, title;
         public String[] authors;
         public String sourceName;
+        public String source; // старыя файлы ctf, мусіць пераносіцца ў sourceName
         public String sourceLinkBase;
         public String previewLinkBase;
         public String creationTime, publicationTime;

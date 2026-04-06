@@ -94,6 +94,10 @@ public class Step1Split {
         r.creationTime = lang.creationTime;
         r.label = lang.label;
         r.lang = lang.lang;
+        r.sourceName = lang.sourceName;
+        if (r.sourceName == null) {
+            r.sourceName = lang.source;
+        }
         r.publicationTime = lang.publicationTime;
         r.sourceLinkBase = lang.sourceLinkBase;
         r.previewLinkBase = lang.previewLinkBase;
