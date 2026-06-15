@@ -16,6 +16,7 @@ import javax.ws.rs.core.Application;
 
 import org.alex73.grammardb.GrammarDB2;
 import org.alex73.grammardb.GrammarFinder;
+import org.alex73.korpus.base.GrammarDBUtils;
 
 @ApplicationPath("rest")
 public class ApplicationOther extends Application {
@@ -67,6 +68,7 @@ public class ApplicationOther extends Application {
             }
             if (!grammarDb.isEmpty()) {
                 gr = GrammarDB2.initializeFromDir(grammarDb);
+                GrammarDBUtils.minimizeMemory(gr);
             } else {
                 gr = GrammarDB2.empty();
             }

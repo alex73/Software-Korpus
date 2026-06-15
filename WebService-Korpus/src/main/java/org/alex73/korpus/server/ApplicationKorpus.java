@@ -29,6 +29,7 @@ import org.alex73.grammardb.SetUtils;
 import org.alex73.grammardb.structures.Variant;
 import org.alex73.grammardb.tags.IGrammarTags;
 import org.alex73.grammardb.tags.TagLetter;
+import org.alex73.korpus.base.GrammarDBUtils;
 import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.languages.DBTagsFactory.KeyValue;
@@ -96,6 +97,7 @@ public class ApplicationKorpus extends Application {
 
             if (!grammarDb.isEmpty()) {
                 gr = GrammarDB2.initializeFromDir(grammarDb);
+                GrammarDBUtils.minimizeMemory(gr);
             } else {
                 gr = GrammarDB2.empty();
             }
