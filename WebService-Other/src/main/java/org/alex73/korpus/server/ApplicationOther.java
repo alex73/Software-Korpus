@@ -1,105 +1,107 @@
 package org.alex73.korpus.server;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-
+import io.javalin.config.RoutesConfig;
 import org.alex73.grammardb.GrammarDB2;
 import org.alex73.grammardb.GrammarFinder;
-import org.alex73.korpus.base.GrammarDBUtils;
+import org.alex73.korpus.future.*;
 
-@ApplicationPath("rest")
-public class ApplicationOther extends Application {
-    public String korpusCache;
-    public GrammarDB2 gr;
-    public GrammarFinder grFinder;
-    private List<String> settings;
-    public String synthUrl;
-    public String synthBookPrefix, synthBookDir, synthBookUrl;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
 
-    public Map<Character, Set<String>> skipGrammar;
+public class ApplicationOther {
+    private final GrammarDB2 grammarDB;
+    private final GrammarFinder grFinder;
+    private final String cachePath;
+    private final List<String> settings;
+    private final  String synthUrl;
+    private final  Map<Character, Set<String>> skipGrammar;
 
-    public static ApplicationOther instance;
-
-    public ApplicationOther() {
-        instance = this;
-
-        System.out.println("Starting...");
-        try {
-            InitialContext context = new InitialContext();
-            Context xmlNode = (Context) context.lookup("java:comp/env");
-            String configDir = (String) xmlNode.lookup("CONFIG_DIR");
-            if (configDir == null) {
-                throw new Exception("CONFIG_DIR is not defined");
-            }
-            korpusCache = (String) xmlNode.lookup("KORPUS_CACHE");
-            if (korpusCache == null) {
-                throw new Exception("KORPUS_CACHE is not defined");
-            }
-            String grammarDb = (String) xmlNode.lookup("GRAMMAR_DB");
-            if (grammarDb == null) {
-                throw new Exception("GRAMMAR_DB is not defined");
-            }
-            synthUrl = (String) xmlNode.lookup("SYNTH_URL");
-            if (synthUrl == null) {
-                throw new Exception("SYNTH_URL is not defined");
-            }
-            synthBookDir = (String) xmlNode.lookup("SYNTH_BOOK_DIR");
-            if (synthBookDir == null) {
-                throw new Exception("SYNTH_BOOK_DIR is not defined");
-            }
-            synthBookUrl = (String) xmlNode.lookup("SYNTH_BOOK_URL");
-            if (synthBookUrl == null) {
-                throw new Exception("SYNTH_BOOK_URL is not defined");
-            }
-            synthBookPrefix = (String) xmlNode.lookup("SYNTH_BOOK_PREFIX");
-            if (synthBookPrefix == null) {
-                throw new Exception("SYNTH_BOOK_PREFIX is not defined");
-            }
-            if (!grammarDb.isEmpty()) {
-                gr = GrammarDB2.initializeFromDir(grammarDb);
-                GrammarDBUtils.minimizeMemory(gr);
-            } else {
-                gr = GrammarDB2.empty();
-            }
-            settings = Files.readAllLines(Paths.get(configDir + "/settings.ini"));
-            System.out.println("GrammarDB loaded with " + gr.getAllParadigms().size() + " paradigms. Used memory: " + getUsedMemory());
-            grFinder = new GrammarFinder(gr);
-            System.out.println("GrammarDB indexed. Used memory: " + getUsedMemory());
-            prepareInitialGrammar();
-        } catch (Throwable ex) {
-            System.err.println("Startup error");
-            ex.printStackTrace();
-            throw new ExceptionInInitializerError(ex);
+    public ApplicationOther(String configDir, String cachePath, String synthUrl, GrammarDB2 grammarDB, GrammarFinder grFinder) throws Exception {
+        this.grammarDB = grammarDB;
+        this.grFinder = grFinder;
+        this.cachePath = cachePath;
+        this.synthUrl = synthUrl;
+    /*
+        String grammarDb = getEnvOrPropOrJndi("GRAMMAR_DB");
+        if (grammarDb == null) {
+            throw new Exception("GRAMMAR_DB is not defined");
         }
+        synthUrl = getEnvOrPropOrJndi("SYNTH_URL");
+        if (synthUrl == null) {
+            throw new Exception("SYNTH_URL is not defined");
+        }
+        synthBookDir = getEnvOrPropOrJndi("SYNTH_BOOK_DIR");
+        if (synthBookDir == null) {
+            throw new Exception("SYNTH_BOOK_DIR is not defined");
+        }
+        synthBookUrl = getEnvOrPropOrJndi("SYNTH_BOOK_URL");
+        if (synthBookUrl == null) {
+            throw new Exception("SYNTH_BOOK_URL is not defined");
+        }
+        synthBookPrefix = getEnvOrPropOrJndi("SYNTH_BOOK_PREFIX");
+        if (synthBookPrefix == null) {
+            throw new Exception("SYNTH_BOOK_PREFIX is not defined");
+        } */
+        settings = Files.readAllLines(Paths.get(configDir + "/settings.ini"));
+
+        skipGrammar=  prepareInitialGrammar();
     }
 
-    void prepareInitialGrammar() throws Exception {
-        skipGrammar = new TreeMap<>();
+
+    public void registerRoutes(String prefix, RoutesConfig routes) {
+//        routes.before(ctx -> {
+//            ctx.header("Access-Control-Allow-Origin", "*");
+//            ctx.header("Access-Control-Allow-Headers", "*");
+//            ctx.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+//        });
+//        routes.options("/*", ctx -> {
+//            ctx.status(200);
+//        });
+
+        routes.get(prefix + "/freq/{count}", new Freq(cachePath));
+        routes.get(prefix + "/arfa/{word}", new Arfa(grammarDB));
+        routes.get(prefix + "/hramatycny/{word}", new Hramatycny(grammarDB, skipGrammar));
+        routes.get(prefix + "/fanietycny/{word}", new Fanietycny(grammarDB, grFinder));
+        routes.get(prefix + "/advarotny/{word}", new Advarotny(grammarDB));
+        routes.get(prefix + "/amonimy/{type}/{level}", new Amonimy(grammarDB, grFinder));
+
+        Kanvertary conv = new Kanvertary(grFinder, null, null, synthUrl);
+        routes.post(prefix + "/rest/conv/fanetyka", ctx -> {
+            ctx.contentType("text/html; charset=UTF-8").result(conv.fanetykaLog(ctx.body()));
+        });
+        routes.post(prefix + "/rest/conv/naciski", ctx -> {
+            ctx.contentType("text/plain; charset=UTF-8").result(conv.naciski(ctx.body()));
+        });
+        routes.post(prefix + "/rest/conv/synth", ctx -> {
+            String text = ctx.body();
+            if (text.isBlank()) {
+                ctx.status(400).result("Пусты тэкст");
+                return;
+            }
+//            if (text.trim().startsWith("")) {
+//                String r = conv.processBook(text.trim().substring(synthBookPrefix.length()).trim());
+//                ctx.contentType("text/plain; charset=UTF-8").result(r);
+//                return;
+//            }
+            if (text.length() > 2000) {
+                text = text.substring(0, 2000);
+            }
+
+            conv.synth(text, ctx);
+        });
+    }
+
+    Map<Character, Set<String>> prepareInitialGrammar() throws Exception {
+        Map<Character, Set<String>> result = new TreeMap<>();
         for (String line : settings) {
             if (line.startsWith("grammar.skip.") && line.charAt(14) == '=') {
                 char part = line.charAt(13);
                 Set<String> vs = Arrays.stream(line.substring(15).split(";")).map(s -> s.trim()).collect(Collectors.toSet());
-                skipGrammar.put(part, vs);
+                result.put(part, vs);
             }
         }
-    }
-
-    private String getUsedMemory() {
-        Runtime runtime = Runtime.getRuntime();
-        runtime.gc();
-        runtime.gc();
-        runtime.gc();
-        return Math.round((runtime.totalMemory() - runtime.freeMemory()) / 1024.0 / 1024.0) + "mb";
+        return result;
     }
 }

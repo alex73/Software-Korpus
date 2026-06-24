@@ -1,50 +1,41 @@
 package org.alex73.korpus.future;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.alex73.fanetyka.impl.FanetykaText;
-import org.alex73.grammardb.FormsReadyFilter;
-import org.alex73.grammardb.SetUtils;
-import org.alex73.grammardb.StressUtils;
+import org.alex73.grammardb.*;
 import org.alex73.grammardb.structures.Form;
 import org.alex73.grammardb.structures.Paradigm;
 import org.alex73.grammardb.structures.Variant;
 import org.alex73.korpus.languages.belarusian.BelarusianComparators;
-import org.alex73.korpus.server.ApplicationOther;
 
-@SuppressWarnings("serial")
-@WebServlet(urlPatterns = { "/amonimy/*" })
+import java.util.*;
+import java.util.stream.Collectors;
+
 public class Amonimy extends FutureBaseServlet {
 
     enum AMO_TYPE {
         FORMY, FONY, HRAFY
-    };
+    }
 
     enum AMO_LEVEL {
         FULL, PART, SOME
-    };
+    }
+
+    private final GrammarDB2 grammarDB;
+    private final GrammarFinder grFinder;
+
+    public Amonimy(GrammarDB2 grammarDB, GrammarFinder grFinder) {
+        super("future/amonimy.html");
+        this.grammarDB = grammarDB;
+        this.grFinder = grFinder;
+    }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String[] type = req.getPathInfo().substring(1).split("/");
-        AMO_TYPE amoType = AMO_TYPE.valueOf(type[0]);
-        AMO_LEVEL amoLevel = AMO_LEVEL.valueOf(type[1]);
+    public List<Row> process(Map<String, String> params) {
+        AMO_TYPE amoType = AMO_TYPE.valueOf(params.get("type"));
+        AMO_LEVEL amoLevel = AMO_LEVEL.valueOf(params.get("level"));
         Map<String, PreRow> detailsByKey = new HashMap<>();
 
-        ApplicationOther.instance.gr.getAllParadigms().parallelStream().forEach(p -> {
+        grammarDB.getAllParadigms().parallelStream().forEach(p -> {
             for (Variant v : p.getVariant()) {
                 List<Form> forms = FormsReadyFilter.getAcceptedForms(FormsReadyFilter.MODE.SHOW, p, v);
                 if (forms == null || forms.isEmpty()) {
@@ -74,9 +65,7 @@ public class Amonimy extends FutureBaseServlet {
                 .filter(r -> r.notSimple()).filter(r -> r.onlyLevel(amoType))
                 .collect(Collectors.groupingBy(p -> p.getDetails().toString())).values();
 
-        List<Row> data = prerowgroups.stream().map(ps -> new Row(ps)).sorted().distinct().collect(Collectors.toList());
-
-        output("future/amonimy.html", data, resp);
+        return prerowgroups.stream().map(ps -> new Row(ps)).sorted().distinct().collect(Collectors.toList());
     }
 
     public static final Comparator<String> STRING_COMPARATOR = new Comparator<String>() {
@@ -92,16 +81,16 @@ public class Amonimy extends FutureBaseServlet {
 
     private String getKey(AMO_TYPE amoType, String s) {
         switch (amoType) {
-        case FORMY:
-            return StressUtils.combineAccute(s.toLowerCase());
-        case HRAFY:
-            return StressUtils.unstress(s.toLowerCase());
-        case FONY:
-            try {
-                return new FanetykaText(ApplicationOther.instance.grFinder, s.replace('+', '´')).ipa;
-            } catch (Exception ex) {
-                return null;
-            }
+            case FORMY:
+                return StressUtils.combineAccute(s.toLowerCase());
+            case HRAFY:
+                return StressUtils.unstress(s.toLowerCase());
+            case FONY:
+                try {
+                    return new FanetykaText(grFinder, s.replace('+', '´')).ipa;
+                } catch (Exception ex) {
+                    return null;
+                }
         }
         return null;
     }
@@ -134,8 +123,9 @@ public class Amonimy extends FutureBaseServlet {
         }
 
         private String getSortKey() {
-            return details.stream().map(d->d.getLemma()).collect(Collectors.joining(" "));
+            return details.stream().map(d -> d.getLemma()).collect(Collectors.joining(" "));
         }
+
         @Override
         public int compareTo(Row o) {
             return BelarusianComparators.FULL.compare(getSortKey(), o.getSortKey());
@@ -164,21 +154,21 @@ public class Amonimy extends FutureBaseServlet {
 
         public boolean onlyLevel(AMO_TYPE amoType) {
             switch (amoType) {
-            case FORMY:
-                return true;
-            case HRAFY:
-            case FONY:
-                String kh = null;
-                for (KeyDetails d : details) {
-                    if (kh == null) {
-                        kh = d.byForm.toLowerCase();
-                    } else {
-                        if (!kh.equalsIgnoreCase(d.byForm)) {
-                            return true;
+                case FORMY:
+                    return true;
+                case HRAFY:
+                case FONY:
+                    String kh = null;
+                    for (KeyDetails d : details) {
+                        if (kh == null) {
+                            kh = d.byForm.toLowerCase();
+                        } else {
+                            if (!kh.equalsIgnoreCase(d.byForm)) {
+                                return true;
+                            }
                         }
                     }
-                }
-                break;
+                    break;
             }
             return false;
         }

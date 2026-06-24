@@ -1,51 +1,71 @@
 package org.alex73.korpus.future;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.util.Map;
-import java.util.TreeMap;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletResponse;
-
-import org.alex73.korpus.server.ApplicationOther;
-
+import freemarker.cache.ClassTemplateLoader;
+import freemarker.cache.FileTemplateLoader;
+import freemarker.cache.MultiTemplateLoader;
+import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
+import io.javalin.http.Context;
+import io.javalin.http.Handler;
+import org.alex73.korpus.server.ApplicationOther;
 
-@SuppressWarnings("serial")
-public class FutureBaseServlet extends HttpServlet {
+import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+public abstract class FutureBaseServlet implements Handler {
+    private final String templatePath;
     private Configuration cfg;
 
-    protected ApplicationOther getApp() {
-        return ApplicationOther.instance;
+    public FutureBaseServlet(String templatePath) {
+        this.templatePath = templatePath;
+        try {
+            cfg = new Configuration(Configuration.VERSION_2_3_30);
+            List<TemplateLoader> loadersList = new ArrayList<>();
+
+            // Dev templates fallback
+            File devTemplates = new File("src/main/webapp/WEB-INF/templates");
+            if (!devTemplates.exists()) {
+                devTemplates = new File("WebService-Other/src/main/webapp/WEB-INF/templates");
+            }
+            if (devTemplates.exists()) {
+                loadersList.add(new FileTemplateLoader(devTemplates));
+            }
+
+            // Classpath fallback
+            loadersList.add(new ClassTemplateLoader(FutureBaseServlet.class, "/WEB-INF/templates"));
+
+            cfg.setTemplateLoader(new MultiTemplateLoader(loadersList.toArray(new TemplateLoader[0])));
+            cfg.setDefaultEncoding("UTF-8");
+            cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
+
+    abstract protected Object process(Map<String, String> pathParams) throws Exception;
 
     @Override
-    public void init(ServletConfig config) throws ServletException {
-        super.init(config);
+    public void handle(Context ctx) throws Exception {
+        var data = process(ctx.pathParamMap());
 
-        cfg = new Configuration(Configuration.VERSION_2_3_30);
-        cfg.setServletContextForTemplateLoading(config.getServletContext(), "/WEB-INF/templates/");
-        cfg.setDefaultEncoding("UTF-8");
-        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-    }
-
-    protected synchronized void output(String template, Object data, HttpServletResponse resp)
-            throws ServletException, IOException {
-        Template t = cfg.getTemplate(template);
+        Template t = cfg.getTemplate(templatePath);
         Map<String, Object> context = new TreeMap<>();
         context.put("data", data);
-        resp.setContentType("text/html; charset=UTF-8");
-        try (OutputStreamWriter wr = new OutputStreamWriter(resp.getOutputStream(), "UTF-8")) {
+        ctx.contentType("text/html; charset=UTF-8");
+        try (StringWriter wr = new StringWriter()) {
             t.process(context, wr);
+            ctx.result(wr.toString());
         } catch (TemplateException ex) {
             ex.printStackTrace();
-            throw new ServletException(ex);
+            ctx.status(500).result("Error processing request");
         }
     }
 }

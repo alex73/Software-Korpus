@@ -7,10 +7,6 @@ import java.util.Set;
 import org.alex73.korpus.languages.DBTagsFactory.DBTagsGroup;
 import org.alex73.korpus.languages.DBTagsFactory.KeyValue;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-@JsonInclude(Include.NON_NULL)
 public class GrammarInitial {
     public Map<Character, GrammarLetter> grammarTree;
     public List<KeyValue> grammarWordTypes;
@@ -25,14 +21,12 @@ public class GrammarInitial {
         public int formCount;
     }
 
-    @JsonInclude(Include.NON_NULL)
     public static class GrammarLetter {
         public String name;
         public String desc;
         public Map<Character, GrammarLetter> ch;
     }
 
-    @JsonInclude(Include.NON_NULL)
     public static class GrammarDict {
         public String name;
         public String desc;

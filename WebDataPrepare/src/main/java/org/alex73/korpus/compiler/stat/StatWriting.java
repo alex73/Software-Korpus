@@ -23,7 +23,7 @@ import org.alex73.korpus.utils.KorpusFileUtils;
 import org.xerial.snappy.SnappyInputStream;
 
 public class StatWriting {
-    private static final Collator BE = Collator.getInstance(new Locale("be"));
+    private static final Collator BE = Collator.getInstance(Locale.of("be"));
 
     public static void write(Map<String, TextStatInfo> textStatInfos, Map<String, Set<String>> authorsByLemmas, Path dir) throws Exception {
         List<String> stat = new ArrayList<>();

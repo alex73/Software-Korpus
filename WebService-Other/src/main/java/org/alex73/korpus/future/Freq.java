@@ -1,30 +1,28 @@
 package org.alex73.korpus.future;
 
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import org.alex73.grammardb.GrammarDB2;
 import org.alex73.korpus.utils.KorpusFileUtils;
 
-@SuppressWarnings("serial")
-@WebServlet(urlPatterns = { "/freq/*" })
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public class Freq extends FutureBaseServlet {
+    private final String corpusCachePath;
+
+    public Freq(String corpusCachePath) {
+        super("future/freq.html");
+        this.corpusCachePath = corpusCachePath;
+    }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        int count = Integer.parseInt(req.getPathInfo().substring(1));
+    public List<Pair> process(Map<String, String> params) throws Exception {
+        int count = Integer.parseInt(params.get("count"));
 
-        List<String> frequences = KorpusFileUtils.readZip(Paths.get(getApp().korpusCache).resolve("stat-freq.zip"), "forms/freq.tab");
+        List<String> frequences = KorpusFileUtils.readZip(Paths.get(corpusCachePath).resolve("stat-freq.zip"), "forms/freq.tab");
         frequences = frequences.subList(0, Math.min(frequences.size(), count));
-        List<Pair> data = frequences.stream().map(line -> new Pair(line)).collect(Collectors.toList());
-
-        output("future/freq.html", data, resp);
+        return frequences.stream().map(line -> new Pair(line)).collect(Collectors.toList());
     }
 
     public static class Pair {

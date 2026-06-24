@@ -3,6 +3,8 @@ package org.alex73.korpus.server;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import org.alex73.grammardb.structures.Form;
@@ -29,6 +31,7 @@ import org.alex73.korpus.text.structure.corpus.Word;
  * Methods of instance can be executed in multiple threads.
  */
 public class WordsDetailsChecks {
+    private final Predicate<String[]> isAuthorsBlacklisted;
     private ILanguage lang;
     private ChainInternals[] chains;
     private boolean chainsInParagraph;
@@ -242,18 +245,19 @@ public class WordsDetailsChecks {
     /**
      * Only for checking words from grammar database.
      */
-    private WordsDetailsChecks() {
+    private WordsDetailsChecks(Predicate<String[]> isAuthorsBlacklisted) {
+        this.isAuthorsBlacklisted = isAuthorsBlacklisted;
     }
 
-    public static WordsDetailsChecks createForGrammarDB() {
-        return new WordsDetailsChecks();
+    public static WordsDetailsChecks createForGrammarDB(Predicate<String[]> isAuthorsBlacklisted) {
+        return new WordsDetailsChecks(isAuthorsBlacklisted);
     }
 
     /**
      * For checking words from texts.
      */
-    public static WordsDetailsChecks createForSearch(ILanguage lang, List<ChainRequest> inputChains, boolean chainsInParagraph, StaticGrammarFiller2 grFiller) {
-        WordsDetailsChecks r = new WordsDetailsChecks();
+    public static WordsDetailsChecks createForSearch(Predicate<String[]> isAuthorsBlacklisted, ILanguage lang, List<ChainRequest> inputChains, boolean chainsInParagraph, StaticGrammarFiller2 grFiller) {
+        WordsDetailsChecks r = new WordsDetailsChecks(isAuthorsBlacklisted);
         r.lang = lang;
         r.chains = new ChainInternals[inputChains.size()];
         r.chainsInParagraph = chainsInParagraph;
@@ -264,8 +268,8 @@ public class WordsDetailsChecks {
         return r;
     }
 
-    public static WordsDetailsChecks createForCluster(ILanguage lang, ChainRequest inputChain, StaticGrammarFiller2 grFiller) {
-        WordsDetailsChecks r = new WordsDetailsChecks();
+    public static WordsDetailsChecks createForCluster(Predicate<String[]> isAuthorsBlacklisted, ILanguage lang, ChainRequest inputChain, StaticGrammarFiller2 grFiller) {
+        WordsDetailsChecks r = new WordsDetailsChecks(isAuthorsBlacklisted);
         r.lang = lang;
         r.grFiller = grFiller;
         r.chains = new ChainInternals[1];
@@ -279,7 +283,7 @@ public class WordsDetailsChecks {
      */
     public boolean isAllowed(TextInfo textInfo, Paragraph[] resultText) {
         for (TextInfo.Subtext tis : textInfo.subtexts) {
-            if (ApplicationKorpus.instance.isAuthorsBlacklisted(tis.authors)) {
+            if (isAuthorsBlacklisted.test(tis.authors)) {
                 return false;
             }
         }
@@ -338,7 +342,7 @@ public class WordsDetailsChecks {
 
     public boolean isOneWordAllowed(TextInfo textInfo, WordResult wordResult) {
         for (TextInfo.Subtext tis : textInfo.subtexts) {
-            if (ApplicationKorpus.instance.isAuthorsBlacklisted(tis.authors)) {
+            if (isAuthorsBlacklisted.test(tis.authors)) {
                 return false;
             }
         }

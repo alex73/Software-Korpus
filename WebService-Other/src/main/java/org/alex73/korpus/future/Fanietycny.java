@@ -1,38 +1,41 @@
 package org.alex73.korpus.future;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.alex73.fanetyka.impl.FanetykaText;
 import org.alex73.grammardb.FormsReadyFilter;
+import org.alex73.grammardb.GrammarDB2;
+import org.alex73.grammardb.GrammarFinder;
 import org.alex73.grammardb.StressUtils;
 import org.alex73.grammardb.structures.Form;
 import org.alex73.grammardb.structures.Variant;
 import org.alex73.korpus.languages.ILanguage;
 import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.languages.belarusian.BelarusianComparators;
-import org.alex73.korpus.server.ApplicationOther;
 
-@SuppressWarnings("serial")
-@WebServlet(urlPatterns = { "/fanietycny/*" })
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 public class Fanietycny extends FutureBaseServlet {
 
+    private final GrammarDB2 grammarDB;
+    private final GrammarFinder grFinder;
+
+    public Fanietycny(GrammarDB2 grammarDB, GrammarFinder grFinder) {
+        super("future/fanietycny.html");
+        this.grammarDB = grammarDB;
+        this.grFinder = grFinder;
+    }
+
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String word = req.getPathInfo().substring(1);
+    public List<Out> process(Map<String, String> params) {
+        String word = params.get("word");
         word = LanguageFactory.get("bel").getNormalizer().lightNormalized(word.trim(), ILanguage.INormalizer.PRESERVE_WILDCARDS);
         Pattern re = Pattern.compile(word.replace("+", "").replace("*", ".*").replace('?', '.'));
 
-        List<Out> result = ApplicationOther.instance.gr.getAllParadigms().parallelStream().flatMap(p -> {
+        return grammarDB.getAllParadigms().parallelStream().flatMap(p -> {
             List<Out> data = new ArrayList<>();
             for (Variant v : p.getVariant()) {
                 List<Form> forms = FormsReadyFilter.getAcceptedForms(FormsReadyFilter.MODE.SHOW, p, v);
@@ -48,11 +51,9 @@ public class Fanietycny extends FutureBaseServlet {
             }
             return data.stream();
         }).sequential().sorted().distinct().collect(Collectors.toList());
-
-        output("future/fanietycny.html", result, resp);
     }
 
-    public static class Out implements Comparable<Out> {
+    public class Out implements Comparable<Out> {
         private final String word;
 
         public Out(String word) {
@@ -64,11 +65,11 @@ public class Fanietycny extends FutureBaseServlet {
         }
 
         public String getIpa() throws Exception {
-            return new FanetykaText(ApplicationOther.instance.grFinder, word.replace('+', '´')).ipa;
+            return new FanetykaText(grFinder, word.replace('+', '´')).ipa;
         }
 
         public String getSkola() throws Exception {
-            return new FanetykaText(ApplicationOther.instance.grFinder, word.replace('+', '´')).skola;
+            return new FanetykaText(grFinder, word.replace('+', '´')).skola;
         }
 
         @Override

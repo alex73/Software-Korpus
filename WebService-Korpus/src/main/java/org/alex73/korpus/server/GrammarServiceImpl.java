@@ -1,32 +1,5 @@
 package org.alex73.korpus.server;
 
-import java.text.Collator;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.Spliterators;
-import java.util.TreeSet;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-
 import org.alex73.grammardb.FormsReadyFilter;
 import org.alex73.grammardb.SetUtils;
 import org.alex73.grammardb.StressUtils;
@@ -39,32 +12,36 @@ import org.alex73.korpus.server.data.GrammarInitial;
 import org.alex73.korpus.shared.GrammarSearchResult;
 import org.alex73.korpus.shared.LemmaInfo;
 
+import java.text.Collator;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 /**
  * Service for find by grammar database.
  */
-@Path("/grammar")
 public class GrammarServiceImpl {
 
-    public static Locale BE = new Locale("be");
+    public static Locale BE = Locale.of("be");
     public static Collator BEL = Collator.getInstance(BE);
 
     public static String dirPrefix = System.getProperty("KORPUS_DIR");
     static final ILanguage.INormalizer wordNormalizer = LanguageFactory.get("bel").getNormalizer();
 
-    @Context
-    HttpServletRequest request;
+    private final ApplicationKorpus app;
 
-    private ApplicationKorpus getApp() {
-        return ApplicationKorpus.instance;
+    public GrammarServiceImpl(ApplicationKorpus app) {
+        this.app = app;
     }
 
-    @Path("initial")
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public GrammarInitial getInitialData() throws Exception {
-        System.out.println("getInitialData from " + request.getRemoteAddr());
+    public GrammarInitial getInitialData(String remoteAddr) throws Exception {
+        System.out.println("getInitialData from " + remoteAddr);
         try {
-            return getApp().grammarInitial;
+            return app.grammarInitial;
         } catch (Exception ex) {
             System.err.println("getInitialData");
             ex.printStackTrace();
@@ -83,12 +60,8 @@ public class GrammarServiceImpl {
         public boolean fullDatabase;
     }
 
-    @Path("search")
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public GrammarSearchResult search(GrammarRequest rq) throws Exception {
-        System.out.println(">> Request from " + request.getRemoteAddr());
+    public GrammarSearchResult search(GrammarRequest rq, String remoteAddr) throws Exception {
+        System.out.println(">> Request from " + remoteAddr);
         System.out.println(">> Request: word=" + rq.word + " orderReverse=" + rq.orderReverse);
         try {
             ILanguage lang = LanguageFactory.get(rq.lang);
@@ -126,7 +99,7 @@ public class GrammarServiceImpl {
                 result.error = "Увядзіце слова для пошуку альбо удакладніце граматыку";
                 return result;
             }
-            WordsDetailsChecks check = WordsDetailsChecks.createForGrammarDB();
+            WordsDetailsChecks check = WordsDetailsChecks.createForGrammarDB(app.isAuthorsBlacklisted);
 
             ThreadLocal<Pattern> reGrammar = null, reOutputGrammar = null;
             if (rq.grammar != null && !rq.grammar.isEmpty()) {
@@ -233,7 +206,7 @@ public class GrammarServiceImpl {
         private int dataPos;
 
         public SearchWidlcards(ILanguage lang, ThreadLocal<Pattern> reWord, ThreadLocal<Pattern> reGrammar, boolean multiform, boolean fullDatabase,
-                ThreadLocal<Pattern> reOutputGrammar) {
+                               ThreadLocal<Pattern> reOutputGrammar) {
             super(Long.MAX_VALUE, 0);
             this.lang = lang;
             this.re = reWord;
@@ -241,7 +214,7 @@ public class GrammarServiceImpl {
             this.multiform = multiform;
             this.fullDatabase = fullDatabase;
             this.reOutputGrammar = reOutputGrammar;
-            data = getApp().gr.getAllParadigms();
+            data = app.grammarDb.getAllParadigms();
         }
 
         @Override
@@ -262,9 +235,9 @@ public class GrammarServiceImpl {
     }
 
     private Stream<LemmaInfo> searchExact(ILanguage lang, String word, ThreadLocal<Pattern> reGrammar, boolean multiform, boolean fullDatabase,
-            ThreadLocal<Pattern> reOutputGrammar) {
+                                          ThreadLocal<Pattern> reOutputGrammar) {
         String normWord = wordNormalizer.lightNormalized(word, ILanguage.INormalizer.PRESERVE_NONE);
-        Paradigm[] data = getApp().grFinder.getParadigms(normWord);
+        Paradigm[] data = app.grFinder.getParadigms(normWord);
         List<LemmaInfo> result = new ArrayList<>();
         for (Paradigm p : data) {
             createLemmaInfoFromParadigm(lang, p, s -> normWord.equals(wordNormalizer.lightNormalized(s, ILanguage.INormalizer.PRESERVE_NONE)), multiform,
@@ -274,7 +247,7 @@ public class GrammarServiceImpl {
     }
 
     private void createLemmaInfoFromParadigm(ILanguage lang, Paradigm p, Predicate<String> checkWord, boolean multiform, boolean fullDatabase,
-            ThreadLocal<Pattern> reOutputGrammar, ThreadLocal<Pattern> reGrammar, List<LemmaInfo> result) {
+                                             ThreadLocal<Pattern> reOutputGrammar, ThreadLocal<Pattern> reGrammar, List<LemmaInfo> result) {
         Set<String> found = new TreeSet<>();
         for (Variant v : p.getVariant()) {
             List<Form> forms = fullDatabase ? v.getForm() : FormsReadyFilter.getAcceptedForms(FormsReadyFilter.MODE.SHOW, p, v);
@@ -327,7 +300,7 @@ public class GrammarServiceImpl {
                 w.pdgId = p.getPdgId();
                 w.meaning = p.getMeaning();
                 w.output = StressUtils.combineAccute(f);
-                w.grammar = String.join(", ", lang.getTags().describe(tag, getApp().grammarInitial.skipGrammar.get(tag.charAt(0))));
+                w.grammar = String.join(", ", lang.getTags().describe(tag, app.grammarInitial.skipGrammar.get(tag.charAt(0))));
                 result.add(w);
             }
         } else {
@@ -335,17 +308,14 @@ public class GrammarServiceImpl {
             w.pdgId = p.getPdgId();
             w.meaning = p.getMeaning();
             w.output = StressUtils.combineAccute(output);
-            w.grammar = String.join(", ", lang.getTags().describe(tag, getApp().grammarInitial.skipGrammar.get(tag.charAt(0))));
+            w.grammar = String.join(", ", lang.getTags().describe(tag, app.grammarInitial.skipGrammar.get(tag.charAt(0))));
             result.add(w);
         }
     }
 
-    @Path("details/{id}")
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public LemmaInfo.LemmaParadigm getLemmaDetails(@PathParam("id") long pdgId) throws Exception {
+    public LemmaInfo.LemmaParadigm getLemmaDetails(long pdgId) throws Exception {
         try {
-            for (Paradigm p : getApp().gr.getAllParadigms()) {
+            for (Paradigm p : app.grammarDb.getAllParadigms()) {
                 if (p.getPdgId() == pdgId) {
                     return conv(p, false);
                 }
@@ -357,12 +327,9 @@ public class GrammarServiceImpl {
         return null;
     }
 
-    @Path("detailsFull/{id}")
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public LemmaInfo.LemmaParadigm getLemmaFullDetails(@PathParam("id") long pdgId) throws Exception {
+    public LemmaInfo.LemmaParadigm getLemmaFullDetails(long pdgId) throws Exception {
         try {
-            for (Paradigm p : getApp().gr.getAllParadigms()) {
+            for (Paradigm p : app.grammarDb.getAllParadigms()) {
                 if (p.getPdgId() == pdgId) {
                     return conv(p, true);
                 }
@@ -374,15 +341,12 @@ public class GrammarServiceImpl {
         return null;
     }
 
-    @Path("lemmas/{form}")
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public String[] getLemmasByForm(@PathParam("form") String form) throws Exception {
+    public String[] getLemmasByForm(String form) throws Exception {
         System.out.println(">> Find lemmas by form " + form);
         Set<String> result = Collections.synchronizedSet(new TreeSet<>());
         try {
             form = wordNormalizer.lightNormalized(form, ILanguage.INormalizer.PRESERVE_NONE);
-            for (Paradigm p : getApp().grFinder.getParadigms(form)) {
+            for (Paradigm p : app.grFinder.getParadigms(form)) {
                 for (Variant v : p.getVariant()) {
                     for (Form f : v.getForm()) {
                         if (wordNormalizer.lightNormalized(f.getValue(), ILanguage.INormalizer.PRESERVE_NONE).equals(form)) {
@@ -432,13 +396,13 @@ public class GrammarServiceImpl {
     }
 
     void createAuthorsList(String lemma, LemmaInfo.LemmaVariant rv) {
-        Set<String> origAuthors = getApp().authorsByLemmas.get(lemma);
+        Set<String> origAuthors = app.authorsByLemmas.get(lemma);
         if (origAuthors == null) {
             return;
         }
 
         Set<String> authors = new TreeSet<>(origAuthors);
-        for (LemmaInfo.Author author : getApp().authors) {
+        for (LemmaInfo.Author author : app.authors) {
             if (authors.remove(author.name)) {
                 rv.authors.add(author);
             }

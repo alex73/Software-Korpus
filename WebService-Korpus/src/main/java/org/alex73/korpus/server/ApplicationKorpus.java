@@ -1,60 +1,47 @@
 package org.alex73.korpus.server;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
-
-import javax.annotation.PreDestroy;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.javalin.config.RoutesConfig;
 import org.alex73.grammardb.GrammarDB2;
 import org.alex73.grammardb.GrammarFinder;
 import org.alex73.grammardb.SetUtils;
 import org.alex73.grammardb.structures.Variant;
 import org.alex73.grammardb.tags.IGrammarTags;
 import org.alex73.grammardb.tags.TagLetter;
-import org.alex73.korpus.base.GrammarDBUtils;
 import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.languages.DBTagsFactory.KeyValue;
 import org.alex73.korpus.languages.ILanguage;
 import org.alex73.korpus.languages.LanguageFactory;
+import org.alex73.korpus.server.data.ClusterParams;
 import org.alex73.korpus.server.data.GrammarInitial;
 import org.alex73.korpus.server.data.GrammarInitial.GrammarLetter;
 import org.alex73.korpus.server.data.InitialData;
 import org.alex73.korpus.shared.LemmaInfo;
 import org.alex73.korpus.utils.KorpusFileUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
-@ApplicationPath("/")
-public class ApplicationKorpus extends Application {
-    public String korpusCache;
-    public String grammarDb;
-    public String configDir;
-    public String[] languages;
+public class ApplicationKorpus {
+    private final String configDir;
+    public final String korpusCachePath;
+    private final String grammarDbDir;
+    public final String[] languages;
+    public final GrammarDB2 grammarDb;
+    public final GrammarFinder grFinder;
 
     private List<String> settings;
     private Properties stat;
     private List<TextInfo> textInfos;
-    public GrammarDB2 gr;
-    public GrammarFinder grFinder;
+
     public StaticGrammarFiller2 grFiller;
     public GrammarInitial grammarInitial;
     InitialData searchInitial;
@@ -64,66 +51,108 @@ public class ApplicationKorpus extends Application {
 
     public LuceneFilter processKorpus;
 
-    public static ApplicationKorpus instance;
+    public ApplicationKorpus(String configDir, String cachePath, String languages, String grammarDbDir, GrammarDB2 grammarDb, GrammarFinder grFinder) throws Exception {
+        this.configDir = configDir;
+        this.korpusCachePath = cachePath;
+        this.languages = languages.split(";");
+        this.grammarDbDir = grammarDbDir;
+        this.grammarDb = grammarDb;
+        this.grFinder = grFinder;
+        settings = Files.readAllLines(Paths.get(configDir + "/settings.ini"));
+        stat = loadSettings(this.korpusCachePath + "/stat.properties");
+        readTextInfos();
+        loadAuthors(configDir);
 
-    public ApplicationKorpus() {
-        instance = this;
+        grFiller = new StaticGrammarFiller2(grFinder);
+        processKorpus = new LuceneFilter(this.korpusCachePath, this.languages);
+        System.out.println("Lucene initialized for languages: " + Arrays.toString(this.languages));
 
-        System.out.println("Starting...");
-        try {
-            InitialContext context = new InitialContext();
-            Context xmlNode = (Context) context.lookup("java:comp/env");
-            korpusCache = (String) xmlNode.lookup("KORPUS_CACHE");
-            grammarDb = (String) xmlNode.lookup("GRAMMAR_DB");
-            configDir = (String) xmlNode.lookup("CONFIG_DIR");
-            String languagesLine = (String) xmlNode.lookup("KORPUS_LANGUAGES");
-            if (configDir == null) {
-                throw new Exception("CONFIG_DIR is not defined");
-            }
-            if (korpusCache == null) {
-                throw new Exception("KORPUS_CACHE is not defined");
-            }
-            if (grammarDb == null) {
-                throw new Exception("GRAMMAR_DB is not defined");
-            }
-            if (languagesLine == null) {
-                throw new Exception("KORPUS_LANGUAGES is not defined");
-            }
-            languages = languagesLine.split(";");
-            settings = Files.readAllLines(Paths.get(configDir + "/settings.ini"));
-            stat = loadSettings(korpusCache + "/stat.properties");
-            readTextInfos();
-            loadAuthors();
+        prepareInitialGrammar();
+        prepareInitialKorpus();
 
-            if (!grammarDb.isEmpty()) {
-                gr = GrammarDB2.initializeFromDir(grammarDb);
-                GrammarDBUtils.minimizeMemory(gr);
-            } else {
-                gr = GrammarDB2.empty();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                processKorpus.close();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            System.out.println("GrammarDB loaded with " + gr.getAllParadigms().size() + " paradigms. Used memory: " + getUsedMemory());
-            grFinder = new GrammarFinder(gr);
-            grFiller = new StaticGrammarFiller2(grFinder);
-            System.out.println("GrammarDB indexed. Used memory: " + getUsedMemory());
-            processKorpus = new LuceneFilter(korpusCache, languages);
-            System.out.println("Lucene initialized for languages: " + Arrays.toString(languages));
-
-            prepareInitialGrammar();
-            prepareInitialKorpus();
-            System.out.println("Initialization finished. Used memory: " + getUsedMemory());
-        } catch (Throwable ex) {
-            System.err.println("Startup error");
-            ex.printStackTrace();
-            throw new ExceptionInInitializerError(ex);
-        }
+        }));
     }
 
-    private String getUsedMemory() {
-        Runtime runtime = Runtime.getRuntime();
-        runtime.gc();
-        runtime.gc();
-        runtime.gc();
-        return Math.round((runtime.totalMemory() - runtime.freeMemory()) / 1024.0 / 1024.0) + "mb";
+    public void registerRoutes(String prefix, RoutesConfig routes) {
+        SearchServiceImpl searchService = new SearchServiceImpl(this);
+        GrammarServiceImpl grammarService = new GrammarServiceImpl(this);
+
+
+//            config.router.apiBuilder(() -> {
+//                // Register routes
+//            });
+
+
+//            routes.before(ctx -> {
+//                ctx.header("Access-Control-Allow-Origin", "*");
+//                ctx.header("Access-Control-Allow-Headers", "*");
+//                ctx.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+//            });
+//            routes.options("/*", ctx -> {
+//                ctx.status(200);
+//            });
+
+        // SearchServiceImpl routes
+        routes.get(prefix + "/korpus/initial", ctx -> {
+            ctx.json(searchService.getInitialData(ctx.ip()));
+        });
+
+        routes.get(prefix + "/korpus/freq/{subcorpus}", ctx -> {
+            String subcorpus = ctx.pathParam("subcorpus");
+            ctx.json(searchService.getFrequences(subcorpus, ctx.ip()));
+        });
+
+        routes.post(prefix + "/korpus/search", ctx -> {
+            SearchServiceImpl.SearchRequest rq = ctx.bodyAsClass(SearchServiceImpl.SearchRequest.class);
+            ctx.json(searchService.search(rq, ctx.ip()));
+        });
+
+        routes.post(prefix + "/korpus/searchTotalCount", ctx -> {
+            SearchServiceImpl.SearchRequest rq = ctx.bodyAsClass(SearchServiceImpl.SearchRequest.class);
+            ctx.json(searchService.searchTotalCount(rq, ctx.ip()));
+        });
+
+        routes.post(prefix + "/korpus/cluster", ctx -> {
+            ClusterParams rq = ctx.bodyAsClass(ClusterParams.class);
+            ctx.json(searchService.calculateClusters(rq, ctx.ip()));
+        });
+
+        routes.post(prefix + "/korpus/sentences", ctx -> {
+            SearchServiceImpl.SentencesRequest rq = ctx.bodyAsClass(SearchServiceImpl.SentencesRequest.class);
+            ctx.json(searchService.getSentences(rq));
+        });
+
+
+        // GrammarServiceImpl routes
+        routes.get(prefix + "/grammar/initial", ctx -> {
+            ctx.json(grammarService.getInitialData(ctx.ip()));
+        });
+
+        routes.post(prefix + "/grammar/search", ctx -> {
+            GrammarServiceImpl.GrammarRequest rq = ctx.bodyAsClass(GrammarServiceImpl.GrammarRequest.class);
+            ctx.json(grammarService.search(rq, ctx.ip()));
+        });
+
+        routes.get(prefix + "/grammar/details/{id}", ctx -> {
+            long id = Long.parseLong(ctx.pathParam("id"));
+            ctx.json(grammarService.getLemmaDetails(id));
+        });
+
+        routes.get(prefix + "/grammar/detailsFull/{id}", ctx -> {
+            long id = Long.parseLong(ctx.pathParam("id"));
+            ctx.json(grammarService.getLemmaFullDetails(id));
+        });
+
+        routes.get(prefix + "/grammar/lemmas/{form}", ctx -> {
+            String form = ctx.pathParam("form");
+            ctx.json(grammarService.getLemmasByForm(form));
+        });
     }
 
     void prepareInitialGrammar() throws Exception {
@@ -144,7 +173,7 @@ public class ApplicationKorpus extends Application {
             }
         }
         grammarInitial.slouniki = new ArrayList<>();
-        for (String d : Files.readAllLines(Paths.get(grammarDb + "/slouniki.list"))) {
+        for (String d : Files.readAllLines(Paths.get(grammarDbDir + "/slouniki.list"))) {
             GrammarInitial.GrammarDict dict = new GrammarInitial.GrammarDict();
             int p = d.indexOf('=');
             if (p < 0 || !d.substring(0, p).matches("[a-z0-9]+")) {
@@ -164,7 +193,7 @@ public class ApplicationKorpus extends Application {
             grammarInitial.stat.add(gs);
             grStats.put(li.letter, gs);
         }
-        gr.getAllParadigms().parallelStream().forEach(p -> {
+        grammarDb.getAllParadigms().parallelStream().forEach(p -> {
             int formsInParadigm = p.getVariant().stream().mapToInt(v -> v.getForm().size()).sum();
             synchronized (grStatTotal) {
                 grStatTotal.paradigmCount++;
@@ -243,45 +272,45 @@ public class ApplicationKorpus extends Application {
             s.words = Long.parseLong(stat.getProperty("words." + k.key, "0"));
             searchInitial.stat.add(s);
             switch (k.key) {
-            case "teksty":
-                searchInitial.styleGenresParts.stream().map(st -> st.replaceAll("/.+", "")).distinct().forEach(st -> {
-                    InitialData.Stat s2 = new InitialData.Stat();
-                    s2.name = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + st;
-                    s2.texts = Integer.parseInt(stat.getProperty("texts." + k.key + "." + st, "0"));
-                    s2.words = Integer.parseInt(stat.getProperty("words." + k.key + "." + st, "0"));
-                    searchInitial.stat.add(s2);
-                });
-                break;
-            case "sajty":
-                Arrays.asList(stat.getProperty("sources.sajty", "").split(";")).forEach(sa -> {
-                    InitialData.Stat s2 = new InitialData.Stat();
-                    s2.name = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + sa;
-                    s2.texts = Integer.parseInt(stat.getProperty("texts." + k.key + "." + sa, "0"));
-                    s2.words = Integer.parseInt(stat.getProperty("words." + k.key + "." + sa, "0"));
-                    searchInitial.stat.add(s2);
-                });
-                break;
-            case "nierazabranaje":
-                Arrays.asList(stat.getProperty("sources.nierazabranaje", "").split(";")).forEach(sa -> {
-                    InitialData.Stat s2 = new InitialData.Stat();
-                    s2.name = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + sa;
-                    s2.texts = Integer.parseInt(stat.getProperty("texts." + k.key + "." + sa, "0"));
-                    s2.words = Integer.parseInt(stat.getProperty("words." + k.key + "." + sa, "0"));
-                    searchInitial.stat.add(s2);
-                });
-                break;
+                case "teksty":
+                    searchInitial.styleGenresParts.stream().map(st -> st.replaceAll("/.+", "")).distinct().forEach(st -> {
+                        InitialData.Stat s2 = new InitialData.Stat();
+                        s2.name = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + st;
+                        s2.texts = Integer.parseInt(stat.getProperty("texts." + k.key + "." + st, "0"));
+                        s2.words = Integer.parseInt(stat.getProperty("words." + k.key + "." + st, "0"));
+                        searchInitial.stat.add(s2);
+                    });
+                    break;
+                case "sajty":
+                    Arrays.asList(stat.getProperty("sources.sajty", "").split(";")).forEach(sa -> {
+                        InitialData.Stat s2 = new InitialData.Stat();
+                        s2.name = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + sa;
+                        s2.texts = Integer.parseInt(stat.getProperty("texts." + k.key + "." + sa, "0"));
+                        s2.words = Integer.parseInt(stat.getProperty("words." + k.key + "." + sa, "0"));
+                        searchInitial.stat.add(s2);
+                    });
+                    break;
+                case "nierazabranaje":
+                    Arrays.asList(stat.getProperty("sources.nierazabranaje", "").split(";")).forEach(sa -> {
+                        InitialData.Stat s2 = new InitialData.Stat();
+                        s2.name = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + sa;
+                        s2.texts = Integer.parseInt(stat.getProperty("texts." + k.key + "." + sa, "0"));
+                        s2.words = Integer.parseInt(stat.getProperty("words." + k.key + "." + sa, "0"));
+                        searchInitial.stat.add(s2);
+                    });
+                    break;
             }
         }
     }
 
     protected void readTextInfos() throws Exception {
         textInfos = new ArrayList<>();
-        for (String s : KorpusFileUtils.readGzip(Paths.get(korpusCache + "/texts.jsons.gz"))) {
+        for (String s : KorpusFileUtils.readGzip(Paths.get(korpusCachePath + "/texts.jsons.gz"))) {
             textInfos.add(new ObjectMapper().readValue(s, TextInfo.class));
         }
 
         authorsByLemmas = new HashMap<>();
-        KorpusFileUtils.readGzip(Paths.get(korpusCache + "/lemma-authors.list.gz")).forEach(s -> {
+        KorpusFileUtils.readGzip(Paths.get(korpusCachePath + "/lemma-authors.list.gz")).forEach(s -> {
             int p = s.indexOf('=');
             if (p < 0) {
                 throw new RuntimeException("Wrong line: " + s);
@@ -299,7 +328,7 @@ public class ApplicationKorpus extends Application {
         });
     }
 
-    protected void loadAuthors() throws Exception {
+    protected void loadAuthors(String configDir) throws Exception {
         Set<String> lemmasAuthors = authorsByLemmas.values().stream().flatMap(a -> a.stream()).collect(Collectors.toSet());
         Set<String> uniqAuthors = new HashSet<>();
         authors = new ArrayList<>();
@@ -330,7 +359,7 @@ public class ApplicationKorpus extends Application {
             if (eq < 0) {
                 throw new RuntimeException();
             }
-            String key=line.substring(0,eq).trim();
+            String key = line.substring(0, eq).trim();
             if (!"authors.blacklist".equals(key)) {
                 continue;
             }
@@ -346,7 +375,7 @@ public class ApplicationKorpus extends Application {
         return textInfos.get(pos);
     }
 
-    public boolean isAuthorsBlacklisted(String[] authors) {
+    public Predicate<String[]> isAuthorsBlacklisted = authors -> {
         if (authors == null) {
             return false;
         }
@@ -356,20 +385,7 @@ public class ApplicationKorpus extends Application {
             }
         }
         return false;
-    }
-
-    @PreDestroy
-    public void shutdown() {
-        System.out.println("shutdown");
-        try {
-            if (processKorpus != null) {
-                processKorpus.close();
-            }
-        } catch (Exception ex) {
-            System.err.println("shutdown");
-            ex.printStackTrace();
-        }
-    }
+    };
 
     private Map<Character, GrammarLetter> addGrammar(TagLetter letters) {
         if (letters.letters.isEmpty()) {
@@ -398,7 +414,7 @@ public class ApplicationKorpus extends Application {
         searchInitial.styleGenresParts = new ArrayList<>();
         searchInitial.styleGenres = new TreeMap<>();
         try (BufferedReader rd = new BufferedReader(
-                new InputStreamReader(getClass().getClassLoader().getResourceAsStream("/styleGenres.txt"), StandardCharsets.UTF_8))) {
+                new InputStreamReader(ApplicationKorpus.class.getResourceAsStream("/styleGenres.txt"), StandardCharsets.UTF_8))) {
             String s;
             while ((s = rd.readLine()) != null) {
                 s = s.trim();

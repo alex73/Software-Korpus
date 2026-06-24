@@ -1,46 +1,12 @@
 package org.alex73.korpus.server;
 
-import java.io.FileNotFoundException;
-import java.nio.file.Paths;
-import java.text.Collator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-
 import org.alex73.grammardb.structures.Paradigm;
 import org.alex73.grammardb.structures.Variant;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.languages.ILanguage;
 import org.alex73.korpus.languages.LanguageFactory;
-import org.alex73.korpus.server.data.ChainRequest;
-import org.alex73.korpus.server.data.ClusterParams;
-import org.alex73.korpus.server.data.ClusterResults;
-import org.alex73.korpus.server.data.FreqSpisResult;
-import org.alex73.korpus.server.data.InitialData;
-import org.alex73.korpus.server.data.LatestMark;
-import org.alex73.korpus.server.data.SearchParams;
-import org.alex73.korpus.server.data.SearchResult;
-import org.alex73.korpus.server.data.SearchResults;
-import org.alex73.korpus.server.data.SearchTotalResult;
-import org.alex73.korpus.server.data.WordRequest;
+import org.alex73.korpus.server.data.*;
 import org.alex73.korpus.server.data.WordRequest.WordMode;
-import org.alex73.korpus.server.data.WordResult;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
 import org.alex73.korpus.server.text.BinaryParagraphReader;
 import org.alex73.korpus.text.structure.corpus.Paragraph;
@@ -48,42 +14,43 @@ import org.alex73.korpus.utils.KorpusFileUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.BooleanQuery;
 
-@Path("/korpus")
+import java.io.FileNotFoundException;
+import java.nio.file.Paths;
+import java.text.Collator;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
 public class SearchServiceImpl {
     private final static Logger LOGGER = Logger.getLogger(SearchServiceImpl.class.getName());
-    private static final Collator BE = Collator.getInstance(new Locale("be"));
+    private static final Collator BE = Collator.getInstance(Locale.of("be"));
 
     private static final Map<String, List<FreqSpisResult>> freqsBySubcorpus = new ConcurrentHashMap<>();
 
-    @Context
-    HttpServletRequest request;
+    private final ApplicationKorpus app;
 
-    private ApplicationKorpus getApp() {
-        return ApplicationKorpus.instance;
+    public SearchServiceImpl(ApplicationKorpus app) {
+        this.app = app;
     }
 
-    @Path("initial")
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public InitialData getInitialData() throws Exception {
-        LOGGER.info("getInitialData from " + request.getRemoteAddr());
+    public InitialData getInitialData(String remoteAddr) throws Exception {
+        LOGGER.info("getInitialData from " + remoteAddr);
         try {
-            return getApp().searchInitial;
+            return app.searchInitial;
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "getInitialData", ex);
             throw ex;
         }
     }
 
-    @Path("freq/{subcorpus}")
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<FreqSpisResult> getFrequences(@PathParam("subcorpus") String subcorpus) throws Exception {
-        LOGGER.info("getFrequences from " + request.getRemoteAddr());
+    public List<FreqSpisResult> getFrequences(String subcorpus, String remoteAddr) throws Exception {
+        LOGGER.info("getFrequences from " + remoteAddr);
 
         List<FreqSpisResult> result = freqsBySubcorpus.computeIfAbsent(subcorpus, sc -> {
             try {
-                List<String> data = KorpusFileUtils.readZip(Paths.get(getApp().korpusCache).resolve("stat-freq.zip"), "forms/freq." + sc + ".tab");
+                List<String> data = KorpusFileUtils.readZip(Paths.get(app.korpusCachePath).resolve("stat-freq.zip"), "forms/freq." + sc + ".tab");
                 return data.stream().map(s -> {
                     int p = s.indexOf('=');
                     FreqSpisResult r = new FreqSpisResult();
@@ -111,12 +78,8 @@ public class SearchServiceImpl {
         public LatestMark latest;
     }
 
-    @Path("search")
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public SearchResult search(SearchRequest rq) throws Exception {
-        LOGGER.info(">> Request from " + request.getRemoteAddr());
+    public SearchResult search(SearchRequest rq, String remoteAddr) throws Exception {
+        LOGGER.info(">> Request from " + remoteAddr);
         try {
             ILanguage lang = LanguageFactory.get(rq.params.lang);
             SearchParams params = rq.params;
@@ -127,7 +90,7 @@ public class SearchServiceImpl {
             params.chains.forEach(ch -> ch.words.forEach(w -> findAllLemmas(lang, w)));
 
             BooleanQuery.Builder query = new BooleanQuery.Builder();
-            LuceneFilter process = getApp().processKorpus;
+            LuceneFilter process = app.processKorpus;
             process.addKorpusTextFilter(rq.params.lang, query, params.textStandard);
             params.chains.forEach(ch -> ch.words.forEach(w -> process.addWordFilter(rq.params.lang, query, w)));
 
@@ -153,12 +116,8 @@ public class SearchServiceImpl {
         }
     }
 
-    @Path("searchTotalCount")
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public SearchTotalResult searchTotalCount(SearchRequest rq) throws Exception {
-        LOGGER.info(">> Request total count from " + request.getRemoteAddr());
+    public SearchTotalResult searchTotalCount(SearchRequest rq, String remoteAddr) throws Exception {
+        LOGGER.info(">> Request total count from " + remoteAddr);
         try {
             ILanguage lang = LanguageFactory.get(rq.params.lang);
             SearchParams params = rq.params;
@@ -167,7 +126,7 @@ public class SearchServiceImpl {
             params.chains.forEach(ch -> ch.words.forEach(w -> findAllLemmas(lang, w)));
 
             BooleanQuery.Builder query = new BooleanQuery.Builder();
-            LuceneFilter process = getApp().processKorpus;
+            LuceneFilter process = app.processKorpus;
             process.addKorpusTextFilter(rq.params.lang, query, params.textStandard);
             params.chains.forEach(ch -> ch.words.forEach(w -> process.addWordFilter(rq.params.lang, query, w)));
 
@@ -187,12 +146,8 @@ public class SearchServiceImpl {
         }
     }
 
-    @Path("cluster")
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public ClusterResults calculateClusters(ClusterParams params) throws Exception {
-        LOGGER.info(">> Request clusters from " + request.getRemoteAddr());
+    public ClusterResults calculateClusters(ClusterParams params, String remoteAddr) throws Exception {
+        LOGGER.info(">> Request clusters from " + remoteAddr);
         try {
             ILanguage lang = LanguageFactory.get(params.lang);
             checkWord(lang, params.word);
@@ -202,8 +157,8 @@ public class SearchServiceImpl {
             }
             findAllLemmas(lang, params.word);
 
-            LuceneFilter corpusFilter = getApp().processKorpus;
-            ClusterResults res = new ClusterServiceImpl(this).calc(params, corpusFilter);
+            LuceneFilter corpusFilter = app.processKorpus;
+            ClusterResults res = new ClusterServiceImpl(this, app).calc(params, corpusFilter);
             LOGGER.info("<< Result clusters");
             return res;
         } catch (ServerError ex) {
@@ -221,20 +176,16 @@ public class SearchServiceImpl {
         public int[] list;
     }
 
-    @Path("sentences")
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     public SearchResults[] getSentences(SentencesRequest rq) throws Exception {
         ILanguage lang = LanguageFactory.get(rq.params.lang);
         SearchParams params = rq.params;
         int[] list = rq.list;
         params.chains.forEach(ch -> ch.words.forEach(w -> findAllLemmas(lang, w)));
-        WordsDetailsChecks checks = WordsDetailsChecks.createForSearch(lang, params.chains, params.chainsInParagraph, getApp().grFiller);
+        WordsDetailsChecks checks = WordsDetailsChecks.createForSearch(app.isAuthorsBlacklisted, lang, params.chains, params.chainsInParagraph, app.grFiller);
         try {
             SearchResults[] result = new SearchResults[list.length];
             for (int i = 0; i < list.length; i++) {
-                Document doc = getApp().processKorpus.getSentence(list[i]);
+                Document doc = app.processKorpus.getSentence(list[i]);
                 result[i] = new SearchResults();
                 result[i].docId = list[i];
                 result[i].doc = restoreTextInfo(doc);
@@ -252,7 +203,7 @@ public class SearchServiceImpl {
     }
 
     protected Paragraph[] restoreText(Document doc) throws Exception {
-        LuceneFilter process = getApp().processKorpus;
+        LuceneFilter process = app.processKorpus;
 
         byte[] xml = process.getXML(doc);
 
@@ -269,8 +220,8 @@ public class SearchServiceImpl {
     }
 
     protected TextInfo restoreTextInfo(Document doc) throws Exception {
-        int textID = getApp().processKorpus.getTextID(doc);
-        return getApp().getTextInfo(textID);
+        int textID = app.processKorpus.getTextID(doc);
+        return app.getTextInfo(textID);
     }
 
     private void findAllLemmas(ILanguage lang, WordRequest w) {
@@ -279,7 +230,7 @@ public class SearchServiceImpl {
         }
         w.word = lang.getNormalizer().lightNormalized(w.word, ILanguage.INormalizer.PRESERVE_NONE);
         Set<String> forms = new TreeSet<>();
-        Paradigm[] ps = getApp().grFinder.getParadigms(w.word);
+        Paradigm[] ps = app.grFinder.getParadigms(w.word);
         // user can enter lemma of variant, but we need to find paradigm
         for (Paradigm p : ps) {
             for (Variant v : p.getVariant()) {
@@ -334,13 +285,13 @@ public class SearchServiceImpl {
     }
 
     private LuceneDriverRead.DocFilter<Integer> filterFoundDocumentsByChains(SearchParams params, ILanguage lang) {
-        WordsDetailsChecks checks = WordsDetailsChecks.createForSearch(lang, params.chains, params.chainsInParagraph, getApp().grFiller);
+        WordsDetailsChecks checks = WordsDetailsChecks.createForSearch(app.isAuthorsBlacklisted,lang, params.chains, params.chainsInParagraph, app.grFiller);
         return new LuceneDriverRead.DocFilter<>() {
 
             public Integer processDoc(int docID) {
                 try {
-                    Document doc = getApp().processKorpus.getSentence(docID);
-                    TextInfo textInfo = getApp().getTextInfo(getApp().processKorpus.getTextID(doc));
+                    Document doc = app.processKorpus.getSentence(docID);
+                    TextInfo textInfo = app.getTextInfo(app.processKorpus.getTextID(doc));
                     Paragraph[] text = restoreText(doc);
                     return checks.isAllowed(textInfo, text) ? docID : null;
                 } catch (Exception ex) {

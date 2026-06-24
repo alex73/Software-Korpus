@@ -25,9 +25,11 @@ public class ClusterServiceImpl {
     private final SearchServiceImpl parent;
     private ClusterParams params;
     private final Map<String, Result> results = new HashMap<>();
+    private final ApplicationKorpus app;
 
-    public ClusterServiceImpl(SearchServiceImpl parent) {
+    public ClusterServiceImpl(SearchServiceImpl parent, ApplicationKorpus app) {
         this.parent = parent;
+        this.app = app;
     }
 
     public ClusterResults calc(ClusterParams params, LuceneFilter process) throws Exception {
@@ -42,7 +44,7 @@ public class ClusterServiceImpl {
 
         ChainRequest chain = new ChainRequest();
         chain.words = List.of(w);
-        WordsDetailsChecks check = WordsDetailsChecks.createForCluster(lang, chain, ApplicationKorpus.instance.grFiller);
+        WordsDetailsChecks check = WordsDetailsChecks.createForCluster(app.isAuthorsBlacklisted,lang, chain, app.grFiller);
 
         process.search(query.build(), SEARCH_BLOCK, new LuceneDriverRead.DocFilter<Void>() {
             @Override
@@ -57,7 +59,7 @@ public class ClusterServiceImpl {
 
     private void process(WordsDetailsChecks check, int docID, LuceneFilter process) throws Exception {
         Document doc = process.getSentence(docID);
-        TextInfo textInfo = ApplicationKorpus.instance.getTextInfo(process.getTextID(doc));
+        TextInfo textInfo = app.getTextInfo(process.getTextID(doc));
         Paragraph[] ps = parent.restoreText(doc);
 
         for (int pi = 0; pi < ps.length; pi++) {
