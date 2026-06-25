@@ -221,7 +221,7 @@ public class SearchServiceImpl {
 
     protected TextInfo restoreTextInfo(Document doc) throws Exception {
         int textID = app.processKorpus.getTextID(doc);
-        return app.getTextInfo(textID);
+        return app.infos.textInfos.get(textID);
     }
 
     private void findAllLemmas(ILanguage lang, WordRequest w) {
@@ -291,7 +291,7 @@ public class SearchServiceImpl {
             public Integer processDoc(int docID) {
                 try {
                     Document doc = app.processKorpus.getSentence(docID);
-                    TextInfo textInfo = app.getTextInfo(app.processKorpus.getTextID(doc));
+                    TextInfo textInfo = app.infos.textInfos.get(app.processKorpus.getTextID(doc));
                     Paragraph[] text = restoreText(doc);
                     return checks.isAllowed(textInfo, text) ? docID : null;
                 } catch (Exception ex) {

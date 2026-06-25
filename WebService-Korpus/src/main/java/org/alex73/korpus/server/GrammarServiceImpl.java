@@ -396,7 +396,7 @@ public class GrammarServiceImpl {
     }
 
     void createAuthorsList(String lemma, LemmaInfo.LemmaVariant rv) {
-        Set<String> origAuthors = app.authorsByLemmas.get(lemma);
+        Set<String> origAuthors = app.infos.authorsByLemmas.get(lemma);
         if (origAuthors == null) {
             return;
         }

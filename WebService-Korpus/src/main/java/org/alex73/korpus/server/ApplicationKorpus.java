@@ -17,6 +17,7 @@ import org.alex73.korpus.server.data.ClusterParams;
 import org.alex73.korpus.server.data.GrammarInitial;
 import org.alex73.korpus.server.data.GrammarInitial.GrammarLetter;
 import org.alex73.korpus.server.data.InitialData;
+import org.alex73.korpus.server.engine.TextInfos;
 import org.alex73.korpus.shared.LemmaInfo;
 import org.alex73.korpus.utils.KorpusFileUtils;
 
@@ -40,12 +41,11 @@ public class ApplicationKorpus {
 
     private List<String> settings;
     private Properties stat;
-    private List<TextInfo> textInfos;
+    public final TextInfos infos;
 
     public StaticGrammarFiller2 grFiller;
     public GrammarInitial grammarInitial;
     InitialData searchInitial;
-    public Map<String, Set<String>> authorsByLemmas;
     public List<LemmaInfo.Author> authors;
     private Set<String> blacklistedAuthors;
 
@@ -60,7 +60,7 @@ public class ApplicationKorpus {
         this.grFinder = grFinder;
         settings = Files.readAllLines(Paths.get(configDir + "/settings.ini"));
         stat = loadSettings(this.korpusCachePath + "/stat.properties");
-        readTextInfos();
+        infos = new TextInfos(this.korpusCachePath + "/info.mapdb");
         loadAuthors(configDir);
 
         grFiller = new StaticGrammarFiller2(grFinder);
@@ -303,33 +303,8 @@ public class ApplicationKorpus {
         }
     }
 
-    protected void readTextInfos() throws Exception {
-        textInfos = new ArrayList<>();
-        for (String s : KorpusFileUtils.readGzip(Paths.get(korpusCachePath + "/texts.jsons.gz"))) {
-            textInfos.add(new ObjectMapper().readValue(s, TextInfo.class));
-        }
-
-        authorsByLemmas = new HashMap<>();
-        KorpusFileUtils.readGzip(Paths.get(korpusCachePath + "/lemma-authors.list.gz")).forEach(s -> {
-            int p = s.indexOf('=');
-            if (p < 0) {
-                throw new RuntimeException("Wrong line: " + s);
-            }
-            String lemma = s.substring(0, p);
-            String[] authorsList = s.substring(p + 1).split(";");
-            Set<String> authors = authorsByLemmas.get(lemma);
-            if (authors == null) {
-                authors = new HashSet<>();
-                authorsByLemmas.put(lemma, authors);
-            }
-            for (String a : authorsList) {
-                authors.add(a);
-            }
-        });
-    }
-
     protected void loadAuthors(String configDir) throws Exception {
-        Set<String> lemmasAuthors = authorsByLemmas.values().stream().flatMap(a -> a.stream()).collect(Collectors.toSet());
+        Set<String> lemmasAuthors = infos.authorsByLemmas.values().stream().flatMap(a -> a.stream()).collect(Collectors.toSet());
         Set<String> uniqAuthors = new HashSet<>();
         authors = new ArrayList<>();
         for (String s : Files.readAllLines(Paths.get(configDir + "/authors-groups.list"))) {
@@ -369,10 +344,6 @@ public class ApplicationKorpus {
                 blacklistedAuthors.add(a);
             }
         }
-    }
-
-    public TextInfo getTextInfo(int pos) {
-        return textInfos.get(pos);
     }
 
     public Predicate<String[]> isAuthorsBlacklisted = authors -> {

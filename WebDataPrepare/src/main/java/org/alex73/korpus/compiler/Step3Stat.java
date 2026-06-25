@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.ZipOutputStream;
 
@@ -158,11 +159,13 @@ public class Step3Stat {
         }
     }
 
-    public static void finish(Path outputDir) throws Exception {
+    public static void finish(Path outputDir, ConcurrentMap<String, Set<String>> authorsByLemmasOutput) throws Exception {
         for (WordsStat ws : wordsStatsBySubcorpus.values()) {
             ws.closeFile();
         }
-        StatWriting.write(textStatInfos, authorsByLemmas, outputDir);
+        StatWriting.write(textStatInfos, outputDir);
+
+        authorsByLemmasOutput.putAll(authorsByLemmas);
     }
 
     public static void mergeToZip(ZipOutputStream zip) throws Exception {
@@ -175,7 +178,7 @@ public class Step3Stat {
             runs.add(() -> StatWriting.mergeCounts(List.of(getTempFreqFile(subcorpus)), zip, "forms/freq." + subcorpus + ".tab"));
         }
 
-        runs.parallelStream().forEach(r -> r.run());
+        runs.stream().forEach(r -> r.run());
     }
 
     public static void removeTemp() throws IOException {

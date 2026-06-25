@@ -5,17 +5,21 @@ import org.alex73.grammardb.structures.Form;
 import org.alex73.grammardb.structures.Paradigm;
 import org.alex73.grammardb.structures.Variant;
 
+import java.util.ArrayList;
+
 public class GrammarDBUtils {
     /**
      * Minimizes memory usage for strings in GrammarDB.
      */
     public static void minimizeMemory(GrammarDB2 db) {
         for (Paradigm p : db.getAllParadigms()) {
+            ((ArrayList<Variant>) p.getVariant()).trimToSize();
             p.setLemma(p.getLemma() == null ? null : p.getLemma().intern());
             p.setTag(p.getTag() == null ? null : p.getTag().intern());
             p.setTheme(p.getTheme() == null ? null : p.getTheme().intern());
             p.setMeaning(p.getMeaning() == null ? null : p.getMeaning().intern());
             for (Variant v : p.getVariant()) {
+                ((ArrayList<Form>) v.getForm()).trimToSize();
                 v.setPravapis(v.getPravapis() == null ? null : v.getPravapis().intern());
                 v.setSlouniki(v.getSlouniki() == null ? null : v.getSlouniki().intern());
                 v.setLemma(v.getLemma() == null ? null : v.getLemma().intern());

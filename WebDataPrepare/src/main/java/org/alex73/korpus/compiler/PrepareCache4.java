@@ -5,18 +5,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -31,6 +21,9 @@ import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.text.parser.IProcess;
 import org.alex73.korpus.utils.KorpusFileUtils;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
+import org.mapdb.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,10 +96,16 @@ public class PrepareCache4 {
         // textsCount);
         parseZips();
 
-        writeTextHeaders();
+        DB outputTextsDb = DBMaker.fileDB(OUTPUT.resolve("info.mapdb").toFile()).fileMmapEnable().make();
+        writeTextHeaders(outputTextsDb.hashMap("textInfos", Serializer.INTEGER, Serializer.ELSA).createOrOpen());
 
         LOG.info("Finishing stats...");
-        Step3Stat.finish(OUTPUT);
+        Step3Stat.finish(OUTPUT, outputTextsDb.hashMap("authorsByLemmas", Serializer.STRING, Serializer.ELSA).createOrOpen());
+
+        outputTextsDb.commit();
+        outputTextsDb.getStore().compact();
+        outputTextsDb.close();
+
         LOG.info("Finishing lucene...");
         Step5WriteLucene.finish(); // finish or shutdown ?
         long af = System.currentTimeMillis();
@@ -231,6 +230,7 @@ public class PrepareCache4 {
         }
     }
 
+    @Deprecated
     static void writeTextHeaders() throws Exception {
         Gson gson = new Gson();
         KorpusFileUtils.writeGzip(OUTPUT.resolve("texts.jsons.gz"), textInfos.stream().map(ti -> {
@@ -240,6 +240,12 @@ public class PrepareCache4 {
                 throw new RuntimeException(ex);
             }
         }));
+    }
+
+    static void writeTextHeaders(ConcurrentMap<Integer, TextInfo> ti) throws Exception {
+        for(int i=0;i<textInfos.size();i++) {
+            ti.put(i, textInfos.get(i));
+        }
     }
 
     static String getKey(String key, String[] args, String description) {

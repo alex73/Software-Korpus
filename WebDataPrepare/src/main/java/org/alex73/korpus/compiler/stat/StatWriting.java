@@ -14,18 +14,23 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.zip.ZipOutputStream;
 
+import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.compiler.Step3Stat.TextStatInfo;
 import org.alex73.korpus.utils.KorpusFileUtils;
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
+import org.mapdb.Serializer;
 import org.xerial.snappy.SnappyInputStream;
 
 public class StatWriting {
     private static final Collator BE = Collator.getInstance(Locale.of("be"));
 
-    public static void write(Map<String, TextStatInfo> textStatInfos, Map<String, Set<String>> authorsByLemmas, Path dir) throws Exception {
+    public static void write(Map<String, TextStatInfo> textStatInfos, Path dir) throws Exception {
         List<String> stat = new ArrayList<>();
         for (Map.Entry<String, TextStatInfo> en : textStatInfos.entrySet()) {
             if (!en.getValue().authors.isEmpty()) {
@@ -41,10 +46,10 @@ public class StatWriting {
         }
         Files.write(dir.resolve("stat.properties"), stat);
 
-        List<String> lemmas = new ArrayList<>(authorsByLemmas.keySet());
-        Collections.sort(lemmas, BE);
-
-        KorpusFileUtils.writeGzip(dir.resolve("lemma-authors.list.gz"), lemmas.stream().map(le -> le + '=' + String.join(";", authorsByLemmas.get(le))));
+//        List<String> lemmas = new ArrayList<>(authorsByLemmas.keySet());
+//        Collections.sort(lemmas, BE);
+//
+//        KorpusFileUtils.writeGzip(dir.resolve("lemma-authors.list.gz"), lemmas.stream().map(le -> le + '=' + String.join(";", authorsByLemmas.get(le))));
     }
 
     public static void mergeCounts(Collection<Path> snappyFiles, ZipOutputStream out, String entryName) {
