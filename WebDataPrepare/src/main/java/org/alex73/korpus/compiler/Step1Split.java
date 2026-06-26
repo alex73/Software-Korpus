@@ -1,13 +1,6 @@
 package org.alex73.korpus.compiler;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.google.gson.Gson;
 import org.alex73.korpus.base.Ctf;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.languages.LanguageFactory;
@@ -16,16 +9,21 @@ import org.alex73.korpus.text.parser.Splitter3;
 import org.alex73.korpus.text.structure.corpus.Paragraph;
 import org.alex73.korpus.text.structure.corpus.Sentence;
 import org.alex73.korpus.text.structure.corpus.Word;
-import org.alex73.korpus.text.structure.files.ITextLineElement;
-import org.alex73.korpus.text.structure.files.InlineTag;
-import org.alex73.korpus.text.structure.files.LongTagItem;
-import org.alex73.korpus.text.structure.files.SentenceSeparatorItem;
-import org.alex73.korpus.text.structure.files.TailItem;
-import org.alex73.korpus.text.structure.files.TextLine;
-import org.alex73.korpus.text.structure.files.WordItem;
+import org.alex73.korpus.text.structure.files.*;
 
-import com.google.gson.Gson;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+/**
+ * Першы этап кампіляцыі корпуса.
+ * Клас адказвае за дэсерыялізацыю ўваходных даных (фармат CTF) і сегментацыю тэксту:
+ * падзел на абзацы, сказы і асобныя элементы (словы, пунктуацыю, тэгі).
+ */
 public class Step1Split {
 
     private static Map<String, ThreadLocal<Splitter3>> splitters;

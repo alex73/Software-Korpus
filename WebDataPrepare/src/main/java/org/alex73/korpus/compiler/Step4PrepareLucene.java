@@ -1,9 +1,5 @@
 package org.alex73.korpus.compiler;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeSet;
-
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.base.TextInfo.Subtext;
 import org.alex73.korpus.languages.ILanguage;
@@ -13,6 +9,15 @@ import org.alex73.korpus.text.structure.corpus.Paragraph;
 import org.alex73.korpus.text.structure.corpus.Sentence;
 import org.alex73.korpus.text.structure.corpus.Word;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
+
+/**
+ * Чацвёрты этап кампіляцыі корпуса.
+ * Падрыхтоўка даных для індэксацыі ў Lucene: здабыццё пошукавых токенаў (нармалізаваных слоў),
+ * граматычных тэгаў і пераўтварэнне структур тэксту ў бінарны фармат для захоўвання ў індэксе.
+ */
 public class Step4PrepareLucene {
     public static MessageLuceneWrite run(MessageParsedText text) throws Exception {
         BinaryParagraphWriter pwr = new BinaryParagraphWriter();

@@ -17,6 +17,7 @@ import java.util.zip.ZipOutputStream;
 
 import org.alex73.grammardb.GrammarDB2;
 import org.alex73.grammardb.GrammarFinder;
+import org.alex73.korpus.base.GrammarDBUtils;
 import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.text.parser.IProcess;
@@ -109,7 +110,7 @@ public class PrepareCache4 {
         LOG.info("Finishing lucene...");
         Step5WriteLucene.finish(); // finish or shutdown ?
         long af = System.currentTimeMillis();
-        LOG.info("Process time: " + ((af - be) / 1000 / 60) + "min");
+        LOG.info("Process time: " + ((af - be) / 1000) + " seconds");
 
         LOG.info("Merging Lucene and words counts...");
         if (writeToLucene) {
@@ -154,6 +155,7 @@ public class PrepareCache4 {
             Thread.sleep(1000);
             gr = GrammarDB2.empty();
         }
+        GrammarDBUtils.minimizeMemory(gr);
         grFinder = new GrammarFinder(gr);
         grFiller = new StaticGrammarFiller2(grFinder);
     }

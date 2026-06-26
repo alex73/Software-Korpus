@@ -1,17 +1,5 @@
 package org.alex73.korpus.compiler;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
-
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.compiler.MessageLuceneWrite.LuceneParagraph;
 import org.alex73.korpus.server.engine.LuceneFields;
@@ -19,12 +7,8 @@ import org.alex73.korpus.server.engine.StringArrayTokenStream;
 import org.alex73.korpus.utils.KorpusDateTime;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.IntRange;
-import org.apache.lucene.index.ConcurrentMergeScheduler;
-import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.*;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
-import org.apache.lucene.index.NoMergePolicy;
-import org.apache.lucene.index.NoMergeScheduler;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.apache.lucene.store.Directory;
@@ -32,6 +16,18 @@ import org.apache.lucene.store.NIOFSDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
+
+/**
+ * Пяты этап кампіляцыі корпуса.
+ * Клас забяспечвае непасрэдны запіс даных у індэксы Lucene: кіраванне індэксатарамі (IndexWriter),
+ * размеркаванне памяці, падтрымка шматпаточнасці і фінальнае аб'яднанне (merge) сегментаў індэкса.
+ */
 public class Step5WriteLucene {
     private static final Logger LOG = LoggerFactory.getLogger(Step5WriteLucene.class);
 
@@ -182,10 +178,10 @@ public class Step5WriteLucene {
 
     private static void setYearsRange(String date, IntRange rangeField) {
         if (date == null || date.isEmpty()) {
-            rangeField.setRangeValues(new int[] { Integer.MAX_VALUE }, new int[] { Integer.MAX_VALUE });
+            rangeField.setRangeValues(new int[]{Integer.MAX_VALUE}, new int[]{Integer.MAX_VALUE});
         } else {
             KorpusDateTime dt = new KorpusDateTime(date);
-            rangeField.setRangeValues(new int[] { dt.getEarliestYear() }, new int[] { dt.getLatestYear() });
+            rangeField.setRangeValues(new int[]{dt.getEarliestYear()}, new int[]{dt.getLatestYear()});
         }
     }
 

@@ -1,21 +1,5 @@
 package org.alex73.korpus.compiler;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.zip.ZipOutputStream;
-
 import org.alex73.grammardb.GrammarFinder;
 import org.alex73.grammardb.StressUtils;
 import org.alex73.grammardb.structures.Form;
@@ -28,6 +12,19 @@ import org.alex73.korpus.text.structure.corpus.Paragraph;
 import org.alex73.korpus.text.structure.corpus.Sentence;
 import org.alex73.korpus.text.structure.corpus.Word;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.zip.ZipOutputStream;
+
+/**
+ * Трэці этап кампіляцыі корпуса.
+ * Клас для збору і апрацоўкі статыстычных даных: падлік частотнасці слоў і лем,
+ * фармаванне спісаў аўтараў па лемах і генерацыя справаздач па падкорпусах.
+ */
 public class Step3Stat {
     public static final int MAX_STAT_IN_MEMORY = 100000;
 
