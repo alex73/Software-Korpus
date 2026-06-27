@@ -64,7 +64,7 @@ public class ApplicationKorpus {
         loadAuthors(configDir);
 
         grFiller = new StaticGrammarFiller2(grFinder);
-        processKorpus = new LuceneFilter(this.korpusCachePath, this.languages);
+        processKorpus = new LuceneFilter(this.korpusCachePath + "/lucene", this.languages);
         System.out.println("Lucene initialized for languages: " + Arrays.toString(this.languages));
 
         prepareInitialGrammar();
