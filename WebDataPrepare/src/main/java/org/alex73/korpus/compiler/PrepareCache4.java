@@ -1,5 +1,18 @@
 package org.alex73.korpus.compiler;
 
+import com.google.common.primitives.Ints;
+import com.google.gson.Gson;
+import org.alex73.grammardb.GrammarDB2;
+import org.alex73.grammardb.GrammarFinder;
+import org.alex73.korpus.base.GrammarDBUtils;
+import org.alex73.korpus.base.StaticGrammarFiller2;
+import org.alex73.korpus.base.TextInfo;
+import org.alex73.korpus.text.parser.IProcess;
+import org.alex73.korpus.utils.KorpusFileUtils;
+import org.rocksdb.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,20 +28,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import org.alex73.grammardb.GrammarDB2;
-import org.alex73.grammardb.GrammarFinder;
-import org.alex73.korpus.base.GrammarDBUtils;
-import org.alex73.korpus.base.StaticGrammarFiller2;
-import org.alex73.korpus.base.TextInfo;
-import org.alex73.korpus.text.parser.IProcess;
-import org.alex73.korpus.utils.KorpusFileUtils;
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
-import org.mapdb.Serializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.gson.Gson;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class PrepareCache4 {
     private static final Logger LOG = LoggerFactory.getLogger(PrepareCache4.class);
@@ -85,7 +85,7 @@ public class PrepareCache4 {
         Step1Split.init(languages, errors);
         Step2Grammar.init(grFiller);
         Step3Stat.init(OUTPUT, grFinder);
-        Step5WriteLucene.init(cores, languages, writeToLucene, cacheForProduction, OUTPUT, 2 * 1024);
+        Step5WriteLucene.init(languages, writeToLucene, cacheForProduction, OUTPUT, 4 * 1024);
 
         LOG.info("Process...");
         long be = System.currentTimeMillis();
@@ -97,14 +97,45 @@ public class PrepareCache4 {
         // textsCount);
         parseZips();
 
-        DB outputTextsDb = DBMaker.fileDB(OUTPUT.resolve("info.mapdb").toFile()).fileMmapEnable().make();
-        writeTextHeaders(outputTextsDb.hashMap("textInfos", Serializer.INTEGER, Serializer.ELSA).createOrOpen());
+        RocksDB.loadLibrary();
+
+        LRUCache cache = new LRUCache(256 * 1024 * 1024);
+        BlockBasedTableConfig tableConfig = new BlockBasedTableConfig();
+        tableConfig.setBlockSize(4096);
+        tableConfig.setBlockCache(cache);
+        tableConfig.setFilterPolicy(new BloomFilter(10, false)); // Bloom filter with 10 bits per key
+        tableConfig.setCacheIndexAndFilterBlocks(true);
+        tableConfig.setPinTopLevelIndexAndFilter(true);
+        ColumnFamilyOptions cfOptions = new ColumnFamilyOptions()
+                .setTableFormatConfig(tableConfig)
+                .setWriteBufferSize(8 * 1024 * 1024)
+                .setMaxWriteBufferNumber(2)
+                .setMinWriteBufferNumberToMerge(1)
+                .setLevel0FileNumCompactionTrigger(2)
+                .setLevel0SlowdownWritesTrigger(10)
+                .setLevel0StopWritesTrigger(40);
+        DBOptions options = new DBOptions().setCreateIfMissing(true).setCreateMissingColumnFamilies(true).setMaxBackgroundJobs(2)
+                .setWriteBufferManager(new WriteBufferManager(0, cache));
+        List<ColumnFamilyHandle> cfHandles = new ArrayList<>();
+        RocksDB outputTextsDb = RocksDB.open(options, OUTPUT.resolve("info.rocksdb").toString(),
+                List.of(
+                        new ColumnFamilyDescriptor(RocksDB.DEFAULT_COLUMN_FAMILY, cfOptions),
+                        new ColumnFamilyDescriptor("textInfos".getBytes(UTF_8), cfOptions),
+                        new ColumnFamilyDescriptor("authorsByLemmas".getBytes(UTF_8), cfOptions)
+                ),
+                cfHandles);
+        ColumnFamilyHandle textInfosCf = cfHandles.get(1);
+        ColumnFamilyHandle authorsByLemmasCf = cfHandles.get(2);
+
+        writeTextHeaders(outputTextsDb, textInfosCf);
 
         LOG.info("Finishing stats...");
-        Step3Stat.finish(OUTPUT, outputTextsDb.hashMap("authorsByLemmas", Serializer.STRING, Serializer.ELSA).createOrOpen());
+        Step3Stat.finish(OUTPUT, outputTextsDb, authorsByLemmasCf);
 
-        outputTextsDb.commit();
-        outputTextsDb.getStore().compact();
+        outputTextsDb.compactRange(textInfosCf);
+        outputTextsDb.compactRange(authorsByLemmasCf);
+        textInfosCf.close();
+        authorsByLemmasCf.close();
         outputTextsDb.close();
 
         LOG.info("Finishing lucene...");
@@ -112,10 +143,7 @@ public class PrepareCache4 {
         long af = System.currentTimeMillis();
         LOG.info("Process time: " + ((af - be) / 1000) + " seconds");
 
-        LOG.info("Merging Lucene and words counts...");
-        if (writeToLucene) {
-            Step5WriteLucene.mergeIndexes();
-        }
+        LOG.info("Merging words counts...");
         try (ZipOutputStream zip = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(OUTPUT.resolve("stat-freq.zip")), 1024 * 1024))) {
             Step3Stat.mergeToZip(zip);
             Step3Stat.removeTemp();
@@ -244,9 +272,13 @@ public class PrepareCache4 {
         }));
     }
 
-    static void writeTextHeaders(ConcurrentMap<Integer, TextInfo> ti) throws Exception {
-        for(int i=0;i<textInfos.size();i++) {
-            ti.put(i, textInfos.get(i));
+    static void writeTextHeaders(RocksDB outputTextsDb, ColumnFamilyHandle textInfosCf) throws Exception {
+        try (WriteOptions writeOptions = new WriteOptions()) {
+            writeOptions.setDisableWAL(true);
+            Gson gson = new Gson();
+            for (int i = 0; i < textInfos.size(); i++) {
+                outputTextsDb.put(textInfosCf, writeOptions, Ints.toByteArray(i), gson.toJson(textInfos.get(i)).getBytes(UTF_8));
+            }
         }
     }
 
@@ -268,14 +300,14 @@ public class PrepareCache4 {
                 String v = a.substring(key.length() + 3);
                 boolean r;
                 switch (v.toLowerCase()) {
-                case "true":
-                    r = true;
-                    break;
-                case "false":
-                    r = false;
-                    break;
-                default:
-                    throw new RuntimeException("Wrong value: " + a);
+                    case "true":
+                        r = true;
+                        break;
+                    case "false":
+                        r = false;
+                        break;
+                    default:
+                        throw new RuntimeException("Wrong value: " + a);
                 }
                 LOG.info(description + ": " + r);
                 return r;

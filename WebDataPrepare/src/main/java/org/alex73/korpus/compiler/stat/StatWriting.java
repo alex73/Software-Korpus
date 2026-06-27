@@ -22,9 +22,6 @@ import java.util.zip.ZipOutputStream;
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.compiler.Step3Stat.TextStatInfo;
 import org.alex73.korpus.utils.KorpusFileUtils;
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
-import org.mapdb.Serializer;
 import org.xerial.snappy.SnappyInputStream;
 
 public class StatWriting {

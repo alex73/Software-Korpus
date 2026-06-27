@@ -46,6 +46,14 @@ public class LuceneFields {
         TYPE_NOTSTORED_INDEXED.setStored(false);
         TYPE_NOTSTORED_INDEXED.freeze();
     }
+    public static final FieldType TYPE_NOTSTORED_INDEXED_ATOMIC = new FieldType();
+    static {
+        TYPE_NOTSTORED_INDEXED_ATOMIC.setTokenized(false);
+        TYPE_NOTSTORED_INDEXED_ATOMIC.setOmitNorms(true);
+        TYPE_NOTSTORED_INDEXED_ATOMIC.setIndexOptions(IndexOptions.DOCS);
+        TYPE_NOTSTORED_INDEXED_ATOMIC.setStored(false);
+        TYPE_NOTSTORED_INDEXED_ATOMIC.freeze();
+    }
 
     public static class LuceneFieldsLang {
         public Field fieldWordWriteVariant; // all supernormalized words from this paragraph
@@ -65,17 +73,18 @@ public class LuceneFields {
     public FieldInt fieldTextID;
 
     public LuceneFields(String[] allLanguages) {
+        StringArrayTokenStream emptyStream = new StringArrayTokenStream(new String[0]);
         for (int l = 0; l < allLanguages.length; l++) {
             String lang = allLanguages[l];
             // words fields
             LuceneFieldsLang lf = new LuceneFieldsLang();
             byLang.put(lang, lf);
-            lf.fieldWordWriteVariant = new Field(lang + "_WordWriteVariant", "", TYPE_NOTSTORED_INDEXED);
-            lf.fieldTagsWriteVariant = new Field(lang + "_TagsWriteVariant", "", TYPE_NOTSTORED_INDEXED);
+            lf.fieldWordWriteVariant = new Field(lang + "_WordWriteVariant", emptyStream, TYPE_NOTSTORED_INDEXED);
+            lf.fieldTagsWriteVariant = new Field(lang + "_TagsWriteVariant", emptyStream, TYPE_NOTSTORED_INDEXED);
             if (l == 0) {
                 // толькі для першай мовы
-                lf.fieldTextAuthor = new Field("textAuthor", "", TYPE_NOTSTORED_INDEXED);
-                lf.fieldTextSource = new Field("textSource", "", TYPE_NOTSTORED_INDEXED);
+                lf.fieldTextAuthor = new Field("textAuthor", emptyStream, TYPE_NOTSTORED_INDEXED);
+                lf.fieldTextSource = new Field("textSource", emptyStream, TYPE_NOTSTORED_INDEXED);
                 lf.fieldTextCreationYear = new IntRange("creationYear", new int[] { 0 }, new int[] { 0 });
                 lf.fieldTextPublishedYear = new IntRange("publishedYear", new int[] { 0 }, new int[] { 0 });
             }
@@ -83,8 +92,8 @@ public class LuceneFields {
         fieldSentencePBinary = new Field("pbinary", new byte[0], TYPE_STORED_NOTINDEXED);
 
         // korpus text fields for filtering
-        fieldTextSubcorpus = new Field("textSubcorpus", "", TYPE_NOTSTORED_INDEXED);
-        fieldTextStyleGenre = new Field("textStyleGenre", "", TYPE_NOTSTORED_INDEXED);
+        fieldTextSubcorpus = new Field("textSubcorpus", "", TYPE_NOTSTORED_INDEXED_ATOMIC);
+        fieldTextStyleGenre = new Field("textStyleGenre", emptyStream, TYPE_NOTSTORED_INDEXED);
 
         fieldTextID = new FieldInt("textId", TYPE_STORED_INDEXED_INT);
     }

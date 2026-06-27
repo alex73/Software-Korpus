@@ -4,6 +4,7 @@ import io.javalin.Javalin;
 import org.alex73.grammardb.GrammarDB2;
 import org.alex73.grammardb.GrammarFinder;
 import org.alex73.korpus.base.GrammarDBUtils;
+import org.rocksdb.RocksDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +14,8 @@ public class Startup {
     private static final int PORT = 8080;
 
     static void main(String[] args) throws Exception {
+        RocksDB.loadLibrary();
+
         String GRAMMAR_DB = getEnv("GRAMMAR_DB");
 
         LOGGER.info("Чытаем GRAMMAR_DB з {}", GRAMMAR_DB);
