@@ -154,7 +154,7 @@ public class LuceneDriverRead extends LuceneFields {
     }
 
     public Document getSentence(int docID) throws Exception {
-        return indexSearcher.doc(docID);
+        return indexSearcher.storedFields().document(docID);
     }
 
     public interface DocFilter<T> {

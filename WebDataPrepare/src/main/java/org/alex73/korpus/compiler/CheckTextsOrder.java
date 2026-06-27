@@ -14,7 +14,7 @@ public class CheckTextsOrder {
         DirectoryReader directoryReader = DirectoryReader.open(dir);
         long prevId = -1;
         for (int i = 0; i < directoryReader.maxDoc(); i++) {
-            Document doc = directoryReader.document(i);
+            Document doc = directoryReader.storedFields().document(i);
             StoredField field = (StoredField) doc.getField("textId");
             long id = field.numericValue().longValue();
             if (i % 1000 == 0)

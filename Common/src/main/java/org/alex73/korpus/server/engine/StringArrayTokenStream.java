@@ -30,12 +30,16 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
  * Token stream which returns each string as separate token.
  */
 public class StringArrayTokenStream extends TokenStream {
-    final String[] data;
+    String[] data;
     int index;
     final CharTermAttribute token = addAttribute(CharTermAttribute.class);
 //    final OffsetAttribute offset = addAttribute(OffsetAttribute.class);
 
     public StringArrayTokenStream(String[] data) {
+        this.data = data;
+    }
+
+    public void setData(String[] data) {
         this.data = data;
     }
 

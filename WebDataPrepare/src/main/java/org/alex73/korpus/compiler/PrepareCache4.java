@@ -85,7 +85,7 @@ public class PrepareCache4 {
         Step1Split.init(languages, errors);
         Step2Grammar.init(grFiller);
         Step3Stat.init(OUTPUT, grFinder);
-        Step5WriteLucene.init(cores, languages, writeToLucene, cacheForProduction, OUTPUT, 2 * 1024);
+        Step5WriteLucene.init(languages, writeToLucene, cacheForProduction, OUTPUT, 2 * 1024);
 
         LOG.info("Process...");
         long be = System.currentTimeMillis();
@@ -112,10 +112,7 @@ public class PrepareCache4 {
         long af = System.currentTimeMillis();
         LOG.info("Process time: " + ((af - be) / 1000) + " seconds");
 
-        LOG.info("Merging Lucene and words counts...");
-        if (writeToLucene) {
-            Step5WriteLucene.mergeIndexes();
-        }
+        LOG.info("Merging words counts...");
         try (ZipOutputStream zip = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(OUTPUT.resolve("stat-freq.zip")), 1024 * 1024))) {
             Step3Stat.mergeToZip(zip);
             Step3Stat.removeTemp();
