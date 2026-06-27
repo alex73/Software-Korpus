@@ -51,14 +51,14 @@ public class WordsStat {
         byFormTempFile.close();
     }
 
-    public void addWord(String normalizedValue, Set<String> lemmas) {
+    public void addWord(String normalizedValue, String[] lemmas) {
         wordsCount++;
 
         if (byForm != null && !normalizedValue.isEmpty()) {
             byForm.computeIfAbsent(normalizedValue, v -> new AtomicInteger()).incrementAndGet();
         }
 
-        if (lemmas.isEmpty()) {
+        if (lemmas.length == 0) {
             if (byUnknown != null) {
                 // TODO адкідаць пустыя словы, нумары, лацінку,
                 if (normalizedValue.isEmpty()) {
@@ -77,7 +77,7 @@ public class WordsStat {
                 allLemmas.add(lemma);
             }
             if (byLemma != null) {
-                float part = 1.0f / lemmas.size();
+                float part = 1.0f / lemmas.length;
                 for (String lemma : lemmas) {
                     if (lemma.isEmpty()) {
                         continue;

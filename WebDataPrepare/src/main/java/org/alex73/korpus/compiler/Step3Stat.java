@@ -1,5 +1,6 @@
 package org.alex73.korpus.compiler;
 
+import org.alex73.grammardb.GrammarDB2;
 import org.alex73.grammardb.GrammarFinder;
 import org.alex73.grammardb.StressUtils;
 import org.alex73.grammardb.structures.Form;
@@ -11,6 +12,8 @@ import org.alex73.korpus.compiler.stat.WordsStat;
 import org.alex73.korpus.text.structure.corpus.Paragraph;
 import org.alex73.korpus.text.structure.corpus.Sentence;
 import org.alex73.korpus.text.structure.corpus.Word;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,10 +29,13 @@ import java.util.zip.ZipOutputStream;
  * фармаванне спісаў аўтараў па лемах і генерацыя справаздач па падкорпусах.
  */
 public class Step3Stat {
+    private static final Logger LOG = LoggerFactory.getLogger(Step3Stat.class);
+
     public static final int MAX_STAT_IN_MEMORY = 100000;
 
     private static final String LANG = "bel";
 
+    private static GrammarDB2 grammarDB;
     private static GrammarFinder grFinder;
     private static Path tempOutputDir;
     // stat by subcorpuses
@@ -37,10 +43,16 @@ public class Step3Stat {
     // authors by lemmas: Map<lemma, Set<author>>
     private static Map<String, Set<String>> authorsByLemmas = new HashMap<>();
     public static Map<String, WordsStat> wordsStatsBySubcorpus = new HashMap<>();
+    private static Map<String,String[]> cacheLemmasByForm;
 
-    public static void init(Path tempDir, GrammarFinder finder) throws Exception {
+    public static void init(Path tempDir, GrammarDB2 db, GrammarFinder finder) throws Exception {
         tempOutputDir = tempDir;
+        grammarDB = db;
         grFinder = finder;
+
+        LOG.info("Ствараем кэш форма->лемы...");
+        initializeCacheLemmasByForm();
+        LOG.info("Кэш створаны");
     }
 
     public static void run(MessageParsedText text) throws Exception {
@@ -76,19 +88,25 @@ public class Step3Stat {
         return wordsStat;
     }
 
-    private static Set<String> getLemmasByForm(String form) {
-        Set<String> result = new TreeSet<>();
-        for (Paradigm p : grFinder.getParadigms(form)) {
+    static final String[] EMPTY=new String[0];
+    private static String[] getLemmasByForm(String form) {
+        return cacheLemmasByForm.getOrDefault(form, EMPTY);
+    }
+
+    private static void initializeCacheLemmasByForm() {
+        Map<String,Set<String>> map = new HashMap<>();
+        for (Paradigm p : grammarDB.getAllParadigms()) {
             for (Variant v : p.getVariant()) {
                 for (Form f : v.getForm()) {
-                    if (fastCompareWithoutStress(f.getValue(), form)) {
-                        result.add(p.getLemma());
-                        break;
-                    }
+                    map.computeIfAbsent(f.getValue(), k -> new TreeSet<>()).add(p.getLemma());
                 }
             }
         }
-        return result;
+
+        cacheLemmasByForm = new HashMap<>(map.size());
+        for(Map.Entry<String, Set<String>> entry : map.entrySet()) {
+            cacheLemmasByForm.put(entry.getKey(), entry.getValue().toArray(new String[entry.getValue().size()]));
+        }
     }
 
     private static boolean fastCompareWithoutStress(String s1, String s2) {

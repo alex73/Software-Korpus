@@ -42,6 +42,7 @@ public class PrepareCache4 {
     public static boolean processStat = true;
 
     static int cores;
+    static GrammarDB2 grammarDB;
     static GrammarFinder grFinder;
     static StaticGrammarFiller2 grFiller;
 
@@ -84,7 +85,7 @@ public class PrepareCache4 {
 
         Step1Split.init(languages, errors);
         Step2Grammar.init(grFiller);
-        Step3Stat.init(OUTPUT, grFinder);
+        Step3Stat.init(OUTPUT, grammarDB, grFinder);
         Step5WriteLucene.init(languages, writeToLucene, cacheForProduction, OUTPUT, 2 * 1024);
 
         LOG.info("Process...");
@@ -143,17 +144,16 @@ public class PrepareCache4 {
     }
 
     static void loadGrammarDB() throws Exception {
-        GrammarDB2 gr;
         if (grammarDbPath != null) {
             LOG.info("Loading GrammarDB...");
-            gr = GrammarDB2.initializeFromDir(grammarDbPath);
+            grammarDB = GrammarDB2.initializeFromDir(grammarDbPath);
         } else {
             LOG.warn("GrammarDB will not be loaded !!!");
             Thread.sleep(1000);
-            gr = GrammarDB2.empty();
+            grammarDB = GrammarDB2.empty();
         }
-        GrammarDBUtils.minimizeMemory(gr);
-        grFinder = new GrammarFinder(gr);
+        GrammarDBUtils.minimizeMemory(grammarDB);
+        grFinder = new GrammarFinder(grammarDB);
         grFiller = new StaticGrammarFiller2(grFinder);
     }
 
