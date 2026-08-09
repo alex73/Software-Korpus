@@ -13,7 +13,7 @@ import org.jsoup.select.Elements;
 
 public class PresidentGovBy extends SiteBase {
     public static void main(String[] args) throws Exception {
-        new PresidentGovBy().run(args);
+        new PresidentGovBy().runWarc(args);
     }
 
     protected Ctf parsePage(String url, byte[] page) throws Exception {
@@ -35,7 +35,7 @@ public class PresidentGovBy extends SiteBase {
         }
         String title = fixText(titleElement.text());
 
-        List<String> paragraphs = parseText(contentElement.get(0).wholeText());
+        List<String> paragraphs = parseText(textFromElement(contentElement.get(0)));
         if (url.contains("addzyal")) {
             System.out.println();
         }

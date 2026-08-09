@@ -20,7 +20,7 @@ public class Output implements Closeable {
 
     public Output(Path out) throws IOException {
         os = new ZipOutputStream(new BufferedOutputStream(Files.newOutputStream(out), 1024 * 1024));
-        gson = new GsonBuilder().setPrettyPrinting().create();
+        gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     }
 
     public void write(String path, Ctf text) throws IOException {

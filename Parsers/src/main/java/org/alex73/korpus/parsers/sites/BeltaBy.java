@@ -13,7 +13,7 @@ import org.jsoup.nodes.Element;
 public class BeltaBy extends SiteBase {
 
     public static void main(String[] args) throws Exception {
-        new BeltaBy().run(args);
+        new BeltaBy().runWarc(args);
     }
 
     protected Ctf parsePage(String url, byte[] page) throws Exception {

@@ -1,41 +1,49 @@
 package org.alex73.korpus.parsers.sites;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-
 import org.alex73.korpus.base.Ctf;
 import org.alex73.korpus.base.Ctf.Page;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class ZviazdaBy extends SiteBase {
 
     public static void main(String[] args) throws Exception {
-        new ZviazdaBy().run(args);
+        new ZviazdaBy().runWarc(args);
     }
 
     protected Ctf parsePage(String url, byte[] page) throws Exception {
-        if (!url.matches("https://zviazda\\.by/be/news/.+")) {
+        if (url.endsWith("/")) {
+            url = url.substring(0, url.length() - 1);
+        }
+        if (!url.matches("https://zviazda\\.by/news/[^/]+")) {
             return null;
         }
 
         String body = new String(page, StandardCharsets.UTF_8);
         Document doc = Jsoup.parse(body);
 
-        String title = fixText(doc.selectFirst("h1").text());
-
-        Element contentElement = doc.selectFirst("div.field-name-body");
+        Element contentElement = doc.selectFirst("div.item-fulltext");
         if (contentElement == null) {
             return null;
         }
 
-        List<String> paragraphs = parseText(contentElement.wholeText());
-        if (paragraphs.isEmpty()) {
-            return null;
+        String title = fixText(doc.selectFirst("div.news-static").selectFirst("h1").text());
+
+        List<String> paragraphs = new ArrayList<>();
+        paragraphs.add(title);
+
+        Element contentPreElement = doc.selectFirst("div.item-pretext");
+        if (contentPreElement != null) {
+            paragraphs.addAll(parseText(textFromElement(contentPreElement)));
         }
-        paragraphs.add(0, title);
+
+        paragraphs.addAll(parseText(textFromElement(contentElement)));
 
         Ctf result = new Ctf();
         Page p = new Page();
@@ -44,7 +52,7 @@ public class ZviazdaBy extends SiteBase {
         result.languages[0].label = "zviazda.by";
         result.languages[0].sourceName = "zviazda.by";
         result.languages[0].title = title;
-        result.languages[0].headers = new String[] { "Крыніца:zviazda.by", "URL:" + url, "Назва:" + title };
+        result.languages[0].headers = new String[]{"Крыніца:zviazda.by", "URL:" + url, "Назва:" + title};
 
         return result;
     }

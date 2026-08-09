@@ -12,7 +12,7 @@ import org.jsoup.nodes.Element;
 
 public class TvrBy extends SiteBase {
     public static void main(String[] args) throws Exception {
-        new TvrBy().run(args);
+        new TvrBy().runWarc(args);
     }
 
     protected Ctf parsePage(String url, byte[] page) throws Exception {
