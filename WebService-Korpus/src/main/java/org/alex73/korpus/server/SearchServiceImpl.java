@@ -79,7 +79,7 @@ public class SearchServiceImpl {
     }
 
     public SearchResult search(SearchRequest rq, String remoteAddr) throws Exception {
-        LOGGER.info(">> Request from " + remoteAddr);
+        LOGGER.info(">> Request from " + remoteAddr + " in " + Thread.currentThread().getName());
         try {
             ILanguage lang = LanguageFactory.get(rq.params.lang);
             SearchParams params = rq.params;

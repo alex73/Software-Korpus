@@ -100,7 +100,7 @@ public class Kanvertary {
             FanetykaText f = new FanetykaText(grFinder,
                     text.replace('+', BelarusianWordNormalizer.pravilny_nacisk).replaceAll("[-‒‒–]", "-"));
 
-            synchronized (synthBookUrl) { // prevent server high load
+            synchronized (this) { // prevent server high load
                 String ipa = f.ipa.replace("w", "u̯").replace("w", "u̯").replace("ɱ", "m").replace("β", "v").replace("ʋ", "v")
                         .replace("\u031E", "").replace("\u032A", "").replace("\u0331", "").replace("\u035F", "");
                 URL url = new URI(synthUrl + "?text=" + URLEncoder.encode(ipa, StandardCharsets.UTF_8)).toURL();

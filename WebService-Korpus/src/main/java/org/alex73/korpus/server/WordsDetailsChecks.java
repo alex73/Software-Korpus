@@ -452,8 +452,11 @@ public class WordsDetailsChecks {
         if (requiredSeparator == null || requiredSeparator.isEmpty()) {
             return true;
         }
-        if ("NONE".equals(requiredSeparator) && wordResult.tail.isBlank()) {
+        if ("NONE".equals(requiredSeparator) && wordResult.tail == null) {
             return true;
+        }
+        if (wordResult.tail == null) {
+            return false;
         }
         return requiredSeparator.equals(wordResult.tail.replace(" ", ""));
     }
