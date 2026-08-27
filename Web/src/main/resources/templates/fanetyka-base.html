@@ -29,7 +29,7 @@
 <div class="container">
 <div style="font-size: 2em;text-align: center;">Фанетычны канвертар  і сінтэз маўлення</div>
 <form onSubmit="req(); return false;">
-	<div class="class="form-group">
+	<div class="form-group">
 		<textarea id="text" class="form-control" rows="3" style="font-size: 150%"></textarea>
 		<ul>
 		<li>улічваецца літара ґ (перадае выбухны гук [g]) - ґанак</li>
@@ -48,7 +48,7 @@
 			<button type="submit" class="btn btn-warning btn-lg mx-3" onClick="reqSynth(); return false;">Агучыць</button>
 		</div>
 </form>
-<div id="status" style="color:red">
+<div id="status">
 </div>
 <div id="out">
 	<a href="/articles/fanietycny-kanviertar-BelG2P.html">Артыкул "Беларускі фанетычны канвертар (BelG2P) - ад вытокаў да рэалізацыі"</a>
@@ -59,43 +59,82 @@
 <script>
 	var otherCallPrefix = "other/rest";
 	var forvoword = '';
+	var ttsIntervalId = null;
 	function forvoopen() {
 		var win = window.open("https://forvo.com/word/"+forvoword+"/#be", '_blank');
 		win.focus();
 	}
 	function reqSynth() {
+		if (ttsIntervalId) {
+			clearInterval(ttsIntervalId);
+			ttsIntervalId = null;
+		}
 		$("audio").hide();
-		$('#status').val('');
+		$('#status').html('');
 		$('#spinner').show();
-		fetch(otherCallPrefix + '/conv/synth', {
+		$("#out").html('');
+		fetch('/tts/start', {
 		      method: 'POST',
 		      headers: {
-		        'Content-Type': 'text/plain; charset=UTF-8'
+		        'Content-Type': 'application/json'
 		      },
-		      body: $('#text').val()
+		      body: JSON.stringify({ text: $('#text').val() })
 		    })
 		      .then(r => {
-		        $('#spinner').hide();
-		        $("#out").html('');
 		        if (!r.ok) {
-		        	alert("Памылка: " + r.status + " " + r.statusText);
-		        } else {
-		          if (r.headers.get("content-type").includes("text/plain")) {
-		            r.text().then(data => {
-		              $("#status").html(data);
-		            });
-		            $('#text').val('');
-		          } else {
-		            r.blob().then(data => {
-		              //$("audio").attr('src', 'data:audio/wav;base64,'+btoa(unescape(encodeURIComponent(data))));
-		              $("audio").attr('src', URL.createObjectURL(data));
-		              $("audio").show();
-		              $("audio")[0].play();
-		            });
-		          }
+                    throw new Error("HTTP " + r.status + " " + r.statusText);
 		        }
+		        return r.json();
 		      })
-		      .catch(err => alert("Памылка: " + err));
+		      .then(data => {
+		        updateStatusDisplay(data);
+		        const id = data.id;
+		        ttsIntervalId = setInterval(() => {
+		          fetch('/tts/' + id)
+		            .then(res => {
+		              if (!res.ok) {
+		                throw new Error("HTTP " + res.status + " " + res.statusText);
+		              }
+		              return res.json();
+		            })
+		            .then(statusData => {
+		              updateStatusDisplay(statusData);
+		              if (statusData.status === 'завершана') {
+		                clearInterval(ttsIntervalId);
+		                ttsIntervalId = null;
+		                $('#spinner').hide();
+		                $("audio").attr('src', '/tts/' + id + '/output.opus');
+		                $("audio").show();
+		                $("audio")[0].play();
+		              } else if (statusData.status === 'памылка') {
+		                clearInterval(ttsIntervalId);
+		                ttsIntervalId = null;
+		                $('#spinner').hide();
+		                $('#status').html('<span class="text-danger">Памылка: ' + (statusData.error_message || 'Невядомая памылка') + '</span>');
+		              }
+		            })
+		            .catch(err => {
+		              $('#status').html('<span class="text-danger">Памылка падчас праверкі статусу: ' + err.message + '</span>');
+		            });
+		        }, 5000);
+		      })
+		      .catch(err => {
+		        $('#spinner').hide();
+		        $('#status').html('<span class="text-danger">Памылка запуску сінтэзу: ' + err.message + '</span>');
+		      });
+	}
+	function updateStatusDisplay(data) {
+		let info = 'Статус: ' + data.status;
+		if (data.step_name) {
+            info += '<br/>Крок ' + data.step_index + ' з ' + data.total_steps + ': ' + data.step_name;
+		}
+		if (data.step_progress_percent !== null && data.step_progress_percent !== undefined) {
+			info += '<br/>Прагрэс: ' + data.step_progress_percent + '%';
+		}
+		if (data.status === 'error' && data.error_message) {
+			info += '<br/><span class="text-danger">Памылка: ' + data.error_message + '</span>';
+		}
+		$('#status').html(info);
 	}
 	function req() {
 		$('#status').val('');
