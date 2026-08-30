@@ -1,34 +1,7 @@
-<!DOCTYPE html>
-<html lang="be" data-lt-installed="true"><head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<#assign title = "Фанетычны канвертар і сінтэз маўлення">
+<#include "dialog-header.html">
 
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <title>Фанетычны канвертар і сінтэз маўлення</title>
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="icon" href="icons/favicon.svg">
-
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsrender/1.0.8/jsrender.min.js" integrity="sha512-eaa+35R4qeIwdRXliPU78o0VnCrxKLPH6tmTv83ODihxRHVj558oYzjTVCGySHN/nbLEmLRdmlikW5+9ElJ5YQ==" crossorigin="anonymous"></script>
-  </head>
-
-  <body>
-
-    <!-- Static navbar -->
-    <nav class="navbar navbar-expand-lg fixed-top navbar-light bg-light">
-      <div class="container">
-        <a class="navbar-brand" href="index.html">Нацыянальны корпус беларускай мовы (Беларускі N-корпус)</a>
-      </div>
-    </nav>
-
-<div class="container">
-<div style="font-size: 2em;text-align: center;">Фанетычны канвертар  і сінтэз маўлення</div>
-<form onSubmit="req(); return false;">
+<form onSubmit="request(); return false;">
 	<div class="form-group">
 		<textarea id="text" class="form-control" rows="3" style="font-size: 150%"></textarea>
 		<ul>
@@ -43,9 +16,8 @@
 		<div class="row justify-content-end my-4">
 			<span id="spinner" class="spinner-border" role="status" aria-hidden="true" style="display: none"></span>
 			<button type="button" class="btn btn-info btn-lg mx-3" onClick="reqNaciski(); return false;">Пазначыць націскі</button>
-			<button type="button" id="forvo" class="btn btn-warning btn-lg mx-3" style="display: none" onClick="forvoopen(); return false;">Паслухаць у forvo</button>
-			<button type="submit" class="btn btn-danger btn-lg mx-3">Канвертаваць</button>
-			<button type="submit" class="btn btn-warning btn-lg mx-3" onClick="reqSynth(); return false;">Агучыць</button>
+			<button type="submit" class="btn btn-danger btn-lg mx-3" onClick="reqG2P(); return false;">Канвертаваць</button>
+			<button type="submit" class="btn btn-warning btn-lg mx-3" onClick="request(); return false;">Агучыць</button>
 		</div>
 </form>
 <div id="status">
@@ -55,152 +27,58 @@
 </div>
 <audio style="display: none" controls/>
 
-</div>
 <script>
-	var otherCallPrefix = "other/rest";
-	var forvoword = '';
-	var ttsIntervalId = null;
-	function forvoopen() {
-		var win = window.open("https://forvo.com/word/"+forvoword+"/#be", '_blank');
-		win.focus();
-	}
-	function reqSynth() {
-		if (ttsIntervalId) {
-			clearInterval(ttsIntervalId);
-			ttsIntervalId = null;
-		}
+    function request() {
 		$("audio").hide();
-		$('#status').html('');
-		$('#spinner').show();
-		$("#out").html('');
-		fetch('/tts/start', {
-		      method: 'POST',
-		      headers: {
-		        'Content-Type': 'application/json'
-		      },
-		      body: JSON.stringify({ text: $('#text').val() })
-		    })
-		      .then(r => {
-		        if (!r.ok) {
-                    throw new Error("HTTP " + r.status + " " + r.statusText);
-		        }
-		        return r.json();
-		      })
-		      .then(data => {
-		        updateStatusDisplay(data);
-		        const id = data.id;
-		        ttsIntervalId = setInterval(() => {
-		          fetch('/tts/' + id)
-		            .then(res => {
-		              if (!res.ok) {
-		                throw new Error("HTTP " + res.status + " " + res.statusText);
-		              }
-		              return res.json();
-		            })
-		            .then(statusData => {
-		              updateStatusDisplay(statusData);
-		              if (statusData.status === 'завершана') {
-		                clearInterval(ttsIntervalId);
-		                ttsIntervalId = null;
-		                $('#spinner').hide();
-		                $("audio").attr('src', '/tts/' + id + '/output.opus');
-		                $("audio").show();
-		                $("audio")[0].play();
-		              } else if (statusData.status === 'памылка') {
-		                clearInterval(ttsIntervalId);
-		                ttsIntervalId = null;
-		                $('#spinner').hide();
-		                $('#status').html('<span class="text-danger">Памылка: ' + (statusData.error_message || 'Невядомая памылка') + '</span>');
-		              }
-		            })
-		            .catch(err => {
-		              $('#status').html('<span class="text-danger">Памылка падчас праверкі статусу: ' + err.message + '</span>');
-		            });
-		        }, 5000);
-		      })
-		      .catch(err => {
-		        $('#spinner').hide();
-		        $('#status').html('<span class="text-danger">Памылка запуску сінтэзу: ' + err.message + '</span>');
-		      });
-	}
-	function updateStatusDisplay(data) {
-		let info = 'Статус: ' + data.status;
-		if (data.step_name) {
-            info += '<br/>Крок ' + data.step_index + ' з ' + data.total_steps + ': ' + data.step_name;
-		}
-		if (data.step_progress_percent !== null && data.step_progress_percent !== undefined) {
-			info += '<br/>Прагрэс: ' + data.step_progress_percent + '%';
-		}
-		if (data.status === 'error' && data.error_message) {
-			info += '<br/><span class="text-danger">Памылка: ' + data.error_message + '</span>';
-		}
-		$('#status').html(info);
-	}
-	function req() {
+		startTTSRequest("TTS-OmniVoice", $('#text').val(), function (id) {
+			$("audio").attr('src', '/tts/' + id + '/output.opus');
+			$("audio").show();
+			$("audio")[0].play();
+		});
+    }
+
+	function reqG2P() {
 		$('#status').val('');
 		$("audio").hide();
 		let arg = $('#text').val();
-		if (arg.trim() != '' && !arg.includes(' ')) {
-			forvoword = arg.toLowerCase().replace('+','').replace('|','').replace('ґ','г');
-			$('#forvo').show();
-		} else {
-			$('#forvo').hide();
-		}
-		fetch(otherCallPrefix + '/conv/fanetyka', {
-		      method: 'POST',
-		      headers: {
-		        'Content-Type': 'text/plain; charset=UTF-8'
-		      },
-		      body: arg
-		    })
-		      .then(r => {
-		        if (!r.ok) {
-		        	alert("Памылка: " + r.status + " " + r.statusText);
-		        } else {
-		          r.text().then(data => {
-		          data += '<button id="logShow" type="button" class="btn btn-secondary btn-sm btn-block" onclick="showLog();">Паказаць крокі канвертацыі</button>';
-		            $("#out").html(data);
-		          });
-		        }
-		      })
-		      .catch(err => alert("Памылка: " + err));
+		fetch('other/rest/conv/fanetyka', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'text/plain; charset=UTF-8'
+			},
+			body: arg
+		})
+		.then(r => {
+			if (!r.ok) {
+				alert("Памылка: " + r.status + " " + r.statusText);
+			} else {
+				r.text().then(data => {
+					data += '<button id="logShow" type="button" class="btn btn-secondary btn-sm btn-block" onclick="showLog();">Паказаць крокі канвертацыі</button>';
+					$("#out").html(data);
+				});
+			}
+		})
+		.catch(err => alert("Памылка: " + err));
 	}
-	function showLog() {
-		$("#log").show();
-		$("#logShow").hide();
-	}
+
 	function reqNaciski() {
 		$("audio").hide();
-		$('#status').val('');
-		let arg = $('#text').val();
-		fetch(otherCallPrefix + '/conv/naciski', {
-		      method: 'POST',
-		      headers: {
-		        'Content-Type': 'text/plain; charset=UTF-8'
-		      },
-		      body: arg
-		    })
-		      .then(r => {
-		        $("#out").html('');
-		        if (!r.ok) {
-		        	alert("Памылка: " + r.status + " " + r.statusText);
-		        } else {
-		          r.text().then(data => {
-		              $('#text').val(data);
-		          });
-		        }
-		      })
-		      .catch(err => alert("Памылка: " + err));
+		startTTSRequest("StressML", $('#text').val(), function (id) {
+			fetch('/tts/' + id + '/output.txt')
+					.then(res => {
+						if (!res.ok) {
+							throw new Error("HTTP " + res.status + " " + res.statusText);
+						}
+						return res.text();
+					})
+					.then(content => {
+						$('#text').val(content);
+					})
+					.catch(err => {
+						$('#status').html('<span class="text-danger">Памылка падчас чытання output.txt: ' + err.message + '</span>');
+					});
+		});
 	}
 </script>
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
-  ga('create', 'UA-40650744-1', 'auto');
-  ga('send', 'pageview');
-
-</script>
-</body></html>
+<#include "dialog-footer.html">

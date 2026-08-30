@@ -1,0 +1,36 @@
+<#assign title = "Пазначэнне націскаў праз char-level Transformer-encoder">
+<#include "dialog-header.html">
+
+<form onSubmit="req(); return false;">
+    <div class="form-group">
+        <textarea id="text" class="form-control" rows="3" style="font-size: 150%"></textarea>
+    </div>
+    <div class="row justify-content-end my-4">
+        <span id="spinner" class="spinner-border" role="status" aria-hidden="true" style="display: none"></span>
+        <button type="submit" class="btn btn-warning btn-lg mx-3" onClick="request(); return false;">Даслаць</button>
+    </div>
+</form>
+<div id="status">
+</div>
+
+<script>
+    function request() {
+        startTTSRequest("StressML", $('#text').val(), function (id) {
+            fetch('/tts/' + id + '/output.txt')
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error("HTTP " + res.status + " " + res.statusText);
+                    }
+                    return res.text();
+                })
+                .then(content => {
+                    $('#text').val(content);
+                })
+                .catch(err => {
+                    $('#status').html('<span class="text-danger">Памылка падчас чытання output.txt: ' + err.message + '</span>');
+                });
+        });
+    }
+</script>
+
+<#include "dialog-footer.html">

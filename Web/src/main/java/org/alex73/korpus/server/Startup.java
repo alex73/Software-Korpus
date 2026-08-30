@@ -40,7 +40,6 @@ public class Startup {
         ApplicationOther appOther = new ApplicationOther(
                 getEnv("KORPUS_CONFIG_DIR"),
                 getEnv("KORPUS_CACHE_PATH"),
-                getEnv("SYNTH_URL"),
                 grammarDb, grFinder);
 
         Javalin.create(config -> {

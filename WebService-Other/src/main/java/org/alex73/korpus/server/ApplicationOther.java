@@ -15,14 +15,12 @@ public class ApplicationOther {
     private final GrammarFinder grFinder;
     private final String cachePath;
     private final List<String> settings;
-    private final  String synthUrl;
-    private final  Map<Character, Set<String>> skipGrammar;
+    private final Map<Character, Set<String>> skipGrammar;
 
-    public ApplicationOther(String configDir, String cachePath, String synthUrl, GrammarDB2 grammarDB, GrammarFinder grFinder) throws Exception {
+    public ApplicationOther(String configDir, String cachePath, GrammarDB2 grammarDB, GrammarFinder grFinder) throws Exception {
         this.grammarDB = grammarDB;
         this.grFinder = grFinder;
         this.cachePath = cachePath;
-        this.synthUrl = synthUrl;
     /*
         String grammarDb = getEnvOrPropOrJndi("GRAMMAR_DB");
         if (grammarDb == null) {
@@ -67,29 +65,9 @@ public class ApplicationOther {
         routes.get(prefix + "/advarotny/{word}", new Advarotny(grammarDB));
         routes.get(prefix + "/amonimy/{type}/{level}", new Amonimy(grammarDB, grFinder));
 
-        Kanvertary conv = new Kanvertary(grFinder, null, null, synthUrl);
+        Kanvertary conv = new Kanvertary(grFinder);
         routes.post(prefix + "/rest/conv/fanetyka", ctx -> {
             ctx.contentType("text/html; charset=UTF-8").result(conv.fanetykaLog(ctx.body()));
-        });
-        routes.post(prefix + "/rest/conv/naciski", ctx -> {
-            ctx.contentType("text/plain; charset=UTF-8").result(conv.naciski(ctx.body()));
-        });
-        routes.post(prefix + "/rest/conv/synth", ctx -> {
-            String text = ctx.body();
-            if (text.isBlank()) {
-                ctx.status(400).result("Пусты тэкст");
-                return;
-            }
-//            if (text.trim().startsWith("")) {
-//                String r = conv.processBook(text.trim().substring(synthBookPrefix.length()).trim());
-//                ctx.contentType("text/plain; charset=UTF-8").result(r);
-//                return;
-//            }
-            if (text.length() > 2000) {
-                text = text.substring(0, 2000);
-            }
-
-            conv.synth(text, ctx);
         });
     }
 

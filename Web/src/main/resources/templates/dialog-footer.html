@@ -1,0 +1,104 @@
+</div>
+<script>
+    function updateStatusDisplay(data) {
+        let info = 'Статус: ' + data.status;
+        if (data.step_name) {
+            info += '<br/>Крок ' + data.step_index + ' з ' + data.total_steps + ': ' + data.step_name;
+        }
+        if (data.step_progress_percent !== null && data.step_progress_percent !== undefined) {
+            info += '<br/>Прагрэс: ' + Number(data.step_progress_percent).toFixed(1) + '%';
+        }
+        if (data.status === 'error' && data.error_message) {
+            info += '<br/><span class="text-danger">Памылка: ' + data.error_message + '</span>';
+        }
+        $('#status').html(info);
+    }
+
+    function showLog() {
+        $("#log").show();
+        $("#logShow").hide();
+    }
+
+    var ttsTimeoutId = null;
+    function checkTTSStatus(id, onComplete) {
+        fetch('/tts/' + id)
+        .then(res => {
+            if (!res.ok) {
+                throw new Error("HTTP " + res.status + " " + res.statusText);
+            }
+            return res.json();
+        })
+        .then(statusData => {
+            updateStatusDisplay(statusData);
+
+            if (statusData.status === 'завершана') {
+                if (ttsTimeoutId) clearTimeout(ttsTimeoutId);
+                ttsTimeoutId = null;
+                $('#spinner').hide();
+                onComplete(id);
+            } else if (statusData.status === 'памылка') {
+                if (ttsTimeoutId) clearTimeout(ttsTimeoutId);
+                ttsTimeoutId = null;
+                $('#spinner').hide();
+                $('#status').html('<span class="text-danger">Памылка: ' + (statusData.error_message || 'Невядомая памылка') + '</span>');
+            } else {
+                // Калі статус яшчэ не канчатковы — робім наступны запыт праз 5 секунд
+                ttsTimeoutId = setTimeout(() => checkTTSStatus(id, onComplete), 5000);
+            }
+        })
+        .catch(err => {
+            $('#status').html('<span class="text-danger">Памылка падчас праверкі статусу: ' + err.message + '</span>');
+            if (ttsTimeoutId) clearTimeout(ttsTimeoutId);
+            ttsTimeoutId = null;
+        });
+    }
+
+    function startTTSRequest(pipeline, text, onComplete) {
+        if (ttsTimeoutId) {
+            clearTimeout(ttsTimeoutId);
+            ttsTimeoutId = null;
+        }
+
+        $('#status').html('');
+        $('#spinner').show();
+        $("#out").html('');
+
+        fetch('/tts/start', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                text: text,
+                pipeline: pipeline
+            })
+        })
+        .then(r => {
+            if (!r.ok) {
+                throw new Error("HTTP " + r.status + " " + r.statusText);
+            }
+            return r.json();
+        })
+        .then(data => {
+            updateStatusDisplay(data);
+            const id = data.id;
+            // Першы запыт праз 1 секунду (1000 мс)
+            ttsTimeoutId = setTimeout(() => checkTTSStatus(id, onComplete), 1000);
+        })
+        .catch(err => {
+            $('#spinner').hide();
+            $('#status').html('<span class="text-danger">Памылка запуску: ' + err.message + '</span>');
+        });
+    }
+</script>
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-40650744-1', 'auto');
+    ga('send', 'pageview');
+
+</script>
+</body></html>
