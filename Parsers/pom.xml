@@ -19,6 +19,11 @@
 			<artifactId>gson</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.github.luben</groupId>
+			<artifactId>zstd-jni</artifactId>
+			<version>1.5.7-25</version>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>
 			<version>1.28.0</version>

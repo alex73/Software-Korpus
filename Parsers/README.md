@@ -5,7 +5,15 @@
 
 Кожны .zip файл утрымлівае CTF файлы для падкорпусу. Вынікі пошуку паказваюцца ў адмысловым парадку:
 спачатку па падкорпусах (.zip файлы могуць мець назвы 01.teksty.zip, 02.kankardans.zip, etc.) а ўсярэдзіне
-кожнага падкорпусу - па парадку файлаў у zip. Звычайна парадак падкорпусаў:  skaryna, kankardans, teksty, pieraklady, sajty, wiki, nierazabranaje, dyjalektny.
+кожнага падкорпусу - па парадку файлаў у zip. Звычайна парадак падкорпусаў:  skaryna, kankardans, teksty, pieraklady, sajty, wiki, nierazabranaje, dyjalektny, hplt.
+
+## HpltParser
+Канвертуе маналінгвальныя тэксты ў фармаце HPLT v3 (`https://hplt-project.org/datasets/v3.0`), распаўсюджаныя як сціснутыя файлы `*.jsonl.zst`.
+Запуск:
+```sh
+java -cp Parsers/target/linguistics.korpus.parsers-1.0.0.jar org.alex73.korpus.parsers.HpltParser <каталог з файламі *.jsonl.zst ці асобны файл> <каталог для захавання падкорпуса ці шлях да .zip>
+```
+Выніковы архіў па змоўчанні: `09.hplt.zip`.
 
 # Фармат файлаў "Corpus Text Format"
 Кожны файл утрымлівае звесткі пра твор і спіс параграфаў. Ён запісаныя ў фармаце json і мае структуру (якая прапісаная ў Ctf.java):
