@@ -6,11 +6,20 @@ import java.util.TreeMap;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.IntRange;
+import org.apache.lucene.document.KnnFloatVectorField;
 import org.apache.lucene.index.DocValuesType;
 import org.apache.lucene.index.IndexOptions;
 import org.apache.lucene.index.IndexableFieldType;
+import org.apache.lucene.index.VectorSimilarityFunction;
 
 public class LuceneFields {
+
+    public static final int VECTOR_DIMENSIONS = 1024;
+    public static final VectorSimilarityFunction VECTOR_SIMILARITY = VectorSimilarityFunction.COSINE;
+
+    public static String getVectorFieldName(String lang) {
+        return lang + "_vector";
+    }
 
     public static final FieldType TYPE_STORED_NOTINDEXED = new FieldType();
     static {
@@ -62,6 +71,7 @@ public class LuceneFields {
         public Field fieldTextSource;
         public IntRange fieldTextCreationYear;
         public IntRange fieldTextPublishedYear;
+        public KnnFloatVectorField fieldVector;
     }
 
     public Field fieldTextSubcorpus;
@@ -73,6 +83,10 @@ public class LuceneFields {
     public FieldInt fieldTextID;
 
     public LuceneFields(String[] allLanguages) {
+        this(allLanguages, false);
+    }
+
+    public LuceneFields(String[] allLanguages, boolean withVectors) {
         StringArrayTokenStream emptyStream = new StringArrayTokenStream(new String[0]);
         for (int l = 0; l < allLanguages.length; l++) {
             String lang = allLanguages[l];
@@ -81,6 +95,11 @@ public class LuceneFields {
             byLang.put(lang, lf);
             lf.fieldWordWriteVariant = new Field(lang + "_WordWriteVariant", emptyStream, TYPE_NOTSTORED_INDEXED);
             lf.fieldTagsWriteVariant = new Field(lang + "_TagsWriteVariant", emptyStream, TYPE_NOTSTORED_INDEXED);
+            if (withVectors) {
+                float[] initialVector = new float[VECTOR_DIMENSIONS];
+                initialVector[0] = 1.0f;
+                lf.fieldVector = new KnnFloatVectorField(getVectorFieldName(lang), initialVector, VECTOR_SIMILARITY);
+            }
             if (l == 0) {
                 // толькі для першай мовы
                 lf.fieldTextAuthor = new Field("textAuthor", emptyStream, TYPE_NOTSTORED_INDEXED);

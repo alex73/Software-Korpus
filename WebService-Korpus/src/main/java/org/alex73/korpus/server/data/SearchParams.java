@@ -34,4 +34,5 @@ public class SearchParams implements Serializable {
     public StandardTextRequest textStandard;
     public boolean chainsInParagraph;
     public List<ChainRequest> chains = new ArrayList<>();
+    public String semanticQuery;
 }

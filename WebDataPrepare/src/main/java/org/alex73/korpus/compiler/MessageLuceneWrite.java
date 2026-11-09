@@ -18,5 +18,6 @@ public class MessageLuceneWrite {
         public String[] values;
         public String[] dbGrammarTags;
         // public String[] lemmas;
+        public float[] vector;
     }
 }

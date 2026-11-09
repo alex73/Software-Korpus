@@ -143,6 +143,10 @@ public class LuceneFilter {
         return lucene.search(query, latest, maxResults, filter);
     }
 
+    public <T> List<T> searchVector(Query query, LatestMark latest, int maxResults, DocFilter<T> filter) throws Exception {
+        return lucene.searchVector(query, latest, maxResults, filter);
+    }
+
     public Document getSentence(int docID) throws Exception {
         return lucene.getSentence(docID);
     }

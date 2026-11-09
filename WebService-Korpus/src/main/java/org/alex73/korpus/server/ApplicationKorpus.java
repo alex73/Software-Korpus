@@ -10,6 +10,7 @@ import org.alex73.grammardb.tags.IGrammarTags;
 import org.alex73.grammardb.tags.TagLetter;
 import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.base.TextInfo;
+import org.alex73.korpus.embedding.EmbeddingClient;
 import org.alex73.korpus.languages.DBTagsFactory.KeyValue;
 import org.alex73.korpus.languages.ILanguage;
 import org.alex73.korpus.languages.LanguageFactory;
@@ -50,6 +51,7 @@ public class ApplicationKorpus {
     private Set<String> blacklistedAuthors;
 
     public LuceneFilter processKorpus;
+    public EmbeddingClient embeddingClient;
 
     public ApplicationKorpus(String configDir, String cachePath, String languages, String grammarDbDir, GrammarDB2 grammarDb, GrammarFinder grFinder) throws Exception {
         this.configDir = configDir;
@@ -62,6 +64,17 @@ public class ApplicationKorpus {
         stat = loadSettings(this.korpusCachePath + "/stat.properties");
         infos = new TextInfos(this.korpusCachePath + "/info.mapdb");
         loadAuthors(configDir);
+
+        String embUrl = System.getenv("EMBEDDING_URL");
+        String embModel = System.getenv("EMBEDDING_MODEL");
+        if (embModel == null || embModel.isBlank()) {
+            embModel = "BAAI/bge-m3";
+        }
+        String embApiKey = System.getenv("EMBEDDING_API_KEY");
+        if (embUrl != null && !embUrl.isBlank()) {
+            embeddingClient = new EmbeddingClient(embUrl, embModel, embApiKey, null);
+            System.out.println("Initialized EmbeddingClient with URL: " + embUrl + ", model: " + embModel);
+        }
 
         grFiller = new StaticGrammarFiller2(grFinder);
         processKorpus = new LuceneFilter(this.korpusCachePath + "/lucene", this.languages);
@@ -301,6 +314,7 @@ public class ApplicationKorpus {
                     break;
             }
         }
+        searchInitial.hasSemanticSearch = (embeddingClient != null);
     }
 
     protected void loadAuthors(String configDir) throws Exception {

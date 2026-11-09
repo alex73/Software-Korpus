@@ -20,6 +20,7 @@ import org.alex73.grammardb.GrammarFinder;
 import org.alex73.korpus.base.GrammarDBUtils;
 import org.alex73.korpus.base.StaticGrammarFiller2;
 import org.alex73.korpus.base.TextInfo;
+import org.alex73.korpus.embedding.EmbeddingClient;
 import org.alex73.korpus.text.parser.IProcess;
 import org.alex73.korpus.utils.KorpusFileUtils;
 import org.mapdb.DB;
@@ -71,6 +72,10 @@ public class PrepareCache4 {
         writeToLucene = getBooleanKey("write", args, true, "Write to Lucene index");
         processStat = getBooleanKey("stat", args, true, "Collect statistics");
 
+        String embeddingUrl = getKey("embedding-url", args, "Embedding service endpoint (TEI or Ollama, e.g. http://localhost:8080/v1/embeddings)");
+        String embeddingModel = getKey("embedding-model", args, "Embedding model name (default: BAAI/bge-m3)");
+        String embeddingApiKey = getKey("embedding-api-key", args, "Embedding API key (optional)");
+
         INPUT = Paths.get(input);
         OUTPUT = Paths.get(output);
 
@@ -86,7 +91,14 @@ public class PrepareCache4 {
         Step1Split.init(languages, errors);
         Step2Grammar.init(grFiller);
         Step3Stat.init(OUTPUT, grammarDB, grFinder);
-        Step5WriteLucene.init(languages, writeToLucene, cacheForProduction, OUTPUT, 2 * 1024);
+        boolean withVectors = embeddingUrl != null && !embeddingUrl.isBlank();
+        if (withVectors) {
+            LOG.info("Initializing EmbeddingClient with URL: " + embeddingUrl);
+            Step4PrepareLucene.init(new EmbeddingClient(embeddingUrl, embeddingModel, embeddingApiKey, null));
+        } else {
+            Step4PrepareLucene.init(null);
+        }
+        Step5WriteLucene.init(languages, writeToLucene, cacheForProduction, OUTPUT, 2 * 1024, withVectors);
 
         LOG.info("Process...");
         long be = System.currentTimeMillis();
@@ -110,6 +122,7 @@ public class PrepareCache4 {
 
         LOG.info("Finishing lucene...");
         Step5WriteLucene.finish(); // finish or shutdown ?
+        Step4PrepareLucene.shutdown();
         long af = System.currentTimeMillis();
         LOG.info("Process time: " + ((af - be) / 1000) + " seconds");
 

@@ -108,30 +108,41 @@ class ResultSearchOutRow {
 class ResultSearchOut {
     public rows: ResultSearchOutRow[] = [];
     
-    constructor(olist:any[], wordsInRequest:number) {
+    constructor(olist:any[], wordsInRequest:number, highlightWords: boolean = true) {
       for(let o of olist) {
       for(var i = 0; i < o.doc.subtexts.length; i++) {
         let r: SearchResults = new SearchResults(o, i);
-
-        let num = this.getRequestedWordsCountInResult(r.text);
-        let wordsCount;
-        switch(num) {
-          case 0:
-          case 1:
-              wordsCount = 5;
-              break;
-          case 2:
-              wordsCount = 3;
-              break;
-          case 3:
-              wordsCount = 2;
-              break;
-          default:
-              wordsCount = 2;
-              break;
-        }
         let out: ResultSearchOutRow = new ResultSearchOutRow(r);
-        this.outputText(r.text, out, wordsCount, 0, " ... ");
+
+        if (!highlightWords) {
+          if (r.text && r.text.sentences) {
+            for (let sent of r.text.sentences) {
+              for (let w of sent.words) {
+                w.requestedWord = false;
+                out.words.push(w);
+              }
+            }
+          }
+        } else {
+          let num = this.getRequestedWordsCountInResult(r.text);
+          let wordsCount;
+          switch(num) {
+            case 0:
+            case 1:
+                wordsCount = 5;
+                break;
+            case 2:
+                wordsCount = 3;
+                break;
+            case 3:
+                wordsCount = 2;
+                break;
+            default:
+                wordsCount = 2;
+                break;
+          }
+          this.outputText(r.text, out, wordsCount, 0, " ... ");
+        }
         this.rows.push(out);
       }
       }

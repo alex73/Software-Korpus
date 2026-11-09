@@ -11,6 +11,7 @@ class InitialData {
     public preselectedSubcorpuses: string;
     public localization: { [key:string]:{ [key:string]:string; } };
     public showControls: { [key:string]:string[]; };
+    public hasSemanticSearch: boolean;
 }
 
 class InitialDataStat {

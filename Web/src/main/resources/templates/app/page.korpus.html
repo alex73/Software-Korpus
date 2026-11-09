@@ -11,6 +11,9 @@
   <li class="nav-item">
     <a id="tabSpisy" class="nav-link" href="#" onClick="korpusui.switchMode('spisy'); return false;">${messages.korpus_subpage_concordance_lists}</a>
   </li>
+  <li class="nav-item">
+    <a id="tabSemantic" class="nav-link" href="#" onClick="korpusui.switchMode('semantic'); return false;">${messages.korpus_subpage_semantic}</a>
+  </li>
   </ul>
 <br/>
     <div id="status" class="alert alert-info fade show" role="alert"></div>
@@ -30,6 +33,11 @@
                         <button id="btnChainAddSentence" type="button" class="btn btn-outline-primary btn-sm mx-2" onClick="korpusui.chainsInParagraph = false; korpusui.addRow(true);">Дадаць словы у межах сказа</button>
                         <button id="btnChainAddParagraph" type="button" class="btn btn-outline-primary btn-sm mx-2" onClick="korpusui.chainsInParagraph = true; korpusui.addRow(true);">Дадаць словы у межах абзаца</button>
                     </div>
+                </div>
+            </div>
+            <div id="divSemantic" style="display: none;">
+                <div class="row">
+                    <textarea id="inputSemanticQuery" class="form-control" rows="3" placeholder="Увядзіце запыт для семантычнага пошуку..."></textarea>
                 </div>
             </div>
             <div id="divCluster">

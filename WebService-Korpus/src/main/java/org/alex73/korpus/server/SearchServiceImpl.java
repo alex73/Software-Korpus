@@ -8,11 +8,14 @@ import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.server.data.*;
 import org.alex73.korpus.server.data.WordRequest.WordMode;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
+import org.alex73.korpus.server.engine.LuceneFields;
 import org.alex73.korpus.server.text.BinaryParagraphReader;
 import org.alex73.korpus.text.structure.corpus.Paragraph;
 import org.alex73.korpus.utils.KorpusFileUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.KnnFloatVectorQuery;
+import org.apache.lucene.search.Query;
 
 import java.io.FileNotFoundException;
 import java.nio.file.Paths;
@@ -81,6 +84,9 @@ public class SearchServiceImpl {
     public SearchResult search(SearchRequest rq, String remoteAddr) throws Exception {
         LOGGER.info(">> Request from " + remoteAddr + " in " + Thread.currentThread().getName());
         try {
+            if (rq.params.semanticQuery != null && !rq.params.semanticQuery.isBlank()) {
+                return searchSemantic(rq, remoteAddr);
+            }
             ILanguage lang = LanguageFactory.get(rq.params.lang);
             SearchParams params = rq.params;
             LatestMark latest = rq.latest;
@@ -119,6 +125,11 @@ public class SearchServiceImpl {
     public SearchTotalResult searchTotalCount(SearchRequest rq, String remoteAddr) throws Exception {
         LOGGER.info(">> Request total count from " + remoteAddr);
         try {
+            if (rq.params.semanticQuery != null && !rq.params.semanticQuery.isBlank()) {
+                SearchTotalResult result = new SearchTotalResult();
+                result.error = "Семантычны пошук не падтрымлівае падлік агульнай колькасці вынікаў";
+                return result;
+            }
             ILanguage lang = LanguageFactory.get(rq.params.lang);
             SearchParams params = rq.params;
             params.chains.forEach(ch -> ch.words.forEach(w -> checkWord(lang, w)));
@@ -144,6 +155,73 @@ public class SearchServiceImpl {
             LOGGER.log(Level.SEVERE, "<< Result error", ex);
             throw ServerError.internalError();
         }
+    }
+
+    private SearchResult searchSemantic(SearchRequest rq, String remoteAddr) throws Exception {
+        if (app.embeddingClient == null) {
+            SearchResult result = new SearchResult();
+            result.error = "Семантычны пошук не наладжаны (адсутнічае сэрвіс эмбедынгаў)";
+            return result;
+        }
+        SearchParams params = rq.params;
+        if (params.semanticQuery == null || params.semanticQuery.trim().isEmpty()) {
+            SearchResult result = new SearchResult();
+            result.foundIDs = new int[0];
+            result.hasMore = false;
+            result.latest = new LatestMark();
+            return result;
+        }
+        LatestMark latest = rq.latest;
+        if (latest == null) {
+            latest = new LatestMark();
+        }
+
+        float[] queryVector = app.embeddingClient.getEmbedding(params.semanticQuery.trim());
+        String fieldName = LuceneFields.getVectorFieldName(params.lang);
+
+        BooleanQuery.Builder textFilterBuilder = new BooleanQuery.Builder();
+        LuceneFilter process = app.processKorpus;
+        if (params.textStandard != null) {
+            process.addKorpusTextFilter(params.lang, textFilterBuilder, params.textStandard);
+        }
+        BooleanQuery textFilter = textFilterBuilder.build();
+        Query preFilter = textFilter.clauses().isEmpty() ? null : textFilter;
+
+        KnnFloatVectorQuery vectorQuery = new KnnFloatVectorQuery(fieldName, queryVector, Settings.KORPUS_SEMANTIC_SEARCH_RESULTS, preFilter);
+
+        ILanguage lang = LanguageFactory.get(params.lang);
+        List<Integer> found = process.searchVector(vectorQuery, latest, Settings.KORPUS_SEMANTIC_SEARCH_RESULTS, filterDocumentsForSemantic(params, lang));
+
+        SearchResult result = new SearchResult();
+        result.hasMore = found.size() >= Settings.KORPUS_SEMANTIC_SEARCH_RESULTS;
+        result.foundIDs = new int[found.size()];
+        for (int i = 0; i < result.foundIDs.length; i++) {
+            result.foundIDs[i] = found.get(i);
+        }
+        result.latest = latest;
+        LOGGER.info("<< Semantic Result: found: " + result.foundIDs.length + " hasMore:" + result.hasMore);
+        return result;
+    }
+
+    private LuceneDriverRead.DocFilter<Integer> filterDocumentsForSemantic(SearchParams params, ILanguage lang) {
+        return new LuceneDriverRead.DocFilter<>() {
+            public Integer processDoc(int docID) {
+                try {
+                    Document doc = app.processKorpus.getSentence(docID);
+                    TextInfo textInfo = app.infos.textInfos.get(app.processKorpus.getTextID(doc));
+                    if (app.isAuthorsBlacklisted != null && textInfo != null && textInfo.subtexts != null) {
+                        for (TextInfo.Subtext st : textInfo.subtexts) {
+                            if (st.authors != null && app.isAuthorsBlacklisted.test(st.authors)) {
+                                return null;
+                            }
+                        }
+                    }
+                    return docID;
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        };
     }
 
     public ClusterResults calculateClusters(ClusterParams params, String remoteAddr) throws Exception {
@@ -180,8 +258,12 @@ public class SearchServiceImpl {
         ILanguage lang = LanguageFactory.get(rq.params.lang);
         SearchParams params = rq.params;
         int[] list = rq.list;
-        params.chains.forEach(ch -> ch.words.forEach(w -> findAllLemmas(lang, w)));
-        WordsDetailsChecks checks = WordsDetailsChecks.createForSearch(app.isAuthorsBlacklisted, lang, params.chains, params.chainsInParagraph, app.grFiller);
+        boolean isSemantic = params.semanticQuery != null && !params.semanticQuery.isBlank();
+        WordsDetailsChecks checks = null;
+        if (!isSemantic && params.chains != null) {
+            params.chains.forEach(ch -> ch.words.forEach(w -> findAllLemmas(lang, w)));
+            checks = WordsDetailsChecks.createForSearch(app.isAuthorsBlacklisted, lang, params.chains, params.chainsInParagraph, app.grFiller);
+        }
         try {
             SearchResults[] result = new SearchResults[list.length];
             for (int i = 0; i < list.length; i++) {
@@ -191,7 +273,9 @@ public class SearchServiceImpl {
                 result[i].doc = restoreTextInfo(doc);
                 result[i].text = restoreText(doc);
                 // mark result words
-                checks.isAllowed(result[i].doc, result[i].text);
+                if (checks != null) {
+                    checks.isAllowed(result[i].doc, result[i].text);
+                }
             }
             return result;
         } catch (ServerError ex) {

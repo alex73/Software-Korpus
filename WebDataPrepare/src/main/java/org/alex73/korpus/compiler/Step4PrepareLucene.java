@@ -2,6 +2,7 @@ package org.alex73.korpus.compiler;
 
 import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.base.TextInfo.Subtext;
+import org.alex73.korpus.embedding.EmbeddingClient;
 import org.alex73.korpus.languages.ILanguage;
 import org.alex73.korpus.languages.LanguageFactory;
 import org.alex73.korpus.server.text.BinaryParagraphWriter;
@@ -9,7 +10,9 @@ import org.alex73.korpus.text.structure.corpus.Paragraph;
 import org.alex73.korpus.text.structure.corpus.Sentence;
 import org.alex73.korpus.text.structure.corpus.Word;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -19,6 +22,16 @@ import java.util.TreeSet;
  * граматычных тэгаў і пераўтварэнне структур тэксту ў бінарны фармат для захоўвання ў індэксе.
  */
 public class Step4PrepareLucene {
+    private static EmbeddingClient embeddingClient;
+
+    public static void init(EmbeddingClient client) {
+        embeddingClient = client;
+    }
+
+    public static void shutdown() {
+        embeddingClient = null;
+    }
+
     public static MessageLuceneWrite run(MessageParsedText text) throws Exception {
         BinaryParagraphWriter pwr = new BinaryParagraphWriter();
 
@@ -60,6 +73,24 @@ public class Step4PrepareLucene {
                 pol.values = values.toArray(new String[0]);
                 pol.dbGrammarTags = dbGrammarTags.toArray(new String[0]);
                 po.byLang.put(text.languages[l].lang, pol);
+            }
+        }
+
+        if (embeddingClient != null) {
+            for (int l = 0; l < text.languages.length; l++) {
+                String lang = text.languages[l].lang;
+                List<String> plainTexts = new ArrayList<>(out.paragraphs.length);
+                for (int i = 0; i < out.paragraphs.length; i++) {
+                    Paragraph p = text.languages[l].paragraphs[i];
+                    plainTexts.add(p != null ? p.toPlainText() : "");
+                }
+                List<float[]> embeddings = embeddingClient.getEmbeddings(plainTexts);
+                for (int i = 0; i < out.paragraphs.length; i++) {
+                    MessageLuceneWrite.LuceneParagraphLang pol = out.paragraphs[i].byLang.get(lang);
+                    if (pol != null && i < embeddings.size()) {
+                        pol.vector = embeddings.get(i);
+                    }
+                }
             }
         }
 

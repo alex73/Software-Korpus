@@ -89,6 +89,11 @@ class KorpusService {
 		if (this.initial.languages.length > 1) {
 			$('#parallel-filter').show();
 		}
+		if (this.initial.hasSemanticSearch) {
+			$('#tabSemantic').show();
+		} else {
+			$('#tabSemantic').hide();
+		}
 		let ps = window.location.hash;
 		let mode = 'search';
 		if (ps.charAt(0) == '#') {
@@ -286,11 +291,15 @@ class KorpusService {
 						switch (this.requestedTypeSearch) {
 							case 'search':
 								this.resultKwic = null;
-								this.resultSearch = new ResultSearchOut(json, this.requestedParams.chains.length);
+								this.resultSearch = new ResultSearchOut(json, this.requestedParams.chains ? this.requestedParams.chains.length : 0);
+								break;
+							case 'semantic':
+								this.resultKwic = null;
+								this.resultSearch = new ResultSearchOut(json, 0, false);
 								break;
 							case 'kwic':
 								this.resultSearch = null;
-								this.resultKwic = new ResultKwicOut(json, this.requestedParams.chains.length);
+								this.resultKwic = new ResultKwicOut(json, this.requestedParams.chains ? this.requestedParams.chains.length : 0);
 								break;
 						}
 						this.currentPage = page;

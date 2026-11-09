@@ -13,4 +13,24 @@ public class Paragraph implements Serializable {
     public String sourceLinkSuffix;
     public String previewLinkSuffix;
     public Sentence[] sentences;
+
+    public String toPlainText() {
+        if (sentences == null || sentences.length == 0) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (Sentence s : sentences) {
+            if (s != null && s.words != null) {
+                for (Word w : s.words) {
+                    if (w.word != null) {
+                        sb.append(w.word);
+                    }
+                    if (w.tail != null) {
+                        sb.append(w.tail);
+                    }
+                }
+            }
+        }
+        return sb.toString().trim();
+    }
 }

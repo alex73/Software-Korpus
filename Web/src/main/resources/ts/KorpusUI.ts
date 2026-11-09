@@ -15,6 +15,9 @@ class KorpusUI {
 		this.hideStatusError();
 	}
 	getMode(): string {
+		if (document.getElementById("tabSemantic") && document.getElementById("tabSemantic").classList.contains('active')) {
+			return 'semantic';
+		}
 		if (document.getElementById("tabKWIC").classList.contains('active')) {
 			return 'kwic';
 		}
@@ -25,11 +28,13 @@ class KorpusUI {
 	}
 	switchMode(mode: string) {
 		$('#tabSearch').removeClass("active");
+		$('#tabSemantic').removeClass("active");
 		$('#tabKWIC').removeClass("active");
 		$('#tabCluster').removeClass("active");
 		$('#tabSpisy').removeClass("active");
 		$('#divInputSearch').hide();
 		$('#divSearch').hide();
+		$('#divSemantic').hide();
 		$('#divCluster').hide();
 		$('#divSpisy').hide();
 		switch (mode) {
@@ -38,6 +43,11 @@ class KorpusUI {
 				$('#divInputSearch').show();
 				$('#divSearch').show();
 				$(".korpus-words-searchonly").show();
+				break;
+			case "semantic":
+				$('#tabSemantic').addClass("active");
+				$('#divInputSearch').show();
+				$('#divSemantic').show();
 				break;
 			case "kwic":
 				$('#tabKWIC').addClass("active");
@@ -273,6 +283,11 @@ class KorpusUI {
 	collectFromScreenSearch(): SearchParams {
 		let requestedParams: SearchParams = new SearchParams();
 		this.collectFromScreenBase(requestedParams);
+		if (this.getMode() == 'semantic') {
+			let input = <HTMLTextAreaElement>document.getElementById('inputSemanticQuery');
+			requestedParams.semanticQuery = input ? fulltrim(input.value) : "";
+			return requestedParams;
+		}
 		let rows: NodeListOf<HTMLElement> = this.getRows();
 		if (rows.length > 1) {
 			requestedParams.chainsInParagraph = this.chainsInParagraph;
@@ -379,6 +394,14 @@ class KorpusUI {
 				} else {
 					this.addRow(true);
 				}
+				break;
+			case 'semantic':
+				let semParams: SearchParams = <SearchParams>data;
+				if (semParams && semParams.semanticQuery) {
+					let el = <HTMLTextAreaElement>document.getElementById('inputSemanticQuery');
+					if (el) el.value = semParams.semanticQuery;
+				}
+				this.addRow(true);
 				break;
 			case 'cluster':
 				let cp: ClusterParams = <ClusterParams>data;

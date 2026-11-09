@@ -6,6 +6,7 @@ class BaseParams {
 class SearchParams extends BaseParams {
     public chainsInParagraph: boolean;
     public chains: ChainRequest[];
+    public semanticQuery: string;
 }
 
 class ClusterParams extends BaseParams {

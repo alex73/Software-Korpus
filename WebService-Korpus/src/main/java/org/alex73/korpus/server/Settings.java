@@ -26,6 +26,7 @@ package org.alex73.korpus.server;
  */
 public class Settings {
     public static final int KORPUS_SEARCH_RESULT_PAGE = 100;
+    public static final int KORPUS_SEMANTIC_SEARCH_RESULTS = 200;
     public static final int KORPUS_SEARCH_TOTAL_MAX_COUNT = 1000000;
     public static final int GRAMMAR_SEARCH_RESULT_PAGE = Integer.MAX_VALUE;
 }

@@ -29,7 +29,7 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 /**
  * Token stream which returns each string as separate token.
  */
-public class StringArrayTokenStream extends TokenStream {
+public final class StringArrayTokenStream extends TokenStream {
     String[] data;
     int index;
     final CharTermAttribute token = addAttribute(CharTermAttribute.class);

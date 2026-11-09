@@ -33,6 +33,7 @@ public class Step5WriteLucene {
     private static boolean realWrite;
     private static boolean cacheForProduction;
     private static int bufferSizeMb;
+    private static boolean withVectors;
 
     private static IndexWriter globalIndexWriter;
     private static Directory globalDir;
@@ -54,7 +55,7 @@ public class Step5WriteLucene {
         StringArrayTokenStream styleGenreStream = new StringArrayTokenStream(EMPTY_STRINGARRAY);
 
         ReusableBuffer() {
-            fields = new LuceneFields(allLanguages);
+            fields = new LuceneFields(allLanguages, withVectors);
             document = new Document();
             fields.fieldTextStyleGenre.setTokenStream(styleGenreStream);
 
@@ -93,12 +94,17 @@ public class Step5WriteLucene {
     private static final ThreadLocal<ReusableBuffer> threadBuffer = ThreadLocal.withInitial(ReusableBuffer::new);
 
     public static void init(String[] languages, boolean rw, boolean cfp, Path outDir, int bs) {
+        init(languages, rw, cfp, outDir, bs, false);
+    }
+
+    public static void init(String[] languages, boolean rw, boolean cfp, Path outDir, int bs, boolean wv) {
         allLanguages = languages;
         realWrite = rw;
         cacheForProduction = cfp;
         rootDir = outDir;
         bufferSizeMb = bs;
-        LOG.info("Lucene will use " + bufferSizeMb + "mb");
+        withVectors = wv;
+        LOG.info("Lucene will use " + bufferSizeMb + "mb, withVectors: " + withVectors);
 
         if (realWrite) {
             try {
@@ -211,6 +217,17 @@ public class Step5WriteLucene {
                             lf.fieldTextPublishedYear.setRangeValues(new int[]{range[0]}, new int[]{range[1]});
                         }
                     }
+
+                    if (lf.fieldVector != null) {
+                        if (isValidVector(pLang.vector)) {
+                            lf.fieldVector.setVectorValue(pLang.vector);
+                            if (b.document.getField(lf.fieldVector.name()) == null) {
+                                b.document.add(lf.fieldVector);
+                            }
+                        } else {
+                            b.document.removeFields(lf.fieldVector.name());
+                        }
+                    }
                 } else {
                     sl.word.setData(EMPTY_STRINGARRAY);
                     sl.tags.setData(EMPTY_STRINGARRAY);
@@ -221,6 +238,9 @@ public class Step5WriteLucene {
                     }
                     if (lf.fieldTextPublishedYear != null) {
                         lf.fieldTextPublishedYear.setRangeValues(new int[]{Integer.MAX_VALUE}, new int[]{Integer.MAX_VALUE});
+                    }
+                    if (lf.fieldVector != null) {
+                        b.document.removeFields(lf.fieldVector.name());
                     }
                 }
             }
@@ -235,6 +255,18 @@ public class Step5WriteLucene {
                 }
             }
         }
+    }
+
+    private static boolean isValidVector(float[] v) {
+        if (v == null || v.length != LuceneFields.VECTOR_DIMENSIONS) {
+            return false;
+        }
+        for (float f : v) {
+            if (f != 0.0f) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void finish() throws Exception {

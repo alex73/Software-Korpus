@@ -21,6 +21,7 @@ public class InitialData {
     public String[] kankardansnyjaSpisy;
     public String preselectedSubcorpuses;
     public Map<String, String[]> showControls;
+    public boolean hasSemanticSearch;
 
     public static class Stat {
         public String name;
