@@ -2,6 +2,9 @@ package org.alex73.korpus.embedding;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
+import org.alex73.korpus.rerank.RerankClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -13,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EmbeddingClient {
+    private final static Logger LOGGER = LoggerFactory.getLogger(EmbeddingClient.class);
+
     private static final Gson GSON = new Gson();
 
     private final URI endpointUri;
@@ -20,7 +25,7 @@ public class EmbeddingClient {
     private final String apiKey;
     private final HttpClient httpClient;
 
-    public EmbeddingClient(String endpointUrl, String model) {
+    protected EmbeddingClient(String endpointUrl, String model) {
         this(endpointUrl, model, null, HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build());
     }
 
@@ -37,8 +42,11 @@ public class EmbeddingClient {
             }
         }
         this.endpointUri = URI.create(url);
-        this.model = (model != null && !model.isBlank()) ? model : "BAAI/bge-m3";
+        this.model = model;
         this.apiKey = (apiKey != null && !apiKey.isBlank()) ? apiKey : null;
+
+        LOGGER.info("Initialized EmbeddingClient with URL: " + url + ", model: " + this.model);
+
         this.httpClient = httpClient != null ? httpClient : HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
     }
 

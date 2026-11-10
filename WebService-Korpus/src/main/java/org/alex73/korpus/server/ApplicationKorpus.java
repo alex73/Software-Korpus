@@ -1,6 +1,5 @@
 package org.alex73.korpus.server;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.config.RoutesConfig;
 import org.alex73.grammardb.GrammarDB2;
 import org.alex73.grammardb.GrammarFinder;
@@ -9,18 +8,19 @@ import org.alex73.grammardb.structures.Variant;
 import org.alex73.grammardb.tags.IGrammarTags;
 import org.alex73.grammardb.tags.TagLetter;
 import org.alex73.korpus.base.StaticGrammarFiller2;
-import org.alex73.korpus.base.TextInfo;
 import org.alex73.korpus.embedding.EmbeddingClient;
 import org.alex73.korpus.languages.DBTagsFactory.KeyValue;
 import org.alex73.korpus.languages.ILanguage;
 import org.alex73.korpus.languages.LanguageFactory;
+import org.alex73.korpus.rerank.RerankClient;
 import org.alex73.korpus.server.data.ClusterParams;
 import org.alex73.korpus.server.data.GrammarInitial;
 import org.alex73.korpus.server.data.GrammarInitial.GrammarLetter;
 import org.alex73.korpus.server.data.InitialData;
 import org.alex73.korpus.server.engine.TextInfos;
 import org.alex73.korpus.shared.LemmaInfo;
-import org.alex73.korpus.utils.KorpusFileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,6 +33,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ApplicationKorpus {
+    private final static Logger LOGGER = LoggerFactory.getLogger(ApplicationKorpus.class);
+
     private final String configDir;
     public final String korpusCachePath;
     private final String grammarDbDir;
@@ -52,6 +54,7 @@ public class ApplicationKorpus {
 
     public LuceneFilter processKorpus;
     public EmbeddingClient embeddingClient;
+    public RerankClient rerankClient;
 
     public ApplicationKorpus(String configDir, String cachePath, String languages, String grammarDbDir, GrammarDB2 grammarDb, GrammarFinder grFinder) throws Exception {
         this.configDir = configDir;
@@ -67,13 +70,20 @@ public class ApplicationKorpus {
 
         String embUrl = System.getenv("EMBEDDING_URL");
         String embModel = System.getenv("EMBEDDING_MODEL");
-        if (embModel == null || embModel.isBlank()) {
-            embModel = "BAAI/bge-m3";
-        }
         String embApiKey = System.getenv("EMBEDDING_API_KEY");
-        if (embUrl != null && !embUrl.isBlank()) {
+        if (embUrl != null && !embUrl.isBlank() && embModel != null && !embModel.isBlank()) {
             embeddingClient = new EmbeddingClient(embUrl, embModel, embApiKey, null);
-            System.out.println("Initialized EmbeddingClient with URL: " + embUrl + ", model: " + embModel);
+        } else {
+            LOGGER.warn("EMBEDDING_URL or EMBEDDING_MODEL is not set; semantic search is disabled");
+        }
+
+        String rerankUrl = System.getenv("RERANK_URL");
+        String rerankModel = System.getenv("RERANK_MODEL");
+        String rerankApiKey = System.getenv("RERANK_API_KEY");
+        if (rerankUrl != null && !rerankUrl.isBlank() && rerankModel != null && !rerankModel.isBlank()) {
+            rerankClient = new RerankClient(rerankUrl, rerankModel, rerankApiKey, null);
+        } else {
+            LOGGER.warn("RERANK_URL or RERANK_MODEL is not set; reranking is disabled");
         }
 
         grFiller = new StaticGrammarFiller2(grFinder);

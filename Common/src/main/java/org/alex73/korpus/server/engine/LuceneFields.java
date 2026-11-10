@@ -15,7 +15,7 @@ import org.apache.lucene.index.VectorSimilarityFunction;
 public class LuceneFields {
 
     public static final int VECTOR_DIMENSIONS = 1024;
-    public static final VectorSimilarityFunction VECTOR_SIMILARITY = VectorSimilarityFunction.COSINE;
+    public static final VectorSimilarityFunction VECTOR_SIMILARITY = VectorSimilarityFunction.DOT_PRODUCT;
 
     public static String getVectorFieldName(String lang) {
         return lang + "_vector";

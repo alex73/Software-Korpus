@@ -72,8 +72,8 @@ public class PrepareCache4 {
         writeToLucene = getBooleanKey("write", args, true, "Write to Lucene index");
         processStat = getBooleanKey("stat", args, true, "Collect statistics");
 
-        String embeddingUrl = getKey("embedding-url", args, "Embedding service endpoint (TEI or Ollama, e.g. http://localhost:8080/v1/embeddings)");
-        String embeddingModel = getKey("embedding-model", args, "Embedding model name (default: BAAI/bge-m3)");
+        String embeddingUrl = getKey("embedding-url", args, "Embedding service endpoint");
+        String embeddingModel = getKey("embedding-model", args, "Embedding model name");
         String embeddingApiKey = getKey("embedding-api-key", args, "Embedding API key (optional)");
 
         INPUT = Paths.get(input);

@@ -9,6 +9,7 @@ import org.alex73.korpus.server.data.*;
 import org.alex73.korpus.server.data.WordRequest.WordMode;
 import org.alex73.korpus.server.engine.LuceneDriverRead;
 import org.alex73.korpus.server.engine.LuceneFields;
+import org.alex73.korpus.rerank.RerankResult;
 import org.alex73.korpus.server.text.BinaryParagraphReader;
 import org.alex73.korpus.text.structure.corpus.Paragraph;
 import org.alex73.korpus.utils.KorpusFileUtils;
@@ -192,6 +193,10 @@ public class SearchServiceImpl {
         ILanguage lang = LanguageFactory.get(params.lang);
         List<Integer> found = process.searchVector(vectorQuery, latest, Settings.KORPUS_SEMANTIC_SEARCH_RESULTS, filterDocumentsForSemantic(params, lang));
 
+        if (!found.isEmpty()) {
+            found = rerankFoundDocuments(found, params.semanticQuery.trim(), params.lang);
+        }
+
         SearchResult result = new SearchResult();
         result.hasMore = found.size() >= Settings.KORPUS_SEMANTIC_SEARCH_RESULTS;
         result.foundIDs = new int[found.size()];
@@ -201,6 +206,51 @@ public class SearchServiceImpl {
         result.latest = latest;
         LOGGER.info("<< Semantic Result: found: " + result.foundIDs.length + " hasMore:" + result.hasMore);
         return result;
+    }
+
+    private List<Integer> rerankFoundDocuments(List<Integer> found, String query, String lang) {
+        if (app.rerankClient == null) {
+            LOGGER.warning("RerankClient is not configured (RERANK_MODEL not set); returning un-reranked vector search results");
+            return found;
+        }
+        try {
+            List<String> docTexts = new ArrayList<>(found.size());
+            for (int docId : found) {
+                Document doc = app.processKorpus.getSentence(docId);
+                byte[] xml = app.processKorpus.getXML(doc);
+                Paragraph[] ps = new BinaryParagraphReader(xml).read();
+                String text = "";
+                for (Paragraph p : ps) {
+                    if (Objects.equals(p.lang, lang)) {
+                        text = p.toPlainText();
+                        break;
+                    }
+                }
+                if (text.isEmpty() && ps.length > 0) {
+                    text = ps[0].toPlainText();
+                }
+                docTexts.add(text);
+            }
+            List<RerankResult> rerankResults = app.rerankClient.rerank(query, docTexts);
+            List<Integer> reranked = new ArrayList<>(found.size());
+            Set<Integer> seenIndices = new HashSet<>();
+            for (RerankResult r : rerankResults) {
+                int idx = r.getIndex();
+                if (idx >= 0 && idx < found.size() && seenIndices.add(idx)) {
+                    reranked.add(found.get(idx));
+                }
+            }
+            for (int i = 0; i < found.size(); i++) {
+                if (seenIndices.add(i)) {
+                    reranked.add(found.get(i));
+                }
+            }
+            LOGGER.info("Reranked " + found.size() + " documents using model " + app.rerankClient.getModel());
+            return reranked;
+        } catch (Exception ex) {
+            LOGGER.log(Level.WARNING, "Reranking failed; returning un-reranked vector search results", ex);
+            return found;
+        }
     }
 
     private LuceneDriverRead.DocFilter<Integer> filterDocumentsForSemantic(SearchParams params, ILanguage lang) {
