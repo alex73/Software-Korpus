@@ -31,7 +31,7 @@
     function request() {
 		$("audio").hide();
 		startTTSRequest("TTS-OmniVoice", $('#text').val(), function (id) {
-			$("audio").attr('src', '/tts/' + id + '/output.opus');
+			$("audio").attr('src', ttsTaskUrl(id) + '/output.opus');
 			$("audio").show();
 			$("audio")[0].play();
 		});
@@ -64,7 +64,7 @@
 	function reqNaciski() {
 		$("audio").hide();
 		startTTSRequest("StressML", $('#text').val(), function (id) {
-			fetch('/tts/' + id + '/output.txt')
+			fetch(ttsTaskUrl(id) + '/output.txt')
 					.then(res => {
 						if (!res.ok) {
 							throw new Error("HTTP " + res.status + " " + res.statusText);

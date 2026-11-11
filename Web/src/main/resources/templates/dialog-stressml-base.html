@@ -16,7 +16,7 @@
 <script>
     function request() {
         startTTSRequest("StressML", $('#text').val(), function (id) {
-            fetch('/tts/' + id + '/output.txt')
+            fetch(ttsTaskUrl(id) + '/output.txt')
                 .then(res => {
                     if (!res.ok) {
                         throw new Error("HTTP " + res.status + " " + res.statusText);
