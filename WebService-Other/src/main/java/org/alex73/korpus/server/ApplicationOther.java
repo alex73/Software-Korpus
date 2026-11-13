@@ -14,37 +14,18 @@ public class ApplicationOther {
     private final GrammarDB2 grammarDB;
     private final GrammarFinder grFinder;
     private final String cachePath;
+    private final String belvoiceUrl;
     private final List<String> settings;
     private final Map<Character, Set<String>> skipGrammar;
 
-    public ApplicationOther(String configDir, String cachePath, GrammarDB2 grammarDB, GrammarFinder grFinder) throws Exception {
+    public ApplicationOther(String configDir, String cachePath, String belvoiceUrl, GrammarDB2 grammarDB, GrammarFinder grFinder) throws Exception {
         this.grammarDB = grammarDB;
         this.grFinder = grFinder;
         this.cachePath = cachePath;
-    /*
-        String grammarDb = getEnvOrPropOrJndi("GRAMMAR_DB");
-        if (grammarDb == null) {
-            throw new Exception("GRAMMAR_DB is not defined");
-        }
-        synthUrl = getEnvOrPropOrJndi("SYNTH_URL");
-        if (synthUrl == null) {
-            throw new Exception("SYNTH_URL is not defined");
-        }
-        synthBookDir = getEnvOrPropOrJndi("SYNTH_BOOK_DIR");
-        if (synthBookDir == null) {
-            throw new Exception("SYNTH_BOOK_DIR is not defined");
-        }
-        synthBookUrl = getEnvOrPropOrJndi("SYNTH_BOOK_URL");
-        if (synthBookUrl == null) {
-            throw new Exception("SYNTH_BOOK_URL is not defined");
-        }
-        synthBookPrefix = getEnvOrPropOrJndi("SYNTH_BOOK_PREFIX");
-        if (synthBookPrefix == null) {
-            throw new Exception("SYNTH_BOOK_PREFIX is not defined");
-        } */
+        this.belvoiceUrl = belvoiceUrl;
         settings = Files.readAllLines(Paths.get(configDir + "/settings.ini"));
 
-        skipGrammar=  prepareInitialGrammar();
+        skipGrammar = prepareInitialGrammar();
     }
 
 

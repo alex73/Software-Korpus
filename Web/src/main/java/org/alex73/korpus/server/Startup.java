@@ -21,7 +21,9 @@ public class Startup {
         GrammarFinder grFinder = new GrammarFinder(grammarDb);
 
         LOGGER.info("Ствараем /");
-        ApplicationWeb appWeb = new ApplicationWeb();
+        ApplicationWeb appWeb = new ApplicationWeb(
+                getEnv("BELVOICE_URL")
+        );
         LOGGER.info("Ствараем /korpus");
         ApplicationKorpus appKorpus = new ApplicationKorpus(
                 getEnv("KORPUS_CONFIG_DIR"),
@@ -40,6 +42,7 @@ public class Startup {
         ApplicationOther appOther = new ApplicationOther(
                 getEnv("KORPUS_CONFIG_DIR"),
                 getEnv("KORPUS_CACHE_PATH"),
+                getEnv("BELVOICE_URL"),
                 grammarDb, grFinder);
 
         Javalin.create(config -> {

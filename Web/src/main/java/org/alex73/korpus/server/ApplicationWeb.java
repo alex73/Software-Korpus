@@ -21,9 +21,11 @@ public class ApplicationWeb {
 
     public static ApplicationWeb instance;
     private Configuration cfg;
+    private final String belvoiceUrl;
 
-    public ApplicationWeb() throws Exception {
+    public ApplicationWeb(String belvoiceUrl) throws Exception {
         instance = this;
+        this.belvoiceUrl = belvoiceUrl;
 
         messagesBe = ResourceBundle.getBundle("messages", Locale.of("be"));
         messagesEn = ResourceBundle.getBundle("messages", Locale.of("en"));
@@ -91,6 +93,7 @@ public class ApplicationWeb {
                 }
                 context.put("lang", lang);
                 context.put("messages", messages);
+                context.put("belvoiceUrl", belvoiceUrl);
                 ctx.contentType("text/html; charset=UTF-8");
 
                 StringWriter wr = new StringWriter();

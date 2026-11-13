@@ -1,14 +1,9 @@
 </div>
 <script>
-    function showLog() {
-        $("#log").show();
-        $("#logShow").hide();
-    }
-
-    var activeTTSTask = null;
+    let activeTTSTask = null;
 
     function ttsTaskUrl(id) {
-        return '/tts/tasks/' + encodeURIComponent(id);
+        return '${belvoiceUrl}/tasks/' + encodeURIComponent(id);
     }
 
     function stopTTSTask(task, cancel) {
@@ -35,7 +30,7 @@
         $('#spinner').show();
         $("#out").html('');
 
-        fetch('/tts/tasks/start', {
+        fetch('${belvoiceUrl}/tasks/start', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -73,24 +68,16 @@
             };
             task.stream.addEventListener('done', event => {
                 if (activeTTSTask !== task) return;
-                let result;
-                try {
-                    result = JSON.parse(event.data);
-                } catch (error) {
-                    stopTTSTask(task, true);
-                    $('#spinner').hide();
-                    $('#status').text('Памылка адказу сервера: ' + error.message);
-                    return;
-                }
                 stopTTSTask(task, false);
                 $('#spinner').hide();
-                if (result.status === 'завершана') {
-                    $('#status').text('Статус: ' + result.status);
-                    onComplete(task.id);
-                } else {
-                    $('#status').text('Статус: ' + result.status +
-                        (result.error_message ? '. Памылка: ' + result.error_message : ''));
-                }
+                $('#status').text('');
+                onComplete(event.data);
+            });
+            task.stream.addEventListener('error', event => {
+                if (activeTTSTask !== task) return;
+                stopTTSTask(task, false);
+                $('#spinner').hide();
+                $('#status').html('<span class="text-danger">Памылка: ' + event.data + '</span>');
             });
             task.heartbeat = setInterval(() => {
                 fetch(url + '/ping', {method: 'POST'})
@@ -104,12 +91,13 @@
                         }
                     });
             }, 5000);
+            fetch(url + '/ping', {method: 'POST'}).then();
         })
         .catch(err => {
             if (activeTTSTask !== task) return;
             stopTTSTask(task, true);
             $('#spinner').hide();
-            $('#status').text('Памылка запуску: ' + err.message);
+            $('#status').html('<span class="text-danger">Памылка старту апрацоўкі: ' + err.message + '</span>');
         });
     }
 

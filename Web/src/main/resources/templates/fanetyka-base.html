@@ -2,83 +2,57 @@
 <#include "dialog-header.html">
 
 <form onSubmit="request(); return false;">
-	<div class="form-group">
-		<textarea id="text" class="form-control" rows="3" style="font-size: 150%"></textarea>
-		<ul>
-		<li>улічваецца літара ґ (перадае выбухны гук [g]) - ґанак</li>
-		<li style="color:red">прыстаўкі раім аддзяляць ад кораня знакам "|" - ад|жаць</li>
-		<li>націскі пазначаюцца знакам плюс (+) - мяжа+</li>
-		<li>націскі аўтаматычна расстаўляюцца ў адпаведнасці з граматычнай базай, пазначаюцца ўсе варыянты націскаў</li>
-		<li>максімальны памер тэксту для агучкі - 2000 знакаў</li>
-		<li style="color:red">агучка пакуль выкарыстоўвае стары рухавік - мы працуем над паляпшэннем</li>
-		</ul>
-	</div>
-		<div class="row justify-content-end my-4">
-			<span id="spinner" class="spinner-border" role="status" aria-hidden="true" style="display: none"></span>
-			<button type="button" class="btn btn-info btn-lg mx-3" onClick="reqNaciski(); return false;">Пазначыць націскі</button>
-			<button type="submit" class="btn btn-danger btn-lg mx-3" onClick="reqG2P(); return false;">Канвертаваць</button>
-			<button type="submit" class="btn btn-warning btn-lg mx-3" onClick="request(); return false;">Агучыць</button>
-		</div>
+    <div class="form-group">
+        <textarea id="text" class="form-control" rows="3" style="font-size: 150%"></textarea>
+        <ul>
+            <li>улічваецца літара ґ (перадае выбухны гук [g]) - ґанак</li>
+            <li style="color:red">прыстаўкі раім аддзяляць ад кораня знакам "|" - ад|жаць</li>
+            <li>націскі пазначаюцца знакам плюс (+) - мяжа+</li>
+            <li>націскі аўтаматычна расстаўляюцца ў адпаведнасці з граматычнай базай, пазначаюцца ўсе варыянты націскаў </li>
+            <li>максімальны памер тэксту для агучкі - 2000 знакаў</li>
+            <li style="color:red">агучка пакуль выкарыстоўвае стары рухавік - мы працуем над паляпшэннем</li>
+        </ul>
+    </div>
+    <div class="row justify-content-end my-4">
+        <span id="spinner" class="spinner-border" role="status" aria-hidden="true" style="display: none"></span>
+        <button type="button" class="btn btn-info btn-lg mx-3" onClick="reqNaciski(); return false;">Пазначыць націскі</button>
+        <button type="submit" class="btn btn-danger btn-lg mx-3" onClick="reqG2P(); return false;">Канвертаваць</button>
+        <button type="submit" class="btn btn-warning btn-lg mx-3" onClick="reqVoice(); return false;">Агучыць</button>
+    </div>
 </form>
 <div id="status">
 </div>
 <div id="out">
-	<a href="/articles/fanietycny-kanviertar-BelG2P.html">Артыкул "Беларускі фанетычны канвертар (BelG2P) - ад вытокаў да рэалізацыі"</a>
+    <a href="/articles/fanietycny-kanviertar-BelG2P.html">Артыкул "Беларускі фанетычны канвертар (BelG2P) - ад вытокаў да рэалізацыі"</a>
 </div>
 <audio style="display: none" controls/>
 
 <script>
-    function request() {
-		$("audio").hide();
-		startTTSRequest("TTS-OmniVoice", $('#text').val(), function (id) {
-			$("audio").attr('src', ttsTaskUrl(id) + '/output.opus');
-			$("audio").show();
-			$("audio")[0].play();
-		});
+    function reqVoice() {
+        $("audio").hide();
+        startTTSRequest("TTS-OmniVoice", $('#text').val(), function (task_id) {
+            $("audio").attr('src', ttsTaskUrl(task_id) + '/output.opus');
+            $("audio").show();
+            $("audio")[0].play();
+        });
     }
-
-	function reqG2P() {
-		$('#status').val('');
-		$("audio").hide();
-		let arg = $('#text').val();
-		fetch('other/rest/conv/fanetyka', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'text/plain; charset=UTF-8'
-			},
-			body: arg
-		})
-		.then(r => {
-			if (!r.ok) {
-				alert("Памылка: " + r.status + " " + r.statusText);
-			} else {
-				r.text().then(data => {
-					data += '<button id="logShow" type="button" class="btn btn-secondary btn-sm btn-block" onclick="showLog();">Паказаць крокі канвертацыі</button>';
-					$("#out").html(data);
-				});
-			}
-		})
-		.catch(err => alert("Памылка: " + err));
-	}
-
-	function reqNaciski() {
-		$("audio").hide();
-		startTTSRequest("StressML", $('#text').val(), function (id) {
-			fetch(ttsTaskUrl(id) + '/output.txt')
-					.then(res => {
-						if (!res.ok) {
-							throw new Error("HTTP " + res.status + " " + res.statusText);
-						}
-						return res.text();
-					})
-					.then(content => {
-						$('#text').val(content);
-					})
-					.catch(err => {
-						$('#status').html('<span class="text-danger">Памылка падчас чытання output.txt: ' + err.message + '</span>');
-					});
-		});
-	}
+    function reqNaciski() {
+        $("audio").hide();
+        startTTSRequest("Stress", $('#text').val(), function (content) {
+            $('#out').text(content);
+        });
+    }
+    function reqG2P() {
+        $("audio").hide();
+        startTTSRequest("G2P", $('#text').val(), function (data) {
+            data += '<button id="logShow" type="button" class="btn btn-secondary btn-sm btn-block" onclick="showLog();">Паказаць крокі канвертацыі</button>';
+            $("#out").html(data);
+        });
+    }
+    function showLog() {
+        $("#log").show();
+        $("#logShow").hide();
+    }
 </script>
 
 <#include "dialog-footer.html">
